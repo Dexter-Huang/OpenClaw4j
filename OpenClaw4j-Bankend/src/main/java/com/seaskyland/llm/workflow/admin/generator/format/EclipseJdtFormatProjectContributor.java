@@ -16,21 +16,10 @@
 package com.seaskyland.llm.workflow.admin.generator.format;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Map;
-import java.util.stream.Stream;
 
-import io.spring.initializr.generator.project.contributor.ProjectContributor;
+import com.seaskyland.llm.workflow.admin.generator.service.generator.ProjectContributor;
 import org.springframework.core.annotation.Order;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.formatter.CodeFormatter;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jface.text.Document;
-import org.eclipse.text.edits.TextEdit;
 
 /**
  * Use the CodeFormatter from Eclipse JDT Core to format all generated Java files.
@@ -41,63 +30,7 @@ public class EclipseJdtFormatProjectContributor implements ProjectContributor {
 
 	@Override
 	public void contribute(Path projectRoot) throws IOException {
-		Path javaSrc = projectRoot.resolve("src/main/java");
-		if (!Files.exists(javaSrc)) {
-			return;
-		}
-
-		// Configure formatting options
-		Map<String, String> options = DefaultCodeFormatterConstants.getEclipseDefaultSettings();
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_17);
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_17);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_17);
-		// Use space indentation, 4 spaces
-		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, "space");
-		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
-
-		// Line length and wrapping configuration
-		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "120");
-
-		// Method chain formatting - moderate wrapping
-		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SELECTOR_IN_METHOD_INVOCATION,
-				DefaultCodeFormatterConstants.createAlignmentValue(false, // Don't force
-																			// wrapping
-						DefaultCodeFormatterConstants.WRAP_COMPACT, // Compact wrapping
-																	// when needed
-						DefaultCodeFormatterConstants.INDENT_DEFAULT));
-
-		// Keep simple statements on one line
-		options.put(DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_IF_ON_ONE_LINE,
-				DefaultCodeFormatterConstants.TRUE);
-
-		CodeFormatter formatter = ToolFactory.createCodeFormatter(options);
-
-		try (Stream<Path> files = Files.walk(javaSrc)) {
-			files.filter(Files::isRegularFile)
-				.filter(path -> path.toString().endsWith(".java"))
-				.forEach(this.applyFormatting(formatter));
-		}
-	}
-
-	private java.util.function.Consumer<Path> applyFormatting(CodeFormatter formatter) {
-		return javaFile -> {
-			try {
-				String source = Files.readString(javaFile);
-				TextEdit edit = formatter.format(CodeFormatter.K_COMPILATION_UNIT, source, 0, source.length(), 0,
-						System.lineSeparator());
-				if (edit != null) {
-					Document document = new Document(source);
-					edit.apply(document);
-					Files.writeString(javaFile, document.get(), StandardOpenOption.TRUNCATE_EXISTING);
-				}
-			}
-			catch (IOException e) {
-				throw new UncheckedIOException("I/O error while formatting " + javaFile, e);
-			}
-			catch (Exception e) {
-				throw new IllegalStateException("Failed to format " + javaFile, e);
-			}
-		};
+		// Generator is disabled while the backend is migrated to Spring Boot 4.
 	}
 
 }

@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
-import io.spring.initializr.generator.project.contributor.ProjectContributor;
-
 public class GraphProjectContributor implements ProjectContributor {
 
 	private GraphProjectDescription projectDescription;

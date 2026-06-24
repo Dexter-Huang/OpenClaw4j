@@ -15,48 +15,9 @@
  */
 package com.seaskyland.llm.workflow.admin.generator.config;
 
-import com.seaskyland.llm.workflow.admin.generator.controller.GeneratorController;
-import com.seaskyland.llm.workflow.admin.generator.format.EclipseJdtFormatProjectContributor;
-import com.seaskyland.llm.workflow.admin.generator.service.generator.GraphAppPropertiesCustomizer;
-import com.seaskyland.llm.workflow.admin.generator.service.generator.GraphProjectReqToDescConverter;
-import com.seaskyland.llm.workflow.admin.generator.service.generator.GraphProjectRequest;
-import io.spring.initializr.generator.project.contributor.ProjectContributor;
-import io.spring.initializr.generator.spring.properties.ApplicationPropertiesCustomizer;
-import io.spring.initializr.metadata.InitializrMetadataProvider;
-import io.spring.initializr.web.controller.ProjectGenerationController;
-import io.spring.initializr.web.project.DefaultProjectRequestPlatformVersionTransformer;
-import io.spring.initializr.web.project.ProjectGenerationInvoker;
-import io.spring.initializr.web.project.ProjectRequestPlatformVersionTransformer;
-
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class GraphInitializrConfiguration {
-
-	@Bean
-	@ConditionalOnMissingBean
-	ProjectGenerationController<GraphProjectRequest> projectGenerationController(
-			InitializrMetadataProvider metadataProvider,
-			ObjectProvider<ProjectRequestPlatformVersionTransformer> platformVersionTransformer,
-			ApplicationContext applicationContext) {
-		ProjectGenerationInvoker<GraphProjectRequest> projectGenerationInvoker = new ProjectGenerationInvoker<>(
-				applicationContext, new GraphProjectReqToDescConverter(platformVersionTransformer
-					.getIfAvailable(DefaultProjectRequestPlatformVersionTransformer::new)));
-		return new GeneratorController(metadataProvider, projectGenerationInvoker);
-	}
-
-	@Bean
-	public ProjectContributor eclipseJdtFormatContributor() {
-		return new EclipseJdtFormatProjectContributor();
-	}
-
-	@Bean
-	public ApplicationPropertiesCustomizer graphAppPropertiesCustomizer() {
-		return new GraphAppPropertiesCustomizer();
-	}
 
 }

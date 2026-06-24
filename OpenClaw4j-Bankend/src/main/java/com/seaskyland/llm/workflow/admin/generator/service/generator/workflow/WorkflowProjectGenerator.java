@@ -43,10 +43,8 @@ import com.seaskyland.llm.workflow.admin.generator.service.dsl.DSLAdapter;
 import com.seaskyland.llm.workflow.admin.generator.service.dsl.DSLDialectType;
 import com.seaskyland.llm.workflow.admin.generator.service.generator.GraphProjectDescription;
 import com.seaskyland.llm.workflow.admin.generator.service.generator.ProjectGenerator;
+import com.seaskyland.llm.workflow.admin.generator.service.generator.SimpleTemplateRenderer;
 import com.seaskyland.llm.workflow.admin.generator.utils.ContributorFileUtil;
-import io.spring.initializr.generator.io.template.MustacheTemplateRenderer;
-import io.spring.initializr.generator.io.template.TemplateRenderer;
-import io.spring.initializr.generator.project.ProjectDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,16 +83,15 @@ public class WorkflowProjectGenerator implements ProjectGenerator {
 
 	private final List<DSLAdapter> dslAdapters;
 
-	private final TemplateRenderer templateRenderer;
+	private final SimpleTemplateRenderer templateRenderer;
 
 	private final Map<NodeType, NodeSection<? extends NodeData>> nodeSectionMap;
 
 	public WorkflowProjectGenerator(List<DSLAdapter> dslAdapters,
-			ObjectProvider<MustacheTemplateRenderer> templateRenderer,
+			ObjectProvider<SimpleTemplateRenderer> templateRenderer,
 			List<NodeSection<? extends NodeData>> nodeNodeSections) {
 		this.dslAdapters = dslAdapters;
-		this.templateRenderer = templateRenderer
-			.getIfAvailable(() -> new MustacheTemplateRenderer("classpath:/templates"));
+		this.templateRenderer = templateRenderer.getIfAvailable(SimpleTemplateRenderer::new);
 		this.nodeSectionMap = nodeNodeSections.stream().map(nodeSection -> {
 			List<NodeType> nodeTypeList = Arrays.stream(NodeType.values()).filter(nodeSection::support).toList();
 			if (nodeTypeList.isEmpty()) {
@@ -267,7 +264,7 @@ public class WorkflowProjectGenerator implements ProjectGenerator {
 	}
 
 	private void renderAndWriteTemplates(List<String> templateNames, List<Map<String, Object>> models, Path projectRoot,
-			ProjectDescription projectDescription) {
+			GraphProjectDescription projectDescription) {
 		// todo: may to standardize the code format via the IdentifierGeneratorFactory
 		Path fileRoot = ContributorFileUtil.createDirectory(projectRoot, projectDescription);
 		for (int i = 0; i < templateNames.size(); i++) {

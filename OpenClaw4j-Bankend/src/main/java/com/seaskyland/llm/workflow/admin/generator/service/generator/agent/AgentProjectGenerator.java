@@ -21,9 +21,7 @@ import com.seaskyland.llm.workflow.admin.generator.model.agent.Agent;
 import com.seaskyland.llm.workflow.admin.generator.service.dsl.DSLAdapter;
 import com.seaskyland.llm.workflow.admin.generator.service.generator.GraphProjectDescription;
 import com.seaskyland.llm.workflow.admin.generator.service.generator.ProjectGenerator;
-import io.spring.initializr.generator.io.template.MustacheTemplateRenderer;
-import io.spring.initializr.generator.io.template.TemplateRenderer;
-import io.spring.initializr.generator.project.ProjectDescription;
+import com.seaskyland.llm.workflow.admin.generator.service.generator.SimpleTemplateRenderer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -54,15 +52,14 @@ public class AgentProjectGenerator implements ProjectGenerator {
 
 	private final DSLAdapter dslAdapter;
 
-	private final TemplateRenderer templateRenderer;
+	private final SimpleTemplateRenderer templateRenderer;
 
 	private final AgentTypeProviderRegistry providerRegistry;
 
 	public AgentProjectGenerator(@Qualifier("agentDSLAdapter") DSLAdapter dslAdapter,
-			ObjectProvider<MustacheTemplateRenderer> templateRenderer, AgentTypeProviderRegistry providerRegistry) {
+			ObjectProvider<SimpleTemplateRenderer> templateRenderer, AgentTypeProviderRegistry providerRegistry) {
 		this.dslAdapter = dslAdapter;
-		this.templateRenderer = templateRenderer
-			.getIfAvailable(() -> new MustacheTemplateRenderer("classpath:/templates"));
+		this.templateRenderer = templateRenderer.getIfAvailable(SimpleTemplateRenderer::new);
 		this.providerRegistry = providerRegistry;
 	}
 
@@ -97,7 +94,7 @@ public class AgentProjectGenerator implements ProjectGenerator {
 	}
 
 	private void renderAndWriteTemplates(List<String> templateNames, List<Map<String, Object>> models, Path projectRoot,
-			ProjectDescription projectDescription) {
+			GraphProjectDescription projectDescription) {
 		Path fileRoot = createDirectory(projectRoot, projectDescription);
 
 		for (int i = 0; i < templateNames.size(); i++) {
@@ -117,8 +114,8 @@ public class AgentProjectGenerator implements ProjectGenerator {
 		}
 	}
 
-	private Path createDirectory(Path projectRoot, ProjectDescription projectDescription) {
-		StringBuilder pathBuilder = new StringBuilder("src/main/").append(projectDescription.getLanguage().id());
+	private Path createDirectory(Path projectRoot, GraphProjectDescription projectDescription) {
+		StringBuilder pathBuilder = new StringBuilder("src/main/").append(projectDescription.getLanguage());
 		String packagePath = projectDescription.getPackageName().replace('.', '/');
 		pathBuilder.append("/").append(packagePath).append("/graph/");
 		try {

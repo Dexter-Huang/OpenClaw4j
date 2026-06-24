@@ -20,13 +20,11 @@ import java.util.List;
 import com.seaskyland.llm.workflow.admin.generator.service.generator.GraphProjectContributor;
 import com.seaskyland.llm.workflow.admin.generator.service.generator.GraphProjectDescription;
 import com.seaskyland.llm.workflow.admin.generator.service.generator.ProjectGenerator;
-import io.spring.initializr.generator.condition.ConditionalOnRequestedDependency;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnRequestedDependency(GraphProjectGenerationConfiguration.GRAPH_PROJECT_DEPENDENCY)
 public class GraphProjectGenerationConfiguration {
 
 	public static final String GRAPH_PROJECT_DEPENDENCY = "spring-ai-alibaba-graph";

@@ -1,12 +1,12 @@
 package com.seaskyland.llm.workflow.admin.utils;
 
 
-import io.spring.initializr.generator.project.ProjectDescription;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import com.seaskyland.llm.workflow.admin.generator.service.generator.GraphProjectDescription;
 
 /**
  * 用于生成项目时，创建文件
@@ -43,8 +43,8 @@ public final class ContributorFileUtil {
         }
     }
 
-    public static Path createDirectory(Path projectRoot, ProjectDescription projectDescription) {
-        StringBuilder pathBuilder = new StringBuilder("src/main/").append(projectDescription.getLanguage().id());
+    public static Path createDirectory(Path projectRoot, GraphProjectDescription projectDescription) {
+        StringBuilder pathBuilder = new StringBuilder("src/main/").append(projectDescription.getLanguage());
         String packagePath = projectDescription.getPackageName().replace('.', '/');
         pathBuilder.append("/").append(packagePath).append("/graph/");
         Path fileRoot;

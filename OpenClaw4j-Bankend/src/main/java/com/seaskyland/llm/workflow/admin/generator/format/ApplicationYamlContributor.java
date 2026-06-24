@@ -21,7 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-import io.spring.initializr.generator.project.contributor.ProjectContributor;
+import com.seaskyland.llm.workflow.admin.generator.service.generator.ProjectContributor;
 
 /**
  * Copy the file `classpath:/templates/default-application.yml` to the

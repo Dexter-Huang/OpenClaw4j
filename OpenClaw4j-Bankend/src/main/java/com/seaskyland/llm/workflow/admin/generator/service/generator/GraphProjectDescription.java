@@ -17,7 +17,6 @@ package com.seaskyland.llm.workflow.admin.generator.service.generator;
 
 import com.seaskyland.llm.workflow.admin.generator.model.AppModeEnum;
 import com.seaskyland.llm.workflow.admin.generator.service.dsl.DSLDialectType;
-import io.spring.initializr.generator.project.MutableProjectDescription;
 
 /**
  * Custom ProjectDescription for Graph Project
@@ -25,7 +24,11 @@ import io.spring.initializr.generator.project.MutableProjectDescription;
  * @author robocanic
  * @since 2025/5/18
  */
-public class GraphProjectDescription extends MutableProjectDescription {
+public class GraphProjectDescription {
+
+	private String packageName = "com.example";
+
+	private String language = "java";
 
 	private String dsl;
 
@@ -37,15 +40,31 @@ public class GraphProjectDescription extends MutableProjectDescription {
 	}
 
 	public GraphProjectDescription(GraphProjectDescription source) {
-		super(source);
+		this.packageName = source.packageName;
+		this.language = source.language;
 		this.dsl = source.dsl;
 		this.appMode = source.appMode;
 		this.dslDialectType = source.dslDialectType;
 	}
 
-	@Override
-	public MutableProjectDescription createCopy() {
+	public GraphProjectDescription createCopy() {
 		return new GraphProjectDescription(this);
+	}
+
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
 	}
 
 	public String getDsl() {
