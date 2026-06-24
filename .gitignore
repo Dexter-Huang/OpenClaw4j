@@ -19,6 +19,7 @@ Thumbs.db
 !.cursor/rules/**
 .vscode/
 .idea/
+**/.idea/
 *.iws
 *.iml
 *.ipr
@@ -51,6 +52,8 @@ OpenClaw4j-Bankend/**/target/
 OpenClaw4j-Bankend/**/build/
 !OpenClaw4j-Bankend/**/src/main/**/build/
 !OpenClaw4j-Bankend/**/src/test/**/build/
+data/
+**/data/
 OpenClaw4j-Bankend/data/
 OpenClaw4j-Bankend/**/*.db
 OpenClaw4j-Bankend/**/*.db-shm
