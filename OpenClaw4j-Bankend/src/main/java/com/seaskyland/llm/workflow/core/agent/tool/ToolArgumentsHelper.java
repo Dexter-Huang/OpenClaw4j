@@ -16,7 +16,7 @@
 
 package com.seaskyland.llm.workflow.core.agent.tool;
 
-import org.springframework.ai.model.ModelOptionsUtils;
+import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Map;
@@ -38,7 +38,7 @@ public class ToolArgumentsHelper {
 	 */
 	public static Map<String, Object> mergeToolArguments(String functionInput, Map<String, Object> extraParams,
 			String toolId) {
-		Map<String, Object> arguments = ModelOptionsUtils.jsonToMap(functionInput);
+		Map<String, Object> arguments = JsonUtils.fromJsonToMap(functionInput);
 		if (!CollectionUtils.isEmpty(extraParams) && extraParams.containsKey(toolId)) {
 			Object obj = extraParams.get(toolId);
 			if (obj instanceof Map) {

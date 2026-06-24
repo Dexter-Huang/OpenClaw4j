@@ -17,7 +17,6 @@
 package com.seaskyland.llm.workflow.core.utils.api;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.MultiValueMap;
 
 /**
  * Utility class for API-related operations. Provides methods for generating user agent
@@ -43,8 +42,8 @@ public class ApiUtils {
 	 * Creates base HTTP headers with user agent information.
 	 * @return MultiValueMap containing the base headers
 	 */
-	public static MultiValueMap<String, String> getBaseHeaders() {
-		MultiValueMap<String, String> headers = new HttpHeaders();
+	public static HttpHeaders getBaseHeaders() {
+		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.USER_AGENT, userAgent());
 
 		return headers;

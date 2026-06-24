@@ -19,7 +19,6 @@ package com.seaskyland.llm.workflow.core.base.manager;
 import com.seaskyland.llm.workflow.runtime.domain.app.FileSearchOptions;
 import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.DocumentChunk;
 import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.KnowledgeBase;
-import com.seaskyland.llm.workflow.core.model.llm.ModelFactory;
 import com.seaskyland.llm.workflow.core.rag.KnowledgeBaseService;
 import com.seaskyland.llm.workflow.core.rag.retriever.KnowledgeBaseDocumentRetriever;
 import com.seaskyland.llm.workflow.core.rag.vectorstore.VectorStoreFactory;
@@ -45,9 +44,6 @@ public class DocumentRetrieverManager {
 	/** Factory for creating vector stores */
 	private final VectorStoreFactory vectorStoreFactory;
 
-	/** Factory for creating AI models */
-	private final ModelFactory modelFactory;
-
 	/** Service for managing knowledge bases */
 	private final KnowledgeBaseService knowledgeBaseService;
 
@@ -58,7 +54,7 @@ public class DocumentRetrieverManager {
 	 */
 	public DocumentRetriever getDocumentRetriever(FileSearchOptions searchOptions) {
 		List<KnowledgeBase> knowledgeBases = knowledgeBaseService.listKnowledgeBases(searchOptions.getKbIds());
-		return new KnowledgeBaseDocumentRetriever(knowledgeBases, vectorStoreFactory, modelFactory, searchOptions);
+		return new KnowledgeBaseDocumentRetriever(knowledgeBases, vectorStoreFactory, searchOptions);
 	}
 
 	/**

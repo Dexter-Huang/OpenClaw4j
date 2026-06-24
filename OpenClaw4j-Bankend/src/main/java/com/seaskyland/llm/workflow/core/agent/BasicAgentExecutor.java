@@ -144,11 +144,11 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
 		// build chat options
 		RequestContext requestContext = RequestContextHolder.getRequestContext();
 		AgentConfig config = context.getConfig();
-		ToolCallingChatOptions chatOptions = buildChatOptions(config);
+		CompositeToolCallbackProvider toolCallbackProvider = buildToolCallbackProvider(config, request.getExtraPrams());
+		ToolCallingChatOptions chatOptions = buildChatOptions(config, toolCallbackProvider);
 
 		// build tool callback provider
 		ToolCallingManager toolCallingManager = ToolCallingManager.builder().build();
-		CompositeToolCallbackProvider toolCallbackProvider = buildToolCallbackProvider(config, request.getExtraPrams());
 
 		// build messages
 		List<Message> messages = buildMessages(context);
@@ -175,11 +175,11 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
 	public AgentResponse execute(AgentContext context, AgentRequest request) {
 		AgentConfig config = context.getConfig();
 		// build chat options
-		ToolCallingChatOptions chatOptions = buildChatOptions(config);
+		CompositeToolCallbackProvider toolCallbackProvider = buildToolCallbackProvider(config, request.getExtraPrams());
+		ToolCallingChatOptions chatOptions = buildChatOptions(config, toolCallbackProvider);
 
 		// build tool callback provider
 		ToolCallingManager toolCallingManager = ToolCallingManager.builder().build();
-		CompositeToolCallbackProvider toolCallbackProvider = buildToolCallbackProvider(config, request.getExtraPrams());
 
 		// build messages
 		List<Message> messages = buildMessages(context);
@@ -188,7 +188,7 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
 		ChatClient.Builder chatClientBuilder = buildChatClient(context, chatOptions, toolCallbackProvider);
 
 		Prompt prompt = new Prompt(messages, chatOptions);
-		ChatResponse response = chatClientBuilder.build().prompt(prompt).options(chatOptions).call().chatResponse();
+		ChatResponse response = chatClientBuilder.build().prompt(prompt).call().chatResponse();
 
 		Assert.notNull(response, "response can not be null");
 		if (response.hasToolCalls()) {
@@ -225,17 +225,21 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
 	 * @param config Agent configuration
 	 * @return OpenAiChatOptions instance
 	 */
-	private OpenAiChatOptions buildChatOptions(AgentConfig config) {
+	private OpenAiChatOptions buildChatOptions(AgentConfig config, ToolCallbackProvider toolCallbackProvider) {
 		OpenAiChatOptions.Builder builder = OpenAiChatOptions.builder()
 			.model(config.getModel())
-			.streamUsage(true)
-			.internalToolExecutionEnabled(false);
+			.streamUsage(true);
 
 		if (config.getParameter() != null) {
 			builder.maxTokens(config.getParameter().getMaxTokens())
 				.temperature(config.getParameter().getTemperature())
 				.topP(config.getParameter().getTopP())
 				.presencePenalty(config.getParameter().getRepetitionPenalty());
+		}
+
+		ToolCallback[] toolCallbacks = toolCallbackProvider.getToolCallbacks();
+		if (!ArrayUtils.isEmpty(toolCallbacks)) {
+			builder.toolCallbacks(Arrays.stream(toolCallbacks).toList());
 		}
 
 		return builder.build();
@@ -290,12 +294,6 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
 				.commonConfig(commonConfig)
 				.build();
 			chatClientBuilder.defaultAdvisors(retrievalAdvisor);
-		}
-
-		// Add tool callbacks
-		ToolCallback[] toolCallbacks = toolCallbackProvider.getToolCallbacks();
-		if (!ArrayUtils.isEmpty(toolCallbacks)) {
-			chatOptions.setToolCallbacks(Arrays.stream(toolCallbacks).toList());
 		}
 
 		return chatClientBuilder;

@@ -35,10 +35,9 @@ import com.seaskyland.llm.workflow.admin.generator.model.workflow.nodedata.HttpN
 import com.seaskyland.llm.workflow.admin.generator.service.dsl.AbstractNodeDataConverter;
 import com.seaskyland.llm.workflow.admin.generator.service.dsl.DSLDialectType;
 import com.seaskyland.llm.workflow.admin.generator.utils.MapReadUtil;
+import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.springframework.ai.util.json.JsonParser;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -308,11 +307,10 @@ public class HttpNodeDataConverter extends AbstractNodeDataConverter<HttpNodeDat
 				// 处理rawBodyMap
 				Map<String, Object> rawBodyMap = httpNodeData.getRawBodyMap();
 				if (!CollectionUtils.isEmpty(rawBodyMap)) {
-					String json = JsonParser.toJson(rawBodyMap);
+					String json = JsonUtils.toJson(rawBodyMap);
 					json = this.convertVarTemplate(dialectType, json.replace("{{#", "${{#"), idToVarName);
 					try {
-						httpNodeData.setRawBodyMap(JsonParser.fromJson(json, new TypeReference<Map<String, Object>>() {
-						}));
+						httpNodeData.setRawBodyMap(JsonUtils.fromJsonToMap(json));
 					}
 					catch (Exception ignore) {
 					}

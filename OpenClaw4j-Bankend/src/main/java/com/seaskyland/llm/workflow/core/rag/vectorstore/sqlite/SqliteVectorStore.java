@@ -29,7 +29,7 @@ import org.springframework.ai.vectorstore.AbstractVectorStoreBuilder;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.filter.Filter;
 import org.springframework.ai.vectorstore.filter.FilterExpressionConverter;
-import org.springframework.ai.vectorstore.filter.converter.SimpleVectorStoreFilterExpressionConverter;
+import org.springframework.ai.vectorstore.filter.converter.PrintFilterExpressionConverter;
 import org.springframework.ai.vectorstore.observation.AbstractObservationVectorStore;
 import org.springframework.ai.vectorstore.observation.VectorStoreObservationContext;
 import org.springframework.expression.ExpressionParser;
@@ -105,7 +105,7 @@ public class SqliteVectorStore extends AbstractObservationVectorStore {
 
 	/** Converts Spring AI FilterExpression into SpEL strings. */
 	private final FilterExpressionConverter filterExpressionConverter =
-			new SimpleVectorStoreFilterExpressionConverter();
+			new PrintFilterExpressionConverter();
 
 	// -------------------------------------------------------------------------
 	// Constructor (via builder)

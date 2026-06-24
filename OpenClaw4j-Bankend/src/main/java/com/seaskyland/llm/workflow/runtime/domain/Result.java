@@ -18,6 +18,7 @@ package com.seaskyland.llm.workflow.runtime.domain;
 
 import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -51,9 +52,11 @@ public class Result<T> implements Serializable {
 	private boolean success = true;
 
 	/** Error code if the request failed */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String code;
 
 	/** Error message if the request failed */
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String message;
 
 	/**

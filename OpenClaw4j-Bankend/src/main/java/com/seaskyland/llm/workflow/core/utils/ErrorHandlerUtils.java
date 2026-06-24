@@ -21,12 +21,14 @@ import com.seaskyland.llm.workflow.runtime.domain.BizError;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.ResponseErrorHandler;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -50,7 +52,7 @@ public class ErrorHandlerUtils {
 		}
 
 		@Override
-		public void handleError(@NonNull ClientHttpResponse response) throws IOException {
+		public void handleError(@NonNull URI url, @NonNull HttpMethod method, @NonNull ClientHttpResponse response) throws IOException {
 			if (response.getStatusCode().isError()) {
 				String body = StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8);
 				JsonNode node = JsonUtils.fromJson(body);
@@ -90,7 +92,7 @@ public class ErrorHandlerUtils {
 		}
 
 		@Override
-		public void handleError(@NonNull ClientHttpResponse response) throws IOException {
+		public void handleError(@NonNull URI url, @NonNull HttpMethod method, @NonNull ClientHttpResponse response) throws IOException {
 			if (response.getStatusCode().isError()) {
 				String body = StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8);
 				log.error("failed to call openai model, code: {}, body: {}", response.getStatusCode(), body);

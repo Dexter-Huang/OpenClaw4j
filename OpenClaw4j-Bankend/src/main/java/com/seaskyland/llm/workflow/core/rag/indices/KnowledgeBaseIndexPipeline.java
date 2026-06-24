@@ -148,7 +148,7 @@ public class KnowledgeBaseIndexPipeline implements IndexPipeline {
 		}
 		else {
 			splitter = new TokenTextSplitter(processConfig.getChunkSize(), processConfig.getChunkOverlap(), 1, 10000,
-					false);
+					false, List.of());
 		}
 		List<Document> transformedDocs = splitter.apply(documents);
 

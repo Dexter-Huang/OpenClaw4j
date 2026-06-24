@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.2</version>
+        <version>4.1.0</version>
         <relativePath/>
     </parent>
 
@@ -16,12 +16,9 @@
     <properties>
         <ces.dto.version>3.2-SNAPSHOT</ces.dto.version>
         <ces.common.version>3.2-SNAPSHOT</ces.common.version>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-initializr.version>0.21.0</spring-initializr.version>
-        <spring-ai.version>1.1.0</spring-ai.version>
-        <spring-ai-alibaba.version>1.1.2.0</spring-ai-alibaba.version>
+        <spring-ai.version>2.0.0</spring-ai.version>
     </properties>
 
     <dependencies>
@@ -86,11 +83,6 @@
 <!--                        </exclusions>-->
 <!--        </dependency>-->
 
-        <dependency>
-            <groupId>com.aspose</groupId>
-            <artifactId>aspose-word-crack</artifactId>
-            <version>24.1</version>
-        </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.aventrix.jnanoid/jnanoid -->
         <dependency>
@@ -100,12 +92,12 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-test</artifactId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <artifactId>spring-boot-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -113,11 +105,13 @@
             <artifactId>spring-ai-starter-model-openai</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
-            <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
-            <version>${spring-ai-alibaba.version}</version>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-rag</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-vector-store</artifactId>
+        </dependency>
         <!--引入Markdown转HTML的插件-->
         <dependency>
             <groupId>org.commonmark</groupId>
@@ -164,20 +158,6 @@
             <artifactId>spring-ai-starter-mcp-client-webflux</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
-            <artifactId>spring-ai-alibaba-graph-core</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jboss.slf4j</groupId>
-                    <artifactId>slf4j-jboss-logmanager</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.jboss.logmanager</groupId>
-                    <artifactId>jboss-logmanager</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.2.2</version>
@@ -219,6 +199,11 @@
             <groupId>ognl</groupId>
             <artifactId>ognl</artifactId>
             <version>3.4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.83</version>
         </dependency>
         <!-- rag -->
         <dependency>
@@ -266,23 +251,6 @@
             <artifactId>jjwt-jackson</artifactId>
             <version>0.12.6</version>
             <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.spring.initializr</groupId>
-            <artifactId>initializr-generator-spring</artifactId>
-            <version>${spring-initializr.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.spring.initializr</groupId>
-            <artifactId>initializr-generator</artifactId>
-            <version>${spring-initializr.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.spring.initializr</groupId>
-            <artifactId>initializr-web</artifactId>
-            <version>${spring-initializr.version}</version>
         </dependency>
         <!-- org.eclipse.jdt.core for format -->
         <dependency>
@@ -358,13 +326,6 @@
             <artifactId>rocketmq-client-java</artifactId>
             <version>5.0.7</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/io.modelcontextprotocol.sdk/mcp -->
-        <dependency>
-            <groupId>io.modelcontextprotocol.sdk</groupId>
-            <artifactId>mcp</artifactId>
-            <version>0.14.0</version>
-        </dependency>
-
         <dependency>
             <groupId>com.github.victools</groupId>
             <artifactId>jsonschema-generator</artifactId>
@@ -398,23 +359,6 @@
             <version>3.0.5</version>
             <scope>compile</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.alibaba/dashscope-sdk-java -->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>dashscope-sdk-java</artifactId>
-            <version>2.21.9</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.logging.log4j</groupId>
-                    <artifactId>log4j-slf4j2-impl</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
         <!-- oss -->
         <dependency>
             <groupId>com.aliyun.oss</groupId>
@@ -427,12 +371,6 @@
             <artifactId>commons-io</artifactId>
             <version>2.20.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
-            <artifactId>spring-ai-alibaba-starter-builtin-nodes</artifactId>
-            <version>1.1.0.0</version>
-        </dependency>
-
         <!-- SQLite Database -->
         <dependency>
             <groupId>org.xerial</groupId>
@@ -464,13 +402,6 @@
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
                 <version>${spring-ai.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.alibaba.cloud.ai</groupId>
-                <artifactId>spring-ai-alibaba-bom</artifactId>
-                <version>${spring-ai-alibaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -518,6 +449,10 @@
                         <configuration>
                             <source>17</source>
                             <target>17</target>
+                            <excludes>
+                                <exclude>com/seaskyland/llm/workflow/admin/generator/**</exclude>
+                                <exclude>com/seaskyland/llm/workflow/admin/utils/ContributorFileUtil.java</exclude>
+                            </excludes>
                             <annotationProcessorPaths>
                                 <path>
                                     <groupId>org.projectlombok</groupId>

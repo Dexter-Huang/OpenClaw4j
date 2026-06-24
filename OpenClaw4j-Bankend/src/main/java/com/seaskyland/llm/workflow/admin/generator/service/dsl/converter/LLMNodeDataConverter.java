@@ -70,7 +70,7 @@ public class LLMNodeDataConverter extends AbstractNodeDataConverter<LLMNodeData>
 					.stream()
 					.filter(map -> map.containsKey("role") && map.containsKey("text"))
 					.map(map -> new LLMNodeData.MessageTemplate(map.get("text").toString(), List.of(),
-							MessageType.fromValue(map.get("role").toString())))
+							MessageType.valueOf(map.get("role").toString().toUpperCase())))
 					.toList();
 
 				Boolean retryEnable = MapReadUtil.getMapDeepValue(data, Boolean.class, "retry_config", "retry_enabled");

@@ -366,9 +366,9 @@ public class SqliteVectorStoreService implements VectorStoreService {
 		}
 		try {
 			org.springframework.ai.vectorstore.filter.converter
-					.SimpleVectorStoreFilterExpressionConverter conv =
+					.PrintFilterExpressionConverter conv =
 					new org.springframework.ai.vectorstore.filter.converter
-							.SimpleVectorStoreFilterExpressionConverter();
+							.PrintFilterExpressionConverter();
 			String spel = conv.convertExpression(request.getFilterExpression());
 			Matcher m = DOC_ID_PATTERN.matcher(spel);
 			return m.find() ? m.group(1) : null;

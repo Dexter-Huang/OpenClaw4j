@@ -15,8 +15,6 @@
  */
 package com.seaskyland.llm.workflow.core.model.llm;
 
-import com.alibaba.cloud.ai.dashscope.api.DashScopeApi;
-import com.seaskyland.llm.workflow.runtime.domain.app.FileSearchOptions;
 import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.IndexConfig;
 import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
 import com.seaskyland.llm.workflow.runtime.exception.BizException;
@@ -25,9 +23,6 @@ import com.seaskyland.llm.workflow.core.model.llm.domain.ModelConfigInfo;
 import com.seaskyland.llm.workflow.core.model.llm.domain.ModelCredential;
 import com.seaskyland.llm.workflow.core.model.llm.domain.ProviderConfigInfo;
 import com.seaskyland.llm.workflow.core.model.embedding.EmbeddingModelDimension;
-import com.seaskyland.llm.workflow.core.model.reranker.dashscope.DashScopeRerankerOptions;
-import com.seaskyland.llm.workflow.core.model.reranker.dashscope.DashscopeReranker;
-import com.seaskyland.llm.workflow.core.utils.ErrorHandlerUtils;
 import com.seaskyland.llm.workflow.core.utils.api.ApiUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -36,11 +31,13 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.openai.OpenAiEmbeddingOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Component;
+import org.springframework.http.HttpHeaders;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.seaskyland.llm.workflow.core.rag.RagConstants.DEFAULT_DIMENSION;
@@ -74,8 +71,7 @@ public class ModelFactory {
 		// TODO will adapt other provider in future, now it's only for OpenAI compatible
 		// API
 
-		OpenAiApi openAiApi = buildOpenAiApi(credential);
-		return OpenAiChatModel.builder().openAiApi(openAiApi).build();
+		return OpenAiChatModel.builder().options(buildOpenAiChatOptions(credential)).build();
 	}
 
 	/**
@@ -90,27 +86,9 @@ public class ModelFactory {
 
 		int dimension = EmbeddingModelDimension.getDimension(indexConfig.getEmbeddingModel(), DEFAULT_DIMENSION);
 
-		OpenAiApi openAiApi = buildOpenAiApi(credential);
-		return new OpenAiEmbeddingModel(openAiApi, metadataMode,
-				OpenAiEmbeddingOptions.builder().model(indexConfig.getEmbeddingModel()).dimensions(dimension).build());
-	}
-
-	/**
-	 * Creates and returns a document ranker instance for search operations
-	 * @param searchOptions The search configuration options
-	 * @return DocumentRanker instance
-	 */
-	public DashscopeReranker getDocumentRanker(FileSearchOptions searchOptions) {
-		ModelCredential credential = getModelCredential(searchOptions.getRerankProvider(),
-				searchOptions.getRerankModel());
-
-		return DashscopeReranker.builder()
-			.dashscopeApi(DashScopeApi.builder().apiKey(credential.getApiKey()).build())
-			.options(DashScopeRerankerOptions.builder()
-				.returnDocuments(false)
-				.topN(searchOptions.getTopK())
-				.model(searchOptions.getRerankModel())
-				.build())
+		return OpenAiEmbeddingModel.builder()
+			.metadataMode(metadataMode)
+			.options(buildOpenAiEmbeddingOptions(credential, indexConfig.getEmbeddingModel(), dimension))
 			.build();
 	}
 
@@ -141,56 +119,53 @@ public class ModelFactory {
 	}
 
 	/**
-	 * Builds an OpenAI API instance with the provided credentials
+	 * Builds OpenAI chat options with the provided credentials.
 	 * @param credential The model credentials
-	 * @return OpenAiApi instance
+	 * @return OpenAiChatOptions instance
 	 */
-	private OpenAiApi buildOpenAiApi(ModelCredential credential) {
-		OpenAiApi.Builder openAiApiBuilder = OpenAiApi.builder()
+	private OpenAiChatOptions buildOpenAiChatOptions(ModelCredential credential) {
+		OpenAiChatOptions.Builder builder = OpenAiChatOptions.builder()
 			.apiKey(credential.getApiKey())
-			.responseErrorHandler(ErrorHandlerUtils.OPENAI_RESPONSE_ERROR_HANDLER)
-			.headers(ApiUtils.getBaseHeaders());
-		
-		if (StringUtils.isNotBlank(credential.getEndpoint())) {
-			String endpoint = credential.getEndpoint();
-			
-			// Get custom API paths from credential, use defaults if not provided
-			String completionsPath = StringUtils.isNotBlank(credential.getCompletionsPath()) 
-				? credential.getCompletionsPath() 
-				: "/v1/chat/completions";
-			String embeddingsPath = StringUtils.isNotBlank(credential.getEmbeddingsPath()) 
-				? credential.getEmbeddingsPath() 
-				: "/v1/embeddings";
+			.customHeaders(toSingleValueMap(ApiUtils.getBaseHeaders()));
 
-			// Remove path suffix from endpoint to avoid duplication
-			// Example: https://ark.cn-beijing.volces.com/api/v3 + /api/v3/chat/completions
-			// Extract the common prefix from completionsPath (e.g., /api/v3 from /api/v3/chat/completions)
-			if (completionsPath.startsWith("/") && completionsPath.contains("/")) {
-				int lastSlashIndex = completionsPath.lastIndexOf("/");
-				if (lastSlashIndex > 0) {
-					String pathPrefix = completionsPath.substring(0, lastSlashIndex);
-					if (StringUtils.isNotBlank(pathPrefix) && endpoint.endsWith(pathPrefix)) {
-						endpoint = endpoint.substring(0, endpoint.length() - pathPrefix.length());
-						log.debug("Removed path prefix '{}' from endpoint to avoid duplication", pathPrefix);
-					}
-				}
-			}
-			
-			// Also remove /v1 suffix for standard OpenAI compatible APIs
-			if (endpoint.endsWith("/v1") || endpoint.endsWith("/v1/")) {
-				endpoint = endpoint.replaceAll("/v1/?$", "");
-			}
-			
-			// Set endpoint and custom paths
-			openAiApiBuilder.baseUrl(endpoint);
-			openAiApiBuilder.completionsPath(completionsPath);
-			openAiApiBuilder.embeddingsPath(embeddingsPath);
-			
-			log.debug("Built OpenAI API - endpoint: {}, completionsPath: {}, embeddingsPath: {}", 
-				endpoint, completionsPath, embeddingsPath);
+		if (StringUtils.isNotBlank(credential.getEndpoint())) {
+			builder.baseUrl(credential.getEndpoint());
+			log.debug("Built OpenAI chat options - endpoint: {}", credential.getEndpoint());
 		}
 
-		return openAiApiBuilder.build();
+		return builder.build();
+	}
+
+	/**
+	 * Builds OpenAI embedding options with the provided credentials.
+	 * @param credential The model credentials
+	 * @param modelId The embedding model identifier
+	 * @param dimension The expected embedding dimension
+	 * @return OpenAiEmbeddingOptions instance
+	 */
+	private OpenAiEmbeddingOptions buildOpenAiEmbeddingOptions(ModelCredential credential, String modelId, int dimension) {
+		OpenAiEmbeddingOptions.Builder builder = OpenAiEmbeddingOptions.builder()
+			.apiKey(credential.getApiKey())
+			.customHeaders(toSingleValueMap(ApiUtils.getBaseHeaders()))
+			.model(modelId)
+			.dimensions(dimension);
+
+		if (StringUtils.isNotBlank(credential.getEndpoint())) {
+			builder.baseUrl(credential.getEndpoint());
+			log.debug("Built OpenAI embedding options - endpoint: {}, model: {}", credential.getEndpoint(), modelId);
+		}
+
+		return builder.build();
+	}
+
+	private Map<String, String> toSingleValueMap(HttpHeaders headers) {
+		Map<String, String> singleValueHeaders = new LinkedHashMap<>();
+		headers.forEach((key, values) -> {
+			if (values != null && !values.isEmpty()) {
+				singleValueHeaders.put(key, values.get(0));
+			}
+		});
+		return singleValueHeaders;
 	}
 
 }

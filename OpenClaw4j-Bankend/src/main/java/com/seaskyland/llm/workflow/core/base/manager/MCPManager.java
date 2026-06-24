@@ -135,12 +135,12 @@ public class MCPManager {
 						McpTool tool = new McpTool();
 						tool.setName(e.name());
 						tool.setDescription(e.description());
-						McpSchema.JsonSchema jsonSchema = e.inputSchema();
+						Map<String, Object> jsonSchema = e.inputSchema();
 						InputSchema inputSchema = new InputSchema();
-						inputSchema.setType(jsonSchema.type());
-						inputSchema.setProperties(jsonSchema.properties());
-						inputSchema.setRequired(jsonSchema.required());
-						inputSchema.setAdditionalProperties(jsonSchema.additionalProperties());
+						inputSchema.setType((String) jsonSchema.get("type"));
+						inputSchema.setProperties(toObjectMap(jsonSchema.get("properties")));
+						inputSchema.setRequired(toStringList(jsonSchema.get("required")));
+						inputSchema.setAdditionalProperties((Boolean) jsonSchema.get("additionalProperties"));
 						tool.setInputSchema(inputSchema);
 						tools.add(tool);
 					});
@@ -171,6 +171,16 @@ public class MCPManager {
 			LogUtils.error("toolsGetFuture Exception", ex, entity.getServerCode());
 			return new ArrayList<>();
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> toObjectMap(Object value) {
+		return value instanceof Map<?, ?> ? (Map<String, Object>) value : null;
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<String> toStringList(Object value) {
+		return value instanceof List<?> ? (List<String>) value : null;
 	}
 
 	/**

@@ -227,67 +227,43 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, AccountEntity
 	private void initAccountData(String workspaceId, String accountId) {
 		// 初始化通义千问提供商
 		ProviderConfigInfo providerConfigInfo = new ProviderConfigInfo();
-		providerConfigInfo.setProvider("Tongyi");
-		providerConfigInfo.setName("Tongyi");
-		providerConfigInfo.setDescription("Tongyi");
+		providerConfigInfo.setProvider("OpenAI");
+		providerConfigInfo.setName("OpenAI");
+		providerConfigInfo.setDescription("OpenAI");
 		providerConfigInfo.setEnable(true);
 		providerConfigInfo.setSource("preset");
 		providerConfigInfo.setProtocol("OpenAI");
-		providerConfigInfo.setSupportedModelTypes(Arrays.asList("llm", "text_embedding", "rerank"));
+		providerConfigInfo.setSupportedModelTypes(Arrays.asList("llm", "text_embedding"));
 
 		ModelCredential credential = new ModelCredential();
-		credential.setEndpoint("https://dashscope.aliyuncs.com/compatible-mode");
+		credential.setEndpoint("https://api.openai.com");
 		providerConfigInfo.setCredential(credential);
 
 		providerManager.addProvider(providerConfigInfo);
 
 		// 初始化通义千问模型
 		List<ModelConfigInfo> models = Arrays.asList(
+				createModelConfig("gpt-4.1", "gpt-4.1", "llm", "chat",
+						Arrays.asList("vision", "function_call", "reasoning")),
+				createModelConfig("gpt-4.1-mini", "gpt-4.1-mini", "llm", "chat",
+						Arrays.asList("vision", "function_call", "reasoning")),
+				createModelConfig("gpt-4.1-nano", "gpt-4.1-nano", "llm", "chat",
+						Arrays.asList("function_call", "reasoning")),
+				createModelConfig("gpt-4o", "gpt-4o", "llm", "chat", Arrays.asList("vision", "function_call")),
+				createModelConfig("gpt-4o-mini", "gpt-4o-mini", "llm", "chat",
+						Arrays.asList("vision", "function_call")),
+				createModelConfig("text-embedding-3-small", "text-embedding-3-small", "text_embedding", "chat",
+						Arrays.asList("embedding")),
+				createModelConfig("text-embedding-3-large", "text-embedding-3-large", "text_embedding", "chat",
+						Arrays.asList("embedding")));
 				// LLM 模型
-				createModelConfig("qwen-max", "qwen-max", "llm", "chat", Arrays.asList("web_search", "function_call")),
-				createModelConfig("qwen-max-latest", "qwen-max-latest", "llm", "chat",
-						Arrays.asList("web_search", "function_call", "reasoning")),
-				createModelConfig("qwen-plus", "qwen-plus", "llm", "chat",
-						Arrays.asList("web_search", "function_call")),
-				createModelConfig("qwen-plus-latest", "qwen-plus-latest", "llm", "chat",
-						Arrays.asList("web_search", "function_call", "reasoning")),
-				createModelConfig("qwen-turbo", "qwen-turbo", "llm", "chat",
-						Arrays.asList("web_search", "function_call")),
-				createModelConfig("qwen-turbo-latest", "qwen-turbo-latest", "llm", "chat",
-						Arrays.asList("web_search", "function_call", "reasoning")),
-				createModelConfig("qwen3-235b-a22b", "qwen3-235b-a22b", "llm", "chat",
-						Arrays.asList("function_call", "reasoning")),
-				createModelConfig("qwen3-30b-a3b", "qwen3-30b-a3b", "llm", "chat",
-						Arrays.asList("function_call", "reasoning")),
-				createModelConfig("qwen3-32b", "qwen3-32b", "llm", "chat", Arrays.asList("function_call", "reasoning")),
-				createModelConfig("qwen3-14b", "qwen3-14b", "llm", "chat", Arrays.asList("function_call", "reasoning")),
-				createModelConfig("qwen3-8b", "qwen3-8b", "llm", "chat", Arrays.asList("function_call", "reasoning")),
-				createModelConfig("qwen3-4b", "qwen3-4b", "llm", "chat", Arrays.asList("function_call", "reasoning")),
-				createModelConfig("qwen3-1.7b", "qwen3-1.7b", "llm", "chat",
-						Arrays.asList("function_call", "reasoning")),
-				createModelConfig("qwen3-0.6b", "qwen3-0.6b", "llm", "chat",
-						Arrays.asList("function_call", "reasoning")),
-				createModelConfig("qwen-vl-max", "qwen-vl-max", "llm", "chat",
-						Arrays.asList("vision", "function_call")),
-				createModelConfig("qwen-vl-plus", "qwen-vl-plus", "llm", "chat",
-						Arrays.asList("vision", "function_call")),
-				createModelConfig("qvq-max", "qvq-max", "llm", "chat", Arrays.asList("vision", "reasoning")),
-				createModelConfig("qwq-plus", "qwq-plus", "llm", "chat", Arrays.asList("reasoning", "function_call")),
-				createModelConfig("deepseek-r1", "deepseek-r1", "llm", "chat", Arrays.asList("reasoning")),
 
 				// 文本嵌入模型
-				createModelConfig("text-embedding-v1", "text-embedding-v1", "text_embedding", "chat",
-						Arrays.asList("embedding")),
-				createModelConfig("text-embedding-v2", "text-embedding-v2", "text_embedding", "chat",
-						Arrays.asList("embedding")),
-				createModelConfig("text-embedding-v3", "text-embedding-v3", "text_embedding", "chat",
-						Arrays.asList("embedding")),
 
 				// 重排序模型
-				createModelConfig("gte-rerank-v2", "gte-rerank-v2", "rerank", "chat", null));
 
 		for (ModelConfigInfo model : models) {
-			model.setProvider("Tongyi");
+			model.setProvider("OpenAI");
 			model.setSource("preset");
 			model.setEnable(true);
 			modelManager.addModel(model);

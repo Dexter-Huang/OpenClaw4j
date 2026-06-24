@@ -33,7 +33,7 @@ import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.ResponseFormat;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
@@ -90,8 +90,8 @@ public class ModelExecuteManager {
 				chatOptionsBuilder.seed((Integer) parameterMap.get("seed"));
 			}
 			if (parameterMap.get("response_format") != null && parameterMap.get("response_format") instanceof String) {
-				chatOptionsBuilder.responseFormat(ResponseFormat.builder()
-					.type(ResponseFormat.Type.valueOf(parameterMap.get("response_format").toString().toUpperCase()))
+				chatOptionsBuilder.responseFormat(OpenAiChatModel.ResponseFormat.builder()
+					.type(OpenAiChatModel.ResponseFormat.Type.valueOf(parameterMap.get("response_format").toString().toUpperCase()))
 					.build());
 			}
 		}
@@ -103,7 +103,6 @@ public class ModelExecuteManager {
 		Prompt prompt = new Prompt(messages);
 		return chatClientBuilder.build()
 			.prompt(prompt)
-			.options(chatOptions)
 			.stream()
 			.chatResponse()
 			.concatMap(response -> convertResponse(response).flux());

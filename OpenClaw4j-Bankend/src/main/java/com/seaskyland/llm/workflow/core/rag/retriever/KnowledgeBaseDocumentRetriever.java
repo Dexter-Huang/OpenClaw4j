@@ -16,12 +16,10 @@
 
 package com.seaskyland.llm.workflow.core.rag.retriever;
 
-import com.seaskyland.llm.workflow.core.model.reranker.dashscope.DashscopeReranker;
 import com.seaskyland.llm.workflow.runtime.exception.BizException;
 import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
 import com.seaskyland.llm.workflow.runtime.domain.app.FileSearchOptions;
 import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.KnowledgeBase;
-import com.seaskyland.llm.workflow.core.model.llm.ModelFactory;
 import com.seaskyland.llm.workflow.core.rag.vectorstore.VectorStoreFactory;
 import com.seaskyland.llm.workflow.core.utils.LogUtils;
 import com.seaskyland.llm.workflow.core.utils.concurrent.ThreadPoolUtils;
@@ -63,9 +61,6 @@ public class KnowledgeBaseDocumentRetriever implements DocumentRetriever {
 
 	/** Factory for creating vector store instances */
 	private final VectorStoreFactory vectorStoreFactory;
-
-	/** Factory for creating model instances */
-	private final ModelFactory modelFactory;
 
 	/** Configuration options for document search */
 	private final FileSearchOptions searchOptions;
@@ -132,7 +127,6 @@ public class KnowledgeBaseDocumentRetriever implements DocumentRetriever {
 
 	/**
 	 * Retrieves documents from a single knowledge base using vector similarity search.
-	 * Optionally applies reranking if enabled in search options.
 	 * @param knowledgeBase The knowledge base to search in
 	 * @param query The search query
 	 * @return List of retrieved documents
@@ -160,28 +154,7 @@ public class KnowledgeBaseDocumentRetriever implements DocumentRetriever {
 			searchRequestBuilder.hybridWeight(searchOptions.getHybridWeight());
 		}
 
-		List<Document> documents = vectorStore.similaritySearch(searchRequestBuilder.build());
-		if (searchOptions.getEnableRerank()) {
-			documents = rerankDocuments(searchOptions, query, documents);
-		}
-
-		return documents;
-	}
-
-	/**
-	 * Reranks the retrieved documents using a document ranker model.
-	 * @param searchOptions Search configuration options
-	 * @param query The original search query
-	 * @param documents List of documents to rerank
-	 * @return Reranked list of documents
-	 */
-	private List<Document> rerankDocuments(FileSearchOptions searchOptions, Query query, List<Document> documents) {
-		long start = System.currentTimeMillis();
-		DashscopeReranker documentRanker = modelFactory.getDocumentRanker(searchOptions);
-		List<Document> results = documentRanker.process(query, documents);
-
-		LogUtils.monitor("DocumentRetriever", "rerank", start, SUCCESS, query.text(), results.size());
-		return results;
+		return vectorStore.similaritySearch(searchRequestBuilder.build());
 	}
 
 }

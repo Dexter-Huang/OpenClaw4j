@@ -29,11 +29,10 @@ import org.springframework.ai.observation.conventions.VectorStoreSimilarityMetri
 import org.springframework.ai.util.JacksonUtils;
 import org.springframework.ai.vectorstore.AbstractVectorStoreBuilder;
 import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.SimpleVectorStoreContent;
 import org.springframework.ai.vectorstore.filter.Filter;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.ai.vectorstore.filter.FilterExpressionConverter;
-import org.springframework.ai.vectorstore.filter.converter.SimpleVectorStoreFilterExpressionConverter;
+import org.springframework.ai.vectorstore.filter.converter.PrintFilterExpressionConverter;
 import org.springframework.ai.vectorstore.observation.AbstractObservationVectorStore;
 import org.springframework.ai.vectorstore.observation.VectorStoreObservationContext;
 import org.springframework.core.io.Resource;
@@ -70,14 +69,14 @@ public class CustomSimpleVectorStore extends AbstractObservationVectorStore {
 
     private final FilterExpressionConverter filterExpressionConverter;
 
-    protected Map<String, SimpleVectorStoreContent> store = new ConcurrentHashMap<>();
+    protected Map<String, StoreContent> store = new ConcurrentHashMap<>();
 
     protected CustomSimpleVectorStore(CustomSimpleVectorStoreBuilder builder) {
         super(builder);
-        this.objectMapper = JsonMapper.builder().addModules(JacksonUtils.instantiateAvailableModules()).build();
+        this.objectMapper = new ObjectMapper().findAndRegisterModules();
         this.expressionParser = new SpelExpressionParser();
         // Use our custom filter expression converter instead of the default one
-        this.filterExpressionConverter = new SimpleVectorStoreFilterExpressionConverter();
+        this.filterExpressionConverter = new PrintFilterExpressionConverter();
     }
 
     /**
@@ -98,7 +97,7 @@ public class CustomSimpleVectorStore extends AbstractObservationVectorStore {
         for (Document document : documents) {
             logger.info("Calling EmbeddingModel for document id = {}", document.getId());
             float[] embedding = this.embeddingModel.embed(document);
-            SimpleVectorStoreContent storeContent = new SimpleVectorStoreContent(document.getId(), document.getText(),
+            StoreContent storeContent = new StoreContent(document.getId(), document.getText(),
                     document.getMetadata(), embedding);
             this.store.put(document.getId(), storeContent);
         }
@@ -113,23 +112,23 @@ public class CustomSimpleVectorStore extends AbstractObservationVectorStore {
 
     @Override
     public void doDelete(Filter.Expression filterExpression) {
-        Predicate<SimpleVectorStoreContent> documentFilterPredicate = doFilterPredicate(SearchRequest.builder().filterExpression(filterExpression).build());
+        Predicate<StoreContent> documentFilterPredicate = doFilterPredicate(SearchRequest.builder().filterExpression(filterExpression).build());
         this.store.values().removeIf(documentFilterPredicate);
     }
 
-    public static Predicate<SimpleVectorStoreContent> doFilterPredicate2(SearchRequest request) {
+    public static Predicate<StoreContent> doFilterPredicate2(SearchRequest request) {
         return request.hasFilterExpression() ? document -> {
             StandardEvaluationContext context = new StandardEvaluationContext();
             context.setVariable("metadata", document.getMetadata());
             return Boolean.TRUE.equals(new SpelExpressionParser()
-                    .parseExpression(new SimpleVectorStoreFilterExpressionConverter().convertExpression(request.getFilterExpression()))
+                    .parseExpression(new PrintFilterExpressionConverter().convertExpression(request.getFilterExpression()))
                     .getValue(context, Boolean.class));
         } : document -> true;
     }
 
     @Override
     public List<Document> doSimilaritySearch(SearchRequest request) {
-        Predicate<SimpleVectorStoreContent> documentFilterPredicate = doFilterPredicate(request);
+        Predicate<StoreContent> documentFilterPredicate = doFilterPredicate(request);
         float[] userQueryEmbedding = getUserQueryEmbedding(request.getQuery());
         return this.store.values()
                 .stream()
@@ -142,7 +141,7 @@ public class CustomSimpleVectorStore extends AbstractObservationVectorStore {
                 .toList();
     }
 
-    private Predicate<SimpleVectorStoreContent> doFilterPredicate(SearchRequest request) {
+    private Predicate<StoreContent> doFilterPredicate(SearchRequest request) {
         return request.hasFilterExpression() ? document -> {
             StandardEvaluationContext context = new StandardEvaluationContext();
             context.setVariable("metadata", document.getMetadata());
@@ -199,7 +198,7 @@ public class CustomSimpleVectorStore extends AbstractObservationVectorStore {
      * @param file the file to load the vector store content
      */
     public void load(File file) {
-        TypeReference<HashMap<String, SimpleVectorStoreContent>> typeRef = new TypeReference<>() {
+        TypeReference<HashMap<String, StoreContent>> typeRef = new TypeReference<>() {
 
         };
         try {
@@ -215,7 +214,7 @@ public class CustomSimpleVectorStore extends AbstractObservationVectorStore {
      * @param resource the resource to load the vector store content
      */
     public void load(Resource resource) {
-        TypeReference<HashMap<String, SimpleVectorStoreContent>> typeRef = new TypeReference<>() {
+        TypeReference<HashMap<String, StoreContent>> typeRef = new TypeReference<>() {
 
         };
         try {
@@ -289,6 +288,34 @@ public class CustomSimpleVectorStore extends AbstractObservationVectorStore {
 
         public static float norm(float[] vector) {
             return dotProduct(vector, vector);
+        }
+
+    }
+
+    protected record StoreContent(String id, String text, Map<String, Object> metadata, float[] embedding) {
+
+        public String getId() {
+            return this.id;
+        }
+
+        public String getText() {
+            return this.text;
+        }
+
+        public Map<String, Object> getMetadata() {
+            return this.metadata;
+        }
+
+        public float[] getEmbedding() {
+            return this.embedding;
+        }
+
+        public Document toDocument(Double score) {
+            Document.Builder builder = Document.builder().id(this.id).text(this.text).metadata(this.metadata);
+            if (score != null) {
+                builder.score(score);
+            }
+            return builder.build();
         }
 
     }
