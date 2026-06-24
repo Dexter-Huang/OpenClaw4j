@@ -60,12 +60,12 @@
 
     <!--异步日志-->
     <appender name="APPLICATION_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
-        <param name="neverBlock" value="true"/>
+        <neverBlock>true</neverBlock>
         <appender-ref ref="APPLICATION"/>
     </appender>
     <!--异步日志-->
     <appender name="MONITOR_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
-        <param name="neverBlock" value="true"/>
+        <neverBlock>true</neverBlock>
         <appender-ref ref="MONITOR-LOG"/>
     </appender>
 <!--    <appender name="dubboAppenderAsync" class="ch.qos.logback.classic.AsyncAppender">-->
@@ -73,7 +73,7 @@
 <!--        <appender-ref ref="dubboAppender"/>-->
 <!--    </appender>-->
     <appender name="TRACE-LOG-ASYNC" class="ch.qos.logback.classic.AsyncAppender">
-        <param name="neverBlock" value="true"/>
+        <neverBlock>true</neverBlock>
         <appender-ref ref="TRACE-LOG"/>
     </appender>
 

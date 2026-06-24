@@ -2,11 +2,15 @@ package com.seaskyland.llm.workflow.admin.compat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.seaskyland.llm.workflow.core.base.entity.AppEntity;
+import com.seaskyland.llm.workflow.core.base.mapper.AppMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -28,6 +32,31 @@ class AdminCompatApiTest {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+
+	@Autowired
+	private AppMapper appMapper;
+
+	@Test
+	void sqliteDateHandlerReadsEpochMillisTextFromApplicationRows() {
+		jdbcTemplate.update("""
+				INSERT INTO application (
+				  workspace_id, app_id, name, source, type, status,
+				  gmt_create, gmt_modified, creator, modifier
+				)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				""",
+				"test-workspace", "epoch-millis-app", "epoch millis app", "test", "basic", 1,
+				"1782306319293", "1782306319293", "10000", "10000");
+
+		AppEntity app = appMapper
+			.selectOne(new LambdaQueryWrapper<AppEntity>().eq(AppEntity::getAppId, "epoch-millis-app"));
+
+		assertThat(app.getGmtCreate()).isNotNull();
+		assertThat(app.getGmtCreate().getTime()).isEqualTo(1782306319293L);
+	}
 
 	@Test
 	void adminListApisReturnLegacyPageEnvelope() throws Exception {

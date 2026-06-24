@@ -54,6 +54,8 @@ public class MybatisPlusConfig {
 		MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
 		factoryBean.setDataSource(dataSource);
 		factoryBean.setPlugins(interceptor);
+		factoryBean.setTypeHandlersPackage("com.seaskyland.llm.workflow.core.config");
+		factoryBean.setTypeHandlers(new SQLiteDateTypeHandler());
 		return factoryBean.getObject();
 	}
 
