@@ -1,0 +1,14 @@
+---
+description: OpenClaw4j-Bankend Java Spring Maven 开发、测试、构建和提交
+globs:
+  - "OpenClaw4j-Bankend/**/*"
+alwaysApply: false
+---
+
+完整项目规则维护在：
+
+```text
+.agents/skills/openclaw4j-backend-maven/SKILL.md
+```
+
+处理后端 Java/Spring/Maven 文件时，先读取并遵循该公共源文件。

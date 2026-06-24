@@ -1,0 +1,14 @@
+---
+description: OpenClaw4j-Frontend Umi React TypeScript 开发、构建、lint 和提交
+globs:
+  - "OpenClaw4j-Frontend/**/*"
+alwaysApply: false
+---
+
+完整项目规则维护在：
+
+```text
+.agents/skills/openclaw4j-frontend-umi/SKILL.md
+```
+
+处理前端 Umi/React/TypeScript 文件时，先读取并遵循该公共源文件。

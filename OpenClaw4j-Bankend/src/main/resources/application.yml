@@ -1,0 +1,128 @@
+server:
+  port: 9004
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript
+    min-response-size: 2048
+
+spring:
+  application:
+    name: OpenClaw4j-Bankend
+  profiles:
+    active: dev
+  messages:
+    basename: i18n/messages
+  main:
+    allow-circular-references: true
+    allow-bean-definition-overriding: true
+  config:
+    import: classpath:initializr.yml
+  datasource:
+    url: jdbc:sqlite:./data/openclaw.db
+    driver-class-name: org.sqlite.JDBC
+    hikari:
+      maximum-pool-size: 1
+      connection-init-sql: PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:sql/Sqlite/V0.0.1__init.sql
+      continue-on-error: false
+  ai:
+    alibaba:
+      studio:
+        login-method: third_party
+        upload-method: file       # file or oss
+        # Vector store backend: simple | sqlite | elasticsearch
+        # vector-store-type: sqlite
+        #
+        # sqlite-vec extension loading (only needed when vector-store-type=sqlite):
+        #   The bundled extension under src/main/resources/sqlite/
+        #   (vec0.dll / vec0.so / vec0.dylib) is extracted automatically at startup.
+        #   Override only if you want to use a custom build of the extension:
+        # sqlite-vec-extension-path: C:/custom-path/vec0.dll
+        vector-store-type: sqlite
+    chat:
+      observations:
+        log-prompt: true # Include prompt content in tracing (disabled by default for privacy)
+        log-completion: true
+    dashscope:
+      api-key: sk-fe87436622344410af346152a99853b5
+    openai:
+      api-key: sk-fe87436622344410af346152a99853b5
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      chat:
+        options:
+          model: qwen-max
+  documentation:
+    enabled: true
+    swagger-ui:
+      path: /swagger/doc.html
+jwt:
+  access-token-expiration: 7200
+  refresh-token-expiration: 2592000
+
+# Cache backend type: REDIS (default, requires Redis) or JVM (in-memory, no Redis needed).
+# When set to JVM, the RedissonClient bean is only created if mq.type=REDISSON.
+cache:
+  type: JVM
+
+# Message queue backend type:
+#   REDISSON  – Redis-backed pub/sub via Redisson (requires Redis, default)
+#   ROCKET_MQ – Apache RocketMQ
+#   JVM       – In-process pub/sub, no external broker required (single-node only)
+mq:
+  type: JVM
+  endpoints: 127.0.0.1:6380
+  document-index-topic: topic_saa_studio_document_index
+  document_index_group: group_saa_studio_document_index
+
+#oauth2:
+#  github:
+#    client-id: ${GITHUB_CLIENT_ID}
+#    client-secret: ${GITHUB_CLIENT_SECRET}
+#    redirect-uri: http://127.0.0.1:9004/oauth2/callback/github
+
+mybatis-plus:
+  global-config:
+    db-config:
+      db-type: sqlite
+  type-handlers-package: com.seaskyland.llm.workflow.core.config
+  configuration:
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+
+seaskyland:
+  ignore:
+    whites:
+      - /console
+      - /graph-studio
+
+logging:
+  level:
+    reactor.netty: ERROR
+    okhttp3.internal: ERROR
+    com.obs: ERROR
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0 # Sample 100% of requests for full tracing (adjust in production as needed)
+  observations:
+    annotations:
+      enabled: true # Enable @Observed (if you use observation annotations in code)
+
+# 如果要关闭检测功能
+#management:
+#  tracing:
+#    enabled: false
+#  observations:
+#    annotations:
+#      enabled: false
+#
+#otel:
+#  traces:
+#    exporter: none
+#  metrics:
+#    exporter: none
+#  logs:
+#    exporter: none

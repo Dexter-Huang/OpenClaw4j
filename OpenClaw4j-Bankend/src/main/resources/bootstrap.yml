@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: ces-llm
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_IP:nacos}:8848
+        namespace: dev
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:Hyt@123465}
+      config:
+        file-extension: yaml
+        server-addr: ${NACOS_IP:nacos}:8848
+        namespace: dev
+        group: DEFAULT_GROUP
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:Hyt@123465}
+        extension-configs:
+          - data-id: ces-llm-prompt.yaml
+            group: DEFAULT_GROUP
+            refresh: true
+          - data-id: ces-llm-agent.json
+            group: DEFAULT_GROUP
+            refresh: true

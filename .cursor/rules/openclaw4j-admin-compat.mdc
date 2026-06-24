@@ -1,0 +1,16 @@
+---
+description: OpenClaw4j legacy admin 兼容接口、Result/AdminPage 契约和前端 request 兼容
+globs:
+  - "OpenClaw4j-Bankend/src/**/*Admin*"
+  - "OpenClaw4j-Bankend/src/**/*compat*"
+  - "OpenClaw4j-Frontend/packages/main/src/legacy/**/*"
+alwaysApply: false
+---
+
+完整项目规则维护在：
+
+```text
+.agents/skills/openclaw4j-admin-compat/SKILL.md
+```
+
+处理 legacy admin 兼容 API、分页响应、`Result<T>`、`AdminPage` 或旧前端 request 兼容时，先读取并遵循该公共源文件。

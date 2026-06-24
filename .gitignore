@@ -1,0 +1,81 @@
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Secrets and private key material
+**/src/main/resources/keys/private*.pem
+**/*.key
+**/*.p12
+**/*.jks
+**/*.keystore
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.history/
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+.vscode/
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Frontend dependencies and build output
+node_modules/
+OpenClaw4j-Frontend/**/node_modules/
+OpenClaw4j-Frontend/**/dist/
+OpenClaw4j-Frontend/**/docs-dist/
+OpenClaw4j-Frontend/**/.umi/
+OpenClaw4j-Frontend/**/.umi-production/
+OpenClaw4j-Frontend/**/.umi-test/
+OpenClaw4j-Frontend/**/.dumi/tmp/
+OpenClaw4j-Frontend/**/.dumi/tmp-test/
+OpenClaw4j-Frontend/**/.dumi/tmp-production/
+OpenClaw4j-Frontend/**/.swc/
+OpenClaw4j-Frontend/**/.cache/
+OpenClaw4j-Frontend/**/*.module.css
+OpenClaw4j-Frontend/**/*.module.css.map
+
+# Frontend local config
+OpenClaw4j-Frontend/**/.env.local
+OpenClaw4j-Frontend/**/.umirc.local.ts
+OpenClaw4j-Frontend/**/config/config.local.ts
+
+# Backend build output and runtime data
+OpenClaw4j-Bankend/**/target/
+!OpenClaw4j-Bankend/**/src/main/**/target/
+!OpenClaw4j-Bankend/**/src/test/**/target/
+OpenClaw4j-Bankend/**/build/
+!OpenClaw4j-Bankend/**/src/main/**/build/
+!OpenClaw4j-Bankend/**/src/test/**/build/
+OpenClaw4j-Bankend/data/
+OpenClaw4j-Bankend/**/*.db
+OpenClaw4j-Bankend/**/*.db-shm
+OpenClaw4j-Bankend/**/*.db-wal
+OpenClaw4j-Bankend/**/*.sqlite
+OpenClaw4j-Bankend/**/*.sqlite3
+
+# Java IDE and tool metadata
+.apt_generated/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# Logs and temp files
+*.log
+logs/
+tmp/
+temp/
+
+# Keep Maven wrapper jar if added later
+!OpenClaw4j-Bankend/**/.mvn/wrapper/maven-wrapper.jar

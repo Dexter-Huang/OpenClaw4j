@@ -1,0 +1,14 @@
+---
+description: OpenClaw4j 根仓库 Git 管理、提交、忽略规则和避免嵌套仓库误操作
+globs:
+  - "**/*"
+alwaysApply: false
+---
+
+完整项目规则维护在：
+
+```text
+.agents/skills/openclaw4j-monorepo-git/SKILL.md
+```
+
+处理 OpenClaw4j Git、提交、`.gitignore`、monorepo、frontend/backend 根仓库管理时，先读取并遵循该公共源文件。

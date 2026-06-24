@@ -1,0 +1,74 @@
+{
+  "CREATE_QUESTION": [
+    {
+      "modelProvider": "DASH_SCOPE",
+      "modelOptions": {
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode",
+        "apiKey": "sk-fe87436622344410af346152a99853b5",
+        "promptUrl": "/prompt/",
+        "model": "qwen-flash",
+        "temperature": 0.1
+      }
+    }
+  ],
+  "CREATE_CATALOG": [
+    {
+      "modelProvider": "DASH_SCOPE",
+      "modelOptions": {
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode",
+        "apiKey": "sk-fe87436622344410af346152a99853b5",
+        "promptUrl": "",
+        "model": "qwen-flash",
+        "temperature": 0.1
+      }
+    }
+  ],
+  "KNOWLEDGE_TAG": [
+    {
+      "modelProvider": "DASH_SCOPE",
+      "modelOptions": {
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode",
+        "apiKey": "sk-fe87436622344410af346152a99853b5",
+        "promptUrl": "",
+        "model": "qwen-flash",
+        "temperature": 0.1
+      }
+    }
+  ],
+  "IMPORT_TEXT_QUESTION_DTO": [
+    {
+      "modelProvider": "DASH_SCOPE",
+      "modelOptions": {
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode",
+        "apiKey": "sk-fe87436622344410af346152a99853b5",
+        "promptUrl": "",
+        "model": "qwen-flash",
+        "temperature": 0.1
+      }
+    }
+  ],
+  "SPLIT_QUESTION": [
+    {
+      "modelProvider": "DASH_SCOPE",
+      "modelOptions": {
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode",
+        "apiKey": "sk-fe87436622344410af346152a99853b5",
+        "promptUrl": "",
+        "model": "qwen-flash",
+        "temperature": 0.1
+      }
+    }
+  ],
+  "OCR_IMG_QUESTION": [
+    {
+      "modelProvider": "OPEN_AI",
+      "modelOptions": {
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode",
+        "apiKey": "sk-fe87436622344410af346152a99853b5",
+        "promptUrl": "",
+        "model": "qwen-vl-ocr-latest",
+        "temperature": 0.1
+      }
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "CREATE_QUESTION": [
+    {
+      "modelProvider": "OPEN_AI",
+      "modelOptions": {
+        "baseUrl": "http://10.1.1.204:1030",
+        "apiKey": "sk-fe87436622344410af346152a99853b5",
+        "promptUrl": "/prompt/",
+        "model": "Qwen3-14B",
+        "temperature": 0.1
+      }
+    }
+  ],
+  "CREATE_CATALOG": [
+    {
+      "modelProvider": "OPEN_AI",
+      "modelOptions": {
+        "baseUrl": "http://10.1.1.204:1030",
+        "apiKey": "sk-fe87436622344410af346152a99853b5",
+        "promptUrl": "",
+        "model": "Qwen3-14B",
+        "temperature": 0.1
+      }
+    }
+  ],
+  "KNOWLEDGE_TAG": [
+    {
+      "modelProvider": "OPEN_AI",
+      "modelOptions": {
+        "baseUrl": "http://10.1.1.204:1030",
+        "apiKey": "sk-fe87436622344410af346152a99853b5",
+        "promptUrl": "",
+        "model": "Qwen3-14B",
+        "temperature": 0.1
+      }
+    }
+  ],
+  "IMPORT_TEXT_QUESTION_DTO": [
+    {
+      "modelProvider": "OPEN_AI",
+      "modelOptions": {
+        "baseUrl": "http://10.1.1.204:1030",
+        "apiKey": "sk-fe87436622344410af346152a99853b5",
+        "promptUrl": "",
+        "model": "Qwen3-14B",
+        "temperature": 0.1
+      }
+    }
+  ],
+  "SPLIT_QUESTION": [
+    {
+      "modelProvider": "OPEN_AI",
+      "modelOptions": {
+        "baseUrl": "http://10.1.1.204:1030",
+        "apiKey": "sk-fe87436622344410af346152a99853b5",
+        "promptUrl": "",
+        "model": "Qwen3-14B",
+        "temperature": 0.1
+      }
+    }
+  ],
+  "OCR_IMG_QUESTION": [
+    {
+      "modelProvider": "MIND_IE_OPENAI",
+      "modelOptions": {
+        "baseUrl": "http://10.1.1.204:1026",
+        "apiKey": "sk-fe87436622344410af346152a99853b5",
+        "promptUrl": "",
+        "model": "Qwen2.5-VL-7B-Instruct",
+        "temperature": 0.1
+      }
+    }
+  ]
+}

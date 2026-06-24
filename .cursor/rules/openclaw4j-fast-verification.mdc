@@ -1,0 +1,14 @@
+---
+description: OpenClaw4j 前后端快速验证、测试、构建和提交 hook 选择
+globs:
+  - "**/*"
+alwaysApply: false
+---
+
+完整项目规则维护在：
+
+```text
+.agents/skills/openclaw4j-fast-verification/SKILL.md
+```
+
+需要选择 Maven、Umi、lint、build、hook 验证范围时，先读取并遵循该公共源文件。
