@@ -20,10 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.alibaba.cloud.ai.graph.node.HttpNode.AuthConfig;
-import com.alibaba.cloud.ai.graph.node.HttpNode.HttpRequestNodeBody;
-import com.alibaba.cloud.ai.graph.node.HttpNode.RetryConfig;
-import com.alibaba.cloud.ai.graph.node.HttpNode.TimeoutConfig;
 import com.seaskyland.llm.workflow.admin.generator.model.Variable;
 import com.seaskyland.llm.workflow.admin.generator.model.VariableSelector;
 import com.seaskyland.llm.workflow.admin.generator.model.VariableType;
@@ -37,6 +33,142 @@ import org.springframework.http.HttpMethod;
  * Builder.。
  */
 public class HttpNodeData extends NodeData {
+
+	public static class HttpRequestNodeBody {
+
+		private List<BodyData> data = Collections.emptyList();
+
+		public static HttpRequestNodeBody from(Object rawBody) {
+			HttpRequestNodeBody body = new HttpRequestNodeBody();
+			Object data = rawBody instanceof Map<?, ?> map ? map.get("data") : rawBody;
+			if (data instanceof List<?> list) {
+				body.setData(list.stream().filter(Map.class::isInstance).map(Map.class::cast).map(BodyData::from).toList());
+			}
+			return body;
+		}
+
+		public List<BodyData> getData() {
+			return data;
+		}
+
+		public void setData(List<BodyData> data) {
+			this.data = data != null ? data : Collections.emptyList();
+		}
+
+	}
+
+	public static class BodyData {
+
+		private String key;
+
+		private String value;
+
+		static BodyData from(Map<?, ?> map) {
+			BodyData data = new BodyData();
+			data.setKey(stringValue(map.get("key")));
+			data.setValue(stringValue(map.get("value")));
+			return data;
+		}
+
+		public String getKey() {
+			return key;
+		}
+
+		public void setKey(String key) {
+			this.key = key;
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+		public void setValue(String value) {
+			this.value = value;
+		}
+
+	}
+
+	public static class AuthConfig {
+
+		private String type;
+
+		private String username;
+
+		private String password;
+
+		private String token;
+
+		public static AuthConfig basic(String username, String password) {
+			AuthConfig config = new AuthConfig();
+			config.type = "basic";
+			config.username = username;
+			config.password = password;
+			return config;
+		}
+
+		public static AuthConfig bearer(String token) {
+			AuthConfig config = new AuthConfig();
+			config.type = "bearer";
+			config.token = token;
+			return config;
+		}
+
+		public boolean isBasic() {
+			return "basic".equals(type);
+		}
+
+		public boolean isBearer() {
+			return "bearer".equals(type);
+		}
+
+		public String getUsername() {
+			return username;
+		}
+
+		public String getPassword() {
+			return password;
+		}
+
+		public String getToken() {
+			return token;
+		}
+
+	}
+
+	public static class RetryConfig {
+
+		private final int maxRetries;
+
+		private final long maxRetryInterval;
+
+		private final boolean enable;
+
+		public RetryConfig(int maxRetries, long maxRetryInterval, boolean enable) {
+			this.maxRetries = maxRetries;
+			this.maxRetryInterval = maxRetryInterval;
+			this.enable = enable;
+		}
+
+		public int getMaxRetries() {
+			return maxRetries;
+		}
+
+		public long getMaxRetryInterval() {
+			return maxRetryInterval;
+		}
+
+		public boolean isEnable() {
+			return enable;
+		}
+
+	}
+
+	public record TimeoutConfig(int connect, int read, int write, int maxConnect, int maxRead, int maxWrite) {
+	}
+
+	private static String stringValue(Object value) {
+		return value != null ? value.toString() : null;
+	}
 
 	public static List<Variable> getDefaultOutputSchemas(DSLDialectType dialectType) {
 		return switch (dialectType) {

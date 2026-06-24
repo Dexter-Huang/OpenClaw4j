@@ -25,13 +25,13 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.alibaba.cloud.ai.graph.node.HttpNode.AuthConfig;
-import com.alibaba.cloud.ai.graph.node.HttpNode.HttpRequestNodeBody;
-import com.alibaba.cloud.ai.graph.node.HttpNode.RetryConfig;
-import com.alibaba.cloud.ai.graph.node.HttpNode.TimeoutConfig;
 import com.seaskyland.llm.workflow.admin.generator.model.VariableSelector;
 import com.seaskyland.llm.workflow.admin.generator.model.workflow.NodeType;
 import com.seaskyland.llm.workflow.admin.generator.model.workflow.nodedata.HttpNodeData;
+import com.seaskyland.llm.workflow.admin.generator.model.workflow.nodedata.HttpNodeData.AuthConfig;
+import com.seaskyland.llm.workflow.admin.generator.model.workflow.nodedata.HttpNodeData.HttpRequestNodeBody;
+import com.seaskyland.llm.workflow.admin.generator.model.workflow.nodedata.HttpNodeData.RetryConfig;
+import com.seaskyland.llm.workflow.admin.generator.model.workflow.nodedata.HttpNodeData.TimeoutConfig;
 import com.seaskyland.llm.workflow.admin.generator.service.dsl.AbstractNodeDataConverter;
 import com.seaskyland.llm.workflow.admin.generator.service.dsl.DSLDialectType;
 import com.seaskyland.llm.workflow.admin.generator.utils.MapReadUtil;

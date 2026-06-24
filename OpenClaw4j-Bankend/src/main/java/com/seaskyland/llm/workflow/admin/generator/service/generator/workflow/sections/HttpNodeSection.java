@@ -19,10 +19,11 @@ package com.seaskyland.llm.workflow.admin.generator.service.generator.workflow.s
 import java.util.List;
 import java.util.Map;
 
-import com.alibaba.cloud.ai.graph.node.HttpNode;
 import com.seaskyland.llm.workflow.admin.generator.model.workflow.Node;
 import com.seaskyland.llm.workflow.admin.generator.model.workflow.NodeType;
 import com.seaskyland.llm.workflow.admin.generator.model.workflow.nodedata.HttpNodeData;
+import com.seaskyland.llm.workflow.admin.generator.model.workflow.nodedata.HttpNodeData.AuthConfig;
+import com.seaskyland.llm.workflow.admin.generator.model.workflow.nodedata.HttpNodeData.RetryConfig;
 import com.seaskyland.llm.workflow.admin.generator.service.dsl.DSLDialectType;
 import com.seaskyland.llm.workflow.admin.generator.service.generator.workflow.NodeSection;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -76,7 +77,7 @@ public class HttpNodeSection implements NodeSection<HttpNodeData> {
 			sb.append(String.format(".body(HttpNode.HttpRequestNodeBody.fromJson(\"%s\"))%n", escape(rawJson)));
 		}
 
-		HttpNode.AuthConfig ac = d.getAuthConfig();
+		AuthConfig ac = d.getAuthConfig();
 		if (ac != null) {
 			if (ac.isBasic()) {
 				sb.append(String.format(".auth(HttpNode.AuthConfig.basic(\"%s\", \"%s\"))%n", escape(ac.getUsername()),
@@ -87,7 +88,7 @@ public class HttpNodeSection implements NodeSection<HttpNodeData> {
 			}
 		}
 
-		HttpNode.RetryConfig rc = d.getRetryConfig();
+		RetryConfig rc = d.getRetryConfig();
 		if (rc != null) {
 			sb.append(String.format(".retryConfig(new HttpNode.RetryConfig(%d, %d, %b))%n", rc.getMaxRetries(),
 					rc.getMaxRetryInterval(), rc.isEnable()));
