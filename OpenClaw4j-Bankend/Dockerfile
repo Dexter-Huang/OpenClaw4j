@@ -16,13 +16,8 @@ ENV JAVA_OPTS=""
 ENV OPENCLAW4J_LEYDEN_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders"
 
 RUN set -eux; \
-    java -Djarmode=tools -jar app.jar extract --destination app; \
-    find app -maxdepth 4 -type f \( -name "OpenClaw4j-Bankend.jar" -o -name "*.jar" \) | sort | head -n 40; \
-    APP_JAR="$(find app -name OpenClaw4j-Bankend.jar -print -quit)"; \
-    test -f "$APP_JAR"; \
-    APP_DIR="$(dirname "$APP_JAR")"; \
     mkdir -p runtime; \
-    cp -a "$APP_DIR"/. runtime/; \
+    cp app.jar runtime/OpenClaw4j-Bankend.jar; \
     cd runtime; \
     jar xf OpenClaw4j-Bankend.jar META-INF/MANIFEST.MF; \
     sed -n '1,80p' META-INF/MANIFEST.MF; \
