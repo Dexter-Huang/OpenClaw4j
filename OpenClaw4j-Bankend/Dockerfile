@@ -17,20 +17,17 @@ ENV OPENCLAW4J_LEYDEN_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseCompactObje
 
 RUN java -Djarmode=tools -jar app.jar extract --destination app \
     && cd app \
-    && export APP_CP="OpenClaw4j-Bankend.jar:lib/*" \
     && java ${OPENCLAW4J_LEYDEN_OPTS} \
       -XX:AOTCacheOutput=openclaw4j.aot \
       -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} \
       -Dopenclaw4j.leyden.training.profiled=true \
-      -cp "$APP_CP" \
-      com.seaskyland.llm.LLMApplication \
+      -jar OpenClaw4j-Bankend.jar \
       --server.port=0 \
     && test -f openclaw4j.aot \
-    && ls -lh openclaw4j.aot \
-    && printf '%s\n' "$APP_CP" > classpath.txt
+    && ls -lh openclaw4j.aot
 
 WORKDIR /app/app
 
 EXPOSE 9004
 
-ENTRYPOINT ["sh", "-c", "exec java ${OPENCLAW4J_LEYDEN_OPTS} -XX:AOTCache=openclaw4j.aot ${JAVA_OPTS} -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-dev} -cp \"$(cat classpath.txt)\" com.seaskyland.llm.LLMApplication"]
+ENTRYPOINT ["sh", "-c", "exec java ${OPENCLAW4J_LEYDEN_OPTS} -XX:AOTCache=openclaw4j.aot ${JAVA_OPTS} -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-dev} -jar OpenClaw4j-Bankend.jar"]

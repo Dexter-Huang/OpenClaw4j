@@ -71,8 +71,9 @@ class LeydenBuildConfigurationTest {
 		assertTrue(dockerfile.contains("test -f openclaw4j.aot"));
 		assertTrue(dockerfile.contains("ls -lh openclaw4j.aot"));
 		assertTrue(dockerfile.contains("openclaw4j.leyden.training.profiled=true"));
-		assertTrue(dockerfile.contains("LLMApplication"));
+		assertTrue(dockerfile.contains("-jar OpenClaw4j-Bankend.jar"));
 		assertTrue(dockerfile.contains("JAVA_OPTS"));
+		assertFalse(dockerfile.contains("classpath.txt"));
 		assertFalse(dockerfile.contains("native-image"));
 		assertFalse(dockerfile.contains("graalvm"));
 		assertFalse(dockerfile.contains("UseZGC"));
