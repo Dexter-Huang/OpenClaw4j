@@ -19,8 +19,8 @@ RUN set -eux; \
     mkdir -p runtime; \
     cp app.jar runtime/OpenClaw4j-Bankend.jar; \
     cd runtime; \
-    jar xf OpenClaw4j-Bankend.jar META-INF/MANIFEST.MF; \
-    sed -n '1,80p' META-INF/MANIFEST.MF; \
+    ls -lh OpenClaw4j-Bankend.jar; \
+    java -version; \
     if ! java ${OPENCLAW4J_LEYDEN_OPTS} \
       -XX:AOTCacheOutput=openclaw4j.aot \
       -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} \

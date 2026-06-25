@@ -76,6 +76,8 @@ class LeydenBuildConfigurationTest {
 		assertTrue(dockerfile.contains("-jar OpenClaw4j-Bankend.jar"));
 		assertTrue(dockerfile.contains("JAVA_OPTS"));
 		assertFalse(dockerfile.contains("classpath.txt"));
+		assertFalse(dockerfile.contains("jar xf"));
+		assertFalse(dockerfile.contains("META-INF/MANIFEST.MF"));
 		assertFalse(dockerfile.contains("native-image"));
 		assertFalse(dockerfile.contains("graalvm"));
 		assertFalse(dockerfile.contains("UseZGC"));
