@@ -64,6 +64,8 @@ class LeydenBuildConfigurationTest {
 		assertTrue(dockerfile.contains("maven:3.9-eclipse-temurin-26"));
 		assertTrue(dockerfile.contains("eclipse-temurin:26-jre"));
 		assertTrue(dockerfile.contains("-Djarmode=tools"));
+		assertTrue(dockerfile.contains("find app -name OpenClaw4j-Bankend.jar"));
+		assertTrue(dockerfile.contains("WORKDIR /app/runtime"));
 		assertTrue(dockerfile.contains("-XX:+UnlockExperimentalVMOptions"));
 		assertTrue(dockerfile.contains("-XX:+UseCompactObjectHeaders"));
 		assertTrue(dockerfile.contains("-XX:AOTCacheOutput=openclaw4j.aot"));

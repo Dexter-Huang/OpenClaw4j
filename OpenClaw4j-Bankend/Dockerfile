@@ -16,7 +16,12 @@ ENV JAVA_OPTS=""
 ENV OPENCLAW4J_LEYDEN_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders"
 
 RUN java -Djarmode=tools -jar app.jar extract --destination app \
-    && cd app \
+    && APP_JAR="$(find app -name OpenClaw4j-Bankend.jar -print -quit)" \
+    && test -f "$APP_JAR" \
+    && APP_DIR="$(dirname "$APP_JAR")" \
+    && mkdir -p runtime \
+    && cp -a "$APP_DIR"/. runtime/ \
+    && cd runtime \
     && java ${OPENCLAW4J_LEYDEN_OPTS} \
       -XX:AOTCacheOutput=openclaw4j.aot \
       -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} \
@@ -26,7 +31,7 @@ RUN java -Djarmode=tools -jar app.jar extract --destination app \
     && test -f openclaw4j.aot \
     && ls -lh openclaw4j.aot
 
-WORKDIR /app/app
+WORKDIR /app/runtime
 
 EXPOSE 9004
 
