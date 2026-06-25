@@ -15,21 +15,29 @@ ENV SPRING_PROFILES_ACTIVE=dev
 ENV JAVA_OPTS=""
 ENV OPENCLAW4J_LEYDEN_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders"
 
-RUN java -Djarmode=tools -jar app.jar extract --destination app \
-    && APP_JAR="$(find app -name OpenClaw4j-Bankend.jar -print -quit)" \
-    && test -f "$APP_JAR" \
-    && APP_DIR="$(dirname "$APP_JAR")" \
-    && mkdir -p runtime \
-    && cp -a "$APP_DIR"/. runtime/ \
-    && cd runtime \
-    && java ${OPENCLAW4J_LEYDEN_OPTS} \
+RUN set -eux; \
+    java -Djarmode=tools -jar app.jar extract --destination app; \
+    find app -maxdepth 4 -type f \( -name "OpenClaw4j-Bankend.jar" -o -name "*.jar" \) | sort | head -n 40; \
+    APP_JAR="$(find app -name OpenClaw4j-Bankend.jar -print -quit)"; \
+    test -f "$APP_JAR"; \
+    APP_DIR="$(dirname "$APP_JAR")"; \
+    mkdir -p runtime; \
+    cp -a "$APP_DIR"/. runtime/; \
+    cd runtime; \
+    jar xf OpenClaw4j-Bankend.jar META-INF/MANIFEST.MF; \
+    sed -n '1,80p' META-INF/MANIFEST.MF; \
+    if ! java ${OPENCLAW4J_LEYDEN_OPTS} \
       -XX:AOTCacheOutput=openclaw4j.aot \
       -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} \
       -Dopenclaw4j.leyden.training.profiled=true \
       -jar OpenClaw4j-Bankend.jar \
-      --server.port=0 \
-    && test -f openclaw4j.aot \
-    && ls -lh openclaw4j.aot
+      --server.port=0 > leyden-training.log 2>&1; then \
+      cat leyden-training.log; \
+      exit 1; \
+    fi; \
+    cat leyden-training.log; \
+    test -f openclaw4j.aot; \
+    ls -lh openclaw4j.aot
 
 WORKDIR /app/runtime
 
