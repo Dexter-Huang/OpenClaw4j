@@ -85,6 +85,22 @@ class LeydenBuildConfigurationTest {
 		assertTrue(benchmarkScript.contains("Group-Object leyden"));
 	}
 
+	@Test
+	void githubActionsBuildsAndUploadsGraalVmNativeBinaryOnPush() throws IOException {
+		String workflow = Files.readString(PROJECT_DIR.getParent().resolve(".github/workflows/backend-native.yml"));
+
+		assertTrue(workflow.contains("graalvm/setup-graalvm@v1"));
+		assertTrue(workflow.contains("distribution: graalvm-community"));
+		assertTrue(workflow.contains("java-version: \"26\""));
+		assertTrue(workflow.contains("${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}"));
+		assertTrue(workflow.contains("-DskipNativeBuild=false"));
+		assertTrue(workflow.contains("native:compile"));
+		assertTrue(workflow.contains("test -f target/OpenClaw4j-Bankend-native"));
+		assertTrue(workflow.contains("name: openclaw4j-backend-native-linux-x64-${{ github.sha }}"));
+		assertTrue(workflow.contains("OpenClaw4j-Bankend/target/OpenClaw4j-Bankend-native*"));
+		assertTrue(workflow.contains("if-no-files-found: error"));
+	}
+
 	private String read(String relativePath) throws IOException {
 		return Files.readString(PROJECT_DIR.resolve(relativePath));
 	}

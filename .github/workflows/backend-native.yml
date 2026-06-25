@@ -12,12 +12,6 @@ on:
       - ".github/workflows/backend-native.yml"
       - "OpenClaw4j-Bankend/**"
   workflow_dispatch:
-    inputs:
-      run_native_compile:
-        description: "Run the long GraalVM native-image compile"
-        required: true
-        default: false
-        type: boolean
 
 permissions:
   contents: read
@@ -67,7 +61,7 @@ jobs:
     name: GraalVM native compile
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_native_compile }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
 
     steps:
       - name: Checkout
@@ -77,7 +71,7 @@ jobs:
         uses: graalvm/setup-graalvm@v1
         with:
           distribution: graalvm-community
-          java-version: "25"
+          java-version: "26"
           cache: maven
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -87,16 +81,25 @@ jobs:
           set -o pipefail
           mvn -B -Pnative-experiment -DskipNativeBuild=false -DskipTests native:compile 2>&1 | tee target/ci-logs/graalvm-native-compile.log
 
-      - name: Upload native artifacts
-        if: always()
+      - name: Record native binary metadata
+        run: |
+          test -f target/OpenClaw4j-Bankend-native
+          {
+            echo "commit=${GITHUB_SHA}"
+            echo "java_version=$(java -version 2>&1 | head -n 1)"
+            echo "native_image_version=$(native-image --version 2>&1 | head -n 1)"
+            ls -lh target/OpenClaw4j-Bankend-native
+            file target/OpenClaw4j-Bankend-native
+          } | tee target/ci-logs/native-binary-metadata.log
+
+      - name: Upload native binary
         uses: actions/upload-artifact@v4
         with:
-          name: openclaw4j-native-experiment
+          name: openclaw4j-backend-native-linux-x64-${{ github.sha }}
           path: |
             OpenClaw4j-Bankend/target/OpenClaw4j-Bankend-native*
-            OpenClaw4j-Bankend/target/native/**
-            OpenClaw4j-Bankend/target/spring-aot/**
-          if-no-files-found: ignore
+            OpenClaw4j-Bankend/target/ci-logs/native-binary-metadata.log
+          if-no-files-found: error
 
       - name: Upload native compile logs
         if: always()
