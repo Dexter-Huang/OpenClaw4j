@@ -24,6 +24,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportRuntimeHints;
 
 import javax.sql.DataSource;
 
@@ -34,7 +35,9 @@ import javax.sql.DataSource;
  * @since 1.0.0.3
  */
 @Configuration
-@MapperScan("com.seaskyland.llm.workflow.core.base.mapper")
+@ImportRuntimeHints(MybatisPlusRuntimeHints.class)
+@MapperScan(basePackages = "com.seaskyland.llm.workflow.core.base.mapper",
+		sqlSessionFactoryRef = "sqlSessionFactory")
 public class MybatisPlusConfig {
 
 	/**

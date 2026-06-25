@@ -1,0 +1,82 @@
+name: Backend Native Experiment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/backend-native.yml"
+      - "OpenClaw4j-Bankend/**"
+  pull_request:
+    paths:
+      - ".github/workflows/backend-native.yml"
+      - "OpenClaw4j-Bankend/**"
+  workflow_dispatch:
+    inputs:
+      run_native_compile:
+        description: "Run the long GraalVM native-image compile"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: OpenClaw4j-Bankend
+
+jobs:
+  native-profile-smoke:
+    name: Native profile smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 26
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "26"
+          cache: maven
+
+      - name: Verify native hints and build configuration
+        run: mvn -B -Dtest=MybatisPlusRuntimeHintsTest,LeydenBuildConfigurationTest test
+
+      - name: Package native experiment without native-image
+        run: mvn -B -Pnative-experiment -DskipNativeBuild=true -DskipTests package
+
+  graalvm-native-compile:
+    name: GraalVM native compile
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_native_compile }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: graalvm-community
+          java-version: "25"
+          cache: maven
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compile native executable
+        run: mvn -B -Pnative-experiment -DskipNativeBuild=false -DskipTests native:compile
+
+      - name: Upload native artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openclaw4j-native-experiment
+          path: |
+            OpenClaw4j-Bankend/target/OpenClaw4j-Bankend-native*
+            OpenClaw4j-Bankend/target/native/**
+            OpenClaw4j-Bankend/target/spring-aot/**
+          if-no-files-found: ignore

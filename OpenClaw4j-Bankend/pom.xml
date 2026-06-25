@@ -295,38 +295,6 @@
             <version>9.6</version>
         </dependency>
 
-        <!--        &lt;!&ndash; GraalJS JavaScript Engine (alternative to Nashorn) &ndash;&gt;-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.graalvm.js</groupId>-->
-        <!--            <artifactId>js</artifactId>-->
-        <!--            <version>22.3.1</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.graalvm.js</groupId>-->
-        <!--            <artifactId>js-scriptengine</artifactId>-->
-        <!--            <version>22.3.1</version>-->
-        <!--        </dependency>-->
-
-        <!--        <dependency>-->
-        <!--            <groupId>org.graalvm.python</groupId>-->
-        <!--            <artifactId>python-language</artifactId>-->
-        <!--            <version>24.2.1</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.graalvm.truffle</groupId>-->
-        <!--            <artifactId>truffle-api</artifactId>-->
-        <!--            <version>24.2.1</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.graalvm.sdk</groupId>-->
-        <!--            <artifactId>graal-sdk</artifactId>-->
-        <!--            <version>24.2.1</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.graalvm.polyglot</groupId>-->
-        <!--            <artifactId>polyglot</artifactId>-->
-        <!--            <version>24.2.1</version>-->
-        <!--        </dependency>-->
         <!-- rocketmq -->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
@@ -531,6 +499,113 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>leyden</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <finalName>${project.artifactId}</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <mainClass>com.seaskyland.llm.LLMApplication</mainClass>
+                            <includeTools>true</includeTools>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>17</source>
+                            <target>17</target>
+                            <excludes>
+                                <exclude>com/seaskyland/llm/workflow/admin/generator/**</exclude>
+                                <exclude>com/seaskyland/llm/workflow/admin/utils/ContributorFileUtil.java</exclude>
+                            </excludes>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                    <version>1.18.42</version>
+                                </path>
+                            </annotationProcessorPaths>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>native-experiment</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <skipNativeBuild>true</skipNativeBuild>
+            </properties>
+            <build>
+                <finalName>${project.artifactId}</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <mainClass>com.seaskyland.llm.LLMApplication</mainClass>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>process-aot</goal>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <skipNativeBuild>${skipNativeBuild}</skipNativeBuild>
+                            <imageName>OpenClaw4j-Bankend-native</imageName>
+                            <mainClass>com.seaskyland.llm.LLMApplication</mainClass>
+                            <buildArgs>
+                                <buildArg>--no-fallback</buildArg>
+                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                            </buildArgs>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>17</source>
+                            <target>17</target>
+                            <excludes>
+                                <exclude>com/seaskyland/llm/workflow/admin/generator/**</exclude>
+                                <exclude>com/seaskyland/llm/workflow/admin/utils/ContributorFileUtil.java</exclude>
+                            </excludes>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                    <version>1.18.42</version>
+                                </path>
+                            </annotationProcessorPaths>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

@@ -5,34 +5,45 @@ description: Use when changing OpenClaw4j code and choosing what tests, builds, 
 
 # OpenClaw4j Fast Verification
 
-## 核心原则
+## Core Principle
 
-先运行能证明当前改动的最小命令；在声明完成或提交重要改动前，再做一次足够宽的最终校验。
+Run the smallest command that proves the current change first. Before claiming completion or preparing an important backend change, run a broad enough final verification.
 
-## 决策表
+## Decision Table
 
-| 改动类型 | 首轮检查 | 最终检查 |
+| Change type | First check | Final check |
 | --- | --- | --- |
-| 后端 controller/service/test | `mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' '-Dtest=<TestClass>' test` | `mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' test` |
-| 后端 POM 或共享配置 | 优先定向 compile/test | 完整 `mvn ... test` |
-| 前端 TypeScript 工具代码 | 没有更小 test/lint 脚本时跑 `npm run build:app` | 最后再跑一次 `npm run build:app` |
-| 前端已暂存 TS/TSX | pre-commit 会跑 `umi lint` 和 prettier | hook 修改了运行时代码时再重跑 build |
-| 仅 `.gitignore` 或文档 | `git status --ignored --short` / skill 校验 | 没有代码改动就不跑 build |
+| Backend controller/service/test | `mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' '-Dtest=<TestClass>' test` | `mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' test` |
+| Backend POM/shared config | Targeted compile/test that covers the touched behavior | Full `mvn ... test` |
+| Backend Leyden/JDK AOT cache config | `mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' '-Dtest=LeydenBuildConfigurationTest' test` | `mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' -Pleyden -DskipTests package`; when JDK 25 is available, also run `./scripts/train-leyden-aot.ps1`, `./scripts/run-leyden-aot.ps1 -ServerPort 0`, and for performance-sensitive changes `./scripts/benchmark-leyden-startup.ps1` |
+| Backend GraalVM native experiment config | `mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' '-Dtest=LeydenBuildConfigurationTest' test` | `mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' -Pnative-experiment -DskipNativeBuild=true -DskipTests package`; do not run `native:compile` unless the user explicitly wants the long GraalVM experiment |
+| Frontend TypeScript app code | If there is no smaller test/lint script, run `npm run build:app` | Run `npm run build:app` again at the end |
+| `.gitignore` or docs only | `git status --ignored --short` / relevant doc checks | No build needed unless runtime/build files changed |
 
-## 避免重复
+## Avoid Repetition
 
-- 后端专属改动不要反复跑前端 build。
-- 小步迭代时先用定向 Maven 测试，不要每改一次就跑完整测试。
-- pre-commit 失败时修具体 lint 错误，再重试提交；不要绕过 hook。
-- hook 自动格式化后先看 `git diff --stat`；只有影响运行时或构建相关文件时才重跑 build。
+- Backend-only changes do not require frontend builds.
+- Iterate with targeted Maven tests before the full suite.
+- If a hook auto-formats files, check `git diff --stat`; rerun builds only when runtime or build-related files changed.
 
-## 完成证据
+## Leyden/JDK AOT Benchmark Guardrails
 
-汇报时给出实际命令和结果：
+- Use an explicit JDK executable for JDK comparison work, for example `D:\jdk-26\bin\java.exe`; do not trust `java` from `PATH` on Windows because `javapath` shims can hide the real process and distort memory sampling.
+- Keep AOT caches tied to the exact JDK and flag set that created them. Do not run a JDK 26 process with a JDK 25 cache, or run a compact-object-header cache without `-XX:+UseCompactObjectHeaders`.
+- Profiled AOT training for this Spring backend can take 10-15 minutes locally. Run it with progress logging and phase markers instead of an opaque short-timeout shell command.
+- Start long AOT training with `Start-Process` and redirected stdout/stderr files. Do not treat stderr warnings such as native-access or `JAVA_TOOL_OPTIONS` output as process failure.
+- Prefer quick, deterministic warmup endpoints for startup training, such as health and global-config endpoints. Heavier DB-backed endpoints can time out and extend graceful shutdown; log those timeouts instead of losing the cache.
+- For two-mode startup comparisons, keep exactly two fixed command lines: one ordinary baseline with no JVM optimization flags, and one optimized command with the intended AOT/GC/heap flags. Report startup and memory as separate results.
+- When startup time regresses, isolate JVM options before changing code: benchmark baseline, compact headers only, AOT only, GC/heap flags only, then the combined command. ZGC, string deduplication, heap caps, `AlwaysPreTouch`, and large pages are latency/memory/runtime tuning knobs; they can hide AOT startup gains in a cold-start benchmark.
+- Sample memory from the real Java process launched by the explicit executable, then use `jcmd GC.heap_info` for heap details. Parse G1 output as committed/used heap, and ZGC output as `ZHeap used/capacity`; missing G1 fields in ZGC output must not be reported as zero heap.
+
+## Completion Evidence
+
+Report actual commands and results, for example:
 
 ```text
 Backend: mvn ... test -> BUILD SUCCESS, Tests run: N, Failures: 0
-Frontend: npm run build:app -> Webpack compiled successfully
+Leyden package: mvn ... -Pleyden -DskipTests package -> BUILD SUCCESS
 ```
 
-没有在当前轮次运行过的检查，不要说它通过了。
+Do not say a check passed unless it was run in the current turn.
