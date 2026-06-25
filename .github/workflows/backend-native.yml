@@ -1,4 +1,4 @@
-name: Backend Native Experiment
+name: Backend Docker Image
 
 on:
   push:
@@ -15,16 +15,16 @@ on:
 
 permissions:
   contents: read
-
-defaults:
-  run:
-    working-directory: OpenClaw4j-Bankend
+  packages: write
 
 jobs:
-  native-profile-smoke:
-    name: Native profile smoke
+  backend-build-smoke:
+    name: Backend build smoke
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: OpenClaw4j-Bankend
 
     steps:
       - name: Checkout
@@ -37,74 +37,82 @@ jobs:
           java-version: "26"
           cache: maven
 
-      - name: Verify native hints and build configuration
+      - name: Verify Leyden and native experiment configuration
         run: |
           mkdir -p target/ci-logs
           set -o pipefail
-          mvn -B -Dtest=MybatisPlusRuntimeHintsTest,LeydenBuildConfigurationTest test 2>&1 | tee target/ci-logs/native-profile-tests.log
+          mvn -B -Dtest=MybatisPlusRuntimeHintsTest,LeydenBuildConfigurationTest test 2>&1 | tee target/ci-logs/backend-build-tests.log
 
-      - name: Package native experiment without native-image
+      - name: Package Leyden-ready jar
         run: |
           mkdir -p target/ci-logs
           set -o pipefail
-          mvn -B -Pnative-experiment -DskipNativeBuild=true -DskipTests package 2>&1 | tee target/ci-logs/native-profile-package.log
+          mvn -B -Pleyden -DskipTests package 2>&1 | tee target/ci-logs/leyden-package.log
 
-      - name: Upload smoke logs
+      - name: Upload backend smoke logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-native-smoke-logs-${{ github.run_attempt }}
+          name: backend-build-smoke-logs-${{ github.run_attempt }}
           path: OpenClaw4j-Bankend/target/ci-logs/**
           if-no-files-found: ignore
 
-  graalvm-native-compile:
-    name: GraalVM native compile
+  docker-image:
+    name: Docker image with Leyden AOT
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up GraalVM
-        uses: graalvm/setup-graalvm@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: docker/login-action@v3
         with:
-          distribution: graalvm-community
-          java-version: "26"
-          cache: maven
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compile native executable
-        run: |
-          mkdir -p target/ci-logs
-          set -o pipefail
-          mvn -B -Pnative-experiment -DskipNativeBuild=false -DskipTests native:compile 2>&1 | tee target/ci-logs/graalvm-native-compile.log
+      - name: Generate Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/dexter-huang/openclaw4j-backend
+          tags: |
+            type=sha,prefix=sha-
+            type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
 
-      - name: Record native binary metadata
+      - name: Build and publish Docker image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ./OpenClaw4j-Bankend
+          file: ./OpenClaw4j-Bankend/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Record Docker image metadata
         run: |
-          test -f target/OpenClaw4j-Bankend-native
+          mkdir -p OpenClaw4j-Bankend/target/ci-logs
           {
-            echo "commit=${GITHUB_SHA}"
-            echo "java_version=$(java -version 2>&1 | head -n 1)"
-            echo "native_image_version=$(native-image --version 2>&1 | head -n 1)"
-            ls -lh target/OpenClaw4j-Bankend-native
-            file target/OpenClaw4j-Bankend-native
-          } | tee target/ci-logs/native-binary-metadata.log
+            echo "OPENCLAW4J_IMAGE_DIGEST=${{ steps.build.outputs.digest }}"
+            echo "OPENCLAW4J_IMAGE_TAGS<<EOF"
+            echo "${{ steps.meta.outputs.tags }}"
+            echo "EOF"
+            echo "OPENCLAW4J_IMAGE_SOURCE=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } | tee OpenClaw4j-Bankend/target/ci-logs/docker-image-metadata.log
 
-      - name: Upload native binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: openclaw4j-backend-native-linux-x64-${{ github.sha }}
-          path: |
-            OpenClaw4j-Bankend/target/OpenClaw4j-Bankend-native*
-            OpenClaw4j-Bankend/target/ci-logs/native-binary-metadata.log
-          if-no-files-found: error
-
-      - name: Upload native compile logs
+      - name: Upload Docker image metadata
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-native-compile-logs-${{ github.run_attempt }}
-          path: OpenClaw4j-Bankend/target/ci-logs/**
+          name: backend-docker-image-metadata-${{ github.run_attempt }}
+          path: OpenClaw4j-Bankend/target/ci-logs/docker-image-metadata.log
           if-no-files-found: ignore

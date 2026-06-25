@@ -61,14 +61,22 @@ class LeydenBuildConfigurationTest {
 	void dockerfileBuildsAndRunsExtractedApplicationWithAotCache() throws IOException {
 		String dockerfile = read("Dockerfile");
 
-		assertTrue(dockerfile.contains("eclipse-temurin:25"));
+		assertTrue(dockerfile.contains("maven:3.9-eclipse-temurin-26"));
+		assertTrue(dockerfile.contains("eclipse-temurin:26-jre"));
 		assertTrue(dockerfile.contains("-Djarmode=tools"));
+		assertTrue(dockerfile.contains("-XX:+UnlockExperimentalVMOptions"));
+		assertTrue(dockerfile.contains("-XX:+UseCompactObjectHeaders"));
 		assertTrue(dockerfile.contains("-XX:AOTCacheOutput=openclaw4j.aot"));
 		assertTrue(dockerfile.contains("-XX:AOTCache=openclaw4j.aot"));
+		assertTrue(dockerfile.contains("test -f openclaw4j.aot"));
+		assertTrue(dockerfile.contains("ls -lh openclaw4j.aot"));
 		assertTrue(dockerfile.contains("openclaw4j.leyden.training.profiled=true"));
 		assertTrue(dockerfile.contains("LLMApplication"));
+		assertTrue(dockerfile.contains("JAVA_OPTS"));
 		assertFalse(dockerfile.contains("native-image"));
 		assertFalse(dockerfile.contains("graalvm"));
+		assertFalse(dockerfile.contains("UseZGC"));
+		assertFalse(dockerfile.contains("UseG1GC"));
 	}
 
 	@Test
@@ -86,19 +94,20 @@ class LeydenBuildConfigurationTest {
 	}
 
 	@Test
-	void githubActionsBuildsAndUploadsGraalVmNativeBinaryOnPush() throws IOException {
+	void githubActionsBuildsAndPublishesOptimizedLeydenDockerImageOnPush() throws IOException {
 		String workflow = Files.readString(PROJECT_DIR.getParent().resolve(".github/workflows/backend-native.yml"));
 
-		assertTrue(workflow.contains("graalvm/setup-graalvm@v1"));
-		assertTrue(workflow.contains("distribution: graalvm-community"));
-		assertTrue(workflow.contains("java-version: \"26\""));
-		assertTrue(workflow.contains("${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}"));
-		assertTrue(workflow.contains("-DskipNativeBuild=false"));
-		assertTrue(workflow.contains("native:compile"));
-		assertTrue(workflow.contains("test -f target/OpenClaw4j-Bankend-native"));
-		assertTrue(workflow.contains("name: openclaw4j-backend-native-linux-x64-${{ github.sha }}"));
-		assertTrue(workflow.contains("OpenClaw4j-Bankend/target/OpenClaw4j-Bankend-native*"));
-		assertTrue(workflow.contains("if-no-files-found: error"));
+		assertTrue(workflow.contains("packages: write"));
+		assertTrue(workflow.contains("docker/login-action@v3"));
+		assertTrue(workflow.contains("docker/metadata-action@v5"));
+		assertTrue(workflow.contains("docker/build-push-action@v6"));
+		assertTrue(workflow.contains("context: ./OpenClaw4j-Bankend"));
+		assertTrue(workflow.contains("push: ${{ github.event_name != 'pull_request' }}"));
+		assertTrue(workflow.contains("ghcr.io/dexter-huang/openclaw4j-backend"));
+		assertTrue(workflow.contains("OPENCLAW4J_IMAGE_DIGEST"));
+		assertFalse(workflow.contains("graalvm/setup-graalvm"));
+		assertFalse(workflow.contains("native:compile"));
+		assertFalse(workflow.contains("OpenClaw4j-Bankend-native"));
 	}
 
 	private String read(String relativePath) throws IOException {
