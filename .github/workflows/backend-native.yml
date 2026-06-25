@@ -44,10 +44,24 @@ jobs:
           cache: maven
 
       - name: Verify native hints and build configuration
-        run: mvn -B -Dtest=MybatisPlusRuntimeHintsTest,LeydenBuildConfigurationTest test
+        run: |
+          mkdir -p target/ci-logs
+          set -o pipefail
+          mvn -B -Dtest=MybatisPlusRuntimeHintsTest,LeydenBuildConfigurationTest test 2>&1 | tee target/ci-logs/native-profile-tests.log
 
       - name: Package native experiment without native-image
-        run: mvn -B -Pnative-experiment -DskipNativeBuild=true -DskipTests package
+        run: |
+          mkdir -p target/ci-logs
+          set -o pipefail
+          mvn -B -Pnative-experiment -DskipNativeBuild=true -DskipTests package 2>&1 | tee target/ci-logs/native-profile-package.log
+
+      - name: Upload smoke logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-native-smoke-logs-${{ github.run_attempt }}
+          path: OpenClaw4j-Bankend/target/ci-logs/**
+          if-no-files-found: ignore
 
   graalvm-native-compile:
     name: GraalVM native compile
@@ -68,7 +82,10 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compile native executable
-        run: mvn -B -Pnative-experiment -DskipNativeBuild=false -DskipTests native:compile
+        run: |
+          mkdir -p target/ci-logs
+          set -o pipefail
+          mvn -B -Pnative-experiment -DskipNativeBuild=false -DskipTests native:compile 2>&1 | tee target/ci-logs/graalvm-native-compile.log
 
       - name: Upload native artifacts
         if: always()
@@ -79,4 +96,12 @@ jobs:
             OpenClaw4j-Bankend/target/OpenClaw4j-Bankend-native*
             OpenClaw4j-Bankend/target/native/**
             OpenClaw4j-Bankend/target/spring-aot/**
+          if-no-files-found: ignore
+
+      - name: Upload native compile logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-native-compile-logs-${{ github.run_attempt }}
+          path: OpenClaw4j-Bankend/target/ci-logs/**
           if-no-files-found: ignore
