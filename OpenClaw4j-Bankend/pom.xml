@@ -14,9 +14,7 @@
     <version>3.2-SNAPSHOT</version>
 
     <properties>
-        <ces.dto.version>3.2-SNAPSHOT</ces.dto.version>
-        <ces.common.version>3.2-SNAPSHOT</ces.common.version>
-        <java.version>17</java.version>
+        <java.version>25</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-ai.version>2.0.0</spring-ai.version>
     </properties>
@@ -26,12 +24,21 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.42</version>
+            <version>1.18.46</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.9.22</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.5.0-jre</version>
         </dependency>
         <dependency>
             <groupId>org.redisson</groupId>
@@ -39,16 +46,8 @@
             <version>4.3.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.aspectj/aspectjweaver -->
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjweaver</artifactId>
-            <version>1.9.22</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-            <version>5.8.26</version>
-        </dependency>
+
+        
         <!--swagger相关-->
         <!--
           knife4j 4.5.0 内置 springdoc-openapi 2.3.0，其 HateoasHalProvider 会调用
@@ -73,30 +72,6 @@
             <scope>compile</scope>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.seaskyland</groupId>-->
-<!--            <artifactId>ces-common</artifactId>-->
-<!--            <version>${ces.common.version}</version>-->
-<!--            &lt;!&ndash;            SAA include&ndash;&gt;-->
-<!--                        <exclusions>-->
-<!--                            <exclusion>-->
-<!--                                <groupId>com.alibaba</groupId>-->
-<!--                                <artifactId>druid-spring-boot-3-starter</artifactId>-->
-<!--                            </exclusion>-->
-<!--                            <exclusion>-->
-<!--                                <groupId>com.mysql</groupId>-->
-<!--                                <artifactId>mysql-connector-j</artifactId>-->
-<!--                            </exclusion>-->
-<!--                        </exclusions>-->
-<!--        </dependency>-->
-
-
-        <!-- https://mvnrepository.com/artifact/com.aventrix.jnanoid/jnanoid -->
-        <dependency>
-            <groupId>com.aventrix.jnanoid</groupId>
-            <artifactId>jnanoid</artifactId>
-            <version>2.0.0</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -119,43 +94,6 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-vector-store</artifactId>
         </dependency>
-        <!--引入Markdown转HTML的插件-->
-        <dependency>
-            <groupId>org.commonmark</groupId>
-            <artifactId>commonmark</artifactId>
-            <version>0.17.0</version>
-        </dependency>
-
-        <!--扩展 标题-->
-        <dependency>
-            <groupId>org.commonmark</groupId>
-            <artifactId>commonmark-ext-heading-anchor</artifactId>
-            <version>0.17.0</version>
-        </dependency>
-
-        <!--扩展 表格-->
-        <dependency>
-            <groupId>org.commonmark</groupId>
-            <artifactId>commonmark-ext-gfm-tables</artifactId>
-            <version>0.17.0</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/com.knuddels/jtokkit -->
-        <dependency>
-            <groupId>com.knuddels</groupId>
-            <artifactId>jtokkit</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>1.17.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vladsch.flexmark</groupId>
-            <artifactId>flexmark-all</artifactId>
-            <version>0.60.0</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-mcp-server-webflux</artifactId>
@@ -170,47 +108,20 @@
             <version>3.2.2</version>
             <scope>compile</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.jgrapht/jgrapht-core -->
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
             <version>1.5.3</version>
         </dependency>
-        <!-- swagger -->
         <dependency>
             <groupId>io.swagger.parser.v3</groupId>
-            <artifactId>swagger-parser</artifactId>
+            <artifactId>swagger-parser-v3</artifactId>
             <version>2.1.22</version>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-inflector</artifactId>
-            <version>2.0.11</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-core</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-models</artifactId>
-            <version>2.2.16</version>
         </dependency>
         <dependency>
             <groupId>ognl</groupId>
             <artifactId>ognl</artifactId>
             <version>3.4.7</version>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.83</version>
         </dependency>
         <!-- rag -->
         <dependency>
@@ -245,18 +156,18 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>0.12.6</version>
+            <version>0.13.0</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.12.6</version>
+            <version>0.13.0</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
-            <version>0.12.6</version>
+            <version>0.13.0</version>
             <scope>runtime</scope>
         </dependency>
         <!-- org.eclipse.jdt.core for format -->
@@ -274,27 +185,6 @@
             <version>15.4</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm</artifactId>
-            <version>9.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-commons</artifactId>
-            <version>9.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-tree</artifactId>
-            <version>9.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-util</artifactId>
-            <version>9.6</version>
-        </dependency>
-
         <!-- rocketmq -->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
@@ -302,37 +192,9 @@
             <version>5.0.7</version>
         </dependency>
         <dependency>
-            <groupId>com.github.victools</groupId>
-            <artifactId>jsonschema-generator</artifactId>
-            <version>4.38.0</version> <!-- 请根据需要替换为最新版本 -->
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.github.victools/jsonschema-module-jackson -->
-        <dependency>
-            <groupId>com.github.victools</groupId>
-            <artifactId>jsonschema-module-jackson</artifactId>
-            <version>4.38.0</version>
-        </dependency>
-
-        <!-- Jackson JSR310 for Java 8 Time Support -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>5.4.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml-schemas</artifactId>
-            <version>4.1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.pdfbox</groupId>
-            <artifactId>pdfbox</artifactId>
-            <version>3.0.5</version>
-            <scope>compile</scope>
         </dependency>
         <!-- oss -->
         <dependency>
@@ -350,22 +212,9 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.51.2.0</version>
-            <!-- compile scope required: SqliteVectorStore uses org.sqlite.SQLiteConfig at compile time -->
+            <version>3.53.2.0</version>
+            <scope>compile</scope>
         </dependency>
-
-        <!--        &lt;!&ndash; https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5 &ndash;&gt;-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.apache.httpcomponents.client5</groupId>-->
-        <!--            <artifactId>httpclient5</artifactId>-->
-        <!--            <version>5.1.3</version>-->
-        <!--        </dependency>-->
-        <!--        &lt;!&ndash; https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5-fluent &ndash;&gt;-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.apache.httpcomponents.client5</groupId>-->
-        <!--            <artifactId>httpclient5-fluent</artifactId>-->
-        <!--            <version>5.1.3</version>-->
-        <!--        </dependency>-->
 
 
 
@@ -432,7 +281,7 @@
                                 <path>
                                     <groupId>org.projectlombok</groupId>
                                     <artifactId>lombok</artifactId>
-                                    <version>1.18.42</version>
+                                    <version>1.18.46</version>
                                 </path>
                             </annotationProcessorPaths>
                         </configuration>
@@ -540,7 +389,7 @@
                                 <path>
                                     <groupId>org.projectlombok</groupId>
                                     <artifactId>lombok</artifactId>
-                                    <version>1.18.42</version>
+                                    <version>1.18.46</version>
                                 </path>
                             </annotationProcessorPaths>
                         </configuration>
@@ -579,7 +428,6 @@
                         <artifactId>native-maven-plugin</artifactId>
                         <extensions>true</extensions>
                         <configuration>
-                            <skipNativeBuild>${skipNativeBuild}</skipNativeBuild>
                             <imageName>OpenClaw4j-Bankend-native</imageName>
                             <mainClass>com.seaskyland.llm.LLMApplication</mainClass>
                             <buildArgs>
@@ -602,7 +450,7 @@
                                 <path>
                                     <groupId>org.projectlombok</groupId>
                                     <artifactId>lombok</artifactId>
-                                    <version>1.18.42</version>
+                                    <version>1.18.46</version>
                                 </path>
                             </annotationProcessorPaths>
                         </configuration>

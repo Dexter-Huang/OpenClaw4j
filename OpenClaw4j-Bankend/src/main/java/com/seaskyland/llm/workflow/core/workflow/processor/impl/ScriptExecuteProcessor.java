@@ -121,7 +121,7 @@ public class ScriptExecuteProcessor extends AbstractExecuteProcessor {
 		// Execute script in sandbox for container isolation
 		Result<String> executeResult;
 		if (ScriptType.python.name().equals(scriptType)) {
-			// Execute Python script using GraalVM Python
+			// Python execution is delegated to the sandbox manager.
 			scriptContent += "\nmain()";
 			executeResult = sandboxManager.executePython3Script(scriptContent, variableMap, context.getRequestId());
 		}

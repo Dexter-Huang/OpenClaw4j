@@ -165,7 +165,7 @@ public class SandboxManager {
     }
 
 	/**
-	 * Executes Python3 script using GraalVM Python
+	 * Executes Python3 script.
 	 * @param scriptContent Python script content
 	 * @param variables Script variable mapping
 	 * @param requestId Request ID
@@ -174,7 +174,7 @@ public class SandboxManager {
 	public Result<String> executePython3Script(String scriptContent, Map<String, Object> variables, String requestId) {
         return null;
 //		try {
-//			// Use GraalVM Python API to execute Python script directly
+//			// Use an embedded Python engine to execute Python script directly
 //			Context.Builder contextBuilder = Context.newBuilder("python")
 //				.allowAllAccess(true)
 //				.option("python.ForceImportSite", "true");
@@ -226,7 +226,7 @@ public class SandboxManager {
 //			}
 //		}
 //		catch (Exception e) {
-//			log.error("GraalVM Python script execution exception", e);
+//			log.error("Python script execution exception", e);
 //			StringWriter sw = new StringWriter();
 //			e.printStackTrace(new PrintWriter(sw));
 //			return Result.error(requestId, ErrorCode.SYSTEM_ERROR);

@@ -29,7 +29,7 @@ import javax.script.ScriptEngineManager;
 public class ScriptEngineConfig {
 
 	/**
-	 * Registers and configures GraalVM Python engine
+	 * Registers JVM script engines discovered on the application classpath.
 	 * @return configured ScriptEngineManager
 	 */
 	@Bean
