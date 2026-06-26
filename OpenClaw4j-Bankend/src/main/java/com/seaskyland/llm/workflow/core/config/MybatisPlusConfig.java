@@ -25,6 +25,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
+import org.springframework.core.env.Environment;
 
 import javax.sql.DataSource;
 
@@ -45,21 +46,24 @@ public class MybatisPlusConfig {
 	 * @return MybatisPlusInterceptor instance
 	 */
 	@Bean
-	public MybatisPlusInterceptor mybatisPlusInterceptor() {
+	public MybatisPlusInterceptor mybatisPlusInterceptor(Environment environment) {
 		MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-		interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.SQLITE));
+		interceptor.addInnerInterceptor(new PaginationInnerInterceptor(resolveDbType(environment)));
 		return interceptor;
 	}
 
 	@Bean
-	public SqlSessionFactory sqlSessionFactory(DataSource dataSource, MybatisPlusInterceptor interceptor)
+	public SqlSessionFactory sqlSessionFactory(DataSource dataSource, MybatisPlusInterceptor interceptor,
+			Environment environment)
 			throws Exception {
 		MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
 		factoryBean.setDataSource(dataSource);
 		factoryBean.setPlugins(interceptor);
-		factoryBean.setTypeHandlersPackage("com.seaskyland.llm.workflow.core.config");
-		factoryBean.setTypeHandlers(new SQLiteDateTypeHandler());
 		return factoryBean.getObject();
+	}
+
+	private DbType resolveDbType(Environment environment) {
+		return DbType.MYSQL;
 	}
 
 }

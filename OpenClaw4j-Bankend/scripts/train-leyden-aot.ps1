@@ -6,10 +6,15 @@ param(
     [int]$TrainingTimeoutSeconds = 900,
     [ValidateSet("profiled", "classpath", "spring")]
     [string]$TrainingMode = "profiled",
-    [string]$WarmupPaths = "/console/v1/system/health,/console/v1/system/global-config,/api/prompts?pageNo=1&pageSize=1,/api/observability/overview"
+    [ValidateSet("minimal", "representative", "extended", "custom")]
+    [string]$WarmupProfile = "representative",
+    [string]$WarmupPaths = "",
+    [int]$WarmupRequestTimeoutSeconds = 10,
+    [string]$LeydenJvmOptions = "-XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders"
 )
 
 $ErrorActionPreference = "Stop"
+$JavaExe = "D:\jdk-26\bin\java.exe"
 
 function Get-LeydenClasspath {
     param(
@@ -18,6 +23,60 @@ function Get-LeydenClasspath {
     )
 
     return @($AppJar, (Join-Path "lib" "*")) -join [System.IO.Path]::PathSeparator
+}
+
+function Get-WarmupPaths {
+    param(
+        [string]$Profile,
+        [string]$CustomPaths
+    )
+
+    if ($Profile -eq "custom") {
+        if ([string]::IsNullOrWhiteSpace($CustomPaths)) {
+            throw "WarmupProfile custom requires -WarmupPaths"
+        }
+        return $CustomPaths
+    }
+
+    $minimal = @(
+        "/console/v1/system/health"
+    )
+    $representative = $minimal + @(
+        "/console/v1/system/global-config",
+        "/api/prompts?pageNo=1&pageSize=1",
+        "/api/models?page=1&size=1",
+        "/api/prompt/templates?pageNo=1&pageSize=1",
+        "/api/observability/overview"
+    )
+    $extended = $representative + @(
+        "/api/dataset/datasets?pageNumber=1&pageSize=1",
+        "/api/evaluator/evaluators?pageNumber=1&pageSize=1",
+        "/api/evaluator/templates",
+        "/api/experiments?pageNumber=1&pageSize=1",
+        "/api/observability/services"
+    )
+
+    if ($Profile -eq "minimal") {
+        return $minimal -join ","
+    }
+    if ($Profile -eq "extended") {
+        return $extended -join ","
+    }
+    return $representative -join ","
+}
+
+function Get-LeydenJvmOptions {
+    param(
+        [string]$Options
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Options)) {
+        return @()
+    }
+
+    return $Options -split "\s+" |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { $_.Length -gt 0 }
 }
 
 $projectDir = Split-Path -Parent $PSScriptRoot
@@ -45,7 +104,7 @@ if (Test-Path -LiteralPath $extractDir) {
     Remove-Item -LiteralPath $extractDir -Recurse -Force
 }
 
-java -Djarmode=tools -jar $JarPath extract --destination $extractDir
+& $JavaExe -Djarmode=tools -jar $JarPath extract --destination $extractDir
 
 if (Test-Path -LiteralPath $CachePath) {
     Remove-Item -LiteralPath $CachePath -Force
@@ -54,8 +113,11 @@ if (Test-Path -LiteralPath $CachePath) {
 $resolvedCachePath = Join-Path $projectDir $CachePath
 $appJar = "OpenClaw4j-Bankend.jar"
 $classpath = Get-LeydenClasspath -ExtractDir $extractDir -AppJar $appJar
+$resolvedWarmupPaths = Get-WarmupPaths -Profile $WarmupProfile -CustomPaths $WarmupPaths
 
-$javaArgs = @(
+$javaArgs = @(Get-LeydenJvmOptions -Options $LeydenJvmOptions)
+$javaArgs += @(
+    "--enable-final-field-mutation=ALL-UNNAMED",
     "-XX:AOTCacheOutput=$resolvedCachePath",
     "-cp",
     $classpath
@@ -65,7 +127,8 @@ if ($TrainingMode -eq "profiled") {
     $javaArgs += @(
         "-Dspring.profiles.active=$SpringProfile",
         "-Dopenclaw4j.leyden.training.profiled=true",
-        "-Dopenclaw4j.leyden.training.warmup-paths=$WarmupPaths",
+        "-Dopenclaw4j.leyden.training.warmup-paths=$resolvedWarmupPaths",
+        "-Dopenclaw4j.leyden.training.request-timeout=${WarmupRequestTimeoutSeconds}s",
         "com.seaskyland.llm.LLMApplication",
         "--server.port=$ServerPort"
     )
@@ -84,11 +147,11 @@ else {
 
 $workingDirectory = (Resolve-Path -LiteralPath $extractDir).Path
 $job = Start-Job -ScriptBlock {
-    param($directory, $arguments)
+    param($directory, $javaExe, $arguments)
     Set-Location $directory
-    & java @arguments
+    & $javaExe @arguments
     exit $LASTEXITCODE
-} -ArgumentList $workingDirectory, $javaArgs
+} -ArgumentList $workingDirectory, $JavaExe, $javaArgs
 
 if (-not (Wait-Job -Job $job -Timeout $TrainingTimeoutSeconds)) {
     Stop-Job -Job $job

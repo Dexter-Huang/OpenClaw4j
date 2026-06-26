@@ -28,9 +28,6 @@ class MybatisPlusRuntimeHintsTest {
 					MemberCategory.ACCESS_DECLARED_FIELDS)
 			.test(hints));
 		assertTrue(RuntimeHintsPredicates.reflection().onType(DocumentMapper.class).test(hints));
-		assertTrue(RuntimeHintsPredicates.reflection().onType(SQLiteDateTypeHandler.class)
-			.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)
-			.test(hints));
 		assertTrue(RuntimeHintsPredicates.resource().forResource("mapper/DocumentMapper.xml").test(hints));
 		assertEquals(16, MybatisPlusRuntimeHints.MYBATIS_PLUS_ENTITY_TYPES.size());
 		assertEquals(15, MybatisPlusRuntimeHints.MYBATIS_PLUS_MAPPER_TYPES.size());

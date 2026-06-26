@@ -38,7 +38,7 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 
 /**
- * Native-image hints for MyBatis-Plus metadata, mapper proxies, and custom type handlers.
+ * Native-image hints for MyBatis-Plus metadata and mapper proxies.
  */
 public class MybatisPlusRuntimeHints implements RuntimeHintsRegistrar {
 
@@ -59,7 +59,6 @@ public class MybatisPlusRuntimeHints implements RuntimeHintsRegistrar {
 					MemberCategory.ACCESS_DECLARED_FIELDS));
 		MYBATIS_PLUS_MAPPER_TYPES.forEach(mapperType -> hints.reflection()
 			.registerType(mapperType, MemberCategory.INVOKE_PUBLIC_METHODS));
-		hints.reflection().registerType(SQLiteDateTypeHandler.class, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 		hints.resources().registerPattern("mapper/*.xml");
 	}
 

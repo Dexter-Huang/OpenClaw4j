@@ -42,8 +42,8 @@ public class VectorStoreFactory {
 	}
 
 	/**
-	 * Retrieves the configured vector store service. Supports Elasticsearch, Simple, and
-	 * SQLite implementations.
+	 * Retrieves the configured vector store service. Supports Elasticsearch and Simple
+	 * implementations.
 	 * @return The configured vector store service
 	 * @throws IllegalArgumentException if the configured vector store type is not
 	 * supported
@@ -55,9 +55,6 @@ public class VectorStoreFactory {
 		}
 		if (type == VectorStoreType.SIMPLE) {
 			return vdbServiceMap.get("simpleVectorStoreService");
-		}
-		if (type == VectorStoreType.SQLITE) {
-			return vdbServiceMap.get("sqliteVectorStoreService");
 		}
 		throw new IllegalArgumentException("Unsupported vector store type: " + type);
 	}

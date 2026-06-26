@@ -414,7 +414,7 @@ VALUES ('1', '10000', 1, 'Default Workspace', 'Default Workspace', NULL, NOW(), 
 -- init provider
 INSERT INTO provider (workspace_id, icon, name, description, provider, enable, source, credential, supported_model_types, protocol, gmt_create, gmt_modified, creator, modifier, tenant_id)
 VALUES ('1', NULL, 'Tongyi', 'Tongyi', 'Tongyi', 1, 'preset',
-        '{"endpoint":"https://dashscope.aliyuncs.com/compatible-mode","api_key":"gA64aJ7fOMLT/J2DxCxZoHbVgUHeUCyHwpWT/pzH8pyvPDacWMkTiy/hf1lxdSIkkDfeLUbDO9Jeo+Uw0bjEBhSBy6tXWfAEHwD2MXZNd+3FjCSW2w+6WHN7hxG5ObVGyabUZiDZoiTrDN83XUGCaLvc5+qOUtj0mR6pY4KuY9QaDBV/bzBNr8AgHPOZJWxmvNpQcXvZ3yieZorc4g4942ivbNks+bDYobOiZEVSig9fQTd+jWNnqtnI7S5ak29V4tNp9SOsY0v8vmlIJi+9+HpG6z+plM+7KMU0l/WfYiTi0RjZ4DHy8AUM3iJkO/VL7HmKrVUkjzfzqYc9SR552g=="}',
+        '{"endpoint":"https://dashscope.aliyuncs.com/compatible-mode/v1","api_key":"gA64aJ7fOMLT/J2DxCxZoHbVgUHeUCyHwpWT/pzH8pyvPDacWMkTiy/hf1lxdSIkkDfeLUbDO9Jeo+Uw0bjEBhSBy6tXWfAEHwD2MXZNd+3FjCSW2w+6WHN7hxG5ObVGyabUZiDZoiTrDN83XUGCaLvc5+qOUtj0mR6pY4KuY9QaDBV/bzBNr8AgHPOZJWxmvNpQcXvZ3yieZorc4g4942ivbNks+bDYobOiZEVSig9fQTd+jWNnqtnI7S5ak29V4tNp9SOsY0v8vmlIJi+9+HpG6z+plM+7KMU0l/WfYiTi0RjZ4DHy8AUM3iJkO/VL7HmKrVUkjzfzqYc9SR552g=="}',
         NULL, 'OpenAI', NOW(), NOW(), NULL, NULL, 0);
 
 -- init model
@@ -486,3 +486,213 @@ VALUES ('1', NULL, 'gte-rerank-v2', 'rerank', 'chat', 'gte-rerank-v2', 'Tongyi',
 
 INSERT INTO model (workspace_id, icon, name, type, mode, model_id, provider, enable, tags, source, gmt_create, gmt_modified, creator, modifier, tenant_id)
 VALUES ('1', NULL, 'deepseek-r1', 'llm', 'chat', 'deepseek-r1', 'Tongyi', 1, 'reasoning', 'preset', NOW(), NOW(), NULL, NULL, 0);
+
+/******************************************/
+/*   Admin compatibility tables           */
+/******************************************/
+
+CREATE TABLE IF NOT EXISTS dataset (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    description TEXT DEFAULT NULL,
+    columns_config LONGTEXT DEFAULT NULL,
+    data_count INT NOT NULL DEFAULT '0',
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted TINYINT NOT NULL DEFAULT '0',
+    PRIMARY KEY (id),
+    KEY idx_dataset_deleted (deleted),
+    KEY idx_dataset_update_time (update_time)
+);
+
+CREATE TABLE IF NOT EXISTS dataset_version (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    dataset_id BIGINT NOT NULL,
+    version VARCHAR(32) NOT NULL,
+    description TEXT DEFAULT NULL,
+    data_count INT NOT NULL DEFAULT '0',
+    status VARCHAR(32) NOT NULL DEFAULT 'draft',
+    experiments TEXT DEFAULT NULL,
+    dataset_items TEXT DEFAULT NULL,
+    columns_config LONGTEXT DEFAULT NULL,
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_dataset_version (dataset_id, version),
+    KEY idx_dataset_version_dataset_id (dataset_id),
+    KEY idx_dataset_version_update_time (update_time)
+);
+
+CREATE TABLE IF NOT EXISTS dataset_item (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    dataset_id BIGINT NOT NULL,
+    columns_config LONGTEXT DEFAULT NULL,
+    data_content LONGTEXT DEFAULT NULL,
+    remark TEXT DEFAULT NULL,
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted TINYINT NOT NULL DEFAULT '0',
+    PRIMARY KEY (id),
+    KEY idx_dataset_item_dataset_id (dataset_id),
+    KEY idx_dataset_item_deleted (deleted),
+    KEY idx_dataset_item_update_time (update_time)
+);
+
+CREATE TABLE IF NOT EXISTS evaluator (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    description TEXT DEFAULT NULL,
+    latest_version VARCHAR(32) DEFAULT NULL,
+    model_name VARCHAR(255) DEFAULT NULL,
+    prompt LONGTEXT DEFAULT NULL,
+    model_config LONGTEXT DEFAULT NULL,
+    variables LONGTEXT DEFAULT NULL,
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted TINYINT NOT NULL DEFAULT '0',
+    PRIMARY KEY (id),
+    KEY idx_evaluator_deleted (deleted),
+    KEY idx_evaluator_update_time (update_time)
+);
+
+CREATE TABLE IF NOT EXISTS evaluator_version (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    evaluator_id BIGINT NOT NULL,
+    description TEXT DEFAULT NULL,
+    version VARCHAR(32) NOT NULL,
+    model_config LONGTEXT DEFAULT NULL,
+    prompt LONGTEXT DEFAULT NULL,
+    variables LONGTEXT DEFAULT NULL,
+    status VARCHAR(32) DEFAULT NULL,
+    experiments TEXT DEFAULT NULL,
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_evaluator_version (evaluator_id, version),
+    KEY idx_evaluator_version_evaluator_id (evaluator_id),
+    KEY idx_evaluator_version_update_time (update_time)
+);
+
+CREATE TABLE IF NOT EXISTS evaluator_template (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    evaluator_template_key VARCHAR(255) NOT NULL,
+    template_desc VARCHAR(255) DEFAULT NULL,
+    template LONGTEXT,
+    variables LONGTEXT DEFAULT NULL,
+    model_config LONGTEXT DEFAULT NULL,
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_evaluator_template_key (evaluator_template_key),
+    KEY idx_evaluator_template_desc (template_desc)
+);
+
+CREATE TABLE IF NOT EXISTS experiment (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    description TEXT DEFAULT NULL,
+    dataset_id BIGINT DEFAULT NULL,
+    dataset_version_id BIGINT DEFAULT NULL,
+    dataset_version VARCHAR(32) DEFAULT NULL,
+    evaluation_object_config LONGTEXT DEFAULT NULL,
+    evaluator_config LONGTEXT DEFAULT NULL,
+    evaluator_id VARCHAR(64) DEFAULT NULL,
+    status VARCHAR(32) NOT NULL DEFAULT 'created',
+    progress INT NOT NULL DEFAULT '0',
+    complete_time TIMESTAMP DEFAULT NULL,
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_experiment_dataset_id (dataset_id),
+    KEY idx_experiment_dataset_version_id (dataset_version_id),
+    KEY idx_experiment_status (status),
+    KEY idx_experiment_update_time (update_time)
+);
+
+CREATE TABLE IF NOT EXISTS experiment_result (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    experiment_id BIGINT NOT NULL,
+    input LONGTEXT DEFAULT NULL,
+    actual_output LONGTEXT DEFAULT NULL,
+    reference_output LONGTEXT DEFAULT NULL,
+    score DECIMAL(6,4) DEFAULT NULL,
+    reason TEXT DEFAULT NULL,
+    evaluation_time TIMESTAMP DEFAULT NULL,
+    evaluator_version_id BIGINT DEFAULT NULL,
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_experiment_result_experiment_id (experiment_id),
+    KEY idx_experiment_result_evaluator_version_id (evaluator_version_id),
+    KEY idx_experiment_result_update_time (update_time)
+);
+
+CREATE TABLE IF NOT EXISTS prompt (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    prompt_key VARCHAR(255) NOT NULL,
+    prompt_desc VARCHAR(255) DEFAULT NULL,
+    prompt_description VARCHAR(255) DEFAULT NULL,
+    latest_version VARCHAR(32) DEFAULT NULL,
+    latest_version_status VARCHAR(32) DEFAULT NULL,
+    tags VARCHAR(255) DEFAULT NULL,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_prompt_key (prompt_key),
+    KEY idx_prompt_update_time (update_time)
+);
+
+CREATE TABLE IF NOT EXISTS prompt_version (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    version VARCHAR(32) NOT NULL,
+    prompt_key VARCHAR(255) NOT NULL,
+    version_desc VARCHAR(255) DEFAULT NULL,
+    version_description VARCHAR(255) DEFAULT NULL,
+    template LONGTEXT,
+    variables LONGTEXT DEFAULT NULL,
+    model_config LONGTEXT DEFAULT NULL,
+    status VARCHAR(32) NOT NULL DEFAULT 'pre',
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    previous_version VARCHAR(32) DEFAULT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_prompt_key_version (prompt_key, version),
+    KEY idx_prompt_version_prompt_key (prompt_key),
+    KEY idx_prompt_version_status (status),
+    KEY idx_prompt_version_update_time (update_time)
+);
+
+CREATE TABLE IF NOT EXISTS prompt_build_template (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    prompt_template_key VARCHAR(255) NOT NULL,
+    tags VARCHAR(255) DEFAULT NULL,
+    template_desc VARCHAR(255) DEFAULT NULL,
+    template LONGTEXT,
+    variables LONGTEXT DEFAULT NULL,
+    model_config LONGTEXT DEFAULT NULL,
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_prompt_template_key (prompt_template_key),
+    KEY idx_prompt_build_template_tags (tags)
+);
+
+CREATE TABLE IF NOT EXISTS model_config (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    provider VARCHAR(50) NOT NULL,
+    model_name VARCHAR(100) NOT NULL,
+    base_url VARCHAR(500) NOT NULL,
+    api_key VARCHAR(500) NOT NULL,
+    default_parameters LONGTEXT DEFAULT NULL,
+    supported_parameters LONGTEXT DEFAULT NULL,
+    status TINYINT NOT NULL DEFAULT '1',
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted TINYINT NOT NULL DEFAULT '0',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_model_config_name (name),
+    KEY idx_model_config_provider (provider),
+    KEY idx_model_config_status (status),
+    KEY idx_model_config_update_time (update_time)
+);

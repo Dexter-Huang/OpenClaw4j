@@ -20,7 +20,7 @@ import lombok.Getter;
 
 /**
  * Enum representing different types of vector stores supported by the system. Currently
- * supports Elasticsearch, Simple, and SQLite vector store implementations.
+ * supports Elasticsearch and Simple vector store implementations.
  *
  * @since 1.0.0.3
  */
@@ -31,10 +31,7 @@ public enum VectorStoreType {
 	ELASTICSEARCH("elasticsearch"),
 
 	/** Simple in-memory/file based vector store implementation */
-	SIMPLE("simple"),
-
-	/** SQLite-based vector store implementation using sqlite-vec extension */
-	SQLITE("sqlite");
+	SIMPLE("simple");
 
 	/** The string identifier for the vector store type */
 	private final String type;

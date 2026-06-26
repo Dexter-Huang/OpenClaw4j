@@ -12,7 +12,7 @@ WORKDIR /app
 COPY --from=build /workspace/target/OpenClaw4j-Bankend.jar app.jar
 
 ENV SPRING_PROFILES_ACTIVE=dev
-ENV JAVA_OPTS=""
+ENV JAVA_OPTS="--enable-final-field-mutation=ALL-UNNAMED"
 ENV OPENCLAW4J_LEYDEN_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders"
 
 RUN set -eux; \
@@ -22,6 +22,7 @@ RUN set -eux; \
     ls -lh OpenClaw4j-Bankend.jar; \
     java -version; \
     if ! java ${OPENCLAW4J_LEYDEN_OPTS} \
+      --enable-final-field-mutation=ALL-UNNAMED \
       -XX:AOTCacheOutput=openclaw4j.aot \
       -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} \
       -Dopenclaw4j.leyden.training.profiled=true \

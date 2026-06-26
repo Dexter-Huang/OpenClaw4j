@@ -3,7 +3,7 @@
     {
       "modelProvider": "DASH_SCOPE",
       "modelOptions": {
-        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode",
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
         "apiKey": "sk-fe87436622344410af346152a99853b5",
         "promptUrl": "/prompt/",
         "model": "qwen-flash",
@@ -15,7 +15,7 @@
     {
       "modelProvider": "DASH_SCOPE",
       "modelOptions": {
-        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode",
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
         "apiKey": "sk-fe87436622344410af346152a99853b5",
         "promptUrl": "",
         "model": "qwen-flash",
@@ -27,7 +27,7 @@
     {
       "modelProvider": "DASH_SCOPE",
       "modelOptions": {
-        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode",
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
         "apiKey": "sk-fe87436622344410af346152a99853b5",
         "promptUrl": "",
         "model": "qwen-flash",
@@ -39,7 +39,7 @@
     {
       "modelProvider": "DASH_SCOPE",
       "modelOptions": {
-        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode",
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
         "apiKey": "sk-fe87436622344410af346152a99853b5",
         "promptUrl": "",
         "model": "qwen-flash",
@@ -51,7 +51,7 @@
     {
       "modelProvider": "DASH_SCOPE",
       "modelOptions": {
-        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode",
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
         "apiKey": "sk-fe87436622344410af346152a99853b5",
         "promptUrl": "",
         "model": "qwen-flash",
@@ -63,7 +63,7 @@
     {
       "modelProvider": "OPEN_AI",
       "modelOptions": {
-        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode",
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
         "apiKey": "sk-fe87436622344410af346152a99853b5",
         "promptUrl": "",
         "model": "qwen-vl-ocr-latest",

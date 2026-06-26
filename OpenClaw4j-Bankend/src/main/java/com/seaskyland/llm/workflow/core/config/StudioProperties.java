@@ -54,16 +54,6 @@ public class StudioProperties {
 //    private String vectorStoreType = "elasticsearch";
     private String vectorStoreType = "simple";
 
-	/**
-	 * Absolute path to the sqlite-vec native extension file (.dll / .so / .dylib).
-	 * Required when vector-store-type is set to "sqlite".
-	 * Example (Windows): C:/sqlite-vec/vec0.dll
-	 * Example (Linux):   /usr/local/lib/vec0.so
-	 * Leave blank to disable the extension (schema creation will still succeed if vec0
-	 * tables already exist, but ANN queries will fail at runtime).
-	 */
-	private String sqliteVecExtensionPath;
-
 	/** login method, like github oauth2 login */
 	private String loginMethod = "third_party";
 

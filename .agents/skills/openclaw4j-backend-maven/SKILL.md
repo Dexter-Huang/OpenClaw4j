@@ -55,6 +55,19 @@ Train the cache:
 ./scripts/train-leyden-aot.ps1
 ```
 
+Use the representative warmup profile unless the user asks for a narrower or experimental run:
+
+```powershell
+./scripts/train-leyden-aot.ps1 -WarmupProfile representative -WarmupRequestTimeoutSeconds 10
+```
+
+Warmup profiles:
+
+- `minimal`: application startup plus `/console/v1/system/health`.
+- `representative`: stable GET endpoints that cover Spring MVC, Jackson, MyBatis, Redis-adjacent startup paths, and observability without external LLM calls.
+- `extended`: extra admin list endpoints for experiments.
+- `custom`: requires `-WarmupPaths`.
+
 Run with the cache:
 
 ```powershell
@@ -63,7 +76,11 @@ Run with the cache:
 
 The AOT cache is tied to the exact JDK version, OS, CPU architecture, jar content, classpath, and extracted application layout. Rebuild and retrain after code or dependency changes. Training and runtime must use the same JDK 25/runtime image.
 
-The default training mode is `profiled`. It starts the real `com.seaskyland.llm.LLMApplication`, enables `openclaw4j.leyden.training.profiled=true`, warms a short list of local endpoints, and exits normally so the JVM can write a representative AOT cache. `-TrainingMode classpath` remains available as the fast fallback that only runs `LeydenTrainingApplication`; `-TrainingMode spring` exits on context refresh for experiments.
+The default training mode is `profiled`. It starts the real `com.seaskyland.llm.LLMApplication`, enables `openclaw4j.leyden.training.profiled=true`, warms representative local endpoints, and exits normally so the JVM can write an AOT cache. `-TrainingMode classpath` remains available as the fast fallback that only runs `LeydenTrainingApplication`; `-TrainingMode spring` exits on context refresh for experiments.
+
+Profiled AOT recording makes the first request much slower than normal runtime. Do not assume a warmup timeout means the endpoint is broken. Common first-hit costs include DispatcherServlet initialization, Jackson setup, Hikari/MySQL connection creation, MyBatis query setup, and training-time JVM recording overhead. The runner logs each warmup duration plus a `Leyden profiled warmup summary`; use that summary to confirm which paths actually trained.
+
+Do not train all API endpoints by default. Full endpoint sweeps usually add authentication, DB state, file upload, external model, and long-running workflow noise while giving little extra startup benefit. Prefer representative GET endpoints, then measure first-request latency with the benchmark script before expanding the profile.
 
 Benchmark startup with and without the cache:
 
@@ -71,7 +88,11 @@ Benchmark startup with and without the cache:
 ./scripts/benchmark-leyden-startup.ps1
 ```
 
-The training script waits up to 900 seconds because profiled Spring training gives JDK 25 a larger startup image and may spend several minutes assembling `openclaw4j.aot` from the temporary `openclaw4j.aot.config`.
+The benchmark refreshes `target/leyden-extracted` before every run so it measures the current jar rather than a stale extracted layout. The benchmark also reports both startup timing and optional first-request probes. Treat these as separate metrics: `springStartedSeconds` / `processRunningSeconds` show startup, while `firstRequestMilliseconds` shows startup-aftershock cost for the probe endpoints.
+
+The training script waits up to 900 seconds because profiled Spring training gives JDK 25/26 a larger startup image and may spend several minutes assembling `openclaw4j.aot` from the temporary `openclaw4j.aot.config`.
+
+SQLite vector store support and bundled `sqlite-vec` native resources were removed. Do not reintroduce `sqlite-jdbc`, `SqliteVectorStoreService`, `src/main/resources/sqlite/vec0.*`, or `spring.ai.alibaba.studio.sqlite-vec-extension-path` unless the user explicitly asks for a new SQLite experiment.
 
 ## GraalVM Native Experiment
 

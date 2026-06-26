@@ -1,5 +1,52 @@
 # cbes-llm
 
+## Local MySQL 8 and Redis
+
+The backend now uses MySQL 8 as the primary database and Redis for persistent
+login token/cache storage. A local Docker Compose file is provided for
+development:
+
+```powershell
+docker compose -f docker-compose.mysql.yml up -d
+```
+
+Default local connection settings:
+
+```text
+url      = jdbc:mysql://127.0.0.1:3306/openclaw4j?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+username = openclaw
+password = openclaw123
+```
+
+Redis: `127.0.0.1:6379`, database `0`.
+
+The MySQL container imports `src/main/resources/sql/MySQL/V0.0.1__init.sql` only
+when the `openclaw4j-mysql-data` Docker volume is first created. Spring Boot
+startup keeps `spring.sql.init.mode=never` so the dump is not executed again on
+every application restart.
+
+The backend default `cache.type=REDIS` stores access and refresh token mappings
+in Redis, so restarting only the backend process does not immediately log users
+out. The message queue remains `mq.type=JVM` for local development.
+
+To recreate a clean local database:
+
+```powershell
+docker compose -f docker-compose.mysql.yml down -v
+docker compose -f docker-compose.mysql.yml up -d
+```
+
+Override the backend connection if needed:
+
+```powershell
+$env:OPENCLAW_MYSQL_URL='jdbc:mysql://127.0.0.1:3306/openclaw4j?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true'
+$env:OPENCLAW_MYSQL_USERNAME='openclaw'
+$env:OPENCLAW_MYSQL_PASSWORD='openclaw123'
+$env:OPENCLAW_REDIS_HOST='127.0.0.1'
+$env:OPENCLAW_REDIS_PORT='6379'
+$env:OPENCLAW_REDIS_DATABASE='0'
+```
+
 ## Leyden / HotSpot AOT cache
 
 The default optimized backend packaging keeps the normal JVM runtime and uses the Project Leyden style AOT cache available in JDK 25.

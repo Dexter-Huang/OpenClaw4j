@@ -14,6 +14,189 @@ class LeydenBuildConfigurationTest {
 	private static final Path PROJECT_DIR = Path.of("").toAbsolutePath();
 
 	@Test
+	void defaultBackendConfigurationUsesMysqlAsPrimaryDatabase() throws IOException {
+		String application = read("src/main/resources/application.yml");
+		String pom = read("pom.xml");
+		String trainingApplication = read("src/main/java/com/seaskyland/llm/LeydenTrainingApplication.java");
+
+		assertTrue(application.contains("url: ${OPENCLAW_MYSQL_URL:jdbc:mysql://127.0.0.1:3306/openclaw4j"));
+		assertTrue(application.contains("driver-class-name: com.mysql.cj.jdbc.Driver"));
+		assertTrue(application.contains("username: ${OPENCLAW_MYSQL_USERNAME:openclaw}"));
+		assertTrue(application.contains("password: ${OPENCLAW_MYSQL_PASSWORD:openclaw123}"));
+		assertTrue(application.contains("schema-locations: classpath:sql/MySQL/V0.0.1__init.sql"));
+		assertTrue(application.contains("mode: never"));
+		assertTrue(application.contains("db-type: mysql"));
+		assertTrue(application.contains("vector-store-type: simple"));
+		assertFalse(application.contains("connection-init-sql: PRAGMA"));
+		assertFalse(application.contains("url: jdbc:sqlite:./data/openclaw.db"));
+		assertFalse(application.contains("sqlite-vec"));
+		assertFalse(application.contains("sqlite-vec-extension-path"));
+
+		assertTrue(pom.contains("<artifactId>mysql-connector-j</artifactId>"));
+		assertFalse(pom.contains("<artifactId>sqlite-jdbc</artifactId>"));
+		assertTrue(trainingApplication.contains("com.mysql.cj.jdbc.Driver"));
+		assertFalse(trainingApplication.contains("org.sqlite.JDBC"));
+	}
+
+	@Test
+	void dashScopeOpenAiCompatibleEndpointsIncludeVersionPath() throws IOException {
+		String[] files = {
+				"src/main/resources/application.yml",
+				"src/main/resources/templates/default-application.yml",
+				"src/main/resources/sql/MySQL/V0.0.1__init.sql",
+				"src/main/resources/sql/H2/V0.0.1__init.sql",
+				"src/main/resources/sql/H2/agentscope-schema.sql",
+				"src/main/resources/prompt/agent.json"
+		};
+
+		for (String file : files) {
+			String content = read(file);
+			assertTrue(content.contains("https://dashscope.aliyuncs.com/compatible-mode/v1"),
+					"DashScope endpoint should include /v1 in " + file);
+			assertFalse(content.contains("https://dashscope.aliyuncs.com/compatible-mode\""),
+					"DashScope JSON endpoint is missing /v1 in " + file);
+			assertFalse(content.contains("https://dashscope.aliyuncs.com/compatible-mode'"),
+					"DashScope SQL endpoint is missing /v1 in " + file);
+			assertFalse(content.contains("https://dashscope.aliyuncs.com/compatible-mode\n"),
+					"DashScope YAML endpoint is missing /v1 in " + file);
+		}
+	}
+
+	@Test
+	void localMysqlComposeInitializesMysql8WithApplicationSchema() throws IOException {
+		String compose = read("docker-compose.mysql.yml");
+		String readme = read("README.md");
+
+		assertTrue(compose.contains("image: mysql:8.0"));
+		assertTrue(compose.contains("MYSQL_DATABASE: openclaw4j"));
+		assertTrue(compose.contains("MYSQL_USER: openclaw"));
+		assertTrue(compose.contains("MYSQL_PASSWORD: openclaw123"));
+		assertTrue(compose.contains("./src/main/resources/sql/MySQL/V0.0.1__init.sql:/docker-entrypoint-initdb.d/01-openclaw4j-init.sql:ro"));
+		assertTrue(compose.contains("openclaw4j-mysql-data"));
+		assertTrue(readme.contains("docker compose -f docker-compose.mysql.yml up -d"));
+		assertTrue(readme.contains("spring.sql.init.mode=never"));
+	}
+
+	@Test
+	void defaultBackendConfigurationUsesRedisForPersistentLoginCache() throws IOException {
+		String application = read("src/main/resources/application.yml");
+		String compose = read("docker-compose.mysql.yml");
+		String readme = read("README.md");
+
+		assertTrue(application.contains("host: ${OPENCLAW_REDIS_HOST:127.0.0.1}"));
+		assertTrue(application.contains("port: ${OPENCLAW_REDIS_PORT:6379}"));
+		assertTrue(application.contains("database: ${OPENCLAW_REDIS_DATABASE:0}"));
+		assertTrue(application.contains("type: REDIS"));
+		assertTrue(application.contains("type: JVM"));
+		assertFalse(application.contains("cache:\n  type: JVM"));
+
+		assertTrue(compose.contains("image: redis:7"));
+		assertTrue(compose.contains("container_name: openclaw4j-redis"));
+		assertTrue(compose.contains("\"6379:6379\""));
+		assertTrue(compose.contains("redis-cli ping"));
+		assertTrue(compose.contains("openclaw4j-redis-data"));
+
+		assertTrue(readme.contains("Redis: `127.0.0.1:6379`, database `0`"));
+		assertTrue(readme.contains("cache.type=REDIS"));
+	}
+
+	@Test
+	void mysqlSchemaIncludesLegacyAdminCompatibilityTables() throws IOException {
+		String mysqlSchema = read("src/main/resources/sql/MySQL/V0.0.1__init.sql");
+
+		assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `prompt`"));
+		assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `prompt_version`"));
+		assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `prompt_build_template`"));
+		assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `dataset`"));
+		assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `dataset_version`"));
+		assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `dataset_item`"));
+		assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `evaluator`"));
+		assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `evaluator_version`"));
+		assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `evaluator_template`"));
+		assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `experiment`"));
+		assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `experiment_result`"));
+		assertTrue(mysqlSchema.contains("INSERT IGNORE INTO `prompt_build_template`"));
+		assertTrue(mysqlSchema.contains("INSERT IGNORE INTO `evaluator_template`"));
+	}
+
+	@Test
+	void adminCompatibilityWritesAvoidSqliteOnlySyntaxForMysqlBackend() throws IOException {
+		String service = read("src/main/java/com/seaskyland/llm/workflow/admin/compat/AdminCompatService.java");
+
+		assertFalse(service.contains("datetime('now')"));
+		assertFalse(service.contains("last_insert_rowid()"));
+		assertFalse(service.contains("ON CONFLICT"));
+		assertFalse(service.contains("ON DUPLICATE KEY"));
+		assertTrue(service.contains("CURRENT_TIMESTAMP"));
+		assertTrue(service.contains("GeneratedKeyHolder"));
+	}
+
+	@Test
+	void sqliteVectorStoreSupportIsRemovedFromRuntime() throws IOException {
+		String vectorStoreType = read("src/main/java/com/seaskyland/llm/workflow/core/rag/vectorstore/VectorStoreType.java");
+		String vectorStoreFactory = read("src/main/java/com/seaskyland/llm/workflow/core/rag/vectorstore/VectorStoreFactory.java");
+		String studioProperties = read("src/main/java/com/seaskyland/llm/workflow/core/config/StudioProperties.java");
+
+		assertFalse(Files.exists(PROJECT_DIR.resolve(
+				"src/main/java/com/seaskyland/llm/workflow/core/rag/vectorstore/sqlite/SqliteVectorStoreService.java")));
+		assertFalse(Files.exists(PROJECT_DIR.resolve(
+				"src/main/java/com/seaskyland/llm/workflow/core/rag/vectorstore/sqlite/SqliteVectorStore.java")));
+		assertFalse(Files.exists(PROJECT_DIR.resolve("src/main/resources/sqlite/vec0.dll")));
+		assertFalse(Files.exists(PROJECT_DIR.resolve("src/main/resources/sql/Sqlite/V0.0.1__init.sql")));
+		assertFalse(vectorStoreType.contains("SQLITE"));
+		assertFalse(vectorStoreType.contains("sqlite"));
+		assertFalse(vectorStoreFactory.contains("sqliteVectorStoreService"));
+		assertFalse(studioProperties.contains("sqliteVecExtensionPath"));
+	}
+
+	@Test
+	void jdkFinalFieldMutationWarningIsSuppressedForMybatisRuntimePaths() throws IOException {
+		String pom = read("pom.xml");
+		String trainScript = read("scripts/train-leyden-aot.ps1");
+		String runScript = read("scripts/run-leyden-aot.ps1");
+		String benchmarkScript = read("scripts/benchmark-leyden-startup.ps1");
+		String dockerfile = read("Dockerfile");
+		String mavenJvmConfig = read(".mvn/jvm.config");
+
+		String flag = "--enable-final-field-mutation=ALL-UNNAMED";
+		assertTrue(pom.contains("<mybatis.final.field.mutation.jvmArg>" + flag + "</mybatis.final.field.mutation.jvmArg>"));
+		assertTrue(pom.contains("<artifactId>maven-surefire-plugin</artifactId>"));
+		assertTrue(pom.contains("<argLine>${mybatis.final.field.mutation.jvmArg}</argLine>"));
+		assertTrue(pom.contains("<jvmArguments>${mybatis.final.field.mutation.jvmArg}</jvmArguments>"));
+		assertTrue(trainScript.contains("$JavaExe = \"D:\\jdk-26\\bin\\java.exe\""));
+		assertTrue(runScript.contains("$JavaExe = \"D:\\jdk-26\\bin\\java.exe\""));
+		assertTrue(benchmarkScript.contains("$JavaExe = \"D:\\jdk-26\\bin\\java.exe\""));
+		assertTrue(trainScript.contains(flag));
+		assertTrue(runScript.contains(flag));
+		assertTrue(benchmarkScript.contains(flag));
+		assertTrue(dockerfile.contains("ENV JAVA_OPTS=\"" + flag + "\""));
+		assertTrue(dockerfile.contains(flag + " \\"));
+		assertTrue(mavenJvmConfig.contains(flag));
+	}
+
+	@Test
+	void localLeydenScriptsUseSameCompactObjectHeaderOptionsAsDockerRuntime() throws IOException {
+		String trainScript = read("scripts/train-leyden-aot.ps1");
+		String runScript = read("scripts/run-leyden-aot.ps1");
+		String benchmarkScript = read("scripts/benchmark-leyden-startup.ps1");
+		String dockerfile = read("Dockerfile");
+
+		String compactHeaderOptions = "[string]$LeydenJvmOptions = \"-XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders\"";
+		assertTrue(trainScript.contains(compactHeaderOptions));
+		assertTrue(runScript.contains(compactHeaderOptions));
+		assertTrue(benchmarkScript.contains(compactHeaderOptions));
+		assertTrue(trainScript.contains("Get-LeydenJvmOptions"));
+		assertTrue(runScript.contains("Get-LeydenJvmOptions"));
+		assertTrue(benchmarkScript.contains("Get-LeydenJvmOptions"));
+		assertTrue(trainScript.contains("$javaArgs = @(Get-LeydenJvmOptions -Options $LeydenJvmOptions)"));
+		assertTrue(runScript.contains("$javaArgs = @(Get-LeydenJvmOptions -Options $LeydenJvmOptions)"));
+		assertTrue(benchmarkScript.contains("$javaArgs = @(\"--enable-final-field-mutation=ALL-UNNAMED\")"));
+		assertTrue(benchmarkScript.contains("if ($UseLeyden)"));
+		assertTrue(benchmarkScript.contains("$javaArgs += Get-LeydenJvmOptions -Options $LeydenJvmOptions"));
+		assertTrue(dockerfile.contains("OPENCLAW4J_LEYDEN_OPTS=\"-XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders\""));
+	}
+
+	@Test
 	void mavenBuildKeepsGraalVmNativeImageInExperimentProfileOnly() throws IOException {
 		String pom = read("pom.xml");
 
@@ -45,7 +228,11 @@ class LeydenBuildConfigurationTest {
 		assertTrue(trainScript.contains("TrainingTimeoutSeconds = 900"));
 		assertTrue(trainScript.contains("Start-Job"));
 		assertTrue(trainScript.contains("profiled"));
+		assertTrue(trainScript.contains("WarmupProfile"));
+		assertTrue(trainScript.contains("WarmupRequestTimeoutSeconds"));
+		assertTrue(trainScript.contains("representative"));
 		assertTrue(trainScript.contains("openclaw4j.leyden.training.profiled=true"));
+		assertTrue(trainScript.contains("openclaw4j.leyden.training.request-timeout="));
 		assertTrue(trainScript.contains("LeydenTrainingApplication"));
 		assertTrue(trainScript.contains("Get-LeydenClasspath"));
 		assertTrue(trainScript.contains("$appJar"));
@@ -93,9 +280,16 @@ class LeydenBuildConfigurationTest {
 		assertTrue(runner.contains("ApplicationReadyEvent"));
 		assertTrue(runner.contains("local.server.port"));
 		assertTrue(runner.contains("/console/v1/system/health"));
+		assertTrue(runner.contains("openclaw4j.leyden.training.request-timeout"));
+		assertTrue(runner.contains("WarmupResult"));
+		assertTrue(runner.contains("Leyden profiled warmup summary"));
 		assertTrue(runner.contains("SpringApplication.exit"));
 		assertTrue(benchmarkScript.contains("Started LLMApplication in"));
+		assertTrue(benchmarkScript.contains("ProbePaths"));
+		assertTrue(benchmarkScript.contains("firstRequestMilliseconds"));
 		assertTrue(benchmarkScript.contains("Group-Object leyden"));
+		assertTrue(benchmarkScript.contains("Refusing to clean extract directory outside target"));
+		assertTrue(benchmarkScript.contains("Remove-Item -LiteralPath $extractDir -Recurse -Force"));
 	}
 
 	@Test

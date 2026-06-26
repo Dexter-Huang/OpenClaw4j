@@ -2,10 +2,12 @@ param(
     [string]$JarPath = "target/OpenClaw4j-Bankend.jar",
     [string]$CachePath = "target/openclaw4j.aot",
     [string]$SpringProfile = "dev",
-    [int]$ServerPort = 9004
+    [int]$ServerPort = 9004,
+    [string]$LeydenJvmOptions = "-XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders"
 )
 
 $ErrorActionPreference = "Stop"
+$JavaExe = "D:\jdk-26\bin\java.exe"
 
 function Get-LeydenClasspath {
     param(
@@ -14,6 +16,20 @@ function Get-LeydenClasspath {
     )
 
     return @($AppJar, (Join-Path "lib" "*")) -join [System.IO.Path]::PathSeparator
+}
+
+function Get-LeydenJvmOptions {
+    param(
+        [string]$Options
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Options)) {
+        return @()
+    }
+
+    return $Options -split "\s+" |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { $_.Length -gt 0 }
 }
 
 $projectDir = Split-Path -Parent $PSScriptRoot
@@ -29,7 +45,7 @@ if (-not (Test-Path -LiteralPath $CachePath)) {
 
 $extractDir = Join-Path (Split-Path -Parent $JarPath) "leyden-extracted"
 if (-not (Test-Path -LiteralPath $extractDir)) {
-    java -Djarmode=tools -jar $JarPath extract --destination $extractDir
+    & $JavaExe -Djarmode=tools -jar $JarPath extract --destination $extractDir
 }
 
 $appJar = "OpenClaw4j-Bankend.jar"
@@ -38,11 +54,17 @@ $resolvedCachePath = Join-Path $projectDir $CachePath
 
 Push-Location $extractDir
 try {
-    java "-XX:AOTCache=$resolvedCachePath" `
-        "-Dspring.profiles.active=$SpringProfile" `
-        -cp $classpath `
-        com.seaskyland.llm.LLMApplication `
+    $javaArgs = @(Get-LeydenJvmOptions -Options $LeydenJvmOptions)
+    $javaArgs += @(
+        "--enable-final-field-mutation=ALL-UNNAMED",
+        "-XX:AOTCache=$resolvedCachePath",
+        "-Dspring.profiles.active=$SpringProfile",
+        "-cp",
+        $classpath,
+        "com.seaskyland.llm.LLMApplication",
         "--server.port=$ServerPort"
+    )
+    & $JavaExe @javaArgs
 }
 finally {
     Pop-Location

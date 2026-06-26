@@ -376,7 +376,7 @@ VALUES ('1', '10000', 1, 'Default Workspace', 'Default Workspace', null, now(), 
 -- init model
 INSERT INTO provider (workspace_id, icon, name, description, provider, enable, source, credential,
                                  supported_model_types, protocol, gmt_create, gmt_modified, creator, modifier)
-VALUES ( '1', null, 'Tongyi', 'Tongyi', 'Tongyi', 1, 'preset','{"endpoint":"https://dashscope.aliyuncs.com/compatible-mode"}',
+VALUES ( '1', null, 'Tongyi', 'Tongyi', 'Tongyi', 1, 'preset','{"endpoint":"https://dashscope.aliyuncs.com/compatible-mode/v1"}',
         null, 'OpenAI', now(), now(), null,null);
 
 INSERT INTO model (workspace_id,icon,name,type,mode,model_id,provider,enable,tags,source,gmt_create,gmt_modified,creator,modifier) VALUES ('1',null,'qwen-max','llm','chat','qwen-max','Tongyi',1,'web_search,function_call','preset',now(),now(),null,null);

@@ -2,15 +2,11 @@ package com.seaskyland.llm.workflow.admin.compat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.seaskyland.llm.workflow.core.base.entity.AppEntity;
-import com.seaskyland.llm.workflow.core.base.mapper.AppMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -22,8 +18,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
-		"spring.datasource.url=jdbc:sqlite:file:admin-compat-test?mode=memory&cache=shared",
-		"spring.sql.init.mode=always"
+		"spring.datasource.url=jdbc:h2:mem:admin-compat-test;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
+		"spring.datasource.driver-class-name=org.h2.Driver",
+		"spring.sql.init.mode=always",
+		"spring.sql.init.schema-locations=classpath:sql/H2/V0.0.1__init.sql",
+		"cache.type=JVM",
+		"mq.type=JVM"
 })
 class AdminCompatApiTest {
 
@@ -33,31 +33,6 @@ class AdminCompatApiTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
-
-	@Autowired
-	private AppMapper appMapper;
-
-	@Test
-	void sqliteDateHandlerReadsEpochMillisTextFromApplicationRows() {
-		jdbcTemplate.update("""
-				INSERT INTO application (
-				  workspace_id, app_id, name, source, type, status,
-				  gmt_create, gmt_modified, creator, modifier
-				)
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-				""",
-				"test-workspace", "epoch-millis-app", "epoch millis app", "test", "basic", 1,
-				"1782306319293", "1782306319293", "10000", "10000");
-
-		AppEntity app = appMapper
-			.selectOne(new LambdaQueryWrapper<AppEntity>().eq(AppEntity::getAppId, "epoch-millis-app"));
-
-		assertThat(app.getGmtCreate()).isNotNull();
-		assertThat(app.getGmtCreate().getTime()).isEqualTo(1782306319293L);
-	}
-
 	@Test
 	void adminListApisReturnLegacyPageEnvelope() throws Exception {
 		assertLegacyPage("/api/prompts?pageNo=1&pageSize=10");
@@ -65,6 +40,47 @@ class AdminCompatApiTest {
 		assertLegacyPage("/api/evaluator/evaluators?pageNumber=1&pageSize=10");
 		assertLegacyPage("/api/experiments?pageNumber=1&pageSize=10");
 		assertLegacyPage("/api/models");
+	}
+
+	@Test
+	void promptWriteApisCreateAndUpdateCompatibilityRecords() throws Exception {
+		JsonNode created = postJson("/api/prompt", """
+				{
+				  "promptKey": "compat_prompt",
+				  "promptDescription": "Initial prompt",
+				  "tags": "compat"
+				}
+				""");
+		assertThat(created.path("data").path("promptKey").asText()).isEqualTo("compat_prompt");
+		assertThat(created.path("data").path("promptDescription").asText()).isEqualTo("Initial prompt");
+
+		JsonNode updated = postJson("/api/prompt", """
+				{
+				  "promptKey": "compat_prompt",
+				  "promptDescription": "Updated prompt",
+				  "tags": "compat,updated"
+				}
+				""");
+		assertThat(updated.path("data").path("promptDescription").asText()).isEqualTo("Updated prompt");
+		assertThat(updated.path("data").path("tags").asText()).isEqualTo("compat,updated");
+
+		JsonNode version = postJson("/api/prompt/version", """
+				{
+				  "promptKey": "compat_prompt",
+				  "version": "1.0.1",
+				  "versionDescription": "First test version",
+				  "template": "Hello {{name}}",
+				  "variables": "[{\\"name\\":\\"name\\"}]",
+				  "modelConfig": "{\\"model\\":\\"qwen-max\\"}",
+				  "status": "pre"
+				}
+				""");
+		assertThat(version.path("data").path("promptKey").asText()).isEqualTo("compat_prompt");
+		assertThat(version.path("data").path("version").asText()).isEqualTo("1.0.1");
+		assertThat(version.path("data").path("versionDescription").asText()).isEqualTo("First test version");
+
+		JsonNode prompt = getJson("/api/prompt?promptKey=compat_prompt");
+		assertThat(prompt.path("data").path("latestVersion").asText()).isEqualTo("1.0.1");
 	}
 
 	@Test
@@ -119,6 +135,15 @@ class AdminCompatApiTest {
 
 	private JsonNode getJson(String url) throws Exception {
 		String content = mockMvc.perform(get(url))
+			.andExpect(status().isOk())
+			.andReturn()
+			.getResponse()
+			.getContentAsString();
+		return objectMapper.readTree(content);
+	}
+
+	private JsonNode postJson(String url, String body) throws Exception {
+		String content = mockMvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content(body))
 			.andExpect(status().isOk())
 			.andReturn()
 			.getResponse()
