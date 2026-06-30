@@ -34,8 +34,12 @@ spring:
     connection-fetch: lazy
   data:
     redis:
-      host: ${OPENCLAW_REDIS_HOST:127.0.0.1}
-      port: ${OPENCLAW_REDIS_PORT:6379}
+      sentinel:
+        master: ${OPENCLAW_REDIS_SENTINEL_MASTER:openclaw4j-master}
+        nodes: ${OPENCLAW_REDIS_SENTINEL_NODES:127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381}
+        nat-map: ${OPENCLAW_REDIS_SENTINEL_NAT_MAP:redis-master:6379=127.0.0.1:6379,redis-replica-1:6379=127.0.0.1:6380,redis-replica-2:6379=127.0.0.1:6381}
+        username: ${OPENCLAW_REDIS_SENTINEL_USERNAME:}
+        password: ${OPENCLAW_REDIS_SENTINEL_PASSWORD:}
       password: ${OPENCLAW_REDIS_PASSWORD:}
       database: ${OPENCLAW_REDIS_DATABASE:0}
   sql:

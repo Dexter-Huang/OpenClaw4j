@@ -1,13 +1,13 @@
 services:
-  mysql:
+  mysql-0:
     image: mysql:8.0
-    container_name: openclaw4j-mysql
+    container_name: openclaw4j-mysql-0
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "33061:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root123456
-      MYSQL_DATABASE: openclaw4j
+      MYSQL_DATABASE: openclaw4j_ds_0
       MYSQL_USER: openclaw
       MYSQL_PASSWORD: openclaw123
       TZ: Asia/Shanghai
@@ -15,9 +15,10 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_0900_ai_ci
       - --default-time-zone=+08:00
+      - --server-id=100
     volumes:
-      - openclaw4j-mysql-data:/var/lib/mysql
-      - ./src/main/resources/sql/MySQL/V0.0.1__init.sql:/docker-entrypoint-initdb.d/01-openclaw4j-init.sql:ro
+      - ./data/mysql-0:/var/lib/mysql
+      - ../OpenClaw4j-Bankend/src/main/resources/sql/MySQL/V0.0.1__init.sql:/docker-entrypoint-initdb.d/01-openclaw4j-init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uopenclaw -p$${MYSQL_PASSWORD} --silent"]
       interval: 10s
@@ -25,18 +26,69 @@ services:
       retries: 12
       start_period: 30s
 
-  redis:
+  mysql-1:
+    image: mysql:8.0
+    container_name: openclaw4j-mysql-1
+    restart: unless-stopped
+    ports:
+      - "33062:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: openclaw4j_ds_1
+      MYSQL_USER: openclaw
+      MYSQL_PASSWORD: openclaw123
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --default-time-zone=+08:00
+      - --server-id=101
+    volumes:
+      - ./data/mysql-1:/var/lib/mysql
+      - ../OpenClaw4j-Bankend/src/main/resources/sql/MySQL/V0.0.1__init.sql:/docker-entrypoint-initdb.d/01-openclaw4j-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uopenclaw -p$${MYSQL_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  shardingsphere-proxy:
+    build:
+      context: ./shardingsphere
+    image: openclaw4j-shardingsphere-proxy:5.5.2
+    container_name: openclaw4j-shardingsphere-proxy
+    restart: unless-stopped
+    depends_on:
+      mysql-0:
+        condition: service_healthy
+      mysql-1:
+        condition: service_healthy
+    ports:
+      - "3306:3307"
+    environment:
+      PORT: 3307
+      JVM_OPTS: "-Xms256m -Xmx512m"
+    volumes:
+      - ./shardingsphere/conf:/opt/shardingsphere-proxy/conf:ro
+      - ./data/shardingsphere/logs:/opt/shardingsphere-proxy/logs
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 3 bash -c '</dev/tcp/127.0.0.1/3307'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  redis-master:
     image: redis:7
-    container_name: openclaw4j-redis
+    container_name: openclaw4j-redis-master
     restart: unless-stopped
     ports:
       - "6379:6379"
-    command:
-      - redis-server
-      - --appendonly
-      - "yes"
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     volumes:
-      - openclaw4j-redis-data:/data
+      - ./redis/redis-master.conf:/usr/local/etc/redis/redis.conf:ro
+      - ./data/redis-master:/data
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
       interval: 10s
@@ -44,6 +96,105 @@ services:
       retries: 12
       start_period: 5s
 
-volumes:
-  openclaw4j-mysql-data:
-  openclaw4j-redis-data:
+  redis-replica-1:
+    image: redis:7
+    container_name: openclaw4j-redis-replica-1
+    restart: unless-stopped
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    ports:
+      - "6380:6379"
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - ./redis/redis-replica-1.conf:/usr/local/etc/redis/redis.conf:ro
+      - ./data/redis-replica-1:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+
+  redis-replica-2:
+    image: redis:7
+    container_name: openclaw4j-redis-replica-2
+    restart: unless-stopped
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    ports:
+      - "6381:6379"
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - ./redis/redis-replica-2.conf:/usr/local/etc/redis/redis.conf:ro
+      - ./data/redis-replica-2:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+
+  redis-sentinel-1:
+    image: redis:7
+    container_name: openclaw4j-redis-sentinel-1
+    restart: unless-stopped
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      redis-replica-1:
+        condition: service_healthy
+      redis-replica-2:
+        condition: service_healthy
+    ports:
+      - "26379:26379"
+    command:
+      - sh
+      - -c
+      - cp /usr/local/etc/redis/sentinel.conf /data/sentinel.conf && redis-sentinel /data/sentinel.conf
+    volumes:
+      - ./redis/sentinel-1.conf:/usr/local/etc/redis/sentinel.conf:ro
+      - ./data/redis-sentinel-1:/data
+
+  redis-sentinel-2:
+    image: redis:7
+    container_name: openclaw4j-redis-sentinel-2
+    restart: unless-stopped
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      redis-replica-1:
+        condition: service_healthy
+      redis-replica-2:
+        condition: service_healthy
+    ports:
+      - "26380:26379"
+    command:
+      - sh
+      - -c
+      - cp /usr/local/etc/redis/sentinel.conf /data/sentinel.conf && redis-sentinel /data/sentinel.conf
+    volumes:
+      - ./redis/sentinel-2.conf:/usr/local/etc/redis/sentinel.conf:ro
+      - ./data/redis-sentinel-2:/data
+
+  redis-sentinel-3:
+    image: redis:7
+    container_name: openclaw4j-redis-sentinel-3
+    restart: unless-stopped
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      redis-replica-1:
+        condition: service_healthy
+      redis-replica-2:
+        condition: service_healthy
+    ports:
+      - "26381:26379"
+    command:
+      - sh
+      - -c
+      - cp /usr/local/etc/redis/sentinel.conf /data/sentinel.conf && redis-sentinel /data/sentinel.conf
+    volumes:
+      - ./redis/sentinel-3.conf:/usr/local/etc/redis/sentinel.conf:ro
+      - ./data/redis-sentinel-3:/data

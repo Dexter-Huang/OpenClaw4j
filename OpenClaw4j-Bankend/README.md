@@ -1,13 +1,14 @@
 # cbes-llm
 
-## Local MySQL 8 and Redis
+## Local ShardingSphere MySQL and Redis Sentinel
 
-The backend now uses MySQL 8 as the primary database and Redis for persistent
-login token/cache storage. A local Docker Compose file is provided for
-development:
+The backend uses MySQL 8 as the primary database and Redis for persistent login
+token/cache storage. The local middleware stack lives in the repository-level
+`deploy/` directory and runs MySQL through ShardingSphere Proxy plus Redis
+Sentinel:
 
 ```powershell
-docker compose -f docker-compose.mysql.yml up -d
+docker compose -f ../deploy/docker-compose.middleware.yml up -d --build
 ```
 
 Default local connection settings:
@@ -18,12 +19,20 @@ username = openclaw
 password = openclaw123
 ```
 
-Redis: `127.0.0.1:6379`, database `0`.
+`127.0.0.1:3306` is ShardingSphere Proxy. The physical MySQL nodes are exposed
+for debugging on `127.0.0.1:33061/openclaw4j_ds_0` and
+`127.0.0.1:33062/openclaw4j_ds_1`.
 
-The MySQL container imports `src/main/resources/sql/MySQL/V0.0.1__init.sql` only
-when the `openclaw4j-mysql-data` Docker volume is first created. Spring Boot
+Redis master remains available at `127.0.0.1:6379`, database `0`, for simple
+local clients. Sentinel is available at `127.0.0.1:26379` with master name
+`openclaw4j-master`; two additional sentinels are published on `26380` and
+`26381`.
+
+Each MySQL container imports `src/main/resources/sql/MySQL/V0.0.1__init.sql`
+only when its `deploy/data/mysql-*` directory is first created. Spring Boot
 startup keeps `spring.sql.init.mode=never` so the dump is not executed again on
-every application restart.
+every application restart. Runtime data stays under ignored `deploy/data/`
+directories.
 
 The backend default `cache.type=REDIS` stores access and refresh token mappings
 in Redis, so restarting only the backend process does not immediately log users
@@ -32,8 +41,9 @@ out. The message queue remains `mq.type=JVM` for local development.
 To recreate a clean local database:
 
 ```powershell
-docker compose -f docker-compose.mysql.yml down -v
-docker compose -f docker-compose.mysql.yml up -d
+docker compose -f ../deploy/docker-compose.middleware.yml down
+Remove-Item -Recurse -Force ..\deploy\data\mysql-0,..\deploy\data\mysql-1
+docker compose -f ../deploy/docker-compose.middleware.yml up -d --build
 ```
 
 Override the backend connection if needed:

@@ -7,6 +7,12 @@
 - Run Git commands from the repository root.
 - Do not track generated output such as `target/`, `data/`, `.idea/`, `*.iml`, `node_modules/`, `dist/`, or `.umi*`.
 
+## Documentation
+
+- Write project documentation in Chinese by default, including new docs, design notes, implementation plans, README updates, and deployment instructions.
+- Keep code identifiers, API paths, command examples, configuration keys, error messages, and third-party product names in their original spelling when that is clearer.
+- If an existing document is already in English, prefer converting touched sections to Chinese when making substantive edits, unless the user explicitly asks to keep that document in English.
+
 ## Backend Maven
 
 - Backend root: `OpenClaw4j-Bankend/`.
