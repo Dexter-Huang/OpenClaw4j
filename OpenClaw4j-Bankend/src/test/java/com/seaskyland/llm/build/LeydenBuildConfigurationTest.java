@@ -14,6 +14,16 @@ class LeydenBuildConfigurationTest {
 	private static final Path PROJECT_DIR = Path.of("").toAbsolutePath();
 
 	@Test
+	void mavenCompilerTargetsConfiguredJdkRelease() throws IOException {
+		String pom = read("pom.xml");
+
+		assertTrue(pom.contains("<java.version>26</java.version>"));
+		assertTrue(pom.contains("<release>${java.version}</release>"));
+		assertFalse(pom.contains("<source>17</source>"));
+		assertFalse(pom.contains("<target>17</target>"));
+	}
+
+	@Test
 	void defaultBackendConfigurationUsesMysqlAsPrimaryDatabase() throws IOException {
 		String application = read("src/main/resources/application.yml");
 		String pom = read("pom.xml");

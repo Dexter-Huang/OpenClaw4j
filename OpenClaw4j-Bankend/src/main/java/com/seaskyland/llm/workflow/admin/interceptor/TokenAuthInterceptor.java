@@ -32,10 +32,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
@@ -48,7 +47,7 @@ import java.io.IOException;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class TokenAuthInterceptor implements HandlerInterceptor {
+public class TokenAuthInterceptor extends OncePerRequestFilter {
 
 	/** Service for managing account-related operations */
 	private final AccountService accountService;
@@ -56,47 +55,55 @@ public class TokenAuthInterceptor implements HandlerInterceptor {
 	/** Manager for handling token operations */
 	private final TokenManager tokenManager;
 
+	@Override
+	protected boolean shouldNotFilter(@NotNull HttpServletRequest request) {
+		String path = request.getServletPath();
+		return path.equals("/console/v1/auth/login") || path.equals("/console/v1/auth/refresh-token")
+				|| path.startsWith("/console/v1/system/") || path.startsWith("/swagger-ui/")
+				|| path.startsWith("/v3/api-docs/") || path.startsWith("/test/");
+	}
+
 	/**
 	 * Intercepts requests to validate authentication token and set up request context.
-	 * Returns true if authentication is successful, false otherwise.
 	 */
 	@Override
-	public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
-			@NotNull Object handler) {
+	protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
+			@NotNull jakarta.servlet.FilterChain filterChain) throws jakarta.servlet.ServletException, IOException {
 		long start = System.currentTimeMillis();
 
 		if (RequestMethod.OPTIONS.name().equals(request.getMethod().toUpperCase())) {
-			return true;
+			filterChain.doFilter(request, response);
+			return;
 		}
 
 		String accountId;
-//        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        String authHeader = request.getHeader("X-SAA-TOKEN");
+		// String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+		String authHeader = request.getHeader("X-SAA-TOKEN");
 		if (authHeader == null) {
 			authHeader = request.getParameter(ApiConstants.ACCESS_TOKEN);
 		}
 		else if (!authHeader.startsWith(ApiConstants.TOKEN_PREFIX)) {
 			returnAuthError(start, response, ErrorCode.INVALID_TOKEN);
-			return false;
+			return;
 		}
 
 		if (authHeader == null) {
 			returnAuthError(start, response, ErrorCode.INVALID_TOKEN);
-			return false;
+			return;
 		}
 
 		String token = authHeader.replace(ApiConstants.TOKEN_PREFIX + " ", "");
 		accountId = tokenManager.getAccountIdFromAccessToken(token);
 		if (accountId == null) {
 			returnAuthError(start, response, ErrorCode.INVALID_TOKEN);
-			return false;
+			return;
 		}
 
 		// login info
 		Account account = accountService.getAccount(accountId);
 		if (account == null) {
 			returnAuthError(start, response, ErrorCode.INVALID_TOKEN);
-			return false;
+			return;
 		}
 
 		RequestContext context = new RequestContext();
@@ -108,8 +115,15 @@ public class TokenAuthInterceptor implements HandlerInterceptor {
 		context.setCallerIp(request.getRemoteAddr());
 		context.setStartTime(System.currentTimeMillis());
 
-		RequestContextHolder.setRequestContext(context);
-		return true;
+		try {
+			RequestContextHolder.runWithRequestContext(context, () -> filterChain.doFilter(request, response));
+		}
+		catch (jakarta.servlet.ServletException | IOException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			throw new jakarta.servlet.ServletException(ex);
+		}
 	}
 
 	/**

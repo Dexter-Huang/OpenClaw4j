@@ -35,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
@@ -47,7 +47,7 @@ import java.io.IOException;
  */
 @Component
 @RequiredArgsConstructor
-public class ApiKeyAuthInterceptor implements HandlerInterceptor {
+public class ApiKeyAuthInterceptor extends OncePerRequestFilter {
 
 	/** Service for managing account-related operations */
 	private final AccountService accountService;
@@ -61,32 +61,33 @@ public class ApiKeyAuthInterceptor implements HandlerInterceptor {
 	 * @return true if authentication succeeds, false otherwise
 	 */
 	@Override
-	public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
-			@NotNull Object handler) {
+	protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
+			@NotNull jakarta.servlet.FilterChain filterChain) throws jakarta.servlet.ServletException, IOException {
 		long start = System.currentTimeMillis();
 
 		if (RequestMethod.OPTIONS.name().equals(request.getMethod().toUpperCase())) {
-			return true;
+			filterChain.doFilter(request, response);
+			return;
 		}
 
 		String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (authorization == null || !authorization.startsWith(ApiConstants.TOKEN_PREFIX)) {
 			returnAuthError(start, response, ErrorCode.INVALID_API_KEY);
-			return false;
+			return;
 		}
 
 		String token = authorization.replace(ApiConstants.TOKEN_PREFIX + " ", "");
 		ApiKey apiKey = apiKeyService.getApiKey(token);
 		if (apiKey == null) {
 			returnAuthError(start, response, ErrorCode.INVALID_API_KEY);
-			return false;
+			return;
 		}
 
 		// login info
 		Account account = accountService.getAccount(apiKey.getAccountId());
 		if (account == null) {
 			returnAuthError(start, response, ErrorCode.INVALID_API_KEY);
-			return false;
+			return;
 		}
 
 		RequestContext context = new RequestContext();
@@ -98,8 +99,15 @@ public class ApiKeyAuthInterceptor implements HandlerInterceptor {
 		context.setCallerIp(request.getRemoteAddr());
 		context.setStartTime(System.currentTimeMillis());
 
-		RequestContextHolder.setRequestContext(context);
-		return true;
+		try {
+			RequestContextHolder.runWithRequestContext(context, () -> filterChain.doFilter(request, response));
+		}
+		catch (jakarta.servlet.ServletException | IOException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			throw new jakarta.servlet.ServletException(ex);
+		}
 	}
 
 	/**

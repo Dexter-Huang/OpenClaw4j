@@ -17,37 +17,38 @@ package com.seaskyland.llm.workflow.admin.interceptor;
 
 import com.seaskyland.llm.workflow.openapi.interceptor.ApiKeyAuthInterceptor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Configuration class for setting up web request interceptors
+ * Configuration class for setting up authenticated web request filters.
  */
 @Configuration
 @RequiredArgsConstructor
 public class InterceptorConfig implements WebMvcConfigurer {
 
-	/** Interceptor for token-based authentication */
+	/** Filter for token-based authentication */
 	private final TokenAuthInterceptor tokenAuthInterceptor;
 
-	/** Interceptor for API key authentication */
+	/** Filter for API key authentication */
 	private final ApiKeyAuthInterceptor apiKeyAuthInterceptor;
 
-	/**
-	 * Configures request interceptors for different API paths
-	 * @param registry The interceptor registry
-	 */
-	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(tokenAuthInterceptor)
-			.addPathPatterns("/console/v1/**")
-			.addPathPatterns("/starter.zip")
-			.excludePathPatterns("/console/v1/auth/login", "/console/v1/auth/refresh-token", "/console/v1/system/**")
-			.excludePathPatterns("/swagger-ui/**", "/v3/api-docs/**")
-			.excludePathPatterns("/test/**");
+	@Bean
+	public FilterRegistrationBean<TokenAuthInterceptor> tokenAuthFilterRegistration() {
+		FilterRegistrationBean<TokenAuthInterceptor> registration = new FilterRegistrationBean<>(tokenAuthInterceptor);
+		registration.addUrlPatterns("/console/v1/*", "/starter.zip");
+		registration.setOrder(10);
+		return registration;
+	}
 
-		registry.addInterceptor(apiKeyAuthInterceptor).addPathPatterns("/api/v1/**");
+	@Bean
+	public FilterRegistrationBean<ApiKeyAuthInterceptor> apiKeyAuthFilterRegistration() {
+		FilterRegistrationBean<ApiKeyAuthInterceptor> registration = new FilterRegistrationBean<>(apiKeyAuthInterceptor);
+		registration.addUrlPatterns("/api/v1/*");
+		registration.setOrder(20);
+		return registration;
 	}
 
 }

@@ -47,17 +47,7 @@ public class RequestContextThreadPoolWrapper implements ExecutorService {
 	@Override
 	public void execute(@NotNull Runnable command) {
 		RequestContext context = RequestContextHolder.getRequestContext();
-		delegate.execute(() -> {
-			try {
-				if (context != null) {
-					RequestContextHolder.setRequestContext(context);
-				}
-				command.run();
-			}
-			finally {
-				RequestContextHolder.clearRequestContext();
-			}
-		});
+		delegate.execute(wrap(command, context));
 	}
 
 	/**
@@ -67,17 +57,7 @@ public class RequestContextThreadPoolWrapper implements ExecutorService {
 	@Override
 	public <T> Future<T> submit(@NotNull Callable<T> task) {
 		RequestContext context = RequestContextHolder.getRequestContext();
-		return delegate.submit(() -> {
-			try {
-				if (context != null) {
-					RequestContextHolder.setRequestContext(context);
-				}
-				return task.call();
-			}
-			finally {
-				RequestContextHolder.clearRequestContext();
-			}
-		});
+		return delegate.submit(wrap(task, context));
 	}
 
 	/**
@@ -88,17 +68,7 @@ public class RequestContextThreadPoolWrapper implements ExecutorService {
 	@Override
 	public <T> Future<T> submit(@NotNull Runnable task, T result) {
 		RequestContext context = RequestContextHolder.getRequestContext();
-		return delegate.submit(() -> {
-			try {
-				if (context != null) {
-					RequestContextHolder.setRequestContext(context);
-				}
-				task.run();
-			}
-			finally {
-				RequestContextHolder.clearRequestContext();
-			}
-		}, result);
+		return delegate.submit(wrap(task, context), result);
 	}
 
 	/**
@@ -108,17 +78,7 @@ public class RequestContextThreadPoolWrapper implements ExecutorService {
 	@Override
 	public Future<?> submit(@NotNull Runnable task) {
 		RequestContext context = RequestContextHolder.getRequestContext();
-		return delegate.submit(() -> {
-			try {
-				if (context != null) {
-					RequestContextHolder.setRequestContext(context);
-				}
-				task.run();
-			}
-			finally {
-				RequestContextHolder.clearRequestContext();
-			}
-		});
+		return delegate.submit(wrap(task, context));
 	}
 
 	/**
@@ -168,17 +128,25 @@ public class RequestContextThreadPoolWrapper implements ExecutorService {
 	 */
 	private <T> Collection<? extends Callable<T>> wrapCallables(Collection<? extends Callable<T>> tasks,
 			RequestContext context) {
-		return tasks.stream().map(task -> (Callable<T>) () -> {
+		return tasks.stream().map(task -> wrap(task, context)).collect(java.util.stream.Collectors.toList());
+	}
+
+	private Runnable wrap(Runnable task, RequestContext context) {
+		return () -> {
 			try {
-				if (context != null) {
-					RequestContextHolder.setRequestContext(context);
-				}
-				return task.call();
+				RequestContextHolder.runWithRequestContext(context, task::run);
 			}
-			finally {
-				RequestContextHolder.clearRequestContext();
+			catch (RuntimeException | Error ex) {
+				throw ex;
 			}
-		}).collect(java.util.stream.Collectors.toList());
+			catch (Exception ex) {
+				throw new CompletionException(ex);
+			}
+		};
+	}
+
+	private <T> Callable<T> wrap(Callable<T> task, RequestContext context) {
+		return () -> RequestContextHolder.callWithRequestContext(context, task);
 	}
 
 	/**

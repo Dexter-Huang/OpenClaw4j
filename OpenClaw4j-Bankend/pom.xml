@@ -14,10 +14,14 @@
     <version>3.2-SNAPSHOT</version>
 
     <properties>
-        <java.version>25</java.version>
+        <java.version>26</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-ai.version>2.0.0</spring-ai.version>
         <mybatis.final.field.mutation.jvmArg>--enable-final-field-mutation=ALL-UNNAMED</mybatis.final.field.mutation.jvmArg>
+        <spotless.maven.plugin.version>3.7.0</spotless.maven.plugin.version>
+        <google.java.format.version>1.35.0</google.java.format.version>
+        <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
+        <spotbugs.maven.plugin.version>4.10.2.0</spotbugs.maven.plugin.version>
     </properties>
 
     <dependencies>
@@ -241,6 +245,58 @@
         </dependencies>
     </dependencyManagement>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.maven.plugin.version}</version>
+                <configuration>
+                    <java>
+                        <includes>
+                            <include>src/main/java/**/*.java</include>
+                            <include>src/test/java/**/*.java</include>
+                        </includes>
+                        <excludes>
+                            <exclude>src/main/java/com/seaskyland/llm/workflow/admin/generator/**/*.java</exclude>
+                            <exclude>src/main/java/com/seaskyland/llm/workflow/admin/utils/ContributorFileUtil.java</exclude>
+                        </excludes>
+                        <removeUnusedImports/>
+                        <googleJavaFormat>
+                            <version>${google.java.format.version}</version>
+                            <style>GOOGLE</style>
+                        </googleJavaFormat>
+                    </java>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven.checkstyle.plugin.version}</version>
+                <configuration>
+                    <configLocation>google_checks.xml</configLocation>
+                    <consoleOutput>true</consoleOutput>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <violationSeverity>warning</violationSeverity>
+                    <excludes>
+                        com/seaskyland/llm/workflow/admin/generator/**,
+                        com/seaskyland/llm/workflow/admin/utils/ContributorFileUtil.java
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${spotbugs.maven.plugin.version}</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>High</threshold>
+                    <excludeFilterFile>${project.basedir}/config/spotbugs-exclude.xml</excludeFilterFile>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <profiles>
         <profile>
             <id>dev</id>
@@ -281,8 +337,7 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
                         <configuration>
-                            <source>17</source>
-                            <target>17</target>
+                            <release>${java.version}</release>
                             <excludes>
                                 <exclude>com/seaskyland/llm/workflow/admin/generator/**</exclude>
                                 <exclude>com/seaskyland/llm/workflow/admin/utils/ContributorFileUtil.java</exclude>
@@ -391,8 +446,7 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
                         <configuration>
-                            <source>17</source>
-                            <target>17</target>
+                            <release>${java.version}</release>
                             <excludes>
                                 <exclude>com/seaskyland/llm/workflow/admin/generator/**</exclude>
                                 <exclude>com/seaskyland/llm/workflow/admin/utils/ContributorFileUtil.java</exclude>
@@ -453,8 +507,7 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
                         <configuration>
-                            <source>17</source>
-                            <target>17</target>
+                            <release>${java.version}</release>
                             <excludes>
                                 <exclude>com/seaskyland/llm/workflow/admin/generator/**</exclude>
                                 <exclude>com/seaskyland/llm/workflow/admin/utils/ContributorFileUtil.java</exclude>

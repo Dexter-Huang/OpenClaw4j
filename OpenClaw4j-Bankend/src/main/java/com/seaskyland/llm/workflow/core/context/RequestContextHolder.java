@@ -18,40 +18,61 @@ package com.seaskyland.llm.workflow.core.context;
 
 import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
 
+import java.util.concurrent.Callable;
+
 /**
- * A holder class for managing request context in a thread-local manner. Provides methods
- * to set, get and clear the request context for the current thread.
+ * A holder class for managing request context in a lexically scoped manner.
  *
  * @since 1.0.0.3
  */
 public class RequestContextHolder {
 
 	/**
-	 * ThreadLocal variable to store request context for each thread
+	 * Scoped request context for the current execution path.
 	 */
-	private static final ThreadLocal<RequestContext> requestContextThreadLocal = new ThreadLocal<>();
+	private static final ScopedValue<RequestContext> REQUEST_CONTEXT = ScopedValue.newInstance();
 
 	/**
-	 * Sets the request context for the current thread
-	 * @param requestContext the context to be set
+	 * Runs the operation with the request context bound to the current lexical scope.
+	 * @param requestContext the context to bind
+	 * @param operation the operation to run
 	 */
-	public static void setRequestContext(RequestContext requestContext) {
-		requestContextThreadLocal.set(requestContext);
+	public static void runWithRequestContext(RequestContext requestContext, ScopedOperation operation) throws Exception {
+		callWithRequestContext(requestContext, () -> {
+			operation.run();
+			return null;
+		});
 	}
 
 	/**
-	 * Gets the request context for the current thread
-	 * @return the current thread's request context
+	 * Calls the operation with the request context bound to the current lexical scope.
+	 * @param requestContext the context to bind
+	 * @param operation the operation to call
+	 * @return the operation result
+	 */
+	public static <T> T callWithRequestContext(RequestContext requestContext, Callable<T> operation) throws Exception {
+		if (requestContext == null) {
+			return operation.call();
+		}
+		return ScopedValue.where(REQUEST_CONTEXT, requestContext).call(() -> operation.call());
+	}
+
+	/**
+	 * Gets the request context for the current lexical scope.
+	 * @return the current request context, or null when no context is bound
 	 */
 	public static RequestContext getRequestContext() {
-		return requestContextThreadLocal.get();
+		return REQUEST_CONTEXT.isBound() ? REQUEST_CONTEXT.get() : null;
 	}
 
 	/**
-	 * Clears the request context for the current thread
+	 * Scoped operation that may throw checked exceptions.
 	 */
-	public static void clearRequestContext() {
-		requestContextThreadLocal.remove();
+	@FunctionalInterface
+	public interface ScopedOperation {
+
+		void run() throws Exception;
+
 	}
 
 }

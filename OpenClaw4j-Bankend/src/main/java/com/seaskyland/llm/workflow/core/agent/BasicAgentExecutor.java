@@ -671,13 +671,17 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
 				convertResponse(response, toolCallbackProvider).flux(),
 				// 2. Send tool execution result
 				Mono.fromCallable(() -> {
-					RequestContextHolder.setRequestContext(requestContext);
 					try {
-						ToolExecutionResult result = toolCallingManager.executeToolCalls(originalPrompt, response);
-						return new Object[] { result, convertToolResult(response, result, toolCallbackProvider) };
+						return RequestContextHolder.callWithRequestContext(requestContext, () -> {
+							ToolExecutionResult result = toolCallingManager.executeToolCalls(originalPrompt, response);
+							return new Object[] { result, convertToolResult(response, result, toolCallbackProvider) };
+						});
 					}
-					finally {
-						RequestContextHolder.clearRequestContext();
+					catch (RuntimeException | Error ex) {
+						throw ex;
+					}
+					catch (Exception ex) {
+						throw new RuntimeException(ex);
 					}
 				}).flux().flatMap(array -> {
 					ToolExecutionResult result = (ToolExecutionResult) array[0];
