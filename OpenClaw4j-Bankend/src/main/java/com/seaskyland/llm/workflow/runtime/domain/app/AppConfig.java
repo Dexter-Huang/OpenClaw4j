@@ -17,12 +17,10 @@
 package com.seaskyland.llm.workflow.runtime.domain.app;
 
 /**
- * Configuration interface for Spring AI Alibaba Studio applications. This interface
- * defines the contract for application configuration settings that can be used to
- * customize the behavior of Spring AI Alibaba Studio applications.
+ * Configuration interface for Spring AI Alibaba Studio applications. This interface defines the
+ * contract for application configuration settings that can be used to customize the behavior of
+ * Spring AI Alibaba Studio applications.
  *
  * @since 1.0.0.3
  */
-public interface AppConfig {
-
-}
+public interface AppConfig {}

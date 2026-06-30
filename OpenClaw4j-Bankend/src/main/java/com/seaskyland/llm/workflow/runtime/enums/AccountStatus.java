@@ -26,44 +26,43 @@ import lombok.Getter;
  *
  * @since 1.0.0.3
  */
-
 @Getter
 @AllArgsConstructor
 public enum AccountStatus {
 
-	/** Account has been deleted */
-	@JsonProperty("deleted")
-	DELETED(0, "deleted"),
+  /** Account has been deleted */
+  @JsonProperty("deleted")
+  DELETED(0, "deleted"),
 
-	/** Account is in normal state */
-	@JsonProperty("normal")
-	NORMAL(1, "normal"),
+  /** Account is in normal state */
+  @JsonProperty("normal")
+  NORMAL(1, "normal"),
 
-	/** Account is disabled */
-	@JsonProperty("disabled")
-	DISABLED(2, "disabled"),;
+  /** Account is disabled */
+  @JsonProperty("disabled")
+  DISABLED(2, "disabled"),
+  ;
 
-	/** Numeric status code */
-	@EnumValue
-	private final Integer status;
+  /** Numeric status code */
+  @EnumValue private final Integer status;
 
-	/** String representation of the status */
-	private final String value;
+  /** String representation of the status */
+  private final String value;
 
-	/**
-	 * Get AccountStatus by numeric status code
-	 * @param status numeric status code
-	 * @return corresponding AccountStatus
-	 * @throws IllegalArgumentException if status is invalid
-	 */
-	public static AccountStatus of(Integer status) {
-		for (AccountStatus accountStatus : AccountStatus.values()) {
-			if (accountStatus.status.equals(status)) {
-				return accountStatus;
-			}
-		}
+  /**
+   * Get AccountStatus by numeric status code
+   *
+   * @param status numeric status code
+   * @return corresponding AccountStatus
+   * @throws IllegalArgumentException if status is invalid
+   */
+  public static AccountStatus of(Integer status) {
+    for (AccountStatus accountStatus : AccountStatus.values()) {
+      if (accountStatus.status.equals(status)) {
+        return accountStatus;
+      }
+    }
 
-		throw new IllegalArgumentException("Invalid status: " + status);
-	}
-
+    throw new IllegalArgumentException("Invalid status: " + status);
+  }
 }

@@ -20,42 +20,40 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Title: CreateDate: 2025/5/1 14:51
  *
  * @author guning.lt
  * @since 1.0.0.3
- **/
+ */
 @Data
 @TableName("reference")
 public class ReferEntity {
 
-	@TableId(value = "id", type = IdType.AUTO)
-	private Long id;
+  @TableId(value = "id", type = IdType.AUTO)
+  private Long id;
 
-	@TableField("gmt_create")
-	private Date gmtCreate;
+  @TableField("gmt_create")
+  private Date gmtCreate;
 
-	@TableField("gmt_modified")
-	private Date gmtModified;
+  @TableField("gmt_modified")
+  private Date gmtModified;
 
-	@TableField("main_code")
-	private String mainCode;
+  @TableField("main_code")
+  private String mainCode;
 
-	@TableField("main_type")
-	private Integer mainType;
+  @TableField("main_type")
+  private Integer mainType;
 
-	@TableField("refer_code")
-	private String referCode;
+  @TableField("refer_code")
+  private String referCode;
 
-	@TableField("refer_type")
-	private Integer referType;
+  @TableField("refer_type")
+  private Integer referType;
 
-	@TableField("workspace_id")
-	private String workspaceId;
-
+  @TableField("workspace_id")
+  private String workspaceId;
 }

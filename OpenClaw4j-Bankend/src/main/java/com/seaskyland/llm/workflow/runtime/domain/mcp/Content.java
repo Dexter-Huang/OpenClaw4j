@@ -16,9 +16,8 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.mcp;
 
-import lombok.Data;
-
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * Content model class for MCP (Message Content Protocol)
@@ -29,9 +28,6 @@ import java.io.Serializable;
 @Data
 public class Content implements Serializable {
 
-	/**
-	 * Type of the content
-	 */
-	private String type;
-
+  /** Type of the content */
+  private String type;
 }

@@ -16,71 +16,70 @@
 
 package com.seaskyland.llm.workflow.core.utils.security;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.apache.commons.lang3.StringUtils;
 
 /**
- * Utility class for cryptographic operations. Provides methods for string masking and
- * hashing.
+ * Utility class for cryptographic operations. Provides methods for string masking and hashing.
  *
  * @since 1.0.0.3
  */
 public class CryptoUtils {
 
-	/**
-	 * Masks a string by showing only the first and last 4 characters. If input is blank
-	 * or shorter than 12 characters, returns 16 asterisks.
-	 * @param original The string to mask
-	 * @return Masked string
-	 */
-	public static String mask(String original) {
-		if (StringUtils.isBlank(original) || original.length() <= 12) {
-			return "*".repeat(16);
-		}
+  /**
+   * Masks a string by showing only the first and last 4 characters. If input is blank or shorter
+   * than 12 characters, returns 16 asterisks.
+   *
+   * @param original The string to mask
+   * @return Masked string
+   */
+  public static String mask(String original) {
+    if (StringUtils.isBlank(original) || original.length() <= 12) {
+      return "*".repeat(16);
+    }
 
-		int prefix_length = 4;
-		String start = original.substring(0, prefix_length);
-		String end = original.substring(original.length() - prefix_length);
-		int middleLength = original.length() - prefix_length * 2;
+    int prefix_length = 4;
+    String start = original.substring(0, prefix_length);
+    String end = original.substring(original.length() - prefix_length);
+    int middleLength = original.length() - prefix_length * 2;
 
-		return start + "*".repeat(middleLength) + end;
-	}
+    return start + "*".repeat(middleLength) + end;
+  }
 
-	/**
-	 * Generates SHA-512 hash of the input string.
-	 * @param original The string to hash
-	 * @return Hexadecimal representation of the hash
-	 * @throws RuntimeException if SHA-512 algorithm is not available
-	 */
-	public static String hashWithSha512(String original) {
-		try {
-			MessageDigest digest = MessageDigest.getInstance("SHA-512");
-			byte[] encodedHash = digest.digest(original.getBytes(StandardCharsets.UTF_8));
-			return bytesToHex(encodedHash);
-		}
-		catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException("failed to hash with sha-512", e);
-		}
-	}
+  /**
+   * Generates SHA-512 hash of the input string.
+   *
+   * @param original The string to hash
+   * @return Hexadecimal representation of the hash
+   * @throws RuntimeException if SHA-512 algorithm is not available
+   */
+  public static String hashWithSha512(String original) {
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-512");
+      byte[] encodedHash = digest.digest(original.getBytes(StandardCharsets.UTF_8));
+      return bytesToHex(encodedHash);
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException("failed to hash with sha-512", e);
+    }
+  }
 
-	/**
-	 * Converts byte array to hexadecimal string.
-	 * @param hash Byte array to convert
-	 * @return Hexadecimal string representation
-	 */
-	private static String bytesToHex(byte[] hash) {
-		StringBuilder hexString = new StringBuilder(2 * hash.length);
-		for (byte b : hash) {
-			String hex = Integer.toHexString(0xff & b);
-			if (hex.length() == 1) {
-				hexString.append('0');
-			}
-			hexString.append(hex);
-		}
-		return hexString.toString();
-	}
-
+  /**
+   * Converts byte array to hexadecimal string.
+   *
+   * @param hash Byte array to convert
+   * @return Hexadecimal string representation
+   */
+  private static String bytesToHex(byte[] hash) {
+    StringBuilder hexString = new StringBuilder(2 * hash.length);
+    for (byte b : hash) {
+      String hex = Integer.toHexString(0xff & b);
+      if (hex.length() == 1) {
+        hexString.append('0');
+      }
+      hexString.append(hex);
+    }
+    return hexString.toString();
+  }
 }

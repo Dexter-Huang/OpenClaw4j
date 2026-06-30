@@ -16,11 +16,10 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.knowledgebase;
 
-import com.seaskyland.llm.workflow.runtime.domain.app.FileSearchOptions;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.domain.app.FileSearchOptions;
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * Query model for document retrieval operations.
@@ -30,11 +29,10 @@ import java.io.Serializable;
 @Data
 public class DocumentRetrieverQuery implements Serializable {
 
-	/** The search query string */
-	private String query;
+  /** The search query string */
+  private String query;
 
-	/** Search options for file retrieval */
-	@JsonProperty("search_options")
-	private FileSearchOptions searchOptions;
-
+  /** Search options for file retrieval */
+  @JsonProperty("search_options")
+  private FileSearchOptions searchOptions;
 }

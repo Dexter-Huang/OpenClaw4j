@@ -16,28 +16,12 @@
 
 package com.seaskyland.llm.workflow.core.base.mq;
 
-import com.seaskyland.llm.workflow.core.config.MqConfigProperties;
-import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.client.apis.ClientConfiguration;
-import org.apache.rocketmq.client.apis.ClientException;
-import org.apache.rocketmq.client.apis.ClientServiceProvider;
-import org.apache.rocketmq.client.apis.consumer.ConsumeResult;
-import org.apache.rocketmq.client.apis.consumer.FilterExpression;
-import org.apache.rocketmq.client.apis.consumer.PushConsumer;
-import org.apache.rocketmq.client.apis.message.MessageView;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * MQ Consumer Manager Manages multiple consumers and provides message consumption
- * capabilities
+ * MQ Consumer Manager Manages multiple consumers and provides message consumption capabilities
  *
  * @since 1.0.0.3
  */
@@ -45,16 +29,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @RequiredArgsConstructor
 public class MqConsumerManager {
-	/**
-	 * Subscribe to a topic with specified consumer group
-	 * @param group consumer group name
-	 * @param topic topic to subscribe
-	 * @param handler message handler for processing messages
-	 */
-	public void subscribe(MqConsumer mqConsumer, String group, String topic, MqConsumerHandler<MqMessage> handler) {
-		mqConsumer.subscribe(group, topic, handler);
-	}
-
-
-
+  /**
+   * Subscribe to a topic with specified consumer group
+   *
+   * @param group consumer group name
+   * @param topic topic to subscribe
+   * @param handler message handler for processing messages
+   */
+  public void subscribe(
+      MqConsumer mqConsumer, String group, String topic, MqConsumerHandler<MqMessage> handler) {
+    mqConsumer.subscribe(group, topic, handler);
+  }
 }

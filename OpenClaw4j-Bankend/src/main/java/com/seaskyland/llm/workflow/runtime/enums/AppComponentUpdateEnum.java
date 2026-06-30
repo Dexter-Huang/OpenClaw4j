@@ -27,29 +27,20 @@ import lombok.Getter;
 @Getter
 public enum AppComponentUpdateEnum {
 
-	/**
-	 * Component update is required
-	 */
-	Necessary(1, "necessary"),
+  /** Component update is required */
+  Necessary(1, "necessary"),
 
-	/**
-	 * Component update is not required
-	 */
-	Unnecessary(0, "unnecessary");
+  /** Component update is not required */
+  Unnecessary(0, "unnecessary");
 
-	/**
-	 * Status code
-	 */
-	private final Integer code;
+  /** Status code */
+  private final Integer code;
 
-	/**
-	 * Status description
-	 */
-	private final String desc;
+  /** Status description */
+  private final String desc;
 
-	AppComponentUpdateEnum(Integer type, String desc) {
-		this.code = type;
-		this.desc = desc;
-	}
-
+  AppComponentUpdateEnum(Integer type, String desc) {
+    this.code = type;
+    this.desc = desc;
+  }
 }

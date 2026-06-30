@@ -17,10 +17,9 @@
 package com.seaskyland.llm.workflow.runtime.domain.component;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Represents an application component in the system.
@@ -31,41 +30,40 @@ import java.util.Date;
 @Data
 public class AppComponent implements Serializable {
 
-	/** Component code identifier */
-	private String code;
+  /** Component code identifier */
+  private String code;
 
-	/** Component name */
-	private String name;
+  /** Component name */
+  private String name;
 
-	/** Name of the associated application */
-	@JsonProperty("app_name")
-	private String appName;
+  /** Name of the associated application */
+  @JsonProperty("app_name")
+  private String appName;
 
-	/** Component type */
-	private String type;
+  /** Component type */
+  private String type;
 
-	/** ID of the associated application */
-	@JsonProperty("app_id")
-	private String appId;
+  /** ID of the associated application */
+  @JsonProperty("app_id")
+  private String appId;
 
-	/** Component configuration */
-	private String config;
+  /** Component configuration */
+  private String config;
 
-	/** Component description */
-	private String description;
+  /** Component description */
+  private String description;
 
-	/** Component status */
-	private Integer status;
+  /** Component status */
+  private Integer status;
 
-	/** Flag indicating if component needs update */
-	private Integer needUpdate;
+  /** Flag indicating if component needs update */
+  private Integer needUpdate;
 
-	/** Last modification time */
-	@JsonProperty("gmt_modified")
-	private Date gmtModified;
+  /** Last modification time */
+  @JsonProperty("gmt_modified")
+  private Date gmtModified;
 
-	/** Creation time */
-	@JsonProperty("gmt_create")
-	private Date gmtCreate;
-
+  /** Creation time */
+  @JsonProperty("gmt_create")
+  private Date gmtCreate;
 }

@@ -27,27 +27,19 @@ import lombok.Getter;
  *
  * @since 1.0.0.3
  */
-
 @Getter
 @AllArgsConstructor
 public enum AppType {
 
-	/**
-	 * Basic application type
-	 */
-	@JsonProperty("basic")
-	BASIC("basic"),
+  /** Basic application type */
+  @JsonProperty("basic")
+  BASIC("basic"),
 
-	/**
-	 * Workflow application type
-	 */
-	@JsonProperty("workflow")
-	WORKFLOW("workflow"),;
+  /** Workflow application type */
+  @JsonProperty("workflow")
+  WORKFLOW("workflow"),
+  ;
 
-	/**
-	 * The string value representing the application type
-	 */
-	@EnumValue
-	private final String value;
-
+  /** The string value representing the application type */
+  @EnumValue private final String value;
 }

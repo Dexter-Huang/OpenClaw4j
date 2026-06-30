@@ -25,30 +25,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public enum AudioResponseFormat {
 
-	/**
-	 * MP3 audio format
-	 */
-	@JsonProperty("mp3")
-	MP3,
-	/**
-	 * FLAC audio format
-	 */
-	@JsonProperty("flac")
-	FLAC,
-	/**
-	 * OPUS audio format
-	 */
-	@JsonProperty("opus")
-	OPUS,
-	/**
-	 * PCM16 audio format
-	 */
-	@JsonProperty("pcm16")
-	PCM16,
-	/**
-	 * WAV audio format
-	 */
-	@JsonProperty("wav")
-	WAV
-
+  /** MP3 audio format */
+  @JsonProperty("mp3")
+  MP3,
+  /** FLAC audio format */
+  @JsonProperty("flac")
+  FLAC,
+  /** OPUS audio format */
+  @JsonProperty("opus")
+  OPUS,
+  /** PCM16 audio format */
+  @JsonProperty("pcm16")
+  PCM16,
+  /** WAV audio format */
+  @JsonProperty("wav")
+  WAV
 }

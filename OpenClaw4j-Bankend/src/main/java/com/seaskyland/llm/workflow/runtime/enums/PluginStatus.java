@@ -26,32 +26,22 @@ import lombok.Getter;
  *
  * @since 1.0.0.3
  */
-
 @Getter
 @AllArgsConstructor
 public enum PluginStatus {
 
-	/**
-	 * Plugin has been deleted
-	 */
-	@JsonProperty("deleted")
-	DELETED(0, "deleted"),
+  /** Plugin has been deleted */
+  @JsonProperty("deleted")
+  DELETED(0, "deleted"),
 
-	/**
-	 * Plugin is in normal state
-	 */
-	@JsonProperty("normal")
-	NORMAL(1, "normal"),;
+  /** Plugin is in normal state */
+  @JsonProperty("normal")
+  NORMAL(1, "normal"),
+  ;
 
-	/**
-	 * Numeric status code
-	 */
-	@EnumValue
-	private final Integer status;
+  /** Numeric status code */
+  @EnumValue private final Integer status;
 
-	/**
-	 * String representation of the status
-	 */
-	private final String value;
-
+  /** String representation of the status */
+  private final String value;
 }

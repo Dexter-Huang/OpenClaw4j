@@ -16,15 +16,12 @@
 
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.AgentSchemaEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.AgentSchemaEntity;
 
 /**
- * Mapper interface for AgentSchema entity. Provides database operations for agent schema
- * data.
+ * Mapper interface for AgentSchema entity. Provides database operations for agent schema data.
  *
  * @since 1.0.0.3
  */
-public interface AgentSchemaMapper extends BaseMapper<AgentSchemaEntity> {
-
-}
+public interface AgentSchemaMapper extends BaseMapper<AgentSchemaEntity> {}

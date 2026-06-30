@@ -16,98 +16,94 @@
 
 package com.seaskyland.llm.workflow.core.base.entity;
 
-import com.seaskyland.llm.workflow.runtime.enums.CommonStatus;
-import com.seaskyland.llm.workflow.runtime.enums.DocumentIndexStatus;
-import com.seaskyland.llm.workflow.runtime.enums.DocumentType;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-import org.springframework.ai.vectorstore.SimpleVectorStore;
-
+import com.seaskyland.llm.workflow.runtime.enums.CommonStatus;
+import com.seaskyland.llm.workflow.runtime.enums.DocumentIndexStatus;
+import com.seaskyland.llm.workflow.runtime.enums.DocumentType;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Document entity class representing a document in the system.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @TableName("document")
 public class DocumentEntity {
 
-	/** Primary key */
-	@TableId(value = "id", type = IdType.AUTO)
-	private Long id;
+  /** Primary key */
+  @TableId(value = "id", type = IdType.AUTO)
+  private Long id;
 
-	/** Workspace identifier */
-	@TableField("workspace_id")
-	private String workspaceId;
+  /** Workspace identifier */
+  @TableField("workspace_id")
+  private String workspaceId;
 
-	/** Knowledge base identifier */
-	@TableField("kb_id")
-	private String kbId;
+  /** Knowledge base identifier */
+  @TableField("kb_id")
+  private String kbId;
 
-	/** Document identifier */
-	@TableField("doc_id")
-	private String docId;
+  /** Document identifier */
+  @TableField("doc_id")
+  private String docId;
 
-	/** Document status */
-	private CommonStatus status;
+  /** Document status */
+  private CommonStatus status;
 
-	/** Document type */
-	private DocumentType type;
+  /** Document type */
+  private DocumentType type;
 
-	/** Whether the document is enabled */
-	private Boolean enabled;
+  /** Whether the document is enabled */
+  private Boolean enabled;
 
-	/** Document name */
-	private String name;
+  /** Document name */
+  private String name;
 
-	/** Document format */
-	private String format;
+  /** Document format */
+  private String format;
 
-	/** Document size in bytes */
-	private Long size;
+  /** Document size in bytes */
+  private Long size;
 
-	/** Document metadata in JSON format */
-	private String metadata;
+  /** Document metadata in JSON format */
+  private String metadata;
 
-	/** Document indexing status */
-	@TableField("index_status")
-	private DocumentIndexStatus indexStatus;
+  /** Document indexing status */
+  @TableField("index_status")
+  private DocumentIndexStatus indexStatus;
 
-	/** Document storage path */
-	private String path;
+  /** Document storage path */
+  private String path;
 
-	/** Path to parsed document content */
-	@TableField("parsed_path")
-	private String parsedPath;
+  /** Path to parsed document content */
+  @TableField("parsed_path")
+  private String parsedPath;
 
-	/** Document processing configuration */
-	@TableField("process_config")
-	private String processConfig;
+  /** Document processing configuration */
+  @TableField("process_config")
+  private String processConfig;
 
-	/** Document source information */
-	private String source;
+  /** Document source information */
+  private String source;
 
-	/** Error message if any */
-	private String error;
+  /** Error message if any */
+  private String error;
 
-	/** Creation timestamp */
-	@TableField("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @TableField("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@TableField("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @TableField("gmt_modified")
+  private Date gmtModified;
 
-	/** Creator's identifier */
-	private String creator;
+  /** Creator's identifier */
+  private String creator;
 
-	/** Last modifier's identifier */
-	private String modifier;
-
+  /** Last modifier's identifier */
+  private String modifier;
 }

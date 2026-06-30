@@ -16,57 +16,54 @@
 package com.seaskyland.llm.workflow.core.model.llm.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
 
-/**
- * Configuration information for a model
- */
+/** Configuration information for a model */
 @Data
 public class ModelConfigInfo implements Serializable {
 
-	/** Model icon */
-	private String icon;
+  /** Model icon */
+  private String icon;
 
-	/** Unique identifier for the model */
-    @JsonProperty("model_id")
-	private String modelId;
+  /** Unique identifier for the model */
+  @JsonProperty("model_id")
+  private String modelId;
 
-	/** Model provider */
-	private String provider;
+  /** Model provider */
+  private String provider;
 
-	/** Model name */
-	private String name;
+  /** Model name */
+  private String name;
 
-	/** Model tags */
-	private List<String> tags;
+  /** Model tags */
+  private List<String> tags;
 
-	/** Whether the model is enabled */
-	private Boolean enable;
+  /** Whether the model is enabled */
+  private Boolean enable;
 
-	/** Source type: custom or preset */
-	private String source;
+  /** Source type: custom or preset */
+  private String source;
 
-	/** Model type */
-	private String type = ModelTypeEnum.llm.name();
+  /** Model type */
+  private String type = ModelTypeEnum.llm.name();
 
-	/** Model mode: chat or completion */
-	private String mode;
+  /** Model mode: chat or completion */
+  private String mode;
 
-	/** Model modes */
-	public enum ModeEnum {
+  /** Model modes */
+  public enum ModeEnum {
+    chat,
+    completion
+  }
 
-		chat, completion
-
-	}
-
-	/** Model types */
-	public enum ModelTypeEnum {
-
-		llm, rerank, text_embedding, tts, stt
-
-	}
-
+  /** Model types */
+  public enum ModelTypeEnum {
+    llm,
+    rerank,
+    text_embedding,
+    tts,
+    stt
+  }
 }

@@ -16,23 +16,10 @@
 
 package com.seaskyland.llm.workflow.core.base.mq;
 
-import com.seaskyland.llm.workflow.core.config.MqConfigProperties;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.client.apis.ClientServiceProvider;
-import org.apache.rocketmq.client.apis.message.Message;
-import org.apache.rocketmq.client.apis.message.MessageBuilder;
-import org.apache.rocketmq.client.apis.producer.Producer;
-import org.apache.rocketmq.client.apis.producer.SendReceipt;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 /**
  * Manages RocketMQ producers and provides message sending capabilities.
@@ -43,85 +30,95 @@ import java.util.function.Consumer;
 @Component
 public class MqProducerManager {
 
-	/**
-	 * Sends a message synchronously
-	 * @param producer MQ producer instance
-	 * @param message Message to be sent
-	 * @return Send result containing message ID
-	 */
-	public SendResult send(MqProducer producer, MqMessage message) {
-		return producer.send(message);
-	}
+  /**
+   * Sends a message synchronously
+   *
+   * @param producer MQ producer instance
+   * @param message Message to be sent
+   * @return Send result containing message ID
+   */
+  public SendResult send(MqProducer producer, MqMessage message) {
+    return producer.send(message);
+  }
 
-	/**
-	 * Sends a delayed message synchronously
-	 * @param producer MQ producer instance
-	 * @param message Message to be sent
-	 * @param delaySeconds Delay time in seconds
-	 * @return Send result containing message ID
-	 */
-	public SendResult sendDelay(MqProducer producer, MqMessage message, int delaySeconds) {
-		return producer.sendDelay(message, delaySeconds);
-	}
+  /**
+   * Sends a delayed message synchronously
+   *
+   * @param producer MQ producer instance
+   * @param message Message to be sent
+   * @param delaySeconds Delay time in seconds
+   * @return Send result containing message ID
+   */
+  public SendResult sendDelay(MqProducer producer, MqMessage message, int delaySeconds) {
+    return producer.sendDelay(message, delaySeconds);
+  }
 
-	/**
-	 * Sends messages asynchronously with callback
-	 * @param producer MQ producer instance
-	 * @param messages List of messages to be sent
-	 * @param callback Callback to handle send results
-	 */
-	public void sendAsync(MqProducer producer, List<MqMessage> messages, SendCallback callback) {
-		try {
-//			List<CompletableFuture<SendReceipt>> futures = new ArrayList<>();
-//			for (MqMessage message : messages) {
-//				CompletableFuture<SendReceipt> future = producer.sendAsync(buildMessage(message));
-//				futures.add(future);
-//			}
-//
-//			for (CompletableFuture<SendReceipt> future : futures) {
-//				try {
-//					SendReceipt sendReceipt = future.get(mqConfigProperties.getSendMessageTimeoutMs(),
-//							TimeUnit.MILLISECONDS);
-//					callback.onSuccess(SendResult.builder().messageId(sendReceipt.getMessageId().toString()).build());
-//				}
-//				catch (Exception e) {
-//					callback.onError(e);
-//				}
-//			}
-            messages.forEach(message -> {
-                producer.sendAsync(message, callback);
-            });
-		}
-		catch (Exception e) {
-			log.error("Failed to async send message", e);
-			throw new RuntimeException("Failed to async send message", e);
-		}
-	}
+  /**
+   * Sends messages asynchronously with callback
+   *
+   * @param producer MQ producer instance
+   * @param messages List of messages to be sent
+   * @param callback Callback to handle send results
+   */
+  public void sendAsync(MqProducer producer, List<MqMessage> messages, SendCallback callback) {
+    try {
+      //			List<CompletableFuture<SendReceipt>> futures = new ArrayList<>();
+      //			for (MqMessage message : messages) {
+      //				CompletableFuture<SendReceipt> future = producer.sendAsync(buildMessage(message));
+      //				futures.add(future);
+      //			}
+      //
+      //			for (CompletableFuture<SendReceipt> future : futures) {
+      //				try {
+      //					SendReceipt sendReceipt = future.get(mqConfigProperties.getSendMessageTimeoutMs(),
+      //							TimeUnit.MILLISECONDS);
+      //
+      //	callback.onSuccess(SendResult.builder().messageId(sendReceipt.getMessageId().toString()).build());
+      //				}
+      //				catch (Exception e) {
+      //					callback.onError(e);
+      //				}
+      //			}
+      messages.forEach(
+          message -> {
+            producer.sendAsync(message, callback);
+          });
+    } catch (Exception e) {
+      log.error("Failed to async send message", e);
+      throw new RuntimeException("Failed to async send message", e);
+    }
+  }
 
-	/**
-	 * Sends messages asynchronously with success and error handlers
-	 * @param producer MQ producer instance
-	 * @param messages List of messages to be sent
-	 * @param onSuccess Success handler
-	 * @param onError Error handler
-	 */
-	public void sendAsync(MqProducer producer, List<MqMessage> messages, Consumer<SendResult> onSuccess,
-			Consumer<Throwable> onError) {
-		sendAsync(producer, messages, new SendCallback() {
-			@Override
-			public void onSuccess(SendResult sendResult) {
-				if (onSuccess != null) {
-					onSuccess.accept(sendResult);
-				}
-			}
+  /**
+   * Sends messages asynchronously with success and error handlers
+   *
+   * @param producer MQ producer instance
+   * @param messages List of messages to be sent
+   * @param onSuccess Success handler
+   * @param onError Error handler
+   */
+  public void sendAsync(
+      MqProducer producer,
+      List<MqMessage> messages,
+      Consumer<SendResult> onSuccess,
+      Consumer<Throwable> onError) {
+    sendAsync(
+        producer,
+        messages,
+        new SendCallback() {
+          @Override
+          public void onSuccess(SendResult sendResult) {
+            if (onSuccess != null) {
+              onSuccess.accept(sendResult);
+            }
+          }
 
-			@Override
-			public void onError(Throwable e) {
-				if (onError != null) {
-					onError.accept(e);
-				}
-			}
-		});
-	}
-
+          @Override
+          public void onError(Throwable e) {
+            if (onError != null) {
+              onError.accept(e);
+            }
+          }
+        });
+  }
 }

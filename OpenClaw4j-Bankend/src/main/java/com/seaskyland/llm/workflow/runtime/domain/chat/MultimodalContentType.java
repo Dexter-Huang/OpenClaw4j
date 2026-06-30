@@ -21,31 +21,24 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * Enum representing different types of multimodal content. Defines the supported content
- * types for multimodal messages.
+ * Enum representing different types of multimodal content. Defines the supported content types for
+ * multimodal messages.
  *
  * @since 1.0.0.3
  */
-
 @Getter
 @AllArgsConstructor
 public enum MultimodalContentType {
 
-	/**
-	 * Text content type
-	 */
-	@JsonProperty("text")
-	TEXT("text"),
+  /** Text content type */
+  @JsonProperty("text")
+  TEXT("text"),
 
-	/**
-	 * Image content type
-	 */
-	@JsonProperty("image")
-	IMAGE("image"),;
+  /** Image content type */
+  @JsonProperty("image")
+  IMAGE("image"),
+  ;
 
-	/**
-	 * The string value of the content type
-	 */
-	private final String value;
-
+  /** The string value of the content type */
+  private final String value;
 }

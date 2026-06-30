@@ -22,37 +22,35 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * Enum representing the status of document indexing process. Tracks the lifecycle of
- * document processing from upload to completion.
+ * Enum representing the status of document indexing process. Tracks the lifecycle of document
+ * processing from upload to completion.
  *
  * @since 1.0.0.3
  */
-
 @Getter
 @AllArgsConstructor
 public enum DocumentIndexStatus {
 
-	/** Document has been uploaded but not yet processed */
-	@JsonProperty("uploaded")
-	UPLOADED(1, "uploaded"),
+  /** Document has been uploaded but not yet processed */
+  @JsonProperty("uploaded")
+  UPLOADED(1, "uploaded"),
 
-	/** Document is currently being processed */
-	@JsonProperty("processing")
-	PROCESSING(2, "processing"),
+  /** Document is currently being processed */
+  @JsonProperty("processing")
+  PROCESSING(2, "processing"),
 
-	/** Document has been successfully processed */
-	@JsonProperty("processed")
-	PROCESSED(3, "processed"),
+  /** Document has been successfully processed */
+  @JsonProperty("processed")
+  PROCESSED(3, "processed"),
 
-	/** Document processing has failed */
-	@JsonProperty("failed")
-	FAILED(4, "failed"),;
+  /** Document processing has failed */
+  @JsonProperty("failed")
+  FAILED(4, "failed"),
+  ;
 
-	/** Numeric status code used for database storage */
-	@EnumValue
-	private final Integer status;
+  /** Numeric status code used for database storage */
+  @EnumValue private final Integer status;
 
-	/** String representation of the status */
-	private final String value;
-
+  /** String representation of the status */
+  private final String value;
 }

@@ -20,57 +20,59 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.http.MediaType;
 
 /**
- * Utility class for file operations. Provides methods for handling file-related
- * operations such as content type detection.
+ * Utility class for file operations. Provides methods for handling file-related operations such as
+ * content type detection.
  *
  * @since 1.0.0.3
  */
 public class FileUtils {
 
-	/**
-	 * Determines the content type (MIME type) based on file extension. Supports common
-	 * file types including PDF, images, text, and data formats.
-	 * @param filename The name of the file
-	 * @return The corresponding MediaType value for the file extension
-	 */
-	public static String getContentType(String filename) {
-		String extension = FilenameUtils.getExtension(filename).toLowerCase();
-		return switch (extension) {
-			case "pdf" -> MediaType.APPLICATION_PDF_VALUE;
-			case "jpg", "jpeg" -> MediaType.IMAGE_JPEG_VALUE;
-			case "png" -> MediaType.IMAGE_PNG_VALUE;
-			case "gif" -> MediaType.IMAGE_GIF_VALUE;
-			case "txt" -> MediaType.TEXT_PLAIN_VALUE;
-			case "html" -> MediaType.TEXT_HTML_VALUE;
-			case "xml" -> MediaType.APPLICATION_XML_VALUE;
-			case "json" -> MediaType.APPLICATION_JSON_VALUE;
-			default -> MediaType.APPLICATION_OCTET_STREAM_VALUE;
-		};
-	}
+  /**
+   * Determines the content type (MIME type) based on file extension. Supports common file types
+   * including PDF, images, text, and data formats.
+   *
+   * @param filename The name of the file
+   * @return The corresponding MediaType value for the file extension
+   */
+  public static String getContentType(String filename) {
+    String extension = FilenameUtils.getExtension(filename).toLowerCase();
+    return switch (extension) {
+      case "pdf" -> MediaType.APPLICATION_PDF_VALUE;
+      case "jpg", "jpeg" -> MediaType.IMAGE_JPEG_VALUE;
+      case "png" -> MediaType.IMAGE_PNG_VALUE;
+      case "gif" -> MediaType.IMAGE_GIF_VALUE;
+      case "txt" -> MediaType.TEXT_PLAIN_VALUE;
+      case "html" -> MediaType.TEXT_HTML_VALUE;
+      case "xml" -> MediaType.APPLICATION_XML_VALUE;
+      case "json" -> MediaType.APPLICATION_JSON_VALUE;
+      default -> MediaType.APPLICATION_OCTET_STREAM_VALUE;
+    };
+  }
 
-	/**
-	 * get temp file path
-	 * @param name file name
-	 * @return temp file path
-	 */
-	public static String getTempFilePath(String name) {
-		String path = System.getProperty("java.io.tmpdir");
-		return String.format("%s/%s", path, name);
-	}
+  /**
+   * get temp file path
+   *
+   * @param name file name
+   * @return temp file path
+   */
+  public static String getTempFilePath(String name) {
+    String path = System.getProperty("java.io.tmpdir");
+    return String.format("%s/%s", path, name);
+  }
 
-	/**
-	 * get unique file name
-	 * @param name file name
-	 * @return unique file name
-	 */
-	public static String getUniqueFileName(String name) {
-		if (name.indexOf('.') == -1) {
-			return name + "_" + System.currentTimeMillis();
-		}
+  /**
+   * get unique file name
+   *
+   * @param name file name
+   * @return unique file name
+   */
+  public static String getUniqueFileName(String name) {
+    if (name.indexOf('.') == -1) {
+      return name + "_" + System.currentTimeMillis();
+    }
 
-		String fileName = name.substring(0, name.lastIndexOf('.'));
-		String fileExtension = name.substring(name.lastIndexOf('.'));
-		return fileName + "_" + System.currentTimeMillis() + fileExtension;
-	}
-
+    String fileName = name.substring(0, name.lastIndexOf('.'));
+    String fileExtension = name.substring(name.lastIndexOf('.'));
+    return fileName + "_" + System.currentTimeMillis() + fileExtension;
+  }
 }

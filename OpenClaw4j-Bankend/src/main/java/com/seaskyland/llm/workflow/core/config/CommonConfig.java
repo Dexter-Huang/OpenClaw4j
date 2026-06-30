@@ -16,53 +16,53 @@
 
 package com.seaskyland.llm.workflow.core.config;
 
-import com.google.common.collect.Sets;
-import lombok.Data;
-import org.springframework.context.annotation.Configuration;
-
-import java.util.Set;
-
 import static com.seaskyland.llm.workflow.runtime.domain.workflow.NodeTypeEnum.API;
 import static com.seaskyland.llm.workflow.runtime.domain.workflow.NodeTypeEnum.MCP;
 import static com.seaskyland.llm.workflow.runtime.domain.workflow.NodeTypeEnum.PLUGIN;
 import static com.seaskyland.llm.workflow.runtime.domain.workflow.NodeTypeEnum.SCRIPT;
 
+import com.google.common.collect.Sets;
+import java.util.Set;
+import lombok.Data;
+import org.springframework.context.annotation.Configuration;
+
 /**
- * Common configuration class for Studio service. Contains various configuration
- * parameters for conversation, workflow, and system behavior.
+ * Common configuration class for Studio service. Contains various configuration parameters for
+ * conversation, workflow, and system behavior.
  *
  * @since 1.0.0.3
  */
-
 @Configuration
 // @NacosPropertySource(dataId = "spring.ai.alibaba.studio.config", groupId =
 // "saa-studio", autoRefreshed = true)
 @Data
 public class CommonConfig {
 
-	// TTL for conversation memory in cache (in seconds)
-	private Long conversationMemoryTtlInCache = 3600L;
+  // TTL for conversation memory in cache (in seconds)
+  private Long conversationMemoryTtlInCache = 3600L;
 
-	// Maximum number of conversation rounds to store in cache
-	private Integer maxConversationRoundInCache = 50;
+  // Maximum number of conversation rounds to store in cache
+  private Integer maxConversationRoundInCache = 50;
 
-	// Timeout for agent read operations (in milliseconds)
-	private Integer agentReadTimeout = 180000;
+  // Timeout for agent read operations (in milliseconds)
+  private Integer agentReadTimeout = 180000;
 
-	// Input timeout duration (in milliseconds)
-	private Long inputTimeout = 5 * 60 * 1000L;
+  // Input timeout duration (in milliseconds)
+  private Long inputTimeout = 5 * 60 * 1000L;
 
-	// Workflow awaiting time between operations (in milliseconds)
-	private Long workflowAwaitingTime = 100L;
+  // Workflow awaiting time between operations (in milliseconds)
+  private Long workflowAwaitingTime = 100L;
 
-	// Template for file search prompt
-	private String fileSearchPrompt = """
+  // Template for file search prompt
+  private String fileSearchPrompt =
+      """
 			# Knowledge Base
 			Please remember the following materials, they may be helpful in answering questions.
 			${documents}
 			""";
 
-	private String citationPrompt = """
+  private String citationPrompt =
+      """
 			指令：您需要仅使用提供的搜索文档为给定问题写出高质量的答案，并正确引用它们。 引用多个搜索结果时，请使用<ref>[1]</ref>或<ref>[1][3]</ref>等格式。 请注意，每个句子中必须至少引用一个文档。 换句话说，你禁止在没有引用任何文献的情况下写句子。 此外，您应该在每个句子中添加引用符号，尤其是在句号（punct.）之前。
 
 			$$材料：
@@ -90,18 +90,13 @@ public class CommonConfig {
 			$$材料：
 			""";
 
-	/**
-	 * Node types that support retry on exception
-	 */
-	private Set<String> retrySupportNodeTypeSet = Sets.newHashSet(SCRIPT.getCode(), API.getCode(), PLUGIN.getCode(),
-			MCP.getCode());
+  /** Node types that support retry on exception */
+  private Set<String> retrySupportNodeTypeSet =
+      Sets.newHashSet(SCRIPT.getCode(), API.getCode(), PLUGIN.getCode(), MCP.getCode());
 
-	/**
-	 * Node types that support try-catch exception handling
-	 */
-	private Set<String> tryCatchSupportNodeTypeSet = Sets.newHashSet(SCRIPT.getCode(), API.getCode(), PLUGIN.getCode(),
-			MCP.getCode());
+  /** Node types that support try-catch exception handling */
+  private Set<String> tryCatchSupportNodeTypeSet =
+      Sets.newHashSet(SCRIPT.getCode(), API.getCode(), PLUGIN.getCode(), MCP.getCode());
 
-	private String workflowRefreshInterval = "{\"console\":3000,\"async\":5000}}";
-
+  private String workflowRefreshInterval = "{\"console\":3000,\"async\":5000}}";
 }

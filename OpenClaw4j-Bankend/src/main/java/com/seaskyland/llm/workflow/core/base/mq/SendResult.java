@@ -26,16 +26,12 @@ import lombok.NoArgsConstructor;
  *
  * @since 1.0.0.3
  */
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class SendResult {
 
-	/**
-	 * Unique identifier of the sent message
-	 */
-	private String messageId;
-
+  /** Unique identifier of the sent message */
+  private String messageId;
 }

@@ -16,9 +16,8 @@
 
 package com.seaskyland.llm.workflow.core.base.domain;
 
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-
 import java.net.URI;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 
 /**
  * A custom HTTP DELETE request implementation that supports request body. Extends
@@ -28,36 +27,37 @@ import java.net.URI;
  */
 public class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
 
-	/** HTTP DELETE method name */
-	public final static String METHOD_NAME = "DELETE";
+  /** HTTP DELETE method name */
+  public static final String METHOD_NAME = "DELETE";
 
-	/** Default constructor */
-	public HttpDeleteWithBody() {
-		super();
-	}
+  /** Default constructor */
+  public HttpDeleteWithBody() {
+    super();
+  }
 
-	/**
-	 * Constructor with URI
-	 * @param uri the target URI for the DELETE request
-	 */
-	public HttpDeleteWithBody(final URI uri) {
-		super();
-		setURI(uri);
-	}
+  /**
+   * Constructor with URI
+   *
+   * @param uri the target URI for the DELETE request
+   */
+  public HttpDeleteWithBody(final URI uri) {
+    super();
+    setURI(uri);
+  }
 
-	/**
-	 * Constructor with URI string
-	 * @param uri the target URI string for the DELETE request
-	 * @throws IllegalArgumentException if the URI string is invalid
-	 */
-	public HttpDeleteWithBody(final String uri) {
-		super();
-		setURI(URI.create(uri));
-	}
+  /**
+   * Constructor with URI string
+   *
+   * @param uri the target URI string for the DELETE request
+   * @throws IllegalArgumentException if the URI string is invalid
+   */
+  public HttpDeleteWithBody(final String uri) {
+    super();
+    setURI(URI.create(uri));
+  }
 
-	@Override
-	public String getMethod() {
-		return METHOD_NAME;
-	}
-
+  @Override
+  public String getMethod() {
+    return METHOD_NAME;
+  }
 }

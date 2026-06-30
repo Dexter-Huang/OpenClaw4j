@@ -17,32 +17,29 @@
 package com.seaskyland.llm.workflow.runtime.domain.knowledgebase;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * Request model for deleting documents from a knowledge base.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class DeleteDocumentRequest implements Serializable {
 
-	/** ID of the knowledge base */
-	@JsonProperty("kb_id")
-	private String kbId;
+  /** ID of the knowledge base */
+  @JsonProperty("kb_id")
+  private String kbId;
 
-	/** List of document IDs to be deleted */
-	@JsonProperty("doc_ids")
-	private List<String> docIds;
-
+  /** List of document IDs to be deleted */
+  @JsonProperty("doc_ids")
+  private List<String> docIds;
 }

@@ -22,8 +22,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * Enum representing different types of documents. Defines the supported document source
- * types in the system.
+ * Enum representing different types of documents. Defines the supported document source types in
+ * the system.
  *
  * @since 1.0.0.3
  */
@@ -31,28 +31,18 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum DocumentType {
 
-	/**
-	 * Represents a document from a file source
-	 */
-	@JsonProperty("file")
-	FILE("file"),
+  /** Represents a document from a file source */
+  @JsonProperty("file")
+  FILE("file"),
 
-	/**
-	 * Represents a document from a URL source
-	 */
-	@JsonProperty("url")
-	URL("url"),
+  /** Represents a document from a URL source */
+  @JsonProperty("url")
+  URL("url"),
 
-	/**
-	 * Represents a document from an OSS source
-	 */
-	@JsonProperty("oss")
-	OSS("oss");
+  /** Represents a document from an OSS source */
+  @JsonProperty("oss")
+  OSS("oss");
 
-	/**
-	 * The string value representing the document type
-	 */
-	@EnumValue
-	private final String value;
-
+  /** The string value representing the document type */
+  @EnumValue private final String value;
 }

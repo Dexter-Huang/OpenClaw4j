@@ -16,109 +16,107 @@
 
 package com.seaskyland.llm.workflow.core.utils.common;
 
+import java.util.*;
+import java.util.stream.Collectors;
 import org.springframework.cglib.beans.BeanCopier;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 /**
- * Utility class for copying properties between Java beans using CGLIB BeanCopier.
- * Provides efficient and type-safe bean property copying operations.
+ * Utility class for copying properties between Java beans using CGLIB BeanCopier. Provides
+ * efficient and type-safe bean property copying operations.
  *
  * @since 1.0.0.3
  */
-
 public class BeanCopierUtils {
 
-	/** Cache for storing BeanCopier instances to improve performance */
-	private static final Map<String, BeanCopier> beanCopierMap = new HashMap<>();
+  /** Cache for storing BeanCopier instances to improve performance */
+  private static final Map<String, BeanCopier> beanCopierMap = new HashMap<>();
 
-	/**
-	 * Copies properties from source object to destination object.
-	 * @param src Source object
-	 * @param dest Destination object
-	 */
-	public static void copy(Object src, Object dest) {
-		Objects.requireNonNull(src);
-		Objects.requireNonNull(dest);
-		String key = getKey(src, dest);
-		BeanCopier beanCopier;
-		if (!beanCopierMap.containsKey(key)) {
-			beanCopier = BeanCopier.create(src.getClass(), dest.getClass(), false);
-			beanCopierMap.put(key, beanCopier);
-		}
-		else {
-			beanCopier = beanCopierMap.get(key);
-		}
-		beanCopier.copy(src, dest, null);
-	}
+  /**
+   * Copies properties from source object to destination object.
+   *
+   * @param src Source object
+   * @param dest Destination object
+   */
+  public static void copy(Object src, Object dest) {
+    Objects.requireNonNull(src);
+    Objects.requireNonNull(dest);
+    String key = getKey(src, dest);
+    BeanCopier beanCopier;
+    if (!beanCopierMap.containsKey(key)) {
+      beanCopier = BeanCopier.create(src.getClass(), dest.getClass(), false);
+      beanCopierMap.put(key, beanCopier);
+    } else {
+      beanCopier = beanCopierMap.get(key);
+    }
+    beanCopier.copy(src, dest, null);
+  }
 
-	/**
-	 * Creates a new instance of destination class and copies properties from source
-	 * object.
-	 * @param src Source object
-	 * @param destClass Destination class
-	 * @return New instance of destination class with copied properties
-	 */
-	public static <T> T copy(Object src, Class<T> destClass) {
-		Objects.requireNonNull(src);
-		Objects.requireNonNull(destClass);
-		T dest;
-		try {
-			dest = destClass.newInstance();
-		}
-		catch (InstantiationException | IllegalAccessException e) {
-			throw new IllegalArgumentException(e);
-		}
-		copy(src, dest);
-		return dest;
-	}
+  /**
+   * Creates a new instance of destination class and copies properties from source object.
+   *
+   * @param src Source object
+   * @param destClass Destination class
+   * @return New instance of destination class with copied properties
+   */
+  public static <T> T copy(Object src, Class<T> destClass) {
+    Objects.requireNonNull(src);
+    Objects.requireNonNull(destClass);
+    T dest;
+    try {
+      dest = destClass.newInstance();
+    } catch (InstantiationException | IllegalAccessException e) {
+      throw new IllegalArgumentException(e);
+    }
+    copy(src, dest);
+    return dest;
+  }
 
-	/**
-	 * Copies a list of source objects to a list of destination objects.
-	 * @param srcList Source object list
-	 * @param destClass Destination class
-	 * @return List of new destination objects
-	 */
-	public static <T, S> List<T> copyList(List<S> srcList, Class<T> destClass) {
-		if (CollectionUtils.isEmpty(srcList)) {
-			return new ArrayList<>(0);
-		}
+  /**
+   * Copies a list of source objects to a list of destination objects.
+   *
+   * @param srcList Source object list
+   * @param destClass Destination class
+   * @return List of new destination objects
+   */
+  public static <T, S> List<T> copyList(List<S> srcList, Class<T> destClass) {
+    if (CollectionUtils.isEmpty(srcList)) {
+      return new ArrayList<>(0);
+    }
 
-		Objects.requireNonNull(destClass);
-		return srcList.stream().map(src -> copy(src, destClass)).collect(Collectors.toList());
-	}
+    Objects.requireNonNull(destClass);
+    return srcList.stream().map(src -> copy(src, destClass)).collect(Collectors.toList());
+  }
 
-	/**
-	 * Copies a list of source objects to a list of destination objects with custom
-	 * callback.
-	 * @param srcList Source object list
-	 * @param destClass Destination class
-	 * @param callback Custom callback for additional processing
-	 * @return List of new destination objects
-	 */
-	public static <T, S> List<T> copyList(List<S> srcList, Class<T> destClass, BeanCopierUtilsCallback<S, T> callback) {
-		if (CollectionUtils.isEmpty(srcList)) {
-			return new ArrayList<>(0);
-		}
+  /**
+   * Copies a list of source objects to a list of destination objects with custom callback.
+   *
+   * @param srcList Source object list
+   * @param destClass Destination class
+   * @param callback Custom callback for additional processing
+   * @return List of new destination objects
+   */
+  public static <T, S> List<T> copyList(
+      List<S> srcList, Class<T> destClass, BeanCopierUtilsCallback<S, T> callback) {
+    if (CollectionUtils.isEmpty(srcList)) {
+      return new ArrayList<>(0);
+    }
 
-		Objects.requireNonNull(destClass);
-		return srcList.stream().map(src -> {
-			T target = copy(src, destClass);
-			if (callback != null) {
-				callback.callback(src, target);
-			}
-			return target;
-		}).collect(Collectors.toList());
-	}
+    Objects.requireNonNull(destClass);
+    return srcList.stream()
+        .map(
+            src -> {
+              T target = copy(src, destClass);
+              if (callback != null) {
+                callback.callback(src, target);
+              }
+              return target;
+            })
+        .collect(Collectors.toList());
+  }
 
-	/**
-	 * Generates a unique key for BeanCopier cache based on source and destination
-	 * classes.
-	 */
-	private static String getKey(Object src, Object dest) {
-		return src.getClass().getName() + dest.getClass().getName();
-	}
-
+  /** Generates a unique key for BeanCopier cache based on source and destination classes. */
+  private static String getKey(Object src, Object dest) {
+    return src.getClass().getName() + dest.getClass().getName();
+  }
 }

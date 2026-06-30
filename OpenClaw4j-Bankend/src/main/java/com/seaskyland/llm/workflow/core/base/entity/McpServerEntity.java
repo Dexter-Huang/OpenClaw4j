@@ -20,63 +20,61 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Title: CreateDate: 2025/4/24 14:34
  *
  * @author guning.lt
  * @since 1.0.0.3
- **/
+ */
 @Data
 @TableName("mcp_server")
 public class McpServerEntity {
 
-	@TableId(value = "id", type = IdType.AUTO)
-	private Long id;
+  @TableId(value = "id", type = IdType.AUTO)
+  private Long id;
 
-	@TableField("gmt_create")
-	private Date gmtCreate;
+  @TableField("gmt_create")
+  private Date gmtCreate;
 
-	@TableField("gmt_modified")
-	private Date gmtModified;
+  @TableField("gmt_modified")
+  private Date gmtModified;
 
-	@TableField("server_code")
-	private String serverCode;
+  @TableField("server_code")
+  private String serverCode;
 
-	private String name;
+  private String name;
 
-	private String description;
+  private String description;
 
-	private String source;
+  private String source;
 
-	@TableField("deploy_env")
-	private String deployEnv;
+  @TableField("deploy_env")
+  private String deployEnv;
 
-	private String type;
+  private String type;
 
-	@TableField("deploy_config")
-	private String deployConfig;
+  @TableField("deploy_config")
+  private String deployConfig;
 
-	@TableField("workspace_id")
-	private String workspaceId;
+  @TableField("workspace_id")
+  private String workspaceId;
 
-	@TableField("account_id")
-	private String accountId;
+  @TableField("account_id")
+  private String accountId;
 
-	private Integer status;
+  private Integer status;
 
-	@TableField("biz_type")
-	private String bizType;
+  @TableField("biz_type")
+  private String bizType;
 
-	@TableField("detail_config")
-	private String detailConfig;
+  @TableField("detail_config")
+  private String detailConfig;
 
-	private String host;
+  private String host;
 
-	@TableField("install_type")
-	private String installType;
-
+  @TableField("install_type")
+  private String installType;
 }

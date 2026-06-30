@@ -15,155 +15,149 @@
  */
 package com.seaskyland.llm.workflow.runtime.domain.workflow;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.seaskyland.llm.workflow.runtime.domain.BizError;
 import com.seaskyland.llm.workflow.runtime.domain.chat.ChatMessage;
 import com.seaskyland.llm.workflow.runtime.domain.chat.Usage;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import lombok.Data;
 
 @Data
 public class NodeResult implements Serializable {
 
-	// 是否多分支节点
-	@JsonProperty("is_multi_branch")
-	private boolean isMultiBranch = false;
+  // 是否多分支节点
+  @JsonProperty("is_multi_branch")
+  private boolean isMultiBranch = false;
 
-	// 多分支节点结果
-	@JsonProperty("multi_branch_results")
-	private List<MultiBranchReference> multiBranchResults;
+  // 多分支节点结果
+  @JsonProperty("multi_branch_results")
+  private List<MultiBranchReference> multiBranchResults;
 
-	@JsonProperty("node_id")
-	private String nodeId;
+  @JsonProperty("node_id")
+  private String nodeId;
 
-	@JsonProperty("node_name")
-	private String nodeName;
+  @JsonProperty("node_name")
+  private String nodeName;
 
-	@JsonProperty("node_type")
-	private String nodeType;
+  @JsonProperty("node_type")
+  private String nodeType;
 
-	@JsonProperty("node_status")
-	private String nodeStatus;
+  @JsonProperty("node_status")
+  private String nodeStatus;
 
-	@JsonProperty("node_exec_time")
-	private String nodeExecTime;
+  @JsonProperty("node_exec_time")
+  private String nodeExecTime;
 
-	private Retry retry;
+  private Retry retry;
 
-	@JsonProperty("try_catch")
-	private TryCatch tryCatch;
+  @JsonProperty("try_catch")
+  private TryCatch tryCatch;
 
-	// 短期记忆
-	@JsonProperty("short_memory")
-	private ShortMemory shortMemory;
+  // 短期记忆
+  @JsonProperty("short_memory")
+  private ShortMemory shortMemory;
 
-	@JsonProperty("error_code")
-	private String errorCode;
+  @JsonProperty("error_code")
+  private String errorCode;
 
-	@JsonProperty("error_info")
-	private String errorInfo;
+  @JsonProperty("error_info")
+  private String errorInfo;
 
-	private BizError error;
+  private BizError error;
 
-	private String input;
+  private String input;
 
-	private String output;
+  private String output;
 
-	// json or text
-	@JsonProperty("output_type")
-	private String outputType = "json";
+  // json or text
+  @JsonProperty("output_type")
+  private String outputType = "json";
 
-	// 增量输出，用于api输出
-	@JsonProperty("increment_output")
-	private String incrementOutput;
+  // 增量输出，用于api输出
+  @JsonProperty("increment_output")
+  private String incrementOutput;
 
-	private List<Usage> usages;
+  private List<Usage> usages;
 
-	@JsonProperty("parent_node_id")
-	private String parentNodeId;
+  @JsonProperty("parent_node_id")
+  private String parentNodeId;
 
-	// 判���是否批处理节点
-	@JsonProperty("is_batch")
-	private boolean isBatch = false;
+  // 判���是否批处理节点
+  @JsonProperty("is_batch")
+  private boolean isBatch = false;
 
-	// 批处理结果返回
-	private List<NodeResult> batches = new CopyOnWriteArrayList<>();
+  // 批处理结果返回
+  private List<NodeResult> batches = new CopyOnWriteArrayList<>();
 
-	// 批次序号,仅isBatch = false时生效
-	private Integer index;
+  // 批次序号,仅isBatch = false时生效
+  private Integer index;
 
-	private String ext;
+  private String ext;
 
-	public static NodeResult error(Node node, BizError error) {
-		NodeResult result = new NodeResult();
-		result.setNodeId(node.getId());
-		result.setNodeName(node.getName() == null ? node.getId() : node.getName());
-		result.setNodeType(node.getType());
-		result.setNodeStatus(NodeStatusEnum.FAIL.getCode());
-		result.setErrorInfo(error.getMessage());
-		result.setError(error);
-		return result;
-	}
+  public static NodeResult error(Node node, BizError error) {
+    NodeResult result = new NodeResult();
+    result.setNodeId(node.getId());
+    result.setNodeName(node.getName() == null ? node.getId() : node.getName());
+    result.setNodeType(node.getType());
+    result.setNodeStatus(NodeStatusEnum.FAIL.getCode());
+    result.setErrorInfo(error.getMessage());
+    result.setError(error);
+    return result;
+  }
 
-	public static NodeResult error(Node node, String errorMsg) {
-		NodeResult result = new NodeResult();
-		result.setNodeId(node.getId());
-		result.setNodeName(node.getName() == null ? node.getId() : node.getName());
-		result.setNodeType(node.getType());
-		result.setNodeStatus(NodeStatusEnum.FAIL.getCode());
-		result.setErrorInfo(errorMsg);
-		return result;
-	}
+  public static NodeResult error(Node node, String errorMsg) {
+    NodeResult result = new NodeResult();
+    result.setNodeId(node.getId());
+    result.setNodeName(node.getName() == null ? node.getId() : node.getName());
+    result.setNodeType(node.getType());
+    result.setNodeStatus(NodeStatusEnum.FAIL.getCode());
+    result.setErrorInfo(errorMsg);
+    return result;
+  }
 
-	@Data
-	public static class Retry implements Serializable {
+  @Data
+  public static class Retry implements Serializable {
 
-		private static final long serialVersionUID = -1L;
+    private static final long serialVersionUID = -1L;
 
-		private boolean happened = false;
+    private boolean happened = false;
 
-		@JsonProperty("retry_times")
-		private Integer retryTimes;
+    @JsonProperty("retry_times")
+    private Integer retryTimes;
+  }
 
-	}
+  @Data
+  public static class TryCatch implements Serializable {
 
-	@Data
-	public static class TryCatch implements Serializable {
+    private static final long serialVersionUID = -1L;
 
-		private static final long serialVersionUID = -1L;
+    private boolean happened = false;
 
-		private boolean happened = false;
+    private String strategy;
+  }
 
-		private String strategy;
+  @Data
+  public static class ShortMemory implements Serializable {
 
-	}
+    private static final long serialVersionUID = -1L;
 
-	@Data
-	public static class ShortMemory implements Serializable {
+    @JsonProperty("current_self_chat_messages")
+    private List<ChatMessage> currentSelfChatMessages;
 
-		private static final long serialVersionUID = -1L;
+    private Integer round;
+  }
 
-		@JsonProperty("current_self_chat_messages")
-		private List<ChatMessage> currentSelfChatMessages;
+  @Data
+  public static class MultiBranchReference implements Serializable {
 
-		private Integer round;
+    private static final long serialVersionUID = -1L;
 
-	}
+    @JsonProperty("condition_id")
+    private String conditionId;
 
-	@Data
-	public static class MultiBranchReference implements Serializable {
-
-		private static final long serialVersionUID = -1L;
-
-		@JsonProperty("condition_id")
-		private String conditionId;
-
-		@JsonProperty("target_ids")
-		private List<String> targetIds;
-
-	}
-
+    @JsonProperty("target_ids")
+    private List<String> targetIds;
+  }
 }

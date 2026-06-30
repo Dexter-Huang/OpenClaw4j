@@ -15,26 +15,23 @@
  */
 package com.seaskyland.llm.workflow.core.config;
 
+import javax.script.ScriptEngineManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.script.ScriptEngineManager;
-
-/**
- * Configuration class for script engines Registers and configures various script engines
- */
+/** Configuration class for script engines Registers and configures various script engines */
 @Slf4j
 @Configuration
 public class ScriptEngineConfig {
 
-	/**
-	 * Registers JVM script engines discovered on the application classpath.
-	 * @return configured ScriptEngineManager
-	 */
-	@Bean
-	public ScriptEngineManager scriptEngineManager() {
-		return new ScriptEngineManager();
-	}
-
+  /**
+   * Registers JVM script engines discovered on the application classpath.
+   *
+   * @return configured ScriptEngineManager
+   */
+  @Bean
+  public ScriptEngineManager scriptEngineManager() {
+    return new ScriptEngineManager();
+  }
 }

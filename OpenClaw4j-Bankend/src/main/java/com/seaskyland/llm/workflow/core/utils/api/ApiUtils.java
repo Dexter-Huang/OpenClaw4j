@@ -19,34 +19,40 @@ package com.seaskyland.llm.workflow.core.utils.api;
 import org.springframework.http.HttpHeaders;
 
 /**
- * Utility class for API-related operations. Provides methods for generating user agent
- * strings and HTTP headers.
+ * Utility class for API-related operations. Provides methods for generating user agent strings and
+ * HTTP headers.
  *
  * @since 1.0.0.3
  */
 public class ApiUtils {
 
-	/** SDK identifier used in user agent string */
-	private static final String SDK_FLAG = "agentscope";
+  /** SDK identifier used in user agent string */
+  private static final String SDK_FLAG = "agentscope";
 
-	/**
-	 * Generates a user agent string containing SDK version and system information.
-	 * @return Formatted user agent string
-	 */
-	public static String userAgent() {
-		return String.format("%s/%s; java/%s; platform/%s; processor/%s", SDK_FLAG, "1.0.0-M1",
-				System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.arch"));
-	}
+  /**
+   * Generates a user agent string containing SDK version and system information.
+   *
+   * @return Formatted user agent string
+   */
+  public static String userAgent() {
+    return String.format(
+        "%s/%s; java/%s; platform/%s; processor/%s",
+        SDK_FLAG,
+        "1.0.0-M1",
+        System.getProperty("java.version"),
+        System.getProperty("os.name"),
+        System.getProperty("os.arch"));
+  }
 
-	/**
-	 * Creates base HTTP headers with user agent information.
-	 * @return MultiValueMap containing the base headers
-	 */
-	public static HttpHeaders getBaseHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.USER_AGENT, userAgent());
+  /**
+   * Creates base HTTP headers with user agent information.
+   *
+   * @return MultiValueMap containing the base headers
+   */
+  public static HttpHeaders getBaseHeaders() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add(HttpHeaders.USER_AGENT, userAgent());
 
-		return headers;
-	}
-
+    return headers;
+  }
 }

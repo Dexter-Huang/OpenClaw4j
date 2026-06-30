@@ -16,14 +16,12 @@
 
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.ToolEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.ToolEntity;
 
 /**
  * Mapper interface for Tool entity. Provides database operations for tool-related data.
  *
  * @since 1.0.0.3
  */
-public interface ToolMapper extends BaseMapper<ToolEntity> {
-
-}
+public interface ToolMapper extends BaseMapper<ToolEntity> {}

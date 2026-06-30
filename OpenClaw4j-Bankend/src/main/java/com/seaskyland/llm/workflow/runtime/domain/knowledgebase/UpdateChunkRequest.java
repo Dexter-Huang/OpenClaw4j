@@ -17,29 +17,26 @@
 package com.seaskyland.llm.workflow.runtime.domain.knowledgebase;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
 
 /**
  * Request model for updating document chunks.
  *
  * @since 1.0.0.3
  */
-
 @Data
 public class UpdateChunkRequest implements Serializable {
 
-	/** Document identifier */
-	@JsonProperty("doc_id")
-	private String docId;
+  /** Document identifier */
+  @JsonProperty("doc_id")
+  private String docId;
 
-	/** List of chunk identifiers to update */
-	@JsonProperty("chunk_ids")
-	private List<String> chunkIds;
+  /** List of chunk identifiers to update */
+  @JsonProperty("chunk_ids")
+  private List<String> chunkIds;
 
-	/** Whether the chunks are enabled */
-	private Boolean enabled = true;
-
+  /** Whether the chunks are enabled */
+  private Boolean enabled = true;
 }

@@ -26,46 +26,44 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Spring configuration for the JVM in-process message queue.
  *
- * <p>Activated when {@code mq.type=JVM} is set in {@code application.yml}.
- * No external broker (Redis, RocketMQ, …) is required.
+ * <p>Activated when {@code mq.type=JVM} is set in {@code application.yml}. No external broker
+ * (Redis, RocketMQ, …) is required.
  *
  * <p><strong>Limitations:</strong>
+ *
  * <ul>
- *   <li>Messages are delivered in-process only – not visible to other JVM instances.</li>
- *   <li>Messages are not persisted; they are lost on restart or crash.</li>
- *   <li>Consumer groups are not supported (all registered handlers receive every message).</li>
+ *   <li>Messages are delivered in-process only – not visible to other JVM instances.
+ *   <li>Messages are not persisted; they are lost on restart or crash.
+ *   <li>Consumer groups are not supported (all registered handlers receive every message).
  * </ul>
  *
  * @see MqConfigProperties.MqType#JVM
  * @since 1.0.0.3
  */
 @Configuration
-@ConditionalOnProperty(name = MqConfigProperties.MQ_TYPE_PREFIX, havingValue = MqConfigProperties.JVM)
+@ConditionalOnProperty(
+    name = MqConfigProperties.MQ_TYPE_PREFIX,
+    havingValue = MqConfigProperties.JVM)
 public class JvmMqConfig {
 
-	/**
-	 * The shared in-process pub/sub bus. Both producer and consumer reference this
-	 * same bean so that published messages reach registered subscribers.
-	 */
-	@Bean
-	public JvmMessageBus jvmMessageBus() {
-		return new JvmMessageBus();
-	}
+  /**
+   * The shared in-process pub/sub bus. Both producer and consumer reference this same bean so that
+   * published messages reach registered subscribers.
+   */
+  @Bean
+  public JvmMessageBus jvmMessageBus() {
+    return new JvmMessageBus();
+  }
 
-	/**
-	 * JVM-backed {@link MqProducer} for document-index messages.
-	 */
-	@Bean
-	public MqProducer documentIndexProducer(JvmMessageBus jvmMessageBus) {
-		return new JvmMqProducer(jvmMessageBus);
-	}
+  /** JVM-backed {@link MqProducer} for document-index messages. */
+  @Bean
+  public MqProducer documentIndexProducer(JvmMessageBus jvmMessageBus) {
+    return new JvmMqProducer(jvmMessageBus);
+  }
 
-	/**
-	 * JVM-backed {@link MqConsumer} for document-index messages.
-	 */
-	@Bean
-	public MqConsumer documentIndexConsumer(JvmMessageBus jvmMessageBus) {
-		return new JvmMqConsumer(jvmMessageBus);
-	}
-
+  /** JVM-backed {@link MqConsumer} for document-index messages. */
+  @Bean
+  public MqConsumer documentIndexConsumer(JvmMessageBus jvmMessageBus) {
+    return new JvmMqConsumer(jvmMessageBus);
+  }
 }

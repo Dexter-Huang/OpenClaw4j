@@ -18,12 +18,11 @@ package com.seaskyland.llm.workflow.admin.utils;
 
 import com.seaskyland.llm.workflow.core.utils.LogUtils;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.util.StreamUtils;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.util.StreamUtils;
 
 /**
  * Utility class for handling HTTP request streams and headers.
@@ -32,37 +31,37 @@ import java.util.Map;
  */
 public class HttpStreamUtils {
 
-	/**
-	 * Extracts the request body as a string from the HTTP request.
-	 * @param request The HTTP request
-	 * @return The request body as a string, or null if extraction fails
-	 */
-	public static String getBodyFromRequest(HttpServletRequest request) {
-		try {
-			return StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
-		}
-		catch (Exception e) {
-			LogUtils.error("failed to get body from http request, err: {}", e.getMessage(), e);
-			return null;
-		}
-	}
+  /**
+   * Extracts the request body as a string from the HTTP request.
+   *
+   * @param request The HTTP request
+   * @return The request body as a string, or null if extraction fails
+   */
+  public static String getBodyFromRequest(HttpServletRequest request) {
+    try {
+      return StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
+    } catch (Exception e) {
+      LogUtils.error("failed to get body from http request, err: {}", e.getMessage(), e);
+      return null;
+    }
+  }
 
-	/**
-	 * Extracts all headers from the HTTP request into a map.
-	 * @param request The HTTP request
-	 * @return Map containing all request headers
-	 */
-	public static Map<String, String> getHeadersFromRequest(HttpServletRequest request) {
-		Map<String, String> map = new HashMap<>();
+  /**
+   * Extracts all headers from the HTTP request into a map.
+   *
+   * @param request The HTTP request
+   * @return Map containing all request headers
+   */
+  public static Map<String, String> getHeadersFromRequest(HttpServletRequest request) {
+    Map<String, String> map = new HashMap<>();
 
-		Enumeration<String> headerNames = request.getHeaderNames();
-		while (headerNames.hasMoreElements()) {
-			String key = headerNames.nextElement();
-			String value = request.getHeader(key);
-			map.put(key, value);
-		}
+    Enumeration<String> headerNames = request.getHeaderNames();
+    while (headerNames.hasMoreElements()) {
+      String key = headerNames.nextElement();
+      String value = request.getHeader(key);
+      map.put(key, value);
+    }
 
-		return map;
-	}
-
+    return map;
+  }
 }

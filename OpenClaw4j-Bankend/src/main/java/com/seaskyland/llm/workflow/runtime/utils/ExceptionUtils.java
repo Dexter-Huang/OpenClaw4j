@@ -16,34 +16,32 @@
 
 package com.seaskyland.llm.workflow.runtime.utils;
 
-import com.seaskyland.llm.workflow.runtime.exception.BizException;
-import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
 import com.seaskyland.llm.workflow.runtime.domain.BizError;
+import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
+import com.seaskyland.llm.workflow.runtime.exception.BizException;
 
 /**
- * Utility class for handling exceptions and converting them to standardized error
- * responses.
+ * Utility class for handling exceptions and converting them to standardized error responses.
  *
  * @since 1.0.0.3
  */
 public class ExceptionUtils {
 
-	/**
-	 * Converts a Throwable to a standardized Error object. If the throwable is a
-	 * BizException, returns its error; otherwise returns a system error.
-	 * @param err The throwable to convert
-	 * @return Standardized Error object
-	 */
-	public static BizError convertError(Throwable err) {
-		BizError error;
-		if (err instanceof BizException) {
-			error = ((BizException) err).getError();
-		}
-		else {
-			error = ErrorCode.SYSTEM_ERROR.toError();
-		}
+  /**
+   * Converts a Throwable to a standardized Error object. If the throwable is a BizException,
+   * returns its error; otherwise returns a system error.
+   *
+   * @param err The throwable to convert
+   * @return Standardized Error object
+   */
+  public static BizError convertError(Throwable err) {
+    BizError error;
+    if (err instanceof BizException) {
+      error = ((BizException) err).getError();
+    } else {
+      error = ErrorCode.SYSTEM_ERROR.toError();
+    }
 
-		return error;
-	}
-
+    return error;
+  }
 }

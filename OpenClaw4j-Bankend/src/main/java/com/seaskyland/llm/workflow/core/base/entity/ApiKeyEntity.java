@@ -16,52 +16,49 @@
 
 package com.seaskyland.llm.workflow.core.base.entity;
 
-import com.seaskyland.llm.workflow.runtime.enums.CommonStatus;
 import com.baomidou.mybatisplus.annotation.*;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.CommonStatus;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Entity class representing an API key record.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @TableName("api_key")
 public class ApiKeyEntity {
 
-	/** Primary key */
-	@TableId(value = "id", type = IdType.AUTO)
-	private Long id;
+  /** Primary key */
+  @TableId(value = "id", type = IdType.AUTO)
+  private Long id;
 
-	/** Associated account identifier */
-	@TableField("account_id")
-	private String accountId;
+  /** Associated account identifier */
+  @TableField("account_id")
+  private String accountId;
 
-	/** The API key value */
-	@TableField("api_key")
-	private String apiKey;
+  /** The API key value */
+  @TableField("api_key")
+  private String apiKey;
 
-	/** Current status of the API key */
-	private CommonStatus status;
+  /** Current status of the API key */
+  private CommonStatus status;
 
-	/** Description of the API key's purpose */
-	private String description;
+  /** Description of the API key's purpose */
+  private String description;
 
-	/** Creation timestamp */
-	@TableField("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @TableField("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@TableField("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @TableField("gmt_modified")
+  private Date gmtModified;
 
-	/** Username of the creator */
-	private String creator;
+  /** Username of the creator */
+  private String creator;
 
-	/** Username of the last modifier */
-	private String modifier;
-
+  /** Username of the last modifier */
+  private String modifier;
 }

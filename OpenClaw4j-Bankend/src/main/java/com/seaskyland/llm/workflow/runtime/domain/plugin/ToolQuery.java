@@ -16,22 +16,20 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.plugin;
 
-import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.util.List;
-
 /**
  * Query model for tool-related operations.
  *
  * @since 1.0.0.3
  */
-
 @EqualsAndHashCode(callSuper = true)
 @Data
 @SuperBuilder
@@ -39,16 +37,15 @@ import java.util.List;
 @AllArgsConstructor
 public class ToolQuery extends BaseQuery {
 
-	/** ID of the plugin */
-	@JsonProperty("plugin_id")
-	private String pluginId;
+  /** ID of the plugin */
+  @JsonProperty("plugin_id")
+  private String pluginId;
 
-	/** List of tool IDs */
-	@JsonProperty("tool_ids")
-	private List<String> toolIds;
+  /** List of tool IDs */
+  @JsonProperty("tool_ids")
+  private List<String> toolIds;
 
-	/** Flag to indicate if all fields should be returned */
-	@JsonProperty("full_fields")
-	private Boolean fullFields = false;
-
+  /** Flag to indicate if all fields should be returned */
+  @JsonProperty("full_fields")
+  private Boolean fullFields = false;
 }

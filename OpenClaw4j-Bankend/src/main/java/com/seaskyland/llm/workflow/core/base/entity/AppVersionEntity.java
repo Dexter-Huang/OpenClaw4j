@@ -16,61 +16,58 @@
 
 package com.seaskyland.llm.workflow.core.base.entity;
 
-import com.seaskyland.llm.workflow.runtime.enums.AppStatus;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.AppStatus;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Entity class representing an application version.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @TableName("application_version")
 public class AppVersionEntity {
 
-	/** Primary key */
-	@TableId(value = "id", type = IdType.AUTO)
-	private Long id;
+  /** Primary key */
+  @TableId(value = "id", type = IdType.AUTO)
+  private Long id;
 
-	/** Workspace identifier */
-	@TableField("workspace_id")
-	private String workspaceId;
+  /** Workspace identifier */
+  @TableField("workspace_id")
+  private String workspaceId;
 
-	/** Application identifier */
-	@TableField("app_id")
-	private String appId;
+  /** Application identifier */
+  @TableField("app_id")
+  private String appId;
 
-	/** Application status */
-	private AppStatus status;
+  /** Application status */
+  private AppStatus status;
 
-	/** Application configuration */
-	private String config;
+  /** Application configuration */
+  private String config;
 
-	/** Version number */
-	private String version;
+  /** Version number */
+  private String version;
 
-	/** Version description */
-	private String description;
+  /** Version description */
+  private String description;
 
-	/** Creation timestamp */
-	@TableField("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @TableField("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@TableField("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @TableField("gmt_modified")
+  private Date gmtModified;
 
-	/** Creator's identifier */
-	private String creator;
+  /** Creator's identifier */
+  private String creator;
 
-	/** Last modifier's identifier */
-	private String modifier;
-
+  /** Last modifier's identifier */
+  private String modifier;
 }

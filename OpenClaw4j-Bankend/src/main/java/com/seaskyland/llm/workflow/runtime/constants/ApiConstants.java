@@ -23,25 +23,24 @@ package com.seaskyland.llm.workflow.runtime.constants;
  */
 public interface ApiConstants {
 
-	/** Error code for invalid request */
-	String INVALID_REQUEST_ERROR = "invalid_request_error";
+  /** Error code for invalid request */
+  String INVALID_REQUEST_ERROR = "invalid_request_error";
 
-	/** Error code for response errors */
-	String RESPONSE_ERROR = "response_error";
+  /** Error code for response errors */
+  String RESPONSE_ERROR = "response_error";
 
-	/** Error code for cancelled operations */
-	String OPERATION_CANCEL = "operation_cancel";
+  /** Error code for cancelled operations */
+  String OPERATION_CANCEL = "operation_cancel";
 
-	/** Default timeout for RPC requests in milliseconds */
-	int RPC_REQUEST_TIMEOUT = 15000;
+  /** Default timeout for RPC requests in milliseconds */
+  int RPC_REQUEST_TIMEOUT = 15000;
 
-	/** Default timeout for RPC model requests in milliseconds */
-	int RPC_MODEL_REQUEST_TIMEOUT = 180000;
+  /** Default timeout for RPC model requests in milliseconds */
+  int RPC_MODEL_REQUEST_TIMEOUT = 180000;
 
-	/** Prefix for token authentication */
-	String TOKEN_PREFIX = "Bearer";
+  /** Prefix for token authentication */
+  String TOKEN_PREFIX = "Bearer";
 
-	/** Key for access token */
-	String ACCESS_TOKEN = "access_token";
-
+  /** Key for access token */
+  String ACCESS_TOKEN = "access_token";
 }

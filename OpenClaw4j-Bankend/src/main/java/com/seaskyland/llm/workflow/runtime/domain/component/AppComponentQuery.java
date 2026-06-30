@@ -16,12 +16,11 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.component;
 
-import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
+import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.util.List;
 
 /**
  * Query parameters for application component operations
@@ -29,35 +28,33 @@ import java.util.List;
  * @author guning.lt
  * @since 1.0.0.3
  */
-
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class AppComponentQuery extends BaseQuery {
 
-	/** Component code */
-	private String code;
+  /** Component code */
+  private String code;
 
-	/** List of component codes */
-	private List<String> codes;
+  /** List of component codes */
+  private List<String> codes;
 
-	/** Application name */
-	@JsonProperty("app_name")
-	private String appName;
+  /** Application name */
+  @JsonProperty("app_name")
+  private String appName;
 
-	/** Component type */
-	private String type;
+  /** Component type */
+  private String type;
 
-	/** Application ID */
-	@JsonProperty("app_id")
-	private String appId;
+  /** Application ID */
+  @JsonProperty("app_id")
+  private String appId;
 
-	/** Component configuration */
-	private String config;
+  /** Component configuration */
+  private String config;
 
-	/** Component description */
-	private String description;
+  /** Component description */
+  private String description;
 
-	/** Component status */
-	private Integer status;
-
+  /** Component status */
+  private Integer status;
 }

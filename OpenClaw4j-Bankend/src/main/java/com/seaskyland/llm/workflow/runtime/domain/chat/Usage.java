@@ -17,35 +17,32 @@
 package com.seaskyland.llm.workflow.runtime.domain.chat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 
 /**
  * Represents token usage statistics for chat operations.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Usage implements Serializable {
 
-	/** Number of tokens used in the prompt */
-	@JsonProperty("prompt_tokens")
-	private Integer promptTokens;
+  /** Number of tokens used in the prompt */
+  @JsonProperty("prompt_tokens")
+  private Integer promptTokens;
 
-	/** Number of tokens used in the completion */
-	@JsonProperty("completion_tokens")
-	private Integer completionTokens;
+  /** Number of tokens used in the completion */
+  @JsonProperty("completion_tokens")
+  private Integer completionTokens;
 
-	/** Total number of tokens used */
-	@JsonProperty("total_tokens")
-	private Integer totalTokens;
-
+  /** Total number of tokens used */
+  @JsonProperty("total_tokens")
+  private Integer totalTokens;
 }

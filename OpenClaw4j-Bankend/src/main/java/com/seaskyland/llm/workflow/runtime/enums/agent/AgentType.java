@@ -26,42 +26,39 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum AgentType {
 
-	/** React agent that can use tools and interact with environments */
-	REACT_AGENT("ReactAgent"),
+  /** React agent that can use tools and interact with environments */
+  REACT_AGENT("ReactAgent"),
 
-	/** Parallel agent that executes multiple agents concurrently */
-	PARALLEL_AGENT("ParallelAgent"),
+  /** Parallel agent that executes multiple agents concurrently */
+  PARALLEL_AGENT("ParallelAgent"),
 
-	/** Sequential agent that executes agents in a specific order */
-	SEQUENTIAL_AGENT("SequentialAgent"),
+  /** Sequential agent that executes agents in a specific order */
+  SEQUENTIAL_AGENT("SequentialAgent"),
 
-	/**
-	 * LLM routing agent that routes requests to different agents based on LLM decisions
-	 */
-	LLM_ROUTING_AGENT("LLMRoutingAgent"),
+  /** LLM routing agent that routes requests to different agents based on LLM decisions */
+  LLM_ROUTING_AGENT("LLMRoutingAgent"),
 
-	/** Loop agent that repeatedly executes agents based on conditions */
-	LOOP_AGENT("LoopAgent");
+  /** Loop agent that repeatedly executes agents based on conditions */
+  LOOP_AGENT("LoopAgent");
 
-	private final String code;
+  private final String code;
 
-	AgentType(String code) {
-		this.code = code;
-	}
+  AgentType(String code) {
+    this.code = code;
+  }
 
-	@JsonValue
-	public String getCode() {
-		return code;
-	}
+  @JsonValue
+  public String getCode() {
+    return code;
+  }
 
-	@JsonCreator
-	public static AgentType fromCode(String code) {
-		for (AgentType type : values()) {
-			if (type.getCode().equals(code)) {
-				return type;
-			}
-		}
-		throw new IllegalArgumentException("Unknown agent type code: " + code);
-	}
-
+  @JsonCreator
+  public static AgentType fromCode(String code) {
+    for (AgentType type : values()) {
+      if (type.getCode().equals(code)) {
+        return type;
+      }
+    }
+    throw new IllegalArgumentException("Unknown agent type code: " + code);
+  }
 }

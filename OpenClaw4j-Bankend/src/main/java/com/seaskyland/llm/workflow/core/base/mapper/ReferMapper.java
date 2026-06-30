@@ -15,17 +15,14 @@
  */
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.ReferEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.ReferEntity;
 
 /**
- * Mapper interface for handling reference data operations. Extends BaseMapper to provide
- * basic CRUD operations for ReferEntity.
+ * Mapper interface for handling reference data operations. Extends BaseMapper to provide basic CRUD
+ * operations for ReferEntity.
  *
  * @author guning.lt
  * @since 1.0.0.3
  */
-
-public interface ReferMapper extends BaseMapper<ReferEntity> {
-
-}
+public interface ReferMapper extends BaseMapper<ReferEntity> {}

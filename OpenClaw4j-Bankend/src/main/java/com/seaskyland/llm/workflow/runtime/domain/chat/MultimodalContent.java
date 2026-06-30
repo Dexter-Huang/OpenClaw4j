@@ -16,32 +16,29 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.chat;
 
+import java.io.Serializable;
 import lombok.Data;
 
-import java.io.Serializable;
-
 /**
- * Represents multimodal content that can contain different types of data (text, images,
- * etc.)
+ * Represents multimodal content that can contain different types of data (text, images, etc.)
  *
  * @since 1.0.0.3
  */
 @Data
 public class MultimodalContent implements Serializable {
 
-	/** Type of the multimodal content */
-	private MultimodalContentType type;
+  /** Type of the multimodal content */
+  private MultimodalContentType type;
 
-	/** Text content */
-	private String text;
+  /** Text content */
+  private String text;
 
-	/** URL of the content */
-	private String url;
+  /** URL of the content */
+  private String url;
 
-	/** Local file path of the content */
-	private String path;
+  /** Local file path of the content */
+  private String path;
 
-	/** Base64 encoded data */
-	private String data;
-
+  /** Base64 encoded data */
+  private String data;
 }

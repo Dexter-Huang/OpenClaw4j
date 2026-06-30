@@ -18,18 +18,17 @@ package com.seaskyland.llm.workflow.core.base.manager;
 
 import com.seaskyland.llm.workflow.core.config.JwtConfigProperties;
 import io.jsonwebtoken.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
 import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import javax.crypto.SecretKey;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 /**
- * JWT token manager for handling authentication tokens. Manages the generation, storage,
- * and validation of access and refresh tokens.
+ * JWT token manager for handling authentication tokens. Manages the generation, storage, and
+ * validation of access and refresh tokens.
  *
  * @since 1.0.0.3
  */
@@ -37,132 +36,144 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TokenManager {
 
-	/** JWT configuration properties */
-	private final JwtConfigProperties jwtConfigProperties;
+  /** JWT configuration properties */
+  private final JwtConfigProperties jwtConfigProperties;
 
-	/** Redis manager for token storage */
-	private final CacheManager cacheManager;
+  /** Redis manager for token storage */
+  private final CacheManager cacheManager;
 
-	/** Secret key for JWT signing */
-	private final SecretKey key = Jwts.SIG.HS256.key().build();
+  /** Secret key for JWT signing */
+  private final SecretKey key = Jwts.SIG.HS256.key().build();
 
-	/**
-	 * Generates a new access token for the given account ID
-	 * @param accountId the account identifier
-	 * @return the generated access token
-	 */
-	public String generateAccessToken(String accountId) {
-		Map<String, Object> claims = new HashMap<>();
-		String token = createToken(claims, accountId, jwtConfigProperties.getAccessTokenExpiration());
+  /**
+   * Generates a new access token for the given account ID
+   *
+   * @param accountId the account identifier
+   * @return the generated access token
+   */
+  public String generateAccessToken(String accountId) {
+    Map<String, Object> claims = new HashMap<>();
+    String token = createToken(claims, accountId, jwtConfigProperties.getAccessTokenExpiration());
 
-		storeAccessToken(token, accountId);
-		return token;
-	}
+    storeAccessToken(token, accountId);
+    return token;
+  }
 
-	/**
-	 * Generates a new refresh token for the given account ID
-	 * @param accountId the account identifier
-	 * @return the generated refresh token
-	 */
-	public String generateRefreshToken(String accountId) {
-		Map<String, Object> claims = new HashMap<>();
-		String token = createToken(claims, accountId, jwtConfigProperties.getRefreshTokenExpiration());
+  /**
+   * Generates a new refresh token for the given account ID
+   *
+   * @param accountId the account identifier
+   * @return the generated refresh token
+   */
+  public String generateRefreshToken(String accountId) {
+    Map<String, Object> claims = new HashMap<>();
+    String token = createToken(claims, accountId, jwtConfigProperties.getRefreshTokenExpiration());
 
-		storeRefreshToken(token, accountId);
-		return token;
-	}
+    storeRefreshToken(token, accountId);
+    return token;
+  }
 
-	/**
-	 * Creates a JWT token with the specified claims and expiration
-	 * @param claims token claims
-	 * @param subject token subject
-	 * @param expiration token expiration time in seconds
-	 * @return the created JWT token
-	 */
-	private String createToken(Map<String, Object> claims, String subject, long expiration) {
-		return Jwts.builder()
-			.claims(claims)
-			.subject(subject)
-			.issuedAt(new Date(System.currentTimeMillis()))
-			.expiration(new Date(System.currentTimeMillis() + expiration * 1000L))
-			.signWith(key)
-			.compact();
-	}
+  /**
+   * Creates a JWT token with the specified claims and expiration
+   *
+   * @param claims token claims
+   * @param subject token subject
+   * @param expiration token expiration time in seconds
+   * @return the created JWT token
+   */
+  private String createToken(Map<String, Object> claims, String subject, long expiration) {
+    return Jwts.builder()
+        .claims(claims)
+        .subject(subject)
+        .issuedAt(new Date(System.currentTimeMillis()))
+        .expiration(new Date(System.currentTimeMillis() + expiration * 1000L))
+        .signWith(key)
+        .compact();
+  }
 
-	/**
-	 * Stores the access token in Redis
-	 * @param accessToken the access token to store
-	 * @param accountId the associated account ID
-	 */
-	public void storeAccessToken(String accessToken, String accountId) {
-		String key = getAccessTokenKey(accessToken);
-		cacheManager.put(key, accountId, Duration.ofSeconds(jwtConfigProperties.getAccessTokenExpiration()));
-	}
+  /**
+   * Stores the access token in Redis
+   *
+   * @param accessToken the access token to store
+   * @param accountId the associated account ID
+   */
+  public void storeAccessToken(String accessToken, String accountId) {
+    String key = getAccessTokenKey(accessToken);
+    cacheManager.put(
+        key, accountId, Duration.ofSeconds(jwtConfigProperties.getAccessTokenExpiration()));
+  }
 
-	/**
-	 * Retrieves the account ID associated with an access token
-	 * @param accessToken the access token
-	 * @return the associated account ID
-	 */
-	public String getAccountIdFromAccessToken(String accessToken) {
-		String key = getAccessTokenKey(accessToken);
-		return cacheManager.get(key);
-	}
+  /**
+   * Retrieves the account ID associated with an access token
+   *
+   * @param accessToken the access token
+   * @return the associated account ID
+   */
+  public String getAccountIdFromAccessToken(String accessToken) {
+    String key = getAccessTokenKey(accessToken);
+    return cacheManager.get(key);
+  }
 
-	/**
-	 * Deletes an access token from Redis
-	 * @param accessToken the access token to delete
-	 */
-	public void deleteAccessToken(String accessToken) {
-		String key = getAccessTokenKey(accessToken);
-		cacheManager.delete(key);
-	}
+  /**
+   * Deletes an access token from Redis
+   *
+   * @param accessToken the access token to delete
+   */
+  public void deleteAccessToken(String accessToken) {
+    String key = getAccessTokenKey(accessToken);
+    cacheManager.delete(key);
+  }
 
-	/**
-	 * Stores the refresh token in Redis
-	 * @param refreshToken the refresh token to store
-	 * @param accountId the associated account ID
-	 */
-	public void storeRefreshToken(String refreshToken, String accountId) {
-		String key = getRefreshTokenKey(refreshToken);
-		cacheManager.put(key, accountId, Duration.ofSeconds(jwtConfigProperties.getRefreshTokenExpiration()));
-	}
+  /**
+   * Stores the refresh token in Redis
+   *
+   * @param refreshToken the refresh token to store
+   * @param accountId the associated account ID
+   */
+  public void storeRefreshToken(String refreshToken, String accountId) {
+    String key = getRefreshTokenKey(refreshToken);
+    cacheManager.put(
+        key, accountId, Duration.ofSeconds(jwtConfigProperties.getRefreshTokenExpiration()));
+  }
 
-	/**
-	 * Retrieves the account ID associated with a refresh token
-	 * @param refreshToken the refresh token
-	 * @return the associated account ID
-	 */
-	public String getAccountIdFromRefreshToken(String refreshToken) {
-		String key = getRefreshTokenKey(refreshToken);
-		return cacheManager.get(key);
-	}
+  /**
+   * Retrieves the account ID associated with a refresh token
+   *
+   * @param refreshToken the refresh token
+   * @return the associated account ID
+   */
+  public String getAccountIdFromRefreshToken(String refreshToken) {
+    String key = getRefreshTokenKey(refreshToken);
+    return cacheManager.get(key);
+  }
 
-	/**
-	 * Deletes a refresh token from Redis
-	 * @param refreshToken the refresh token to delete
-	 */
-	public void deleteRefreshToken(String refreshToken) {
-		String key = getRefreshTokenKey(refreshToken);
-		cacheManager.delete(key);
-	}
+  /**
+   * Deletes a refresh token from Redis
+   *
+   * @param refreshToken the refresh token to delete
+   */
+  public void deleteRefreshToken(String refreshToken) {
+    String key = getRefreshTokenKey(refreshToken);
+    cacheManager.delete(key);
+  }
 
-	/**
-	 * Generates the Redis key for an access token
-	 * @param accessToken the access token
-	 * @return the Redis key
-	 */
-	private String getAccessTokenKey(String accessToken) {
-		return "access_token:" + accessToken;
-	}
+  /**
+   * Generates the Redis key for an access token
+   *
+   * @param accessToken the access token
+   * @return the Redis key
+   */
+  private String getAccessTokenKey(String accessToken) {
+    return "access_token:" + accessToken;
+  }
 
-	/**
-	 * Generates the Redis key for a refresh token
-	 * @param refreshToken the refresh token
-	 * @return the Redis key
-	 */
-	private String getRefreshTokenKey(String refreshToken) {
-		return "refresh_token:" + refreshToken;
-	}
-
+  /**
+   * Generates the Redis key for a refresh token
+   *
+   * @param refreshToken the refresh token
+   * @return the Redis key
+   */
+  private String getRefreshTokenKey(String refreshToken) {
+    return "refresh_token:" + refreshToken;
+  }
 }

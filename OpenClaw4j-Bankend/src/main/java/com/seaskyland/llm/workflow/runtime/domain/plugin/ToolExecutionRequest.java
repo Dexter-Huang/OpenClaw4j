@@ -17,42 +17,39 @@
 package com.seaskyland.llm.workflow.runtime.domain.plugin;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
 
 /**
  * Represents a request for tool execution in the agent system.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class ToolExecutionRequest {
 
-	/** Unique identifier for the request */
-	@JsonProperty("request_id")
-	private String requestId;
+  /** Unique identifier for the request */
+  @JsonProperty("request_id")
+  private String requestId;
 
-	/** Identifier of the plugin that contains the tool */
-	@JsonProperty("plugin_id")
-	private String pluginId;
+  /** Identifier of the plugin that contains the tool */
+  @JsonProperty("plugin_id")
+  private String pluginId;
 
-	/** Identifier of the tool to be executed */
-	@JsonProperty("tool_id")
-	private String toolId;
+  /** Identifier of the tool to be executed */
+  @JsonProperty("tool_id")
+  private String toolId;
 
-	/** The tool instance to be executed */
-	private Tool tool;
+  /** The tool instance to be executed */
+  private Tool tool;
 
-	/** Arguments to be passed to the tool execution */
-	@JsonProperty("arguments")
-	private Map<String, Object> arguments;
-
+  /** Arguments to be passed to the tool execution */
+  @JsonProperty("arguments")
+  private Map<String, Object> arguments;
 }

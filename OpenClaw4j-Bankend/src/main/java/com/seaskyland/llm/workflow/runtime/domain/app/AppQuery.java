@@ -15,28 +15,25 @@
  */
 package com.seaskyland.llm.workflow.runtime.domain.app;
 
-import com.seaskyland.llm.workflow.runtime.enums.AppStatus;
-import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
+import com.seaskyland.llm.workflow.runtime.enums.AppStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * Query parameters for application search
- */
+/** Query parameters for application search */
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class AppQuery extends BaseQuery {
 
-	/** Application ID */
-	@JsonProperty("app_id")
-	private String appId;
+  /** Application ID */
+  @JsonProperty("app_id")
+  private String appId;
 
-	/** Application type */
-	@JsonProperty("type")
-	private String type;
+  /** Application type */
+  @JsonProperty("type")
+  private String type;
 
-	/** Application status */
-	private AppStatus status;
-
+  /** Application status */
+  private AppStatus status;
 }

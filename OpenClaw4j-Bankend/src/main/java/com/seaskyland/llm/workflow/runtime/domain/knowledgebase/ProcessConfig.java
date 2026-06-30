@@ -16,11 +16,10 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.knowledgebase;
 
-import com.seaskyland.llm.workflow.runtime.enums.ChunkType;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.ChunkType;
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * Configuration for document processing. Defines how documents are split into chunks for
@@ -28,23 +27,21 @@ import java.io.Serializable;
  *
  * @since 1.0.0.3
  */
-
 @Data
 public class ProcessConfig implements Serializable {
 
-	/** Type of chunking strategy to use */
-	@JsonProperty("chunk_type")
-	private ChunkType chunkType;
+  /** Type of chunking strategy to use */
+  @JsonProperty("chunk_type")
+  private ChunkType chunkType;
 
-	/** Regular expression used for splitting text into chunks */
-	private String regex = "\\n\\n";
+  /** Regular expression used for splitting text into chunks */
+  private String regex = "\\n\\n";
 
-	/** Maximum size of each text chunk */
-	@JsonProperty("chunk_size")
-	private Integer chunkSize = 600;
+  /** Maximum size of each text chunk */
+  @JsonProperty("chunk_size")
+  private Integer chunkSize = 600;
 
-	/** Number of characters to overlap between consecutive chunks */
-	@JsonProperty("chunk_overlap")
-	private Integer chunkOverlap = 100;
-
+  /** Number of characters to overlap between consecutive chunks */
+  @JsonProperty("chunk_overlap")
+  private Integer chunkOverlap = 100;
 }

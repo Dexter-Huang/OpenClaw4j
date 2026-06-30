@@ -16,19 +16,18 @@
 
 package com.seaskyland.llm.workflow.core.agent.tool;
 
+import com.seaskyland.llm.workflow.core.base.service.ToolExecutionService;
+import com.seaskyland.llm.workflow.core.utils.api.OpenApiUtils;
 import com.seaskyland.llm.workflow.runtime.domain.chat.ToolCallType;
 import com.seaskyland.llm.workflow.runtime.domain.plugin.Tool;
 import com.seaskyland.llm.workflow.runtime.domain.plugin.ToolExecutionRequest;
 import com.seaskyland.llm.workflow.runtime.domain.plugin.ToolExecutionResult;
 import com.seaskyland.llm.workflow.runtime.domain.tool.ToolCallSchema;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
-import com.seaskyland.llm.workflow.core.base.service.ToolExecutionService;
-import com.seaskyland.llm.workflow.core.utils.api.OpenApiUtils;
+import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.ai.tool.metadata.ToolMetadata;
-
-import java.util.Map;
 
 /**
  * Plugin tool callback implementation for handling tool execution requests.
@@ -37,81 +36,83 @@ import java.util.Map;
  */
 public class PluginToolCallback implements AgentToolCallback {
 
-	/** Service for executing tool operations */
-	private final ToolExecutionService toolExecutionService;
+  /** Service for executing tool operations */
+  private final ToolExecutionService toolExecutionService;
 
-	/** Tool configuration and metadata */
-	private final Tool tool;
+  /** Tool configuration and metadata */
+  private final Tool tool;
 
-	/** Additional parameters for tool execution */
-	private final Map<String, Object> extraParams;
+  /** Additional parameters for tool execution */
+  private final Map<String, Object> extraParams;
 
-	/**
-	 * Creates a new PluginToolCallback instance.
-	 * @param toolExecutionService Service for executing tool operations
-	 * @param tool Tool configuration
-	 * @param extraParams Additional execution parameters
-	 */
-	public PluginToolCallback(ToolExecutionService toolExecutionService, Tool tool, Map<String, Object> extraParams) {
-		this.toolExecutionService = toolExecutionService;
-		this.tool = tool;
-		this.extraParams = extraParams;
-	}
+  /**
+   * Creates a new PluginToolCallback instance.
+   *
+   * @param toolExecutionService Service for executing tool operations
+   * @param tool Tool configuration
+   * @param extraParams Additional execution parameters
+   */
+  public PluginToolCallback(
+      ToolExecutionService toolExecutionService, Tool tool, Map<String, Object> extraParams) {
+    this.toolExecutionService = toolExecutionService;
+    this.tool = tool;
+    this.extraParams = extraParams;
+  }
 
-	/**
-	 * Gets the tool definition including name, description and input schema.
-	 */
-	@NotNull
-	@Override
-	public ToolDefinition getToolDefinition() {
-		ToolCallSchema schema = OpenApiUtils.buildToolCallSchema(this.tool);
-		return ToolDefinition.builder()
-			.name(schema.getName())
-			.description(schema.getDescription())
-			.inputSchema(JsonUtils.toJson(schema.getInputSchema()))
-			.build();
-	}
+  /** Gets the tool definition including name, description and input schema. */
+  @NotNull
+  @Override
+  public ToolDefinition getToolDefinition() {
+    ToolCallSchema schema = OpenApiUtils.buildToolCallSchema(this.tool);
+    return ToolDefinition.builder()
+        .name(schema.getName())
+        .description(schema.getDescription())
+        .inputSchema(JsonUtils.toJson(schema.getInputSchema()))
+        .build();
+  }
 
-	/**
-	 * Executes the tool with the given input parameters. Merges any extra parameters if
-	 * available.
-	 * @param functionInput JSON string containing function input parameters
-	 * @return JSON string containing the execution result
-	 */
-	@NotNull
-	@Override
-	public String call(@NotNull String functionInput) {
-		String toolId = tool.getToolId();
-		Map<String, Object> arguments = ToolArgumentsHelper.mergeToolArguments(functionInput, extraParams, toolId);
+  /**
+   * Executes the tool with the given input parameters. Merges any extra parameters if available.
+   *
+   * @param functionInput JSON string containing function input parameters
+   * @return JSON string containing the execution result
+   */
+  @NotNull
+  @Override
+  public String call(@NotNull String functionInput) {
+    String toolId = tool.getToolId();
+    Map<String, Object> arguments =
+        ToolArgumentsHelper.mergeToolArguments(functionInput, extraParams, toolId);
 
-		ToolExecutionResult response = this.toolExecutionService
-			.callOpenApi(ToolExecutionRequest.builder().tool(this.tool).arguments(arguments).build());
+    ToolExecutionResult response =
+        this.toolExecutionService.callOpenApi(
+            ToolExecutionRequest.builder().tool(this.tool).arguments(arguments).build());
 
-		if (!response.isSuccess()) {
-			return JsonUtils.toJson(response.getError());
-		}
+    if (!response.isSuccess()) {
+      return JsonUtils.toJson(response.getError());
+    }
 
-		return response.getOutput();
-	}
+    return response.getOutput();
+  }
 
-	/**
-	 * Gets the tool metadata configuration.
-	 * @return ToolMetadata with returnDirect set to true
-	 */
-	@NotNull
-	@Override
-	public ToolMetadata getToolMetadata() {
-		return ToolMetadata.builder().returnDirect(true).build();
-	}
+  /**
+   * Gets the tool metadata configuration.
+   *
+   * @return ToolMetadata with returnDirect set to true
+   */
+  @NotNull
+  @Override
+  public ToolMetadata getToolMetadata() {
+    return ToolMetadata.builder().returnDirect(true).build();
+  }
 
-	@Override
-	public String getId() {
-		return tool.getToolId();
-	}
+  @Override
+  public String getId() {
+    return tool.getToolId();
+  }
 
-	@Override
-	public ToolCallType getToolCallType() {
-		return ToolCallType.TOOL_CALL;
-	}
-
+  @Override
+  public ToolCallType getToolCallType() {
+    return ToolCallType.TOOL_CALL;
+  }
 }

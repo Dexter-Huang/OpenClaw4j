@@ -17,9 +17,8 @@
 package com.seaskyland.llm.workflow.runtime.domain.knowledgebase;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * Request model for indexing documents in the knowledge base.
@@ -29,16 +28,15 @@ import java.io.Serializable;
 @Data
 public class IndexDocumentRequest implements Serializable {
 
-	/** Knowledge base identifier */
-	@JsonProperty("kb_id")
-	private String kbId;
+  /** Knowledge base identifier */
+  @JsonProperty("kb_id")
+  private String kbId;
 
-	/** Document identifier */
-	@JsonProperty("doc_id")
-	private String docId;
+  /** Document identifier */
+  @JsonProperty("doc_id")
+  private String docId;
 
-	/** Document processing configuration */
-	@JsonProperty("process_config")
-	private ProcessConfig processConfig;
-
+  /** Document processing configuration */
+  @JsonProperty("process_config")
+  private ProcessConfig processConfig;
 }

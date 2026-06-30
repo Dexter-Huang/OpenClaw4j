@@ -21,51 +21,56 @@ import com.seaskyland.llm.workflow.runtime.domain.PagingList;
 import com.seaskyland.llm.workflow.runtime.domain.account.ApiKey;
 
 /**
- * Service interface for managing API keys. Provides operations for creating, updating,
- * deleting, and retrieving API keys.
+ * Service interface for managing API keys. Provides operations for creating, updating, deleting,
+ * and retrieving API keys.
  *
  * @since 1.0.0.3
  */
 public interface ApiKeyService {
 
-	/**
-	 * Creates a new API key.
-	 * @param apiKey The API key information to create
-	 * @return The ID of the created API key
-	 */
-	Long createApiKey(ApiKey apiKey);
+  /**
+   * Creates a new API key.
+   *
+   * @param apiKey The API key information to create
+   * @return The ID of the created API key
+   */
+  Long createApiKey(ApiKey apiKey);
 
-	/**
-	 * Updates an existing API key.
-	 * @param apiKey The API key information to update
-	 */
-	void updateApiKey(ApiKey apiKey);
+  /**
+   * Updates an existing API key.
+   *
+   * @param apiKey The API key information to update
+   */
+  void updateApiKey(ApiKey apiKey);
 
-	/**
-	 * Deletes an API key by its ID.
-	 * @param id The ID of the API key to delete
-	 */
-	void deleteApiKey(Long id);
+  /**
+   * Deletes an API key by its ID.
+   *
+   * @param id The ID of the API key to delete
+   */
+  void deleteApiKey(Long id);
 
-	/**
-	 * Lists API keys with pagination support.
-	 * @param query The query parameters for filtering and pagination
-	 * @return A paged list of API keys
-	 */
-	PagingList<ApiKey> listApiKeys(BaseQuery query);
+  /**
+   * Lists API keys with pagination support.
+   *
+   * @param query The query parameters for filtering and pagination
+   * @return A paged list of API keys
+   */
+  PagingList<ApiKey> listApiKeys(BaseQuery query);
 
-	/**
-	 * Retrieves an API key by its ID.
-	 * @param id The ID of the API key to retrieve
-	 * @return The API key information
-	 */
-	ApiKey getApiKey(Long id);
+  /**
+   * Retrieves an API key by its ID.
+   *
+   * @param id The ID of the API key to retrieve
+   * @return The API key information
+   */
+  ApiKey getApiKey(Long id);
 
-	/**
-	 * Retrieves an API key by its key value.
-	 * @param apiKey The API key value to look up
-	 * @return The API key information
-	 */
-	ApiKey getApiKey(String apiKey);
-
+  /**
+   * Retrieves an API key by its key value.
+   *
+   * @param apiKey The API key value to look up
+   * @return The API key information
+   */
+  ApiKey getApiKey(String apiKey);
 }

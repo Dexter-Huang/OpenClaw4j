@@ -17,9 +17,8 @@
 package com.seaskyland.llm.workflow.runtime.domain.account;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * Request model for changing user password.
@@ -29,15 +28,10 @@ import java.io.Serializable;
 @Data
 public class ChangePasswordRequest implements Serializable {
 
-	/**
-	 * Current password of the user
-	 */
-	private String password;
+  /** Current password of the user */
+  private String password;
 
-	/**
-	 * New password to be set
-	 */
-	@JsonProperty("new_password")
-	private String newPassword;
-
+  /** New password to be set */
+  @JsonProperty("new_password")
+  private String newPassword;
 }

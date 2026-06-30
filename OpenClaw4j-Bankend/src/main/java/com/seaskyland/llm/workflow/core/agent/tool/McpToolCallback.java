@@ -16,6 +16,8 @@
 
 package com.seaskyland.llm.workflow.core.agent.tool;
 
+import com.seaskyland.llm.workflow.core.base.service.McpServerService;
+import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
 import com.seaskyland.llm.workflow.runtime.domain.Result;
 import com.seaskyland.llm.workflow.runtime.domain.chat.ToolCallType;
 import com.seaskyland.llm.workflow.runtime.domain.mcp.McpServerCallToolRequest;
@@ -23,93 +25,87 @@ import com.seaskyland.llm.workflow.runtime.domain.mcp.McpServerCallToolResponse;
 import com.seaskyland.llm.workflow.runtime.domain.mcp.McpServerDetail;
 import com.seaskyland.llm.workflow.runtime.domain.mcp.McpTool;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
-import com.seaskyland.llm.workflow.core.base.service.McpServerService;
-import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.ai.tool.metadata.ToolMetadata;
 
-import java.util.Map;
-
 /**
- * MCP tool callback implementation. Handles the execution of MCP tools and manages
- * tool-related operations.
+ * MCP tool callback implementation. Handles the execution of MCP tools and manages tool-related
+ * operations.
  *
  * @since 1.0.0.3
  */
 @RequiredArgsConstructor
 public class McpToolCallback implements AgentToolCallback {
 
-	/** Service for handling MCP server operations */
-	private final McpServerService mcpServerService;
+  /** Service for handling MCP server operations */
+  private final McpServerService mcpServerService;
 
-	/** Details of the MCP server */
-	private final McpServerDetail mcpServerDetail;
+  /** Details of the MCP server */
+  private final McpServerDetail mcpServerDetail;
 
-	/** The MCP tool to be executed */
-	private final McpTool tool;
+  /** The MCP tool to be executed */
+  private final McpTool tool;
 
-	/** Additional parameters for tool execution */
-	private final Map<String, Object> extraParams;
+  /** Additional parameters for tool execution */
+  private final Map<String, Object> extraParams;
 
-	/**
-	 * Gets the tool definition including name, description and input schema
-	 */
-	@NotNull
-	@Override
-	public ToolDefinition getToolDefinition() {
-		return ToolDefinition.builder()
-			.name(tool.getName())
-			.description(tool.getDescription())
-			.inputSchema(JsonUtils.toJson(tool.getInputSchema()))
-			.build();
-	}
+  /** Gets the tool definition including name, description and input schema */
+  @NotNull
+  @Override
+  public ToolDefinition getToolDefinition() {
+    return ToolDefinition.builder()
+        .name(tool.getName())
+        .description(tool.getDescription())
+        .inputSchema(JsonUtils.toJson(tool.getInputSchema()))
+        .build();
+  }
 
-	/**
-	 * Executes the tool with the given input parameters
-	 * @param functionInput JSON string containing the input parameters
-	 * @return JSON string containing the execution result
-	 */
-	@NotNull
-	@Override
-	public String call(@NotNull String functionInput) {
-		String mcpServerId = mcpServerDetail.getServerCode();
-		Map<String, Object> arguments = ToolArgumentsHelper.mergeToolArguments(functionInput, extraParams, mcpServerId);
+  /**
+   * Executes the tool with the given input parameters
+   *
+   * @param functionInput JSON string containing the input parameters
+   * @return JSON string containing the execution result
+   */
+  @NotNull
+  @Override
+  public String call(@NotNull String functionInput) {
+    String mcpServerId = mcpServerDetail.getServerCode();
+    Map<String, Object> arguments =
+        ToolArgumentsHelper.mergeToolArguments(functionInput, extraParams, mcpServerId);
 
-		McpServerCallToolRequest request = new McpServerCallToolRequest();
-		request.setServerCode(this.mcpServerDetail.getServerCode());
-		request.setToolName(this.tool.getName());
-		request.setWorkspaceId(RequestContextHolder.getRequestContext().getWorkspaceId());
-		request.setToolParams(arguments);
-		request.setRequestId(RequestContextHolder.getRequestContext().getRequestId());
+    McpServerCallToolRequest request = new McpServerCallToolRequest();
+    request.setServerCode(this.mcpServerDetail.getServerCode());
+    request.setToolName(this.tool.getName());
+    request.setWorkspaceId(RequestContextHolder.getRequestContext().getWorkspaceId());
+    request.setToolParams(arguments);
+    request.setRequestId(RequestContextHolder.getRequestContext().getRequestId());
 
-		Result<McpServerCallToolResponse> result = mcpServerService.callTool(request);
+    Result<McpServerCallToolResponse> result = mcpServerService.callTool(request);
 
-		if (!result.isSuccess()) {
-			return JsonUtils.toJson(result);
-		}
+    if (!result.isSuccess()) {
+      return JsonUtils.toJson(result);
+    }
 
-		return JsonUtils.toJson(result.getData());
-	}
+    return JsonUtils.toJson(result.getData());
+  }
 
-	/**
-	 * Gets the tool metadata configuration
-	 */
-	@NotNull
-	@Override
-	public ToolMetadata getToolMetadata() {
-		return ToolMetadata.builder().returnDirect(true).build();
-	}
+  /** Gets the tool metadata configuration */
+  @NotNull
+  @Override
+  public ToolMetadata getToolMetadata() {
+    return ToolMetadata.builder().returnDirect(true).build();
+  }
 
-	@Override
-	public String getId() {
-		return mcpServerDetail.getServerCode();
-	}
+  @Override
+  public String getId() {
+    return mcpServerDetail.getServerCode();
+  }
 
-	@Override
-	public ToolCallType getToolCallType() {
-		return ToolCallType.MCP_TOOL_CALL;
-	}
-
+  @Override
+  public ToolCallType getToolCallType() {
+    return ToolCallType.MCP_TOOL_CALL;
+  }
 }

@@ -17,9 +17,8 @@
 package com.seaskyland.llm.workflow.runtime.domain.account;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * Request model for refreshing authentication token.
@@ -29,10 +28,7 @@ import java.io.Serializable;
 @Data
 public class RefreshTokenRequest implements Serializable {
 
-	/**
-	 * The refresh token used to obtain a new access token.
-	 */
-	@JsonProperty("refresh_token")
-	private String refreshToken;
-
+  /** The refresh token used to obtain a new access token. */
+  @JsonProperty("refresh_token")
+  private String refreshToken;
 }

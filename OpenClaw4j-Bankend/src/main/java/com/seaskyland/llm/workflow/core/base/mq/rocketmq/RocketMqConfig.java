@@ -23,50 +23,54 @@ import lombok.Data;
 import org.apache.rocketmq.client.apis.ClientConfiguration;
 import org.apache.rocketmq.client.apis.ClientConfigurationBuilder;
 import org.apache.rocketmq.client.apis.ClientException;
-import org.apache.rocketmq.client.apis.ClientServiceProvider;
-import org.apache.rocketmq.client.apis.producer.Producer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Configuration class for RocketMQ client setup. Provides beans for client configuration
- * and document index producer.
+ * Configuration class for RocketMQ client setup. Provides beans for client configuration and
+ * document index producer.
  *
  * @since 1.0.0.3
  */
 @Data
 @Configuration
-@ConditionalOnProperty(name = MqConfigProperties.MQ_TYPE_PREFIX, havingValue = MqConfigProperties.ROCKET_MQ)
+@ConditionalOnProperty(
+    name = MqConfigProperties.MQ_TYPE_PREFIX,
+    havingValue = MqConfigProperties.ROCKET_MQ)
 public class RocketMqConfig {
 
-	/**
-	 * Creates a RocketMQ client configuration bean.
-	 * @param mqConfigProperties Configuration properties for MQ
-	 * @return Configured client configuration
-	 */
-	@Bean
-	public ClientConfiguration clientConfiguration(MqConfigProperties mqConfigProperties) {
-		ClientConfigurationBuilder builder = ClientConfiguration.newBuilder()
-			.setEndpoints(mqConfigProperties.getEndpoints());
-		return builder.build();
-	}
+  /**
+   * Creates a RocketMQ client configuration bean.
+   *
+   * @param mqConfigProperties Configuration properties for MQ
+   * @return Configured client configuration
+   */
+  @Bean
+  public ClientConfiguration clientConfiguration(MqConfigProperties mqConfigProperties) {
+    ClientConfigurationBuilder builder =
+        ClientConfiguration.newBuilder().setEndpoints(mqConfigProperties.getEndpoints());
+    return builder.build();
+  }
 
-	/**
-	 * Creates a RocketMQ producer bean for document indexing.
-	 * @param clientConfiguration The client configuration
-	 * @param mqConfigProperties Configuration properties for MQ
-	 * @return Configured document index producer
-	 * @throws ClientException if producer creation fails
-	 */
-    @Bean
-    public MqProducer documentIndexProducer(ClientConfiguration clientConfiguration, MqConfigProperties mqConfigProperties) {
-        return new RocketMqProducer(mqConfigProperties, clientConfiguration, mqConfigProperties.getDocumentIndexTopic());
-    }
+  /**
+   * Creates a RocketMQ producer bean for document indexing.
+   *
+   * @param clientConfiguration The client configuration
+   * @param mqConfigProperties Configuration properties for MQ
+   * @return Configured document index producer
+   * @throws ClientException if producer creation fails
+   */
+  @Bean
+  public MqProducer documentIndexProducer(
+      ClientConfiguration clientConfiguration, MqConfigProperties mqConfigProperties) {
+    return new RocketMqProducer(
+        mqConfigProperties, clientConfiguration, mqConfigProperties.getDocumentIndexTopic());
+  }
 
-    @Bean
-    public MqConsumer documentIndexConsumer(ClientConfiguration clientConfiguration, MqConfigProperties mqConfigProperties) {
-        return new RocketMqConsumer(mqConfigProperties, clientConfiguration);
-    }
-
+  @Bean
+  public MqConsumer documentIndexConsumer(
+      ClientConfiguration clientConfiguration, MqConfigProperties mqConfigProperties) {
+    return new RocketMqConsumer(mqConfigProperties, clientConfiguration);
+  }
 }

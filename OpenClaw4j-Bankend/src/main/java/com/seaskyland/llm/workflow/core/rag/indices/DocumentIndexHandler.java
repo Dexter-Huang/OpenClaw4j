@@ -16,12 +16,11 @@
 
 package com.seaskyland.llm.workflow.core.rag.indices;
 
+import static com.seaskyland.llm.workflow.core.rag.RagConstants.*;
+import static com.seaskyland.llm.workflow.core.utils.LogUtils.FAIL;
+import static com.seaskyland.llm.workflow.core.utils.LogUtils.SUCCESS;
+
 import com.seaskyland.llm.workflow.core.base.mq.MqConsumer;
-import com.seaskyland.llm.workflow.runtime.enums.DocumentIndexStatus;
-import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.Document;
-import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.KnowledgeBase;
-import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.ProcessConfig;
-import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
 import com.seaskyland.llm.workflow.core.base.mq.MqConsumerHandler;
 import com.seaskyland.llm.workflow.core.base.mq.MqConsumerManager;
 import com.seaskyland.llm.workflow.core.base.mq.MqMessage;
@@ -29,21 +28,21 @@ import com.seaskyland.llm.workflow.core.config.MqConfigProperties;
 import com.seaskyland.llm.workflow.core.rag.DocumentService;
 import com.seaskyland.llm.workflow.core.rag.KnowledgeBaseService;
 import com.seaskyland.llm.workflow.core.utils.LogUtils;
+import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.Document;
+import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.KnowledgeBase;
+import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.ProcessConfig;
+import com.seaskyland.llm.workflow.runtime.enums.DocumentIndexStatus;
+import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
 import jakarta.annotation.PostConstruct;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
-
-import static com.seaskyland.llm.workflow.core.rag.RagConstants.*;
-import static com.seaskyland.llm.workflow.core.utils.LogUtils.FAIL;
-import static com.seaskyland.llm.workflow.core.utils.LogUtils.SUCCESS;
-
 /**
- * Handler for document indexing operations. Processes documents through parsing,
- * chunking, and vector storage.
+ * Handler for document indexing operations. Processes documents through parsing, chunking, and
+ * vector storage.
  *
  * @since 1.0.0.3
  */
@@ -52,83 +51,95 @@ import static com.seaskyland.llm.workflow.core.utils.LogUtils.SUCCESS;
 @Slf4j
 public class DocumentIndexHandler implements MqConsumerHandler<MqMessage> {
 
-	/** Message queue configuration properties */
-	private final MqConfigProperties mqConfigProperties;
+  /** Message queue configuration properties */
+  private final MqConfigProperties mqConfigProperties;
 
-	/** Message queue consumer manager */
-	private final MqConsumerManager mqConsumerManager;
+  /** Message queue consumer manager */
+  private final MqConsumerManager mqConsumerManager;
 
-	/** Service for knowledge base operations */
-	private final KnowledgeBaseService knowledgeBaseService;
+  /** Service for knowledge base operations */
+  private final KnowledgeBaseService knowledgeBaseService;
 
-	/** Service for document operations */
-	private final DocumentService documentService;
+  /** Service for document operations */
+  private final DocumentService documentService;
 
-	/** Pipeline for knowledge base indexing operations */
-	private final KnowledgeBaseIndexPipeline knowledgeBaseIndexPipeline;
+  /** Pipeline for knowledge base indexing operations */
+  private final KnowledgeBaseIndexPipeline knowledgeBaseIndexPipeline;
 
-    private final MqConsumer documentIndexConsumer;
+  private final MqConsumer documentIndexConsumer;
 
-	/**
-	 * Initialize the handler by subscribing to the document index topic
-	 */
-	@PostConstruct
-	public void init() {
-		mqConsumerManager.subscribe(documentIndexConsumer, mqConfigProperties.getDocumentIndexGroup(),
-				mqConfigProperties.getDocumentIndexTopic(), this);
-	}
+  /** Initialize the handler by subscribing to the document index topic */
+  @PostConstruct
+  public void init() {
+    mqConsumerManager.subscribe(
+        documentIndexConsumer,
+        mqConfigProperties.getDocumentIndexGroup(),
+        mqConfigProperties.getDocumentIndexTopic(),
+        this);
+  }
 
-	/**
-	 * Handle incoming message by processing the document
-	 * @param message The message containing document data
-	 */
-	@Override
-	public void handle(MqMessage message) {
-		LogUtils.monitor("DocumentIndexHandler", "handle", System.currentTimeMillis(), SUCCESS, message, null);
+  /**
+   * Handle incoming message by processing the document
+   *
+   * @param message The message containing document data
+   */
+  @Override
+  public void handle(MqMessage message) {
+    LogUtils.monitor(
+        "DocumentIndexHandler", "handle", System.currentTimeMillis(), SUCCESS, message, null);
 
-		Document document = JsonUtils.fromJson(message.getBody(), Document.class);
-		process(document);
-	}
+    Document document = JsonUtils.fromJson(message.getBody(), Document.class);
+    process(document);
+  }
 
-	/**
-	 * Process a document through the indexing pipeline: 1. Parse the document 2. Split
-	 * into chunks 3. Create embeddings and store in vector store
-	 * @param document The document to process
-	 */
-	private void process(Document document) {
-		long start = System.currentTimeMillis();
-		DocumentIndexStatus status;
-		try {
-			documentService.updateDocumentIndexStatus(document.getDocId(), DocumentIndexStatus.PROCESSING);
+  /**
+   * Process a document through the indexing pipeline: 1. Parse the document 2. Split into chunks 3.
+   * Create embeddings and store in vector store
+   *
+   * @param document The document to process
+   */
+  private void process(Document document) {
+    long start = System.currentTimeMillis();
+    DocumentIndexStatus status;
+    try {
+      documentService.updateDocumentIndexStatus(
+          document.getDocId(), DocumentIndexStatus.PROCESSING);
 
-			KnowledgeBase knowledgeBase = knowledgeBaseService.getKnowledgeBase(document.getKbId());
+      KnowledgeBase knowledgeBase = knowledgeBaseService.getKnowledgeBase(document.getKbId());
 
-			// Parse document
-			List<org.springframework.ai.document.Document> parsedDocuments = knowledgeBaseIndexPipeline.parse(document);
+      // Parse document
+      List<org.springframework.ai.document.Document> parsedDocuments =
+          knowledgeBaseIndexPipeline.parse(document);
 
-			// Split into chunks
-			ProcessConfig processConfig = document.getProcessConfig();
-			if (processConfig == null) {
-				processConfig = knowledgeBase.getProcessConfig();
-			}
-			List<org.springframework.ai.document.Document> chunks = knowledgeBaseIndexPipeline
-				.transform(parsedDocuments, processConfig);
+      // Split into chunks
+      ProcessConfig processConfig = document.getProcessConfig();
+      if (processConfig == null) {
+        processConfig = knowledgeBase.getProcessConfig();
+      }
+      List<org.springframework.ai.document.Document> chunks =
+          knowledgeBaseIndexPipeline.transform(parsedDocuments, processConfig);
 
-			// Create embeddings and store in vector store
-			Map<String, Object> metadata = Map.of(KEY_WORKSPACE_ID, knowledgeBase.getWorkspaceId(), KEY_DOC_ID,
-					document.getDocId(), KEY_ENABLED, document.getEnabled(), KEY_DOC_NAME, document.getName());
+      // Create embeddings and store in vector store
+      Map<String, Object> metadata =
+          Map.of(
+              KEY_WORKSPACE_ID,
+              knowledgeBase.getWorkspaceId(),
+              KEY_DOC_ID,
+              document.getDocId(),
+              KEY_ENABLED,
+              document.getEnabled(),
+              KEY_DOC_NAME,
+              document.getName());
 
-			knowledgeBaseIndexPipeline.store(chunks, knowledgeBase.getIndexConfig(), metadata);
+      knowledgeBaseIndexPipeline.store(chunks, knowledgeBase.getIndexConfig(), metadata);
 
-			status = DocumentIndexStatus.PROCESSED;
-			LogUtils.monitor("DocumentIndexHandler", "process", start, SUCCESS, document, null);
-		}
-		catch (Exception e) {
-			status = DocumentIndexStatus.FAILED;
-			LogUtils.monitor("DocumentIndexHandler", "process", start, FAIL, document, e.getMessage(), e);
-		}
+      status = DocumentIndexStatus.PROCESSED;
+      LogUtils.monitor("DocumentIndexHandler", "process", start, SUCCESS, document, null);
+    } catch (Exception e) {
+      status = DocumentIndexStatus.FAILED;
+      LogUtils.monitor("DocumentIndexHandler", "process", start, FAIL, document, e.getMessage(), e);
+    }
 
-		documentService.updateDocumentIndexStatus(document.getDocId(), status);
-	}
-
+    documentService.updateDocumentIndexStatus(document.getDocId(), status);
+  }
 }

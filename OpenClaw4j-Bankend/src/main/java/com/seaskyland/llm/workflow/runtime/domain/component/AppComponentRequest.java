@@ -16,15 +16,14 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.component;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
 import com.seaskyland.llm.workflow.runtime.domain.chat.ChatMessage;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Request model for application component operations
@@ -36,22 +35,21 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 public class AppComponentRequest extends BaseQuery implements Serializable {
 
-	/** Component identifier code */
-	private String code;
+  /** Component identifier code */
+  private String code;
 
-	/** Type of the component */
-	private String type;
+  /** Type of the component */
+  private String type;
 
-	/** Business variables for component input parameters */
-	@JsonProperty("biz_vars")
-	private Map<String, Object> bizVars;
+  /** Business variables for component input parameters */
+  @JsonProperty("biz_vars")
+  private Map<String, Object> bizVars;
 
-	/** Flag indicating if streaming mode is enabled */
-	@JsonProperty("stream_mode")
-	private Boolean streamMode = true;
+  /** Flag indicating if streaming mode is enabled */
+  @JsonProperty("stream_mode")
+  private Boolean streamMode = true;
 
-	/** List of chat messages */
-	@JsonProperty("messages")
-	private List<ChatMessage> messages;
-
+  /** List of chat messages */
+  @JsonProperty("messages")
+  private List<ChatMessage> messages;
 }

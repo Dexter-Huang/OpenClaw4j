@@ -15,39 +15,25 @@
  */
 package com.seaskyland.llm.workflow.core.model.llm.domain;
 
+import java.io.Serializable;
 import lombok.Data;
 
-import java.io.Serializable;
-
-/**
- * Model parameter configuration
- */
+/** Model parameter configuration */
 @Data
 public class ModelParam implements Serializable {
 
-	/**
-	 * Parameter key name
-	 */
-	private String key;
+  /** Parameter key name */
+  private String key;
 
-	/**
-	 * Parameter type
-	 */
-	private String type;
+  /** Parameter type */
+  private String type;
 
-	/**
-	 * Default value
-	 */
-	private Object defaultValue;
+  /** Default value */
+  private Object defaultValue;
 
-	/**
-	 * Parameter value
-	 */
-	private Object value;
+  /** Parameter value */
+  private Object value;
 
-	/**
-	 * Parameter switch flag
-	 */
-	private Boolean paramSwitch = false;
-
+  /** Parameter switch flag */
+  private Boolean paramSwitch = false;
 }

@@ -23,7 +23,6 @@ import lombok.EqualsAndHashCode;
 @Data
 public class TaskRunParam extends CommonParam {
 
-	// user or sys
-	private String source;
-
+  // user or sys
+  private String source;
 }

@@ -16,15 +16,12 @@
 
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.DocumentEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.DocumentEntity;
 
 /**
- * Mapper interface for document operations. Provides basic CRUD operations for document
- * entities.
+ * Mapper interface for document operations. Provides basic CRUD operations for document entities.
  *
  * @since 1.0.0.3
  */
-public interface DocumentMapper extends BaseMapper<DocumentEntity> {
-
-}
+public interface DocumentMapper extends BaseMapper<DocumentEntity> {}

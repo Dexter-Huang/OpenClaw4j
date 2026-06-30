@@ -28,20 +28,19 @@ import lombok.Data;
 @Data
 public class Refer {
 
-	/** Main entity code */
-	@JsonProperty("main_code")
-	private String mainCode;
+  /** Main entity code */
+  @JsonProperty("main_code")
+  private String mainCode;
 
-	/** Main entity type */
-	@JsonProperty("main_type")
-	private Integer mainType;
+  /** Main entity type */
+  @JsonProperty("main_type")
+  private Integer mainType;
 
-	/** Referenced entity code */
-	@JsonProperty("refer_code")
-	private String referCode;
+  /** Referenced entity code */
+  @JsonProperty("refer_code")
+  private String referCode;
 
-	/** Referenced entity type */
-	@JsonProperty("refer_type")
-	private Integer referType;
-
+  /** Referenced entity type */
+  @JsonProperty("refer_type")
+  private Integer referType;
 }

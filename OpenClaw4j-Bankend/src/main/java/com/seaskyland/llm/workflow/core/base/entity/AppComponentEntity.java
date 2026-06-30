@@ -20,53 +20,50 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Title: CreateDate: 2025/4/24 14:41
  *
  * @author guning.lt
  * @since 1.0.0.3
- **/
-
+ */
 @Data
 @TableName("application_component")
 public class AppComponentEntity {
 
-	@TableId(value = "id", type = IdType.AUTO)
-	private Long id;
+  @TableId(value = "id", type = IdType.AUTO)
+  private Long id;
 
-	@TableField("gmt_create")
-	private Date gmtCreate;
+  @TableField("gmt_create")
+  private Date gmtCreate;
 
-	@TableField("gmt_modified")
-	private Date gmtModified;
+  @TableField("gmt_modified")
+  private Date gmtModified;
 
-	private String code;
+  private String code;
 
-	private String name;
+  private String name;
 
-	@TableField("workspace_id")
-	private String workspaceId;
+  @TableField("workspace_id")
+  private String workspaceId;
 
-	private String type;
+  private String type;
 
-	@TableField("app_id")
-	private String appId;
+  @TableField("app_id")
+  private String appId;
 
-	private String config;
+  private String config;
 
-	private String description;
+  private String description;
 
-	private Integer status;
+  private Integer status;
 
-	private String creator;
+  private String creator;
 
-	private String modifier;
+  private String modifier;
 
-	@TableField("need_update")
-	private Integer needUpdate;
-
+  @TableField("need_update")
+  private Integer needUpdate;
 }

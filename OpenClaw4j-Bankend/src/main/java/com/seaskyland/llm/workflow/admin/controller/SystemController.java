@@ -16,10 +16,11 @@
 package com.seaskyland.llm.workflow.admin.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.seaskyland.llm.workflow.runtime.enums.UploadType;
-import com.seaskyland.llm.workflow.runtime.domain.Result;
 import com.seaskyland.llm.workflow.core.config.StudioProperties;
+import com.seaskyland.llm.workflow.runtime.domain.Result;
+import com.seaskyland.llm.workflow.runtime.enums.UploadType;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.io.Serializable;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +29,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.Serializable;
-
 @Slf4j
 @RestController
 @Tag(name = "system")
@@ -37,50 +36,45 @@ import java.io.Serializable;
 @RequiredArgsConstructor
 public class SystemController {
 
-	private final StudioProperties studioProperties;
+  private final StudioProperties studioProperties;
 
-	@GetMapping("/global-config")
-	public Result<GlobalConfig> globalConfig() {
-		GlobalConfig globalConfig = new GlobalConfig();
-		if (StringUtils.isBlank(studioProperties.getLoginMethod())) {
-			globalConfig.setLoginMethod(LoginMethodEnum.preset_account.name());
-		}
-		else {
-			LoginMethodEnum loginMethodEnum = LoginMethodEnum.valueOf(studioProperties.getLoginMethod());
-			globalConfig.setLoginMethod(loginMethodEnum.name());
-		}
+  @GetMapping("/global-config")
+  public Result<GlobalConfig> globalConfig() {
+    GlobalConfig globalConfig = new GlobalConfig();
+    if (StringUtils.isBlank(studioProperties.getLoginMethod())) {
+      globalConfig.setLoginMethod(LoginMethodEnum.preset_account.name());
+    } else {
+      LoginMethodEnum loginMethodEnum = LoginMethodEnum.valueOf(studioProperties.getLoginMethod());
+      globalConfig.setLoginMethod(loginMethodEnum.name());
+    }
 
-		if (StringUtils.isBlank(studioProperties.getUploadMethod())) {
-			globalConfig.setUploadMethod(UploadType.FILE.name());
-		}
-		else {
-			UploadType uploadMethodEnum = UploadType.fromValue(studioProperties.getUploadMethod());
-			globalConfig.setUploadMethod(uploadMethodEnum.name().toLowerCase());
-		}
+    if (StringUtils.isBlank(studioProperties.getUploadMethod())) {
+      globalConfig.setUploadMethod(UploadType.FILE.name());
+    } else {
+      UploadType uploadMethodEnum = UploadType.fromValue(studioProperties.getUploadMethod());
+      globalConfig.setUploadMethod(uploadMethodEnum.name().toLowerCase());
+    }
 
-		return Result.success(globalConfig);
-	}
+    return Result.success(globalConfig);
+  }
 
-	@Data
-	public static class GlobalConfig implements Serializable {
+  @Data
+  public static class GlobalConfig implements Serializable {
 
-		@JsonProperty("login_method")
-		private String loginMethod;
+    @JsonProperty("login_method")
+    private String loginMethod;
 
-		@JsonProperty("upload_method")
-		private String uploadMethod;
+    @JsonProperty("upload_method")
+    private String uploadMethod;
+  }
 
-	}
+  enum LoginMethodEnum {
+    third_party,
+    preset_account
+  }
 
-	enum LoginMethodEnum {
-
-		third_party, preset_account
-
-	}
-
-	@GetMapping("/health")
-	public String health() {
-		return "ok";
-	}
-
+  @GetMapping("/health")
+  public String health() {
+    return "ok";
+  }
 }

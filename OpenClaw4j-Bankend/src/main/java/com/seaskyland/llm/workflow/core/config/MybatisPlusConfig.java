@@ -20,6 +20,7 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
+import javax.sql.DataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
@@ -27,43 +28,42 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.core.env.Environment;
 
-import javax.sql.DataSource;
-
 /**
- * Configuration class for MyBatis-Plus integration. Provides pagination support and
- * mapper scanning configuration.
+ * Configuration class for MyBatis-Plus integration. Provides pagination support and mapper scanning
+ * configuration.
  *
  * @since 1.0.0.3
  */
 @Configuration
 @ImportRuntimeHints(MybatisPlusRuntimeHints.class)
-@MapperScan(basePackages = "com.seaskyland.llm.workflow.core.base.mapper",
-		sqlSessionFactoryRef = "sqlSessionFactory")
+@MapperScan(
+    basePackages = "com.seaskyland.llm.workflow.core.base.mapper",
+    sqlSessionFactoryRef = "sqlSessionFactory")
 public class MybatisPlusConfig {
 
-	/**
-	 * Configures MyBatis-Plus interceptor with MySQL pagination support.
-	 * @return MybatisPlusInterceptor instance
-	 */
-	@Bean
-	public MybatisPlusInterceptor mybatisPlusInterceptor(Environment environment) {
-		MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-		interceptor.addInnerInterceptor(new PaginationInnerInterceptor(resolveDbType(environment)));
-		return interceptor;
-	}
+  /**
+   * Configures MyBatis-Plus interceptor with MySQL pagination support.
+   *
+   * @return MybatisPlusInterceptor instance
+   */
+  @Bean
+  public MybatisPlusInterceptor mybatisPlusInterceptor(Environment environment) {
+    MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+    interceptor.addInnerInterceptor(new PaginationInnerInterceptor(resolveDbType(environment)));
+    return interceptor;
+  }
 
-	@Bean
-	public SqlSessionFactory sqlSessionFactory(DataSource dataSource, MybatisPlusInterceptor interceptor,
-			Environment environment)
-			throws Exception {
-		MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
-		factoryBean.setDataSource(dataSource);
-		factoryBean.setPlugins(interceptor);
-		return factoryBean.getObject();
-	}
+  @Bean
+  public SqlSessionFactory sqlSessionFactory(
+      DataSource dataSource, MybatisPlusInterceptor interceptor, Environment environment)
+      throws Exception {
+    MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
+    factoryBean.setDataSource(dataSource);
+    factoryBean.setPlugins(interceptor);
+    return factoryBean.getObject();
+  }
 
-	private DbType resolveDbType(Environment environment) {
-		return DbType.MYSQL;
-	}
-
+  private DbType resolveDbType(Environment environment) {
+    return DbType.MYSQL;
+  }
 }

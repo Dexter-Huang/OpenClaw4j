@@ -24,24 +24,24 @@ package com.seaskyland.llm.workflow.runtime.enums;
  */
 public enum McpServerTypeEnum {
 
-	/** Official MCP server */
-	OFFICIAL,
+  /** Official MCP server */
+  OFFICIAL,
 
-	/** Customer's MCP server */
-	CUSTOMER;
+  /** Customer's MCP server */
+  CUSTOMER;
 
-	/**
-	 * Converts a string to the corresponding McpServerTypeEnum value.
-	 * @param type The string representation of the server type
-	 * @return The corresponding McpServerTypeEnum value, or null if not found
-	 */
-	public static McpServerTypeEnum of(String type) {
-		for (McpServerTypeEnum typeEnum : McpServerTypeEnum.values()) {
-			if (typeEnum.name().equals(type)) {
-				return typeEnum;
-			}
-		}
-		return null;
-	}
-
+  /**
+   * Converts a string to the corresponding McpServerTypeEnum value.
+   *
+   * @param type The string representation of the server type
+   * @return The corresponding McpServerTypeEnum value, or null if not found
+   */
+  public static McpServerTypeEnum of(String type) {
+    for (McpServerTypeEnum typeEnum : McpServerTypeEnum.values()) {
+      if (typeEnum.name().equals(type)) {
+        return typeEnum;
+      }
+    }
+    return null;
+  }
 }

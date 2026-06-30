@@ -15,19 +15,12 @@
  */
 package com.seaskyland.llm.workflow.runtime.enums;
 
-/**
- * Enum representing the source of data
- */
+/** Enum representing the source of data */
 public enum DataSourceEnum {
 
-	/**
-	 * Preset data source
-	 */
-	preset,
+  /** Preset data source */
+  preset,
 
-	/**
-	 * Custom data source
-	 */
-	custom
-
+  /** Custom data source */
+  custom
 }

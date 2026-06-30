@@ -16,13 +16,12 @@
 
 package com.seaskyland.llm.workflow.runtime.domain;
 
+import java.io.Serializable;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * A generic class for handling paginated data lists.
@@ -35,16 +34,15 @@ import java.util.List;
 @Builder
 public class PagingList<T> implements Serializable {
 
-	/** Current page number */
-	private Integer current = 0;
+  /** Current page number */
+  private Integer current = 0;
 
-	/** Number of items per page */
-	private Integer size = 0;
+  /** Number of items per page */
+  private Integer size = 0;
 
-	/** Total number of items */
-	private Long total = 0L;
+  /** Total number of items */
+  private Long total = 0L;
 
-	/** List of items for the current page */
-	private List<T> records;
-
+  /** List of items for the current page */
+  private List<T> records;
 }

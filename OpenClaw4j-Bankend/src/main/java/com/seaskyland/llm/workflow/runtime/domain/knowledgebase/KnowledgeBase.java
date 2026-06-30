@@ -16,14 +16,13 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.knowledgebase;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.seaskyland.llm.workflow.runtime.domain.app.FileSearchOptions;
 import com.seaskyland.llm.workflow.runtime.enums.CommonStatus;
 import com.seaskyland.llm.workflow.runtime.enums.KnowledgeBaseType;
-import com.seaskyland.llm.workflow.runtime.domain.app.FileSearchOptions;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Represents a knowledge base entity that stores and manages knowledge resources.
@@ -33,54 +32,53 @@ import java.util.Date;
 @Data
 public class KnowledgeBase implements Serializable {
 
-	/** Unique identifier of the knowledge base */
-	@JsonProperty("kb_id")
-	private String kbId;
+  /** Unique identifier of the knowledge base */
+  @JsonProperty("kb_id")
+  private String kbId;
 
-	/** Type of the knowledge base */
-	private KnowledgeBaseType type;
+  /** Type of the knowledge base */
+  private KnowledgeBaseType type;
 
-	/** Current status of the knowledge base */
-	private CommonStatus status;
+  /** Current status of the knowledge base */
+  private CommonStatus status;
 
-	/** Name of the knowledge base */
-	private String name;
+  /** Name of the knowledge base */
+  private String name;
 
-	/** Description of the knowledge base */
-	private String description;
+  /** Description of the knowledge base */
+  private String description;
 
-	/** Configuration for document processing */
-	@JsonProperty("process_config")
-	private ProcessConfig processConfig;
+  /** Configuration for document processing */
+  @JsonProperty("process_config")
+  private ProcessConfig processConfig;
 
-	/** Configuration for indexing */
-	@JsonProperty("index_config")
-	private IndexConfig indexConfig;
+  /** Configuration for indexing */
+  @JsonProperty("index_config")
+  private IndexConfig indexConfig;
 
-	/** Configuration for file search */
-	@JsonProperty("search_config")
-	private FileSearchOptions searchConfig;
+  /** Configuration for file search */
+  @JsonProperty("search_config")
+  private FileSearchOptions searchConfig;
 
-	/** Total number of documents in the knowledge base */
-	@JsonProperty("total_docs")
-	private Long totalDocs = 0L;
+  /** Total number of documents in the knowledge base */
+  @JsonProperty("total_docs")
+  private Long totalDocs = 0L;
 
-	/** Creation timestamp */
-	@JsonProperty("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @JsonProperty("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@JsonProperty("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @JsonProperty("gmt_modified")
+  private Date gmtModified;
 
-	/** Creator of the knowledge base */
-	private String creator;
+  /** Creator of the knowledge base */
+  private String creator;
 
-	/** Last modifier of the knowledge base */
-	private String modifier;
+  /** Last modifier of the knowledge base */
+  private String modifier;
 
-	/** ID of the workspace this knowledge base belongs to */
-	@JsonProperty("workspace_id")
-	private String workspaceId;
-
+  /** ID of the workspace this knowledge base belongs to */
+  @JsonProperty("workspace_id")
+  private String workspaceId;
 }

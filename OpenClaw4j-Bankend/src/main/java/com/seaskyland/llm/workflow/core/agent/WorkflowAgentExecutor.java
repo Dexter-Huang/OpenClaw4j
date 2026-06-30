@@ -28,19 +28,17 @@ import reactor.core.publisher.Flux;
  *
  * @since 1.0.0.3
  */
-
 @Service()
 @Qualifier("workflowAgentExecutor")
 public class WorkflowAgentExecutor extends AbstractAgentExecutor {
 
-	@Override
-	public Flux<AgentResponse> streamExecute(AgentContext context, AgentRequest request) {
-		return null;
-	}
+  @Override
+  public Flux<AgentResponse> streamExecute(AgentContext context, AgentRequest request) {
+    return null;
+  }
 
-	@Override
-	public AgentResponse execute(AgentContext context, AgentRequest request) {
-		return null;
-	}
-
+  @Override
+  public AgentResponse execute(AgentContext context, AgentRequest request) {
+    return null;
+  }
 }

@@ -20,51 +20,51 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 /**
- * Enum representing different roles in a chat message. Defines the possible roles that
- * can be assigned to messages in a conversation.
+ * Enum representing different roles in a chat message. Defines the possible roles that can be
+ * assigned to messages in a conversation.
  *
  * @since 1.0.0.3
  */
 @Getter
 public enum MessageRole {
 
-	/** Represents a message from the user */
-	@JsonProperty("user")
-	USER("user"),
+  /** Represents a message from the user */
+  @JsonProperty("user")
+  USER("user"),
 
-	/** Represents a message from the AI assistant */
-	@JsonProperty("assistant")
-	ASSISTANT("assistant"),
+  /** Represents a message from the AI assistant */
+  @JsonProperty("assistant")
+  ASSISTANT("assistant"),
 
-	/** Represents a system-level message */
-	@JsonProperty("system")
-	SYSTEM("system"),
+  /** Represents a system-level message */
+  @JsonProperty("system")
+  SYSTEM("system"),
 
-	/** Represents a message from a tool */
-	@JsonProperty("tool")
-	TOOL("tool");
+  /** Represents a message from a tool */
+  @JsonProperty("tool")
+  TOOL("tool");
 
-	/** The string value of the message role */
-	private final String value;
+  /** The string value of the message role */
+  private final String value;
 
-	MessageRole(String value) {
-		this.value = value;
-	}
+  MessageRole(String value) {
+    this.value = value;
+  }
 
-	/**
-	 * Converts a string value to its corresponding MessageRole enum.
-	 * @param value The string value to convert
-	 * @return The corresponding MessageRole enum
-	 * @throws IllegalArgumentException if the value is invalid
-	 */
-	public static MessageRole of(String value) {
-		for (MessageRole messageRole : MessageRole.values()) {
-			if (messageRole.getValue().equals(value)) {
-				return messageRole;
-			}
-		}
+  /**
+   * Converts a string value to its corresponding MessageRole enum.
+   *
+   * @param value The string value to convert
+   * @return The corresponding MessageRole enum
+   * @throws IllegalArgumentException if the value is invalid
+   */
+  public static MessageRole of(String value) {
+    for (MessageRole messageRole : MessageRole.values()) {
+      if (messageRole.getValue().equals(value)) {
+        return messageRole;
+      }
+    }
 
-		throw new IllegalArgumentException("Invalid MessageType value: " + value);
-	}
-
+    throw new IllegalArgumentException("Invalid MessageType value: " + value);
+  }
 }

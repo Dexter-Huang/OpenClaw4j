@@ -25,17 +25,19 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Swagger/OpenAPI configuration for API documentation. Configures API info and JWT
- * authentication security scheme.
+ * Swagger/OpenAPI configuration for API documentation. Configures API info and JWT authentication
+ * security scheme.
  *
  * @since 1.0.0.3
  */
-
 @Configuration
-@OpenAPIDefinition(info = @Info(title = "agent studio restful api", version = "1.0.0-M1"),
-		security = @SecurityRequirement(name = "bearerAuth"))
-@SecurityScheme(type = SecuritySchemeType.HTTP, name = "bearerAuth", scheme = "bearer", bearerFormat = "JWT",
-		in = SecuritySchemeIn.HEADER)
-public class SwaggerConfig {
-
-}
+@OpenAPIDefinition(
+    info = @Info(title = "agent studio restful api", version = "1.0.0-M1"),
+    security = @SecurityRequirement(name = "bearerAuth"))
+@SecurityScheme(
+    type = SecuritySchemeType.HTTP,
+    name = "bearerAuth",
+    scheme = "bearer",
+    bearerFormat = "JWT",
+    in = SecuritySchemeIn.HEADER)
+public class SwaggerConfig {}

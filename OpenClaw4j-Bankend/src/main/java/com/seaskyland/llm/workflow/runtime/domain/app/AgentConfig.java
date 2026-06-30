@@ -17,10 +17,9 @@
 package com.seaskyland.llm.workflow.runtime.domain.app;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
 
 /**
  * Configuration for an agent in the system.
@@ -30,139 +29,132 @@ import java.util.List;
 @Data
 public class AgentConfig implements AppConfig, Serializable {
 
-	/** Provider of the LLM/VLM model */
-	@JsonProperty("model_provider")
-	private String modelProvider;
+  /** Provider of the LLM/VLM model */
+  @JsonProperty("model_provider")
+  private String modelProvider;
 
-	/** Name of the LLM/VLM model to use */
-	private String model;
+  /** Name of the LLM/VLM model to use */
+  private String model;
 
-	/** Type of modality supported by the model */
-	@JsonProperty("modality_type")
-	private String modalityType;
+  /** Type of modality supported by the model */
+  @JsonProperty("modality_type")
+  private String modalityType;
 
-	/** System instructions for the agent */
-	private String instructions;
+  /** System instructions for the agent */
+  private String instructions;
 
-	/** Memory configuration for the agent */
-	private Memory memory;
+  /** Memory configuration for the agent */
+  private Memory memory;
 
-	/** Model parameters for generation */
-	private Parameter parameter;
+  /** Model parameters for generation */
+  private Parameter parameter;
 
-	/** List of tools available to the agent */
-	private List<Tool> tools;
+  /** List of tools available to the agent */
+  private List<Tool> tools;
 
-	/** List of MCP servers for the agent */
-	@JsonProperty("mcp_servers")
-	private List<McpServer> mcpServers;
+  /** List of MCP servers for the agent */
+  @JsonProperty("mcp_servers")
+  private List<McpServer> mcpServers;
 
-	/** List of agent component identifiers */
-	@JsonProperty("agent_components")
-	private List<String> agentComponents;
+  /** List of agent component identifiers */
+  @JsonProperty("agent_components")
+  private List<String> agentComponents;
 
-	/** List of workflow component identifiers */
-	@JsonProperty("workflow_components")
-	private List<String> workflowComponents;
+  /** List of workflow component identifiers */
+  @JsonProperty("workflow_components")
+  private List<String> workflowComponents;
 
-	/** List of variables used in prompts */
-	@JsonProperty("prompt_variables")
-	private List<PromptVariable> promptVariables;
+  /** List of variables used in prompts */
+  @JsonProperty("prompt_variables")
+  private List<PromptVariable> promptVariables;
 
-	/** File search configuration options */
-	@JsonProperty("file_search")
-	private FileSearchOptions fileSearch;
+  /** File search configuration options */
+  @JsonProperty("file_search")
+  private FileSearchOptions fileSearch;
 
-	/** Initial context and suggested questions */
-	private Prologue prologue;
+  /** Initial context and suggested questions */
+  private Prologue prologue;
 
-	/** Configuration for model generation parameters */
-	@Data
-	public static class Parameter implements Serializable {
+  /** Configuration for model generation parameters */
+  @Data
+  public static class Parameter implements Serializable {
 
-		/** Maximum number of tokens to generate */
-		@JsonProperty("max_tokens")
-		private Integer maxTokens;
+    /** Maximum number of tokens to generate */
+    @JsonProperty("max_tokens")
+    private Integer maxTokens;
 
-		/** Temperature for controlling randomness */
-		@JsonProperty("temperature")
-		private Double temperature;
+    /** Temperature for controlling randomness */
+    @JsonProperty("temperature")
+    private Double temperature;
 
-		/** Top-p sampling parameter */
-		@JsonProperty("top_p")
-		private Double topP;
+    /** Top-p sampling parameter */
+    @JsonProperty("top_p")
+    private Double topP;
 
-		/** Penalty for repeated tokens */
-		@JsonProperty("repetition_penalty")
-		private Double repetitionPenalty;
+    /** Penalty for repeated tokens */
+    @JsonProperty("repetition_penalty")
+    private Double repetitionPenalty;
+  }
 
-	}
+  /** Configuration for agent's memory */
+  @Data
+  public static class Memory implements Serializable {
 
-	/** Configuration for agent's memory */
-	@Data
-	public static class Memory implements Serializable {
+    /** Number of dialog rounds to remember */
+    @JsonProperty("dialog_round")
+    private Integer dialogRound;
+  }
 
-		/** Number of dialog rounds to remember */
-		@JsonProperty("dialog_round")
-		private Integer dialogRound;
+  /** Configuration for agent's tools */
+  @Data
+  public static class Tool implements Serializable {
 
-	}
+    /** Unique identifier for the tool */
+    private String id;
 
-	/** Configuration for agent's tools */
-	@Data
-	public static class Tool implements Serializable {
+    /** Type of the tool */
+    private String type;
+  }
 
-		/** Unique identifier for the tool */
-		private String id;
+  /** Configuration for MCP servers */
+  @Data
+  public static class McpServer implements Serializable {
 
-		/** Type of the tool */
-		private String type;
+    /** Unique identifier for the server */
+    private String id;
 
-	}
+    /** Type of the server */
+    private String type;
+  }
 
-	/** Configuration for MCP servers */
-	@Data
-	public static class McpServer implements Serializable {
+  /** Configuration for prompt variables */
+  @Data
+  public static class PromptVariable implements Serializable {
 
-		/** Unique identifier for the server */
-		private String id;
+    /** Name of the variable */
+    private String name;
 
-		/** Type of the server */
-		private String type;
+    /** Type of the variable */
+    private String type;
 
-	}
+    /** Description of the variable's purpose */
+    private String description;
 
-	/** Configuration for prompt variables */
-	@Data
-	public static class PromptVariable implements Serializable {
+    /** Default value for the variable */
+    @JsonProperty("default_value")
+    private String defaultValue;
+  }
 
-		/** Name of the variable */
-		private String name;
+  /** Configuration for agent's prologue */
+  @Data
+  public static class Prologue implements Serializable {
 
-		/** Type of the variable */
-		private String type;
+    /** Initial text shown to users */
+    @JsonProperty("prologue_text")
+    private String prologueText;
 
-		/** Description of the variable's purpose */
-		private String description;
-
-		/** Default value for the variable */
-		@JsonProperty("default_value")
-		private String defaultValue;
-
-	}
-
-	/** Configuration for agent's prologue */
-	@Data
-	public static class Prologue implements Serializable {
-
-		/** Initial text shown to users */
-		@JsonProperty("prologue_text")
-		private String prologueText;
-
-		/** List of suggested questions for users */
-		@JsonProperty("suggested_questions")
-		private List<String> suggestedQuestions;
-
-	}
-
+    /** List of suggested questions for users */
+    @JsonProperty("suggested_questions")
+    private List<String> suggestedQuestions;
+  }
 }

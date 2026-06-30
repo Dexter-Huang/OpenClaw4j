@@ -17,32 +17,29 @@
 package com.seaskyland.llm.workflow.runtime.domain.knowledgebase;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * Request model for batch deleting chunks from a document.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class DeleteChunkRequest implements Serializable {
 
-	/** ID of the document containing the chunks to be deleted */
-	@JsonProperty("doc_id")
-	private String docId;
+  /** ID of the document containing the chunks to be deleted */
+  @JsonProperty("doc_id")
+  private String docId;
 
-	/** List of chunk IDs to be deleted from the document */
-	@JsonProperty("chunk_ids")
-	private List<String> chunkIds;
-
+  /** List of chunk IDs to be deleted from the document */
+  @JsonProperty("chunk_ids")
+  private List<String> chunkIds;
 }

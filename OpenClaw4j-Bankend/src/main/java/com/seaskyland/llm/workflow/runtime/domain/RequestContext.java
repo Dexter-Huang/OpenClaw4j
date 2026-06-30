@@ -16,48 +16,45 @@
 
 package com.seaskyland.llm.workflow.runtime.domain;
 
-import com.seaskyland.llm.workflow.runtime.enums.AccountType;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.AccountType;
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * Request context for tracking request metadata and user information.
  *
  * @since 1.0.0.3
  */
-
 @Data
 public class RequestContext implements Serializable {
 
-	/** Request start timestamp */
-	private long startTime;
+  /** Request start timestamp */
+  private long startTime;
 
-	/** Unique identifier for the request */
-	@JsonProperty("request_id")
-	private String requestId;
+  /** Unique identifier for the request */
+  @JsonProperty("request_id")
+  private String requestId;
 
-	/** User account identifier */
-	@JsonProperty("account_id")
-	private String accountId;
+  /** User account identifier */
+  @JsonProperty("account_id")
+  private String accountId;
 
-	/** User account name */
-	private String username;
+  /** User account name */
+  private String username;
 
-	/** Type of the user account */
-	@JsonProperty("account_type")
-	private AccountType accountType;
+  /** Type of the user account */
+  @JsonProperty("account_type")
+  private AccountType accountType;
 
-	/** Workspace identifier */
-	@JsonProperty("workspace_id")
-	private String workspaceId;
+  /** Workspace identifier */
+  @JsonProperty("workspace_id")
+  private String workspaceId;
 
-	/** IP address of the request caller */
-	@JsonProperty("caller_ip")
-	private String callerIp;
+  /** IP address of the request caller */
+  @JsonProperty("caller_ip")
+  private String callerIp;
 
-	/** Source of the request, defaults to "console" */
-	private String source = "console";
-
+  /** Source of the request, defaults to "console" */
+  private String source = "console";
 }

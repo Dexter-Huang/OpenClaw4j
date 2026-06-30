@@ -17,38 +17,27 @@
 package com.seaskyland.llm.workflow.runtime.domain.tool;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * Schema for tool call definition.
  *
  * @since 1.0.0.3
  */
-
 @Data
 public class ToolCallSchema implements Serializable {
 
-	/**
-	 * Tool name (recommended to include unique identifiers to prevent duplicates)
-	 */
-	private String name;
+  /** Tool name (recommended to include unique identifiers to prevent duplicates) */
+  private String name;
 
-	/**
-	 * Tool description
-	 */
-	private String description;
+  /** Tool description */
+  private String description;
 
-	/**
-	 * Input schema definition
-	 */
-	@JsonProperty("input_schema")
-	private InputSchema inputSchema;
+  /** Input schema definition */
+  @JsonProperty("input_schema")
+  private InputSchema inputSchema;
 
-	/**
-	 * JSON serialized examples
-	 */
-	private String examples;
-
+  /** JSON serialized examples */
+  private String examples;
 }

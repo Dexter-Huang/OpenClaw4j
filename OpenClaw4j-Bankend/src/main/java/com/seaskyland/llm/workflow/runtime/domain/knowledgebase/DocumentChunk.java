@@ -17,56 +17,53 @@
 package com.seaskyland.llm.workflow.runtime.domain.knowledgebase;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 /**
- * Represents a chunk of a document in the knowledge base. Each chunk contains a portion
- * of the document's content along with metadata.
+ * Represents a chunk of a document in the knowledge base. Each chunk contains a portion of the
+ * document's content along with metadata.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class DocumentChunk implements Serializable {
 
-	/** Unique identifier of the document */
-	@JsonProperty("doc_id")
-	private String docId;
+  /** Unique identifier of the document */
+  @JsonProperty("doc_id")
+  private String docId;
 
-	/** Name of the document */
-	@JsonProperty("doc_name")
-	private String docName;
+  /** Name of the document */
+  @JsonProperty("doc_name")
+  private String docName;
 
-	/** Title of the document chunk */
-	private String title;
+  /** Title of the document chunk */
+  private String title;
 
-	/** Content text of the chunk */
-	private String text;
+  /** Content text of the chunk */
+  private String text;
 
-	/** Relevance score of the chunk */
-	private Double score;
+  /** Relevance score of the chunk */
+  private Double score;
 
-	/** Page number in the original document */
-	@JsonProperty("page_number")
-	private Integer pageNumber;
+  /** Page number in the original document */
+  @JsonProperty("page_number")
+  private Integer pageNumber;
 
-	/** Unique identifier of the chunk */
-	@JsonProperty("chunk_id")
-	private String chunkId;
+  /** Unique identifier of the chunk */
+  @JsonProperty("chunk_id")
+  private String chunkId;
 
-	/** Whether the chunk is enabled */
-	private Boolean enabled;
+  /** Whether the chunk is enabled */
+  private Boolean enabled;
 
-	/** ID of the workspace this chunk belongs to */
-	@JsonProperty("workspace_id")
-	private String workspaceId;
-
+  /** ID of the workspace this chunk belongs to */
+  @JsonProperty("workspace_id")
+  private String workspaceId;
 }

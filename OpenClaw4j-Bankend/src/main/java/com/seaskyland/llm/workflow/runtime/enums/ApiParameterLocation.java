@@ -16,55 +16,54 @@
 
 package com.seaskyland.llm.workflow.runtime.enums;
 
-import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Arrays;
 import java.util.Optional;
+import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Enum representing the location of API parameters in HTTP requests.
  *
  * @since 1.0.0.3
  */
-
 @Getter
 public enum ApiParameterLocation {
 
-	/** Parameter in request body */
-	BODY("body"),
+  /** Parameter in request body */
+  BODY("body"),
 
-	/** Parameter in URL path */
-	PATH("path"),
+  /** Parameter in URL path */
+  PATH("path"),
 
-	/** Parameter in URL query string */
-	QUERY("query"),
+  /** Parameter in URL query string */
+  QUERY("query"),
 
-	/** Parameter in HTTP header */
-	HEADER("header");
+  /** Parameter in HTTP header */
+  HEADER("header");
 
-	/** The string representation of the parameter location */
-	private final String location;
+  /** The string representation of the parameter location */
+  private final String location;
 
-	ApiParameterLocation(String location) {
-		this.location = location;
-	}
+  ApiParameterLocation(String location) {
+    this.location = location;
+  }
 
-	/**
-	 * Converts a string location to the corresponding enum value.
-	 * @param location The string representation of the location
-	 * @return The matching ApiParameterLocation enum value, or null if not found
-	 */
-	public static ApiParameterLocation of(String location) {
-		if (StringUtils.isBlank(location)) {
-			return null;
-		}
+  /**
+   * Converts a string location to the corresponding enum value.
+   *
+   * @param location The string representation of the location
+   * @return The matching ApiParameterLocation enum value, or null if not found
+   */
+  public static ApiParameterLocation of(String location) {
+    if (StringUtils.isBlank(location)) {
+      return null;
+    }
 
-		Optional<ApiParameterLocation> any = Arrays.stream(values())
-			.filter(parameterLocation -> location.equalsIgnoreCase(parameterLocation.getLocation()))
-			.findAny();
+    Optional<ApiParameterLocation> any =
+        Arrays.stream(values())
+            .filter(parameterLocation -> location.equalsIgnoreCase(parameterLocation.getLocation()))
+            .findAny();
 
-		return any.orElse(null);
-	}
-
+    return any.orElse(null);
+  }
 }

@@ -16,15 +16,12 @@
 
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.PluginEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.PluginEntity;
 
 /**
- * Mapper interface for plugin operations. Provides database access methods for plugin
- * entities.
+ * Mapper interface for plugin operations. Provides database access methods for plugin entities.
  *
  * @since 1.0.0.3
  */
-public interface PluginMapper extends BaseMapper<PluginEntity> {
-
-}
+public interface PluginMapper extends BaseMapper<PluginEntity> {}

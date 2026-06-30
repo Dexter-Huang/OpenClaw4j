@@ -21,95 +21,104 @@ import com.seaskyland.llm.workflow.runtime.domain.app.AppQuery;
 import com.seaskyland.llm.workflow.runtime.domain.app.Application;
 import com.seaskyland.llm.workflow.runtime.domain.app.ApplicationVersion;
 import com.seaskyland.llm.workflow.runtime.domain.component.AppComponentQuery;
-
 import java.util.List;
 
 /**
- * Service interface for managing applications and their versions. Provides CRUD
- * operations and version management for applications.
+ * Service interface for managing applications and their versions. Provides CRUD operations and
+ * version management for applications.
  *
  * @since 1.0.0.3
  */
 public interface AppService {
 
-	/**
-	 * Creates a new application
-	 * @param application Application details
-	 * @return ID of the created application
-	 */
-	String createApp(Application application);
+  /**
+   * Creates a new application
+   *
+   * @param application Application details
+   * @return ID of the created application
+   */
+  String createApp(Application application);
 
-	/**
-	 * Updates an existing application
-	 * @param application Updated application details
-	 */
-	void updateApp(Application application);
+  /**
+   * Updates an existing application
+   *
+   * @param application Updated application details
+   */
+  void updateApp(Application application);
 
-	/**
-	 * Deletes an application by ID
-	 * @param appId Application ID to delete
-	 */
-	void deleteApp(String appId);
+  /**
+   * Deletes an application by ID
+   *
+   * @param appId Application ID to delete
+   */
+  void deleteApp(String appId);
 
-	/**
-	 * Retrieves an application by ID
-	 * @param appId Application ID to retrieve
-	 * @return Application details
-	 */
-	Application getApp(String appId);
+  /**
+   * Retrieves an application by ID
+   *
+   * @param appId Application ID to retrieve
+   * @return Application details
+   */
+  Application getApp(String appId);
 
-	/**
-	 * Lists applications based on query criteria
-	 * @param query Search criteria
-	 * @return Paged list of applications
-	 */
-	PagingList<Application> listApps(AppQuery query);
+  /**
+   * Lists applications based on query criteria
+   *
+   * @param query Search criteria
+   * @return Paged list of applications
+   */
+  PagingList<Application> listApps(AppQuery query);
 
-	/**
-	 * Publishes an application
-	 * @param appId Application ID to publish
-	 */
-	void publishApp(String appId);
+  /**
+   * Publishes an application
+   *
+   * @param appId Application ID to publish
+   */
+  void publishApp(String appId);
 
-	/**
-	 * Lists application versions based on query criteria
-	 * @param query Search criteria
-	 * @return Paged list of application versions
-	 */
-	PagingList<ApplicationVersion> listAppVersions(AppQuery query);
+  /**
+   * Lists application versions based on query criteria
+   *
+   * @param query Search criteria
+   * @return Paged list of application versions
+   */
+  PagingList<ApplicationVersion> listAppVersions(AppQuery query);
 
-	/**
-	 * Retrieves a specific version of an application
-	 * @param appId Application ID
-	 * @param versionId Version ID
-	 * @return Application version details
-	 */
-	ApplicationVersion getAppVersion(String appId, String versionId);
+  /**
+   * Retrieves a specific version of an application
+   *
+   * @param appId Application ID
+   * @param versionId Version ID
+   * @return Application version details
+   */
+  ApplicationVersion getAppVersion(String appId, String versionId);
 
-	/**
-	 * Gets list of published applications by type and name
-	 * @param type Application type
-	 * @param appName Application name
-	 * @param codes List of codes
-	 * @return List of application IDs
-	 */
-	List<Long> getApplicationPublished(String type, String appName, List<String> codes);
+  /**
+   * Gets list of published applications by type and name
+   *
+   * @param type Application type
+   * @param appName Application name
+   * @param codes List of codes
+   * @return List of application IDs
+   */
+  List<Long> getApplicationPublished(String type, String appName, List<String> codes);
 
-	/**
-	 * Gets list of published applications that are not components
-	 * @param request Component query parameters
-	 * @param codes List of codes
-	 * @param ids List of application IDs
-	 * @return Paged list of applications
-	 */
-	PagingList<Application> getApplicationPublishedAndNotComponentList(AppComponentQuery request, List<String> codes,
-			List<Long> ids);
+  /**
+   * Gets list of published applications that are not components
+   *
+   * @param request Component query parameters
+   * @param codes List of codes
+   * @param ids List of application IDs
+   * @return Paged list of applications
+   */
+  PagingList<Application> getApplicationPublishedAndNotComponentList(
+      AppComponentQuery request, List<String> codes, List<Long> ids);
 
-	/**
-	 * Creates a copy of an existing application
-	 * @param appId ID of the application to copy
-	 * @return ID of the newly created application
-	 */
-	String copyApp(String appId);
-
+  /**
+   * Creates a copy of an existing application
+   *
+   * @param appId ID of the application to copy
+   * @return ID of the newly created application
+   */
+  String copyApp(String appId);
 }

@@ -16,15 +16,13 @@
 
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.WorkspaceEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.WorkspaceEntity;
 
 /**
- * Mapper interface for workspace operations. Provides database access methods for
- * workspace entities.
+ * Mapper interface for workspace operations. Provides database access methods for workspace
+ * entities.
  *
  * @since 1.0.0.3
  */
-public interface WorkspaceMapper extends BaseMapper<WorkspaceEntity> {
-
-}
+public interface WorkspaceMapper extends BaseMapper<WorkspaceEntity> {}

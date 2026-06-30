@@ -26,10 +26,9 @@ import lombok.Data;
 @Data
 public class LimitEntity {
 
-	/** Maximum number of allowed operations */
-	private int count;
+  /** Maximum number of allowed operations */
+  private int count;
 
-	/** Time window for the limit in milliseconds */
-	private long time;
-
+  /** Time window for the limit in milliseconds */
+  private long time;
 }

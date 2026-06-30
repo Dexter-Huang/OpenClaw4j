@@ -16,9 +16,9 @@
 
 package com.seaskyland.llm.workflow.core.utils.security;
 
+import java.nio.charset.StandardCharsets;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 
 /**
  * AES encryption and decryption utility class.
@@ -27,58 +27,55 @@ import java.nio.charset.StandardCharsets;
  */
 public class AESCryptUtils {
 
-	/** AES cipher algorithm specification */
-	private static final String AES_CIPHER = "AES/ECB/PKCS5Padding";
+  /** AES cipher algorithm specification */
+  private static final String AES_CIPHER = "AES/ECB/PKCS5Padding";
 
-	/** AES encryption key */
-	public static final String AES_KEY = "agentscope_5qAI8#nO-d@xK7$kdF+Dh";
+  /** AES encryption key */
+  public static final String AES_KEY = "agentscope_5qAI8#nO-d@xK7$kdF+Dh";
 
-	/**
-	 * Encrypts a string using AES algorithm.
-	 * @param original The string to be encrypted
-	 * @return Base64 encoded encrypted string
-	 */
-	public static String encrypt(String original) {
-		try {
-			byte[] raw = AES_KEY.getBytes();
-			SecretKeySpec secKey = new SecretKeySpec(raw, "AES");
-			Cipher cipher = Cipher.getInstance(AES_CIPHER);
-			cipher.init(Cipher.ENCRYPT_MODE, secKey);
-			byte[] byte_content = original.getBytes(StandardCharsets.UTF_8);
-			byte[] encode_content = cipher.doFinal(byte_content);
-			return org.apache.commons.codec.binary.Base64.encodeBase64String(encode_content);
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+  /**
+   * Encrypts a string using AES algorithm.
+   *
+   * @param original The string to be encrypted
+   * @return Base64 encoded encrypted string
+   */
+  public static String encrypt(String original) {
+    try {
+      byte[] raw = AES_KEY.getBytes();
+      SecretKeySpec secKey = new SecretKeySpec(raw, "AES");
+      Cipher cipher = Cipher.getInstance(AES_CIPHER);
+      cipher.init(Cipher.ENCRYPT_MODE, secKey);
+      byte[] byte_content = original.getBytes(StandardCharsets.UTF_8);
+      byte[] encode_content = cipher.doFinal(byte_content);
+      return org.apache.commons.codec.binary.Base64.encodeBase64String(encode_content);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-	/**
-	 * Decrypts an AES encrypted string.
-	 * @param encrypted Base64 encoded encrypted string
-	 * @return Decrypted string
-	 */
-	public static String decrypt(String encrypted) {
-		try {
-			byte[] raw = AES_KEY.getBytes();
-			SecretKeySpec secKey = new SecretKeySpec(raw, "AES");
-			Cipher cipher = Cipher.getInstance(AES_CIPHER);
-			cipher.init(Cipher.DECRYPT_MODE, secKey);
-			byte[] encode_content = org.apache.commons.codec.binary.Base64.decodeBase64(encrypted);
-			byte[] byte_content = cipher.doFinal(encode_content);
-			return new String(byte_content, StandardCharsets.UTF_8);
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+  /**
+   * Decrypts an AES encrypted string.
+   *
+   * @param encrypted Base64 encoded encrypted string
+   * @return Decrypted string
+   */
+  public static String decrypt(String encrypted) {
+    try {
+      byte[] raw = AES_KEY.getBytes();
+      SecretKeySpec secKey = new SecretKeySpec(raw, "AES");
+      Cipher cipher = Cipher.getInstance(AES_CIPHER);
+      cipher.init(Cipher.DECRYPT_MODE, secKey);
+      byte[] encode_content = org.apache.commons.codec.binary.Base64.decodeBase64(encrypted);
+      byte[] byte_content = cipher.doFinal(encode_content);
+      return new String(byte_content, StandardCharsets.UTF_8);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-	/**
-	 * Test method for encryption.
-	 */
-	public static void main(String[] args) {
-		String encrypted = encrypt("sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-		System.out.println(encrypted);
-	}
-
+  /** Test method for encryption. */
+  public static void main(String[] args) {
+    String encrypted = encrypt("sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+    System.out.println(encrypted);
+  }
 }

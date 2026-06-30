@@ -27,38 +27,25 @@ import lombok.Getter;
 @Getter
 public enum ReferTypeEnum {
 
-	/**
-	 * Main entity type: Agent
-	 */
-	MAIN_TYPE_AGENT(2),
+  /** Main entity type: Agent */
+  MAIN_TYPE_AGENT(2),
 
-	/**
-	 * Main entity type: Flow
-	 */
-	MAIN_TYPE_FLOW(3),
+  /** Main entity type: Flow */
+  MAIN_TYPE_FLOW(3),
 
-	/**
-	 * Referenced entity type: Plugin
-	 */
-	REFER_TYPE_PLUGIN(10),
+  /** Referenced entity type: Plugin */
+  REFER_TYPE_PLUGIN(10),
 
-	/**
-	 * Referenced entity type: Component Agent
-	 */
-	REFER_TYPE_COMPONENT_AGENT(20),
+  /** Referenced entity type: Component Agent */
+  REFER_TYPE_COMPONENT_AGENT(20),
 
-	/**
-	 * Referenced entity type: Component Workflow
-	 */
-	REFER_TYPE_COMPONENT_WORKFLOW(30);
+  /** Referenced entity type: Component Workflow */
+  REFER_TYPE_COMPONENT_WORKFLOW(30);
 
-	/**
-	 * Type identifier
-	 */
-	private final Integer type;
+  /** Type identifier */
+  private final Integer type;
 
-	ReferTypeEnum(Integer type) {
-		this.type = type;
-	}
-
+  ReferTypeEnum(Integer type) {
+    this.type = type;
+  }
 }

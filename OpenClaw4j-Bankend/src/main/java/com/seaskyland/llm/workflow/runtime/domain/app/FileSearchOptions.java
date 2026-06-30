@@ -17,71 +17,68 @@
 package com.seaskyland.llm.workflow.runtime.domain.app;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * Configuration options for file search and retrieval.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class FileSearchOptions implements Serializable {
 
-	/** List of knowledge base IDs to search in */
-	@JsonProperty("kb_ids")
-	private List<String> kbIds;
+  /** List of knowledge base IDs to search in */
+  @JsonProperty("kb_ids")
+  private List<String> kbIds;
 
-	/** Whether to enable search functionality */
-	@JsonProperty("enable_search")
-	@Builder.Default
-	private Boolean enableSearch = false;
+  /** Whether to enable search functionality */
+  @JsonProperty("enable_search")
+  @Builder.Default
+  private Boolean enableSearch = false;
 
-	/** Whether to enable citation in search results */
-	@JsonProperty("enable_citation")
-	private Boolean enableCitation;
+  /** Whether to enable citation in search results */
+  @JsonProperty("enable_citation")
+  private Boolean enableCitation;
 
-	/** Number of top results to return */
-	@JsonProperty("top_k")
-	private Integer topK;
+  /** Number of top results to return */
+  @JsonProperty("top_k")
+  private Integer topK;
 
-	/** Maximum length of retrieved content */
-	@JsonProperty("retrieve_max_length")
-	private Integer retrieveMaxLength;
+  /** Maximum length of retrieved content */
+  @JsonProperty("retrieve_max_length")
+  private Integer retrieveMaxLength;
 
-	/** Minimum similarity threshold for search results */
-	@JsonProperty("similarity_threshold")
-	private Float similarityThreshold;
+  /** Minimum similarity threshold for search results */
+  @JsonProperty("similarity_threshold")
+  private Float similarityThreshold;
 
-	/** Weight for hybrid search algorithm, default to 0.7 */
-	@JsonProperty("hybrid_weight")
-	private Float hybridWeight;
+  /** Weight for hybrid search algorithm, default to 0.7 */
+  @JsonProperty("hybrid_weight")
+  private Float hybridWeight;
 
-	/** Type of search to perform (e.g., "hybrid") */
-	@JsonProperty("search_type")
-	@Builder.Default
-	private String searchType = "hybrid";
+  /** Type of search to perform (e.g., "hybrid") */
+  @JsonProperty("search_type")
+  @Builder.Default
+  private String searchType = "hybrid";
 
-	/** Whether to enable reranking of results */
-	@JsonProperty("enable_rerank")
-	@Builder.Default
-	private Boolean enableRerank = false;
+  /** Whether to enable reranking of results */
+  @JsonProperty("enable_rerank")
+  @Builder.Default
+  private Boolean enableRerank = false;
 
-	/** Provider for reranking service */
-	@JsonProperty("rerank_provider")
-	private String rerankProvider;
+  /** Provider for reranking service */
+  @JsonProperty("rerank_provider")
+  private String rerankProvider;
 
-	/** Model to use for reranking */
-	@JsonProperty("rerank_model")
-	private String rerankModel;
-
+  /** Model to use for reranking */
+  @JsonProperty("rerank_model")
+  private String rerankModel;
 }

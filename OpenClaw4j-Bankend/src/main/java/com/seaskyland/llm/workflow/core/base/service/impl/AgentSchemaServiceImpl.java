@@ -16,6 +16,9 @@
 
 package com.seaskyland.llm.workflow.core.base.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seaskyland.llm.workflow.core.base.entity.AgentSchemaEntity;
 import com.seaskyland.llm.workflow.core.base.mapper.AgentSchemaMapper;
 import com.seaskyland.llm.workflow.core.base.service.AgentSchemaService;
@@ -24,14 +27,10 @@ import com.seaskyland.llm.workflow.core.utils.common.IdGenerator;
 import com.seaskyland.llm.workflow.runtime.domain.PagingList;
 import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
 import com.seaskyland.llm.workflow.runtime.enums.agent.AgentStatus;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 /**
  * Implementation of AgentSchemaService for CRUD operations.
@@ -40,136 +39,136 @@ import java.util.List;
  */
 @Service
 public class AgentSchemaServiceImpl extends ServiceImpl<AgentSchemaMapper, AgentSchemaEntity>
-		implements AgentSchemaService {
+    implements AgentSchemaService {
 
-	@Override
-	public AgentSchemaEntity createAgentSchema(AgentSchemaEntity agentSchemaEntity) {
-		RequestContext requestContext = RequestContextHolder.getRequestContext();
+  @Override
+  public AgentSchemaEntity createAgentSchema(AgentSchemaEntity agentSchemaEntity) {
+    RequestContext requestContext = RequestContextHolder.getRequestContext();
 
-		// Check for duplicate name in the same workspace
-		String workspaceId = requestContext != null ? requestContext.getWorkspaceId() : null;
-		if (StringUtils.isBlank(workspaceId)) {
-			workspaceId = "1"; // Use default workspace ID that matches database
-		}
+    // Check for duplicate name in the same workspace
+    String workspaceId = requestContext != null ? requestContext.getWorkspaceId() : null;
+    if (StringUtils.isBlank(workspaceId)) {
+      workspaceId = "1"; // Use default workspace ID that matches database
+    }
 
-		LambdaQueryWrapper<AgentSchemaEntity> duplicateCheck = new LambdaQueryWrapper<>();
-		duplicateCheck.eq(AgentSchemaEntity::getWorkspaceId, workspaceId);
-		duplicateCheck.eq(AgentSchemaEntity::getName, agentSchemaEntity.getName());
-		List<AgentSchemaEntity> existingAgents = list(duplicateCheck);
+    LambdaQueryWrapper<AgentSchemaEntity> duplicateCheck = new LambdaQueryWrapper<>();
+    duplicateCheck.eq(AgentSchemaEntity::getWorkspaceId, workspaceId);
+    duplicateCheck.eq(AgentSchemaEntity::getName, agentSchemaEntity.getName());
+    List<AgentSchemaEntity> existingAgents = list(duplicateCheck);
 
-		if (!existingAgents.isEmpty()) {
-			throw new IllegalArgumentException("智能体名称已存在，请使用其他名称: " + agentSchemaEntity.getName());
-		}
+    if (!existingAgents.isEmpty()) {
+      throw new IllegalArgumentException("智能体名称已存在，请使用其他名称: " + agentSchemaEntity.getName());
+    }
 
-		// Set default values
-		if (StringUtils.isBlank(agentSchemaEntity.getAgentId())) {
-			agentSchemaEntity.setAgentId(IdGenerator.generateAgentId());
-		}
+    // Set default values
+    if (StringUtils.isBlank(agentSchemaEntity.getAgentId())) {
+      agentSchemaEntity.setAgentId(IdGenerator.generateAgentId());
+    }
 
-		agentSchemaEntity.setWorkspaceId(workspaceId);
-		agentSchemaEntity.setStatus(AgentStatus.ACTIVE);
-		agentSchemaEntity.setEnabled(true);
-		agentSchemaEntity.setGmtCreate(new Date());
-		agentSchemaEntity.setGmtModified(new Date());
+    agentSchemaEntity.setWorkspaceId(workspaceId);
+    agentSchemaEntity.setStatus(AgentStatus.ACTIVE);
+    agentSchemaEntity.setEnabled(true);
+    agentSchemaEntity.setGmtCreate(new Date());
+    agentSchemaEntity.setGmtModified(new Date());
 
-		String accountId = requestContext != null ? requestContext.getAccountId() : "10000";
-		agentSchemaEntity.setCreator(accountId);
-		agentSchemaEntity.setModifier(accountId);
+    String accountId = requestContext != null ? requestContext.getAccountId() : "10000";
+    agentSchemaEntity.setCreator(accountId);
+    agentSchemaEntity.setModifier(accountId);
 
-		save(agentSchemaEntity);
-		return agentSchemaEntity;
-	}
+    save(agentSchemaEntity);
+    return agentSchemaEntity;
+  }
 
-	@Override
-	public AgentSchemaEntity updateAgentSchema(AgentSchemaEntity agentSchemaEntity) {
-		RequestContext requestContext = RequestContextHolder.getRequestContext();
+  @Override
+  public AgentSchemaEntity updateAgentSchema(AgentSchemaEntity agentSchemaEntity) {
+    RequestContext requestContext = RequestContextHolder.getRequestContext();
 
-		AgentSchemaEntity existing = getById(agentSchemaEntity.getId());
-		if (existing == null) {
-			throw new IllegalArgumentException("Agent schema not found with id: " + agentSchemaEntity.getId());
-		}
+    AgentSchemaEntity existing = getById(agentSchemaEntity.getId());
+    if (existing == null) {
+      throw new IllegalArgumentException(
+          "Agent schema not found with id: " + agentSchemaEntity.getId());
+    }
 
-		// Check for duplicate name in the same workspace (excluding current agent)
-		String workspaceId = requestContext != null ? requestContext.getWorkspaceId() : null;
-		if (StringUtils.isBlank(workspaceId)) {
-			workspaceId = "1"; // Use default workspace ID that matches database
-		}
+    // Check for duplicate name in the same workspace (excluding current agent)
+    String workspaceId = requestContext != null ? requestContext.getWorkspaceId() : null;
+    if (StringUtils.isBlank(workspaceId)) {
+      workspaceId = "1"; // Use default workspace ID that matches database
+    }
 
-		LambdaQueryWrapper<AgentSchemaEntity> duplicateCheck = new LambdaQueryWrapper<>();
-		duplicateCheck.eq(AgentSchemaEntity::getWorkspaceId, workspaceId);
-		duplicateCheck.eq(AgentSchemaEntity::getName, agentSchemaEntity.getName());
-		duplicateCheck.ne(AgentSchemaEntity::getId, agentSchemaEntity.getId()); // Exclude
-																				// current
-																				// agent
-		List<AgentSchemaEntity> existingAgents = list(duplicateCheck);
+    LambdaQueryWrapper<AgentSchemaEntity> duplicateCheck = new LambdaQueryWrapper<>();
+    duplicateCheck.eq(AgentSchemaEntity::getWorkspaceId, workspaceId);
+    duplicateCheck.eq(AgentSchemaEntity::getName, agentSchemaEntity.getName());
+    duplicateCheck.ne(AgentSchemaEntity::getId, agentSchemaEntity.getId()); // Exclude
+    // current
+    // agent
+    List<AgentSchemaEntity> existingAgents = list(duplicateCheck);
 
-		if (!existingAgents.isEmpty()) {
-			throw new IllegalArgumentException("智能体名称已存在，请使用其他名称: " + agentSchemaEntity.getName());
-		}
+    if (!existingAgents.isEmpty()) {
+      throw new IllegalArgumentException("智能体名称已存在，请使用其他名称: " + agentSchemaEntity.getName());
+    }
 
-		// Update fields
-		agentSchemaEntity.setGmtModified(new Date());
-		agentSchemaEntity.setModifier(requestContext.getAccountId());
+    // Update fields
+    agentSchemaEntity.setGmtModified(new Date());
+    agentSchemaEntity.setModifier(requestContext.getAccountId());
 
-		updateById(agentSchemaEntity);
-		return agentSchemaEntity;
-	}
+    updateById(agentSchemaEntity);
+    return agentSchemaEntity;
+  }
 
-	@Override
-	public void deleteAgentSchema(Long id) {
-		removeById(id);
-	}
+  @Override
+  public void deleteAgentSchema(Long id) {
+    removeById(id);
+  }
 
-	@Override
-	public AgentSchemaEntity getAgentSchemaById(Long id) {
-		return getById(id);
-	}
+  @Override
+  public AgentSchemaEntity getAgentSchemaById(Long id) {
+    return getById(id);
+  }
 
-	@Override
-	public List<AgentSchemaEntity> getAgentSchemasByWorkspaceId(String workspaceId) {
-		LambdaQueryWrapper<AgentSchemaEntity> queryWrapper = new LambdaQueryWrapper<>();
-		queryWrapper.eq(AgentSchemaEntity::getWorkspaceId, workspaceId);
-		queryWrapper.orderByDesc(AgentSchemaEntity::getGmtModified);
-		return list(queryWrapper);
-	}
+  @Override
+  public List<AgentSchemaEntity> getAgentSchemasByWorkspaceId(String workspaceId) {
+    LambdaQueryWrapper<AgentSchemaEntity> queryWrapper = new LambdaQueryWrapper<>();
+    queryWrapper.eq(AgentSchemaEntity::getWorkspaceId, workspaceId);
+    queryWrapper.orderByDesc(AgentSchemaEntity::getGmtModified);
+    return list(queryWrapper);
+  }
 
-	@Override
-	public PagingList<AgentSchemaEntity> getAgentSchemasByWorkspaceId(String workspaceId,
-			Page<AgentSchemaEntity> page) {
-		LambdaQueryWrapper<AgentSchemaEntity> queryWrapper = new LambdaQueryWrapper<>();
-		queryWrapper.eq(AgentSchemaEntity::getWorkspaceId, workspaceId);
-		queryWrapper.orderByDesc(AgentSchemaEntity::getGmtModified);
+  @Override
+  public PagingList<AgentSchemaEntity> getAgentSchemasByWorkspaceId(
+      String workspaceId, Page<AgentSchemaEntity> page) {
+    LambdaQueryWrapper<AgentSchemaEntity> queryWrapper = new LambdaQueryWrapper<>();
+    queryWrapper.eq(AgentSchemaEntity::getWorkspaceId, workspaceId);
+    queryWrapper.orderByDesc(AgentSchemaEntity::getGmtModified);
 
-		Page<AgentSchemaEntity> result = page(page, queryWrapper);
-		return PagingList.<AgentSchemaEntity>builder()
-			.current((int) result.getCurrent())
-			.size((int) result.getSize())
-			.total(result.getTotal())
-			.records(result.getRecords())
-			.build();
-	}
+    Page<AgentSchemaEntity> result = page(page, queryWrapper);
+    return PagingList.<AgentSchemaEntity>builder()
+        .current((int) result.getCurrent())
+        .size((int) result.getSize())
+        .total(result.getTotal())
+        .records(result.getRecords())
+        .build();
+  }
 
-	@Override
-	public List<AgentSchemaEntity> getAgentSchemasByName(String name, String workspaceId) {
-		LambdaQueryWrapper<AgentSchemaEntity> queryWrapper = new LambdaQueryWrapper<>();
-		queryWrapper.eq(AgentSchemaEntity::getWorkspaceId, workspaceId);
-		queryWrapper.like(AgentSchemaEntity::getName, name);
-		queryWrapper.orderByDesc(AgentSchemaEntity::getGmtModified);
-		return list(queryWrapper);
-	}
+  @Override
+  public List<AgentSchemaEntity> getAgentSchemasByName(String name, String workspaceId) {
+    LambdaQueryWrapper<AgentSchemaEntity> queryWrapper = new LambdaQueryWrapper<>();
+    queryWrapper.eq(AgentSchemaEntity::getWorkspaceId, workspaceId);
+    queryWrapper.like(AgentSchemaEntity::getName, name);
+    queryWrapper.orderByDesc(AgentSchemaEntity::getGmtModified);
+    return list(queryWrapper);
+  }
 
-	@Override
-	public void setAgentSchemaEnabled(Long id, Boolean enabled) {
-		AgentSchemaEntity agent = getById(id);
-		if (agent == null) {
-			throw new IllegalArgumentException("Agent schema not found with id: " + id);
-		}
+  @Override
+  public void setAgentSchemaEnabled(Long id, Boolean enabled) {
+    AgentSchemaEntity agent = getById(id);
+    if (agent == null) {
+      throw new IllegalArgumentException("Agent schema not found with id: " + id);
+    }
 
-		agent.setEnabled(enabled);
-		agent.setGmtModified(new Date());
-		agent.setModifier(RequestContextHolder.getRequestContext().getAccountId());
+    agent.setEnabled(enabled);
+    agent.setGmtModified(new Date());
+    agent.setModifier(RequestContextHolder.getRequestContext().getAccountId());
 
-		updateById(agent);
-	}
-
+    updateById(agent);
+  }
 }

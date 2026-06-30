@@ -16,77 +16,74 @@
 
 package com.seaskyland.llm.workflow.core.base.entity;
 
-import com.seaskyland.llm.workflow.runtime.enums.AccountStatus;
-import com.seaskyland.llm.workflow.runtime.enums.AccountType;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.AccountStatus;
+import com.seaskyland.llm.workflow.runtime.enums.AccountType;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Account entity representing user account information.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @TableName("account")
 public class AccountEntity {
 
-	/** Primary key */
-	@TableId(value = "id", type = IdType.AUTO)
-	private Long id;
+  /** Primary key */
+  @TableId(value = "id", type = IdType.AUTO)
+  private Long id;
 
-	/** Unique account identifier */
-	@TableField("account_id")
-	private String accountId;
+  /** Unique account identifier */
+  @TableField("account_id")
+  private String accountId;
 
-	/** Username for login */
-	private String username;
+  /** Username for login */
+  private String username;
 
-	/** User's email address */
-	private String email;
+  /** User's email address */
+  private String email;
 
-	/** User's mobile number */
-	private String mobile;
+  /** User's mobile number */
+  private String mobile;
 
-	/** Encrypted password */
-	private String password;
+  /** Encrypted password */
+  private String password;
 
-	/** User's display name */
-	private String nickname;
+  /** User's display name */
+  private String nickname;
 
-	/** User's profile picture URL */
-	private String icon;
+  /** User's profile picture URL */
+  private String icon;
 
-	/** Account status */
-	private AccountStatus status;
+  /** Account status */
+  private AccountStatus status;
 
-	/** Account type */
-	private AccountType type;
+  /** Account type */
+  private AccountType type;
 
-	/** Creation timestamp */
-	@TableField("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @TableField("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@TableField("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @TableField("gmt_modified")
+  private Date gmtModified;
 
-	/** Last login timestamp */
-	@TableField("gmt_last_login")
-	private Date gmtLastLogin;
+  /** Last login timestamp */
+  @TableField("gmt_last_login")
+  private Date gmtLastLogin;
 
-	/** Creator's identifier */
-	private String creator;
+  /** Creator's identifier */
+  private String creator;
 
-	/** Last modifier's identifier */
-	private String modifier;
+  /** Last modifier's identifier */
+  private String modifier;
 
-	@TableField(exist = false)
-	private String defaultWorkspaceId;
-
+  @TableField(exist = false)
+  private String defaultWorkspaceId;
 }

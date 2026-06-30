@@ -22,32 +22,24 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * Enum representing different types of plugins in the system. Defines whether a plugin is
- * official or custom.
+ * Enum representing different types of plugins in the system. Defines whether a plugin is official
+ * or custom.
  *
  * @since 1.0.0.3
  */
-
 @Getter
 @AllArgsConstructor
 public enum PluginType {
 
-	/**
-	 * Official plugin type
-	 */
-	@JsonProperty("official")
-	OFFICIAL("official"),
+  /** Official plugin type */
+  @JsonProperty("official")
+  OFFICIAL("official"),
 
-	/**
-	 * Custom plugin type
-	 */
-	@JsonProperty("custom")
-	CUSTOM("custom"),;
+  /** Custom plugin type */
+  @JsonProperty("custom")
+  CUSTOM("custom"),
+  ;
 
-	/**
-	 * The string value representing the plugin type
-	 */
-	@EnumValue
-	private final String value;
-
+  /** The string value representing the plugin type */
+  @EnumValue private final String value;
 }

@@ -16,8 +16,10 @@
 
 package com.seaskyland.llm.workflow.admin.controller;
 
-import com.seaskyland.llm.workflow.runtime.exception.BizException;
-import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
+import com.seaskyland.llm.workflow.admin.annotation.ApiModelAttribute;
+import com.seaskyland.llm.workflow.core.base.manager.DocumentRetrieverManager;
+import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
+import com.seaskyland.llm.workflow.core.rag.KnowledgeBaseService;
 import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
 import com.seaskyland.llm.workflow.runtime.domain.PagingList;
 import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
@@ -27,22 +29,19 @@ import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.DocumentChunk;
 import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.DocumentRetrieverQuery;
 import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.IndexConfig;
 import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.KnowledgeBase;
-import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
-import com.seaskyland.llm.workflow.core.base.manager.DocumentRetrieverManager;
-import com.seaskyland.llm.workflow.core.rag.KnowledgeBaseService;
-import com.seaskyland.llm.workflow.admin.annotation.ApiModelAttribute;
+import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
+import com.seaskyland.llm.workflow.runtime.exception.BizException;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.ai.rag.Query;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Objects;
-
 /**
- * Controller for managing knowledge bases and document retrieval operations. Provides
- * REST endpoints for CRUD operations on knowledge bases and document retrieval.
+ * Controller for managing knowledge bases and document retrieval operations. Provides REST
+ * endpoints for CRUD operations on knowledge bases and document retrieval.
  *
  * @since 1.0.0.3
  */
@@ -51,178 +50,189 @@ import java.util.Objects;
 @RequestMapping("/console/v1/knowledge-bases")
 public class KnowledgeBaseController {
 
-	/** Service for managing knowledge base operations */
-	private final KnowledgeBaseService knowledgeBaseService;
+  /** Service for managing knowledge base operations */
+  private final KnowledgeBaseService knowledgeBaseService;
 
-	/** Manager for handling document retrieval operations */
-	private final DocumentRetrieverManager documentRetrieverManager;
+  /** Manager for handling document retrieval operations */
+  private final DocumentRetrieverManager documentRetrieverManager;
 
-	public KnowledgeBaseController(KnowledgeBaseService knowledgeBaseService,
-			DocumentRetrieverManager documentRetrieverManager) {
-		this.knowledgeBaseService = knowledgeBaseService;
-		this.documentRetrieverManager = documentRetrieverManager;
-	}
+  public KnowledgeBaseController(
+      KnowledgeBaseService knowledgeBaseService,
+      DocumentRetrieverManager documentRetrieverManager) {
+    this.knowledgeBaseService = knowledgeBaseService;
+    this.documentRetrieverManager = documentRetrieverManager;
+  }
 
-	/**
-	 * Creates a new knowledge base
-	 * @param kb Knowledge base configuration
-	 * @return Result containing the created knowledge base ID
-	 */
-	@PostMapping()
-	public Result<String> createKnowledgeBase(@RequestBody KnowledgeBase kb) {
-		RequestContext context = RequestContextHolder.getRequestContext();
+  /**
+   * Creates a new knowledge base
+   *
+   * @param kb Knowledge base configuration
+   * @return Result containing the created knowledge base ID
+   */
+  @PostMapping()
+  public Result<String> createKnowledgeBase(@RequestBody KnowledgeBase kb) {
+    RequestContext context = RequestContextHolder.getRequestContext();
 
-		if (Objects.isNull(kb)) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("knowledge_base"));
-		}
+    if (Objects.isNull(kb)) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("knowledge_base"));
+    }
 
-		if (StringUtils.isBlank(kb.getName())) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("name"));
-		}
+    if (StringUtils.isBlank(kb.getName())) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("name"));
+    }
 
-		if (kb.getProcessConfig() == null) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("process_config"));
-		}
+    if (kb.getProcessConfig() == null) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("process_config"));
+    }
 
-		if (kb.getIndexConfig() == null) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("index_config"));
-		}
+    if (kb.getIndexConfig() == null) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("index_config"));
+    }
 
-		IndexConfig indexConfig = kb.getIndexConfig();
-		if (StringUtils.isBlank(indexConfig.getEmbeddingProvider())) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("embedding_provider"));
-		}
+    IndexConfig indexConfig = kb.getIndexConfig();
+    if (StringUtils.isBlank(indexConfig.getEmbeddingProvider())) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("embedding_provider"));
+    }
 
-		if (StringUtils.isBlank(indexConfig.getEmbeddingModel())) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("embedding_model"));
-		}
+    if (StringUtils.isBlank(indexConfig.getEmbeddingModel())) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("embedding_model"));
+    }
 
-		String kbId = knowledgeBaseService.createKnowledgeBase(kb);
-		return Result.success(context.getRequestId(), kbId);
-	}
+    String kbId = knowledgeBaseService.createKnowledgeBase(kb);
+    return Result.success(context.getRequestId(), kbId);
+  }
 
-	/**
-	 * Updates an existing knowledge base
-	 * @param kbId ID of the knowledge base to update
-	 * @param kb Updated knowledge base configuration
-	 * @return Result indicating success
-	 */
-	@PutMapping("/{kbId}")
-	public Result<String> updateKnowledgeBase(@PathVariable("kbId") String kbId, @RequestBody KnowledgeBase kb) {
-		RequestContext context = RequestContextHolder.getRequestContext();
+  /**
+   * Updates an existing knowledge base
+   *
+   * @param kbId ID of the knowledge base to update
+   * @param kb Updated knowledge base configuration
+   * @return Result indicating success
+   */
+  @PutMapping("/{kbId}")
+  public Result<String> updateKnowledgeBase(
+      @PathVariable("kbId") String kbId, @RequestBody KnowledgeBase kb) {
+    RequestContext context = RequestContextHolder.getRequestContext();
 
-		if (Objects.isNull(kb)) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("kb_id"));
-		}
+    if (Objects.isNull(kb)) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("kb_id"));
+    }
 
-		if (StringUtils.isBlank(kbId)) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("knowledge base id"));
-		}
+    if (StringUtils.isBlank(kbId)) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("knowledge base id"));
+    }
 
-		if (StringUtils.isBlank(kb.getName())) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("name"));
-		}
+    if (StringUtils.isBlank(kb.getName())) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("name"));
+    }
 
-		kb.setKbId(kbId);
-		knowledgeBaseService.updateKnowledgeBase(kb);
-		return Result.success(context.getRequestId(), null);
-	}
+    kb.setKbId(kbId);
+    knowledgeBaseService.updateKnowledgeBase(kb);
+    return Result.success(context.getRequestId(), null);
+  }
 
-	/**
-	 * Deletes a knowledge base
-	 * @param kbId ID of the knowledge base to delete
-	 * @return Result indicating success
-	 */
-	@DeleteMapping("/{kbId}")
-	public Result<Void> deleteKnowledgeBase(@PathVariable("kbId") String kbId) {
-		RequestContext context = RequestContextHolder.getRequestContext();
+  /**
+   * Deletes a knowledge base
+   *
+   * @param kbId ID of the knowledge base to delete
+   * @return Result indicating success
+   */
+  @DeleteMapping("/{kbId}")
+  public Result<Void> deleteKnowledgeBase(@PathVariable("kbId") String kbId) {
+    RequestContext context = RequestContextHolder.getRequestContext();
 
-		if (Objects.isNull(kbId)) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("knowledge base id"));
-		}
+    if (Objects.isNull(kbId)) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("knowledge base id"));
+    }
 
-		knowledgeBaseService.deleteKnowledgeBase(kbId);
-		return Result.success(context.getRequestId(), null);
-	}
+    knowledgeBaseService.deleteKnowledgeBase(kbId);
+    return Result.success(context.getRequestId(), null);
+  }
 
-	/**
-	 * Retrieves a knowledge base by ID
-	 * @param kbId ID of the knowledge base to retrieve
-	 * @return Result containing the knowledge base details
-	 */
-	@GetMapping("/{kbId}")
-	public Result<KnowledgeBase> getKnowledgeBase(@PathVariable("kbId") String kbId) {
-		RequestContext context = RequestContextHolder.getRequestContext();
+  /**
+   * Retrieves a knowledge base by ID
+   *
+   * @param kbId ID of the knowledge base to retrieve
+   * @return Result containing the knowledge base details
+   */
+  @GetMapping("/{kbId}")
+  public Result<KnowledgeBase> getKnowledgeBase(@PathVariable("kbId") String kbId) {
+    RequestContext context = RequestContextHolder.getRequestContext();
 
-		if (Objects.isNull(kbId)) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("knowledge base id"));
-		}
+    if (Objects.isNull(kbId)) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("knowledge base id"));
+    }
 
-		KnowledgeBase kb = knowledgeBaseService.getKnowledgeBase(kbId);
-		return Result.success(context.getRequestId(), kb);
-	}
+    KnowledgeBase kb = knowledgeBaseService.getKnowledgeBase(kbId);
+    return Result.success(context.getRequestId(), kb);
+  }
 
-	/**
-	 * Lists knowledge bases with pagination
-	 * @param query Query parameters for pagination
-	 * @return Result containing paginated list of knowledge bases
-	 */
-	@GetMapping()
-	public Result<PagingList<KnowledgeBase>> listKnowledgeBases(@ApiModelAttribute BaseQuery query) {
-		RequestContext context = RequestContextHolder.getRequestContext();
+  /**
+   * Lists knowledge bases with pagination
+   *
+   * @param query Query parameters for pagination
+   * @return Result containing paginated list of knowledge bases
+   */
+  @GetMapping()
+  public Result<PagingList<KnowledgeBase>> listKnowledgeBases(@ApiModelAttribute BaseQuery query) {
+    RequestContext context = RequestContextHolder.getRequestContext();
 
-		if (Objects.isNull(query)) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("query"));
-		}
+    if (Objects.isNull(query)) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("query"));
+    }
 
-		PagingList<KnowledgeBase> kbs = knowledgeBaseService.listKnowledgeBases(query);
-		return Result.success(context.getRequestId(), kbs);
-	}
+    PagingList<KnowledgeBase> kbs = knowledgeBaseService.listKnowledgeBases(query);
+    return Result.success(context.getRequestId(), kbs);
+  }
 
-	/**
-	 * Retrieves knowledge bases by their IDs
-	 * @param query Query containing list of knowledge base IDs
-	 * @return Result containing list of knowledge bases
-	 */
-	@PostMapping("/query-by-codes")
-	public Result<List<KnowledgeBase>> queryKnowledgeBasesByCodes(@RequestBody KnowledgeBaseQuery query) {
-		RequestContext context = RequestContextHolder.getRequestContext();
+  /**
+   * Retrieves knowledge bases by their IDs
+   *
+   * @param query Query containing list of knowledge base IDs
+   * @return Result containing list of knowledge bases
+   */
+  @PostMapping("/query-by-codes")
+  public Result<List<KnowledgeBase>> queryKnowledgeBasesByCodes(
+      @RequestBody KnowledgeBaseQuery query) {
+    RequestContext context = RequestContextHolder.getRequestContext();
 
-		if (Objects.isNull(query) || CollectionUtils.isEmpty(query.getKbIds())) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("query or kb_ids"));
-		}
+    if (Objects.isNull(query) || CollectionUtils.isEmpty(query.getKbIds())) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("query or kb_ids"));
+    }
 
-		List<KnowledgeBase> knowledgeBases = knowledgeBaseService.listKnowledgeBases(query.getKbIds());
-		return Result.success(context.getRequestId(), knowledgeBases);
-	}
+    List<KnowledgeBase> knowledgeBases = knowledgeBaseService.listKnowledgeBases(query.getKbIds());
+    return Result.success(context.getRequestId(), knowledgeBases);
+  }
 
-	/**
-	 * Retrieves relevant document chunks based on query
-	 * @param query Document retrieval query with search options
-	 * @return Result containing list of relevant document chunks
-	 */
-	@PostMapping("/retrieve")
-	public Result<List<DocumentChunk>> retrieve(@RequestBody DocumentRetrieverQuery query) {
-		RequestContext context = RequestContextHolder.getRequestContext();
+  /**
+   * Retrieves relevant document chunks based on query
+   *
+   * @param query Document retrieval query with search options
+   * @return Result containing list of relevant document chunks
+   */
+  @PostMapping("/retrieve")
+  public Result<List<DocumentChunk>> retrieve(@RequestBody DocumentRetrieverQuery query) {
+    RequestContext context = RequestContextHolder.getRequestContext();
 
-		if (Objects.isNull(query) || StringUtils.isBlank(query.getQuery())) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("query"));
-		}
+    if (Objects.isNull(query) || StringUtils.isBlank(query.getQuery())) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("query"));
+    }
 
-		if (Objects.isNull(query.getSearchOptions()) || Objects.isNull(query.getSearchOptions().getKbIds())) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("kbIds"));
-		}
+    if (Objects.isNull(query.getSearchOptions())
+        || Objects.isNull(query.getSearchOptions().getKbIds())) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("kbIds"));
+    }
 
-		if (query.getSearchOptions().getKbIds().size() == 1) {
-			String kbId = query.getSearchOptions().getKbIds().get(0);
-			KnowledgeBase knowledgeBase = knowledgeBaseService.getKnowledgeBase(kbId);
-			query.getSearchOptions().setTopK(knowledgeBase.getSearchConfig().getTopK());
-		}
+    if (query.getSearchOptions().getKbIds().size() == 1) {
+      String kbId = query.getSearchOptions().getKbIds().get(0);
+      KnowledgeBase knowledgeBase = knowledgeBaseService.getKnowledgeBase(kbId);
+      query.getSearchOptions().setTopK(knowledgeBase.getSearchConfig().getTopK());
+    }
 
-		query.getSearchOptions().setEnableSearch(true);
-		List<DocumentChunk> documentChunks = documentRetrieverManager
-			.retrieve(Query.builder().text(query.getQuery()).build(), query.getSearchOptions());
-		return Result.success(context.getRequestId(), documentChunks);
-	}
-
+    query.getSearchOptions().setEnableSearch(true);
+    List<DocumentChunk> documentChunks =
+        documentRetrieverManager.retrieve(
+            Query.builder().text(query.getQuery()).build(), query.getSearchOptions());
+    return Result.success(context.getRequestId(), documentChunks);
+  }
 }

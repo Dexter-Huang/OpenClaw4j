@@ -15,17 +15,16 @@
  */
 package com.seaskyland.llm.workflow.runtime.domain.workflow.debug;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.seaskyland.llm.workflow.runtime.domain.BizError;
 import com.seaskyland.llm.workflow.runtime.domain.chat.ChatMessage;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.WorkflowStatus;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 
 /**
  * workflow response.
@@ -39,42 +38,41 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class WorkflowResponse implements Serializable {
 
-	@JsonProperty("request_id")
-	private String requestId;
+  @JsonProperty("request_id")
+  private String requestId;
 
-	@JsonProperty("conversation_id")
-	private String conversationId;
+  @JsonProperty("conversation_id")
+  private String conversationId;
 
-	@JsonProperty("task_id")
-	private String taskId;
+  @JsonProperty("task_id")
+  private String taskId;
 
-	@JsonProperty("node_id")
-	private String nodeId;
+  @JsonProperty("node_id")
+  private String nodeId;
 
-	@JsonProperty("node_name")
-	private String nodeName;
+  @JsonProperty("node_name")
+  private String nodeName;
 
-	@JsonProperty("node_type")
-	private String nodeType;
+  @JsonProperty("node_type")
+  private String nodeType;
 
-	@JsonProperty("node_status")
-	private String nodeStatus;
+  @JsonProperty("node_status")
+  private String nodeStatus;
 
-	@JsonProperty("node_msg_seq_id")
-	private Integer nodeMsgSeqId;
+  @JsonProperty("node_msg_seq_id")
+  private Integer nodeMsgSeqId;
 
-	@JsonProperty("node_is_completed")
-	private Boolean nodeIsCompleted;
+  @JsonProperty("node_is_completed")
+  private Boolean nodeIsCompleted;
 
-	private WorkflowStatus status;
+  private WorkflowStatus status;
 
-	private ChatMessage message;
+  private ChatMessage message;
 
-	private BizError error;
+  private BizError error;
 
-	@JsonIgnore
-	public boolean isSuccess() {
-		return error == null;
-	}
-
+  @JsonIgnore
+  public boolean isSuccess() {
+    return error == null;
+  }
 }

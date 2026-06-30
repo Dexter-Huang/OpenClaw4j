@@ -21,25 +21,26 @@ import com.seaskyland.llm.workflow.runtime.domain.agent.AgentResponse;
 import reactor.core.publisher.Flux;
 
 /**
- * Agent inference service interface. Provides methods for agent communication and
- * streaming responses.
+ * Agent inference service interface. Provides methods for agent communication and streaming
+ * responses.
  *
  * @since 1.0.0.3
  */
 public interface AgentService {
 
-	/**
-	 * Makes a single agent call
-	 * @param request The agent request
-	 * @return The agent response
-	 */
-	AgentResponse call(AgentRequest request);
+  /**
+   * Makes a single agent call
+   *
+   * @param request The agent request
+   * @return The agent response
+   */
+  AgentResponse call(AgentRequest request);
 
-	/**
-	 * Makes a streaming agent call
-	 * @param requestFlux The stream of agent requests
-	 * @return A stream of agent responses
-	 */
-	Flux<AgentResponse> streamCall(Flux<AgentRequest> requestFlux);
-
+  /**
+   * Makes a streaming agent call
+   *
+   * @param requestFlux The stream of agent requests
+   * @return A stream of agent responses
+   */
+  Flux<AgentResponse> streamCall(Flux<AgentRequest> requestFlux);
 }

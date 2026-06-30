@@ -21,31 +21,24 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * Enum representing different types of content in chat messages. Currently supports text
- * and multimodal content types.
+ * Enum representing different types of content in chat messages. Currently supports text and
+ * multimodal content types.
  *
  * @since 1.0.0.3
  */
-
 @Getter
 @AllArgsConstructor
 public enum ContentType {
 
-	/**
-	 * Represents plain text content
-	 */
-	@JsonProperty("text")
-	TEXT("text"),
+  /** Represents plain text content */
+  @JsonProperty("text")
+  TEXT("text"),
 
-	/**
-	 * Represents multimodal content (e.g., text with images)
-	 */
-	@JsonProperty("multimodal")
-	MULTIMODAL("multimodal"),;
+  /** Represents multimodal content (e.g., text with images) */
+  @JsonProperty("multimodal")
+  MULTIMODAL("multimodal"),
+  ;
 
-	/**
-	 * The string value of the content type
-	 */
-	private final String value;
-
+  /** The string value of the content type */
+  private final String value;
 }

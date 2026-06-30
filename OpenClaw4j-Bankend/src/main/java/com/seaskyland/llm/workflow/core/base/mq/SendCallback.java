@@ -17,23 +17,24 @@
 package com.seaskyland.llm.workflow.core.base.mq;
 
 /**
- * Interface for handling message sending callbacks. Provides methods to handle successful
- * message delivery and error cases.
+ * Interface for handling message sending callbacks. Provides methods to handle successful message
+ * delivery and error cases.
  *
  * @since 1.0.0.3
  */
 public interface SendCallback {
 
-	/**
-	 * Called when message is successfully sent.
-	 * @param sendResult Result of the send operation
-	 */
-	void onSuccess(final SendResult sendResult);
+  /**
+   * Called when message is successfully sent.
+   *
+   * @param sendResult Result of the send operation
+   */
+  void onSuccess(final SendResult sendResult);
 
-	/**
-	 * Called when an error occurs during message sending.
-	 * @param e The exception that occurred
-	 */
-	void onError(final Throwable e);
-
+  /**
+   * Called when an error occurs during message sending.
+   *
+   * @param e The exception that occurred
+   */
+  void onError(final Throwable e);
 }

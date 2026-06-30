@@ -21,27 +21,28 @@ import com.seaskyland.llm.workflow.runtime.domain.agent.AgentResponse;
 import reactor.core.publisher.Flux;
 
 /**
- * Interface for executing agent operations. Provides methods for both streaming and
- * synchronous execution of agent tasks.
+ * Interface for executing agent operations. Provides methods for both streaming and synchronous
+ * execution of agent tasks.
  *
  * @since 1.0.0.3
  */
 public interface AgentExecutor {
 
-	/**
-	 * Executes the agent operation in streaming mode.
-	 * @param context The execution context containing agent state and configuration
-	 * @param request The input request for the agent
-	 * @return A Flux of agent responses
-	 */
-	Flux<AgentResponse> streamExecute(AgentContext context, AgentRequest request);
+  /**
+   * Executes the agent operation in streaming mode.
+   *
+   * @param context The execution context containing agent state and configuration
+   * @param request The input request for the agent
+   * @return A Flux of agent responses
+   */
+  Flux<AgentResponse> streamExecute(AgentContext context, AgentRequest request);
 
-	/**
-	 * Executes the agent operation synchronously.
-	 * @param context The execution context containing agent state and configuration
-	 * @param request The input request for the agent
-	 * @return The agent response
-	 */
-	AgentResponse execute(AgentContext context, AgentRequest request);
-
+  /**
+   * Executes the agent operation synchronously.
+   *
+   * @param context The execution context containing agent state and configuration
+   * @param request The input request for the agent
+   * @return The agent response
+   */
+  AgentResponse execute(AgentContext context, AgentRequest request);
 }

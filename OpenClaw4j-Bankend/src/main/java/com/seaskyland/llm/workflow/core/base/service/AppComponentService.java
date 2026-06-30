@@ -20,75 +20,81 @@ import com.seaskyland.llm.workflow.runtime.domain.PagingList;
 import com.seaskyland.llm.workflow.runtime.domain.Result;
 import com.seaskyland.llm.workflow.runtime.domain.component.AppComponent;
 import com.seaskyland.llm.workflow.runtime.domain.component.AppComponentQuery;
-
 import java.util.List;
 
 /**
- * Service interface for managing application components. Provides CRUD operations and
- * query capabilities for app components.
+ * Service interface for managing application components. Provides CRUD operations and query
+ * capabilities for app components.
  *
  * @author guning.lt
  * @since 1.0.0.3
  */
 public interface AppComponentService {
 
-	/**
-	 * Get a paginated list of app components based on query conditions.
-	 * @param request Query request object
-	 * @return Paginated list of app components
-	 */
-	PagingList<AppComponent> getAppComponentList(AppComponentQuery request);
+  /**
+   * Get a paginated list of app components based on query conditions.
+   *
+   * @param request Query request object
+   * @return Paginated list of app components
+   */
+  PagingList<AppComponent> getAppComponentList(AppComponentQuery request);
 
-	/**
-	 * Get all app components matching the given type and status.
-	 * @param type Component type filter
-	 * @param status Component status filter
-	 * @return List of app components
-	 */
-	List<AppComponent> getAppComponentListAll(String type, Integer status);
+  /**
+   * Get all app components matching the given type and status.
+   *
+   * @param type Component type filter
+   * @param status Component status filter
+   * @return List of app components
+   */
+  List<AppComponent> getAppComponentListAll(String type, Integer status);
 
-	/**
-	 * Get app components by their codes.
-	 * @param codes List of component codes
-	 * @return List of matched app components
-	 */
-	List<AppComponent> getAppComponentListByCodes(List<String> codes);
+  /**
+   * Get app components by their codes.
+   *
+   * @param codes List of component codes
+   * @return List of matched app components
+   */
+  List<AppComponent> getAppComponentListByCodes(List<String> codes);
 
-	/**
-	 * Get an app component by application code and status.
-	 * @param appId Application code
-	 * @param status Component status
-	 * @return App component object
-	 */
-	AppComponent getAppComponentByAppId(String appId, Integer status);
+  /**
+   * Get an app component by application code and status.
+   *
+   * @param appId Application code
+   * @param status Component status
+   * @return App component object
+   */
+  AppComponent getAppComponentByAppId(String appId, Integer status);
 
-	/**
-	 * Get an app component by component code and status.
-	 * @param code Internal component code
-	 * @param status Component status
-	 * @return App component object
-	 */
-	AppComponent getAppComponentByCode(String code, Integer status);
+  /**
+   * Get an app component by component code and status.
+   *
+   * @param code Internal component code
+   * @param status Component status
+   * @return App component object
+   */
+  AppComponent getAppComponentByCode(String code, Integer status);
 
-	/**
-	 * Create a new app component.
-	 * @param component App component to create
-	 * @return Result indicating success or failure
-	 */
-	Result<String> createAppComponent(AppComponent component);
+  /**
+   * Create a new app component.
+   *
+   * @param component App component to create
+   * @return Result indicating success or failure
+   */
+  Result<String> createAppComponent(AppComponent component);
 
-	/**
-	 * Update an existing app component.
-	 * @param component Updated app component data
-	 * @return Result indicating success or failure
-	 */
-	Result<Integer> updateAppComponent(AppComponent component);
+  /**
+   * Update an existing app component.
+   *
+   * @param component Updated app component data
+   * @return Result indicating success or failure
+   */
+  Result<Integer> updateAppComponent(AppComponent component);
 
-	/**
-	 * Delete an app component by marking it as deleted.
-	 * @param code component code
-	 * @return Result indicating success or failure
-	 */
-	Result<Void> deleteAppComponent(String code);
-
+  /**
+   * Delete an app component by marking it as deleted.
+   *
+   * @param code component code
+   * @return Result indicating success or failure
+   */
+  Result<Void> deleteAppComponent(String code);
 }

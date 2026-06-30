@@ -17,15 +17,10 @@ package com.seaskyland.llm.workflow.runtime.domain.model;
 
 import lombok.Data;
 
-/**
- * Request for querying provider information
- */
+/** Request for querying provider information */
 @Data
 public class QueryProviderRequest {
 
-	/**
-	 * Provider name
-	 */
-	private String name;
-
+  /** Provider name */
+  private String name;
 }

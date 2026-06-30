@@ -15,11 +15,10 @@
  */
 package com.seaskyland.llm.workflow.runtime.domain.workflow.inner;
 
-import com.seaskyland.llm.workflow.runtime.domain.workflow.Node;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.domain.workflow.Node;
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * 短期记忆参数
@@ -29,26 +28,24 @@ import java.io.Serializable;
 @Data
 public class ShortTermMemory implements Serializable {
 
-	@JsonProperty("enabled")
-	private Boolean enabled;
+  @JsonProperty("enabled")
+  private Boolean enabled;
 
-	/**
-	 * @see TypeEnum
-	 */
-	@JsonProperty("type")
-	private String type;
+  /**
+   * @see TypeEnum
+   */
+  @JsonProperty("type")
+  private String type;
 
-	// 轮次
-	@JsonProperty("round")
-	private Integer round;
+  // 轮次
+  @JsonProperty("round")
+  private Integer round;
 
-	@JsonProperty("param")
-	private Node.InputParam param;
+  @JsonProperty("param")
+  private Node.InputParam param;
 
-	public enum TypeEnum {
-
-		custom, self
-
-	}
-
+  public enum TypeEnum {
+    custom,
+    self
+  }
 }

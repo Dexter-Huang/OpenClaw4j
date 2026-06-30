@@ -1,4 +1,4 @@
-///*
+/// *
 // * Copyright 2025 the original author or authors.
 // *
 // * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,63 +14,64 @@
 // * limitations under the License.
 // */
 //
-//package com.seaskyland.llm.workflow.core.rag.vectorstore.elasticsearch;
+// package com.seaskyland.llm.workflow.core.rag.vectorstore.elasticsearch;
 //
-//import co.elastic.clients.elasticsearch.ElasticsearchClient;
-//import co.elastic.clients.elasticsearch._types.ElasticsearchException;
-//import co.elastic.clients.elasticsearch._types.mapping.*;
-//import co.elastic.clients.elasticsearch.core.BulkRequest;
-//import co.elastic.clients.elasticsearch.core.BulkResponse;
-//import co.elastic.clients.elasticsearch.core.SearchResponse;
-//import co.elastic.clients.elasticsearch.core.bulk.BulkResponseItem;
-//import co.elastic.clients.elasticsearch.core.search.Hit;
-//import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
-//import co.elastic.clients.elasticsearch.indices.IndexSettings;
-//import com.seaskyland.llm.workflow.runtime.exception.BizException;
-//import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
-//import com.seaskyland.llm.workflow.runtime.domain.PagingList;
-//import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.DocumentChunk;
-//import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.IndexConfig;
-//import com.seaskyland.llm.workflow.core.model.embedding.DefaultBatchingStrategy;
-//import com.seaskyland.llm.workflow.core.model.embedding.EmbeddingModelDimension;
-//import com.seaskyland.llm.workflow.core.model.llm.ModelFactory;
-//import com.seaskyland.llm.workflow.core.rag.RagConstants;
-//import com.seaskyland.llm.workflow.core.rag.vectorstore.VectorStoreService;
-//import com.seaskyland.llm.workflow.core.rag.DocumentChunkConverter;
-//import lombok.extern.slf4j.Slf4j;
-//import org.apache.commons.lang3.StringUtils;
-//import org.elasticsearch.client.RestClient;
-//import org.springframework.ai.document.Document;
-//import org.springframework.ai.document.MetadataMode;
-//import org.springframework.ai.embedding.EmbeddingModel;
-//import org.springframework.ai.embedding.EmbeddingOptions;
-//import org.springframework.ai.vectorstore.SearchRequest;
-//import org.springframework.ai.vectorstore.VectorStore;
-//import org.springframework.ai.vectorstore.elasticsearch.ElasticsearchAiSearchFilterExpressionConverter;
-//import org.springframework.ai.vectorstore.elasticsearch.ElasticsearchVectorStore;
-//import org.springframework.ai.vectorstore.elasticsearch.ElasticsearchVectorStoreOptions;
-//import org.springframework.ai.vectorstore.elasticsearch.SimilarityFunction;
-//import org.springframework.ai.vectorstore.filter.FilterExpressionConverter;
-//import org.springframework.beans.factory.annotation.Qualifier;
-//import org.springframework.stereotype.Service;
-//import org.springframework.util.CollectionUtils;
+// import co.elastic.clients.elasticsearch.ElasticsearchClient;
+// import co.elastic.clients.elasticsearch._types.ElasticsearchException;
+// import co.elastic.clients.elasticsearch._types.mapping.*;
+// import co.elastic.clients.elasticsearch.core.BulkRequest;
+// import co.elastic.clients.elasticsearch.core.BulkResponse;
+// import co.elastic.clients.elasticsearch.core.SearchResponse;
+// import co.elastic.clients.elasticsearch.core.bulk.BulkResponseItem;
+// import co.elastic.clients.elasticsearch.core.search.Hit;
+// import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
+// import co.elastic.clients.elasticsearch.indices.IndexSettings;
+// import com.seaskyland.llm.workflow.runtime.exception.BizException;
+// import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
+// import com.seaskyland.llm.workflow.runtime.domain.PagingList;
+// import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.DocumentChunk;
+// import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.IndexConfig;
+// import com.seaskyland.llm.workflow.core.model.embedding.DefaultBatchingStrategy;
+// import com.seaskyland.llm.workflow.core.model.embedding.EmbeddingModelDimension;
+// import com.seaskyland.llm.workflow.core.model.llm.ModelFactory;
+// import com.seaskyland.llm.workflow.core.rag.RagConstants;
+// import com.seaskyland.llm.workflow.core.rag.vectorstore.VectorStoreService;
+// import com.seaskyland.llm.workflow.core.rag.DocumentChunkConverter;
+// import lombok.extern.slf4j.Slf4j;
+// import org.apache.commons.lang3.StringUtils;
+// import org.elasticsearch.client.RestClient;
+// import org.springframework.ai.document.Document;
+// import org.springframework.ai.document.MetadataMode;
+// import org.springframework.ai.embedding.EmbeddingModel;
+// import org.springframework.ai.embedding.EmbeddingOptions;
+// import org.springframework.ai.vectorstore.SearchRequest;
+// import org.springframework.ai.vectorstore.VectorStore;
+// import
+// org.springframework.ai.vectorstore.elasticsearch.ElasticsearchAiSearchFilterExpressionConverter;
+// import org.springframework.ai.vectorstore.elasticsearch.ElasticsearchVectorStore;
+// import org.springframework.ai.vectorstore.elasticsearch.ElasticsearchVectorStoreOptions;
+// import org.springframework.ai.vectorstore.elasticsearch.SimilarityFunction;
+// import org.springframework.ai.vectorstore.filter.FilterExpressionConverter;
+// import org.springframework.beans.factory.annotation.Qualifier;
+// import org.springframework.stereotype.Service;
+// import org.springframework.util.CollectionUtils;
 //
-//import java.io.IOException;
-//import java.util.*;
+// import java.io.IOException;
+// import java.util.*;
 //
-//import static com.seaskyland.llm.workflow.core.rag.RagConstants.*;
+// import static com.seaskyland.llm.workflow.core.rag.RagConstants.*;
 //
-///**
+/// **
 // * Elasticsearch vector store service implementation. Provides functionality for managing
 // * vector indices and document chunks in Elasticsearch. Note: Spring AI does not support
 // * index management, so we implement it ourselves.
 // *
 // * @since 1.0.0.3
 // */
-//@Service
-//@Slf4j
-//@Qualifier("elasticSearchVectorStoreService")
-//public class ElasticSearchVectorStoreService implements VectorStoreService {
+// @Service
+// @Slf4j
+// @Qualifier("elasticSearchVectorStoreService")
+// public class ElasticSearchVectorStoreService implements VectorStoreService {
 //
 //	/** Factory for creating embedding models */
 //	private final ModelFactory modelFactory;
@@ -82,9 +83,11 @@
 //	private final RestClient restClient;
 //
 //	/** Converter for filter expressions to Elasticsearch queries */
-//	private final FilterExpressionConverter filterExpressionConverter = new ElasticsearchAiSearchFilterExpressionConverter();
+//	private final FilterExpressionConverter filterExpressionConverter = new
+// ElasticsearchAiSearchFilterExpressionConverter();
 //
-//	public ElasticSearchVectorStoreService(ModelFactory modelFactory, ElasticsearchClient elasticsearchClient,
+//	public ElasticSearchVectorStoreService(ModelFactory modelFactory, ElasticsearchClient
+// elasticsearchClient,
 //			RestClient restClient) {
 //		this.modelFactory = modelFactory;
 //		this.elasticsearchClient = elasticsearchClient;
@@ -109,20 +112,27 @@
 //
 //		String similarityAlgo = SimilarityFunction.cosine.name();
 //		IndexSettings indexSettings = IndexSettings
-//			.of(settings -> settings.numberOfShards(String.valueOf(1)).numberOfReplicas(String.valueOf(1)));
+//			.of(settings ->
+// settings.numberOfShards(String.valueOf(1)).numberOfReplicas(String.valueOf(1)));
 //
 //		// Maybe using json directly?
-//		int dimension = EmbeddingModelDimension.getDimension(indexConfig.getEmbeddingModel(), DEFAULT_DIMENSION);
+//		int dimension = EmbeddingModelDimension.getDimension(indexConfig.getEmbeddingModel(),
+// DEFAULT_DIMENSION);
 //		Map<String, Property> properties = new HashMap<>();
 //		properties.put(RagConstants.VECTOR_FIELD, Property.of(property -> property.denseVector(
-//				DenseVectorProperty.of(dense -> dense.index(true).dims(dimension).similarity(similarityAlgo)))));
-//		properties.put(RagConstants.TEXT_FIELD, Property.of(property -> property.text(TextProperty.of(t -> t))));
+//				DenseVectorProperty.of(dense ->
+// dense.index(true).dims(dimension).similarity(similarityAlgo)))));
+//		properties.put(RagConstants.TEXT_FIELD, Property.of(property -> property.text(TextProperty.of(t
+// -> t))));
 //
 //		Map<String, Property> metadata = new HashMap<>();
-//		metadata.put(KEY_WORKSPACE_ID, Property.of(property -> property.keyword(KeywordProperty.of(k -> k))));
+//		metadata.put(KEY_WORKSPACE_ID, Property.of(property -> property.keyword(KeywordProperty.of(k ->
+// k))));
 //		metadata.put(KEY_DOC_ID, Property.of(property -> property.keyword(KeywordProperty.of(k -> k))));
-//		metadata.put(KEY_ENABLED, Property.of(property -> property.keyword(KeywordProperty.of(k -> k))));
-//		metadata.put(KEY_CHUNK_INDEX, Property.of(property -> property.keyword(KeywordProperty.of(k -> k))));
+//		metadata.put(KEY_ENABLED, Property.of(property -> property.keyword(KeywordProperty.of(k ->
+// k))));
+//		metadata.put(KEY_CHUNK_INDEX, Property.of(property -> property.keyword(KeywordProperty.of(k ->
+// k))));
 //
 //		properties.put("metadata",
 //				Property.of(property -> property.object(ObjectProperty.of(op -> op.properties(metadata)))));
@@ -177,7 +187,8 @@
 //	public VectorStore getVectorStore(IndexConfig indexConfig) {
 //		EmbeddingModel embeddingModel = modelFactory.getEmbeddingModel(MetadataMode.EMBED, indexConfig);
 //
-//		int dimension = EmbeddingModelDimension.getDimension(indexConfig.getEmbeddingModel(), DEFAULT_DIMENSION);
+//		int dimension = EmbeddingModelDimension.getDimension(indexConfig.getEmbeddingModel(),
+// DEFAULT_DIMENSION);
 //		ElasticsearchVectorStoreOptions storeOptions = new ElasticsearchVectorStoreOptions();
 //		storeOptions.setIndexName(indexConfig.getName());
 //		storeOptions.setSimilarity(SimilarityFunction.cosine);
@@ -196,13 +207,15 @@
 //	 * @param searchRequest Search parameters including pagination and filters
 //	 * @return Paginated list of document chunks
 //	 */
-//	public PagingList<DocumentChunk> listDocumentChunks(IndexConfig indexConfig, SearchRequest searchRequest) {
+//	public PagingList<DocumentChunk> listDocumentChunks(IndexConfig indexConfig, SearchRequest
+// searchRequest) {
 //		try {
 //			int from = searchRequest.getFrom();
 //			int size = searchRequest.getTopK();
 //			String queryString = Objects.isNull(searchRequest.getFilterExpression()) ? "*"
 //					: this.filterExpressionConverter.convertExpression(searchRequest.getFilterExpression());
-//			SearchResponse<Document> res = this.elasticsearchClient.search(sr -> sr.index(indexConfig.getName())
+//			SearchResponse<Document> res = this.elasticsearchClient.search(sr ->
+// sr.index(indexConfig.getName())
 //				.query(q -> q.queryString(qs -> qs.query(queryString)))
 //				.from(searchRequest.getFrom())
 //				.size(searchRequest.getTopK()), Document.class);
@@ -236,7 +249,8 @@
 //	@Override
 //	public void updateDocumentChunks(IndexConfig indexConfig, List<DocumentChunk> chunks) {
 //		try {
-//			EmbeddingModel embeddingModel = modelFactory.getEmbeddingModel(MetadataMode.EMBED, indexConfig);
+//			EmbeddingModel embeddingModel = modelFactory.getEmbeddingModel(MetadataMode.EMBED,
+// indexConfig);
 //			BulkRequest.Builder bulkRequestBuilder = new BulkRequest.Builder();
 //
 //			List<Document> documents = chunks.stream().map(DocumentChunkConverter::toDocument).toList();
@@ -244,11 +258,13 @@
 //					new DefaultBatchingStrategy());
 //
 //			for (Document document : documents) {
-////				ElasticsearchVectorStore.ElasticSearchDocument doc = new ElasticsearchVectorStore.ElasticSearchDocument(
+////				ElasticsearchVectorStore.ElasticSearchDocument doc = new
+// ElasticsearchVectorStore.ElasticSearchDocument(
 ////						document.getId(), document.getText(), document.getMetadata(),
 ////						embeddings.get(documents.indexOf(document)));
 //				bulkRequestBuilder.operations(op -> op
-//					.update(idx -> idx.index(indexConfig.getName()).id(document.getId()).action(a -> a.doc(document))));
+//					.update(idx -> idx.index(indexConfig.getName()).id(document.getId()).action(a ->
+// a.doc(document))));
 //			}
 //
 //			bulkUpdate(bulkRequestBuilder.build());
@@ -265,7 +281,8 @@
 //	 * @param enabled New enabled status
 //	 */
 //	@Override
-//	public void updateDocumentChunkStatus(IndexConfig indexConfig, List<String> chunkIds, boolean enabled) {
+//	public void updateDocumentChunkStatus(IndexConfig indexConfig, List<String> chunkIds, boolean
+// enabled) {
 //		try {
 //			BulkRequest.Builder bulkRequestBuilder = new BulkRequest.Builder();
 //			for (String chunkId : chunkIds) {
@@ -274,7 +291,8 @@
 //                        .metadata(Map.of(KEY_ENABLED, enabled))
 //                        .build();
 //				bulkRequestBuilder.operations(
-//						op -> op.update(idx -> idx.index(indexConfig.getName()).id(chunkId).action(a -> a.doc(document))));
+//						op -> op.update(idx -> idx.index(indexConfig.getName()).id(chunkId).action(a ->
+// a.doc(document))));
 //			}
 //
 //			bulkUpdate(bulkRequestBuilder.build());
@@ -301,4 +319,4 @@
 //		}
 //	}
 //
-//}
+// }

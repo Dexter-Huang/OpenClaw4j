@@ -16,15 +16,14 @@
 
 package com.seaskyland.llm.workflow.core.base.entity;
 
-import com.seaskyland.llm.workflow.runtime.enums.PluginStatus;
-import com.seaskyland.llm.workflow.runtime.enums.PluginType;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.PluginStatus;
+import com.seaskyland.llm.workflow.runtime.enums.PluginType;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Entity class representing a plugin in the system.
@@ -35,48 +34,47 @@ import java.util.Date;
 @TableName("plugin")
 public class PluginEntity {
 
-	/** Primary key */
-	@TableId(value = "id", type = IdType.AUTO)
-	private Long id;
+  /** Primary key */
+  @TableId(value = "id", type = IdType.AUTO)
+  private Long id;
 
-	/** Workspace identifier */
-	@TableField("workspace_id")
-	private String workspaceId;
+  /** Workspace identifier */
+  @TableField("workspace_id")
+  private String workspaceId;
 
-	/** Unique identifier for the plugin */
-	@TableField("plugin_id")
-	private String pluginId;
+  /** Unique identifier for the plugin */
+  @TableField("plugin_id")
+  private String pluginId;
 
-	/** Type of the plugin */
-	private PluginType type;
+  /** Type of the plugin */
+  private PluginType type;
 
-	/** Current status of the plugin */
-	private PluginStatus status;
+  /** Current status of the plugin */
+  private PluginStatus status;
 
-	/** Name of the plugin */
-	private String name;
+  /** Name of the plugin */
+  private String name;
 
-	/** Description of the plugin */
-	private String description;
+  /** Description of the plugin */
+  private String description;
 
-	/** Configuration settings for the plugin */
-	private String config;
+  /** Configuration settings for the plugin */
+  private String config;
 
-	/** Source information of the plugin */
-	private String source;
+  /** Source information of the plugin */
+  private String source;
 
-	/** Creation timestamp */
-	@TableField("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @TableField("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@TableField("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @TableField("gmt_modified")
+  private Date gmtModified;
 
-	/** Creator of the plugin */
-	private String creator;
+  /** Creator of the plugin */
+  private String creator;
 
-	/** Last modifier of the plugin */
-	private String modifier;
-
+  /** Last modifier of the plugin */
+  private String modifier;
 }

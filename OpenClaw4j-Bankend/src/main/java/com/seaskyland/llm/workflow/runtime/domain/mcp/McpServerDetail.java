@@ -16,71 +16,69 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.mcp;
 
-import com.seaskyland.llm.workflow.runtime.enums.McpInstallTypeEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.McpInstallTypeEnum;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import lombok.Data;
 
 /**
  * MCP server detail information
  *
  * @author guning.lt
  * @since 1.0.0.3
- **/
+ */
 @Data
 public class McpServerDetail implements Serializable {
 
-	/** Server code identifier */
-	@JsonProperty("server_code")
-	private String serverCode;
+  /** Server code identifier */
+  @JsonProperty("server_code")
+  private String serverCode;
 
-	/** Server name */
-	private String name;
+  /** Server name */
+  private String name;
 
-	/** Deployment configuration */
-	@JsonProperty("deploy_config")
-	private String deployConfig;
+  /** Deployment configuration */
+  @JsonProperty("deploy_config")
+  private String deployConfig;
 
-	/** Detailed configuration */
-	@JsonProperty("detail_config")
-	private String detailConfig;
+  /** Detailed configuration */
+  @JsonProperty("detail_config")
+  private String detailConfig;
 
-	/** Server status */
-	private Integer status;
+  /** Server status */
+  private Integer status;
 
-	/** Server type */
-	private String type;
+  /** Server type */
+  private String type;
 
-	/** Business type */
-	@JsonProperty("biz_type")
-	private String bizType;
+  /** Business type */
+  @JsonProperty("biz_type")
+  private String bizType;
 
-	/** Description */
-	private String description;
+  /** Description */
+  private String description;
 
-	/** Installation method, defaults to SSE */
-	@JsonProperty("install_type")
-	private String installType = McpInstallTypeEnum.SSE.name();
+  /** Installation method, defaults to SSE */
+  @JsonProperty("install_type")
+  private String installType = McpInstallTypeEnum.SSE.name();
 
-	/** List of available tools */
-	private List<McpTool> tools;
+  /** List of available tools */
+  private List<McpTool> tools;
 
-	/** Deployment environment */
-	@JsonProperty("deploy_env")
-	private String deployEnv;
+  /** Deployment environment */
+  @JsonProperty("deploy_env")
+  private String deployEnv;
 
-	/** Source information */
-	private String source;
+  /** Source information */
+  private String source;
 
-	/** Flag indicating if tools are required */
-	@JsonProperty("need_tools")
-	private Boolean needTools = false;
+  /** Flag indicating if tools are required */
+  @JsonProperty("need_tools")
+  private Boolean needTools = false;
 
-	/** Last modification timestamp */
-	@JsonProperty("gmt_modified")
-	private Date gmtModified;
-
+  /** Last modification timestamp */
+  @JsonProperty("gmt_modified")
+  private Date gmtModified;
 }

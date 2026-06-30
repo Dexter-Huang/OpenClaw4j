@@ -15,51 +15,47 @@
  */
 package com.seaskyland.llm.workflow.runtime.domain.app;
 
-import com.seaskyland.llm.workflow.runtime.enums.AppStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.AppStatus;
 import java.io.Serializable;
 import java.util.Date;
+import lombok.Data;
 
-/**
- * Represents a version of an application in the workspace
- */
+/** Represents a version of an application in the workspace */
 @Data
 public class ApplicationVersion implements Serializable {
 
-	/** Workspace identifier */
-	@JsonProperty("workspace_id")
-	private String workspaceId;
+  /** Workspace identifier */
+  @JsonProperty("workspace_id")
+  private String workspaceId;
 
-	/** Application identifier */
-	@JsonProperty("app_id")
-	private String appId;
+  /** Application identifier */
+  @JsonProperty("app_id")
+  private String appId;
 
-	/** Current status of the application version */
-	private AppStatus status;
+  /** Current status of the application version */
+  private AppStatus status;
 
-	/** Application configuration */
-	private String config;
+  /** Application configuration */
+  private String config;
 
-	/** Version number, etc 1, 2, 3 */
-	private String version;
+  /** Version number, etc 1, 2, 3 */
+  private String version;
 
-	/** Version description */
-	private String description;
+  /** Version description */
+  private String description;
 
-	/** Creation timestamp */
-	@JsonProperty("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @JsonProperty("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@JsonProperty("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @JsonProperty("gmt_modified")
+  private Date gmtModified;
 
-	/** Creator's identifier */
-	private String creator;
+  /** Creator's identifier */
+  private String creator;
 
-	/** Last modifier's identifier */
-	private String modifier;
-
+  /** Last modifier's identifier */
+  private String modifier;
 }

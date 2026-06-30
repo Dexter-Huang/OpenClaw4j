@@ -19,58 +19,64 @@ package com.seaskyland.llm.workflow.core.rag.vectorstore;
 import com.seaskyland.llm.workflow.runtime.domain.PagingList;
 import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.DocumentChunk;
 import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.IndexConfig;
+import java.util.List;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 
-import java.util.List;
-
 /**
- * Service interface for managing vector stores and document chunks. Provides operations
- * for index management and document chunk operations.
+ * Service interface for managing vector stores and document chunks. Provides operations for index
+ * management and document chunk operations.
  *
  * @since 1.0.0.3
  */
 public interface VectorStoreService {
 
-	/**
-	 * Creates a new vector store index with the specified configuration.
-	 * @param indexConfig Configuration for the new index
-	 */
-	void createIndex(IndexConfig indexConfig);
+  /**
+   * Creates a new vector store index with the specified configuration.
+   *
+   * @param indexConfig Configuration for the new index
+   */
+  void createIndex(IndexConfig indexConfig);
 
-	/**
-	 * Deletes an existing vector store index.
-	 * @param indexConfig Configuration of the index to delete
-	 */
-	void deleteIndex(IndexConfig indexConfig);
+  /**
+   * Deletes an existing vector store index.
+   *
+   * @param indexConfig Configuration of the index to delete
+   */
+  void deleteIndex(IndexConfig indexConfig);
 
-	/**
-	 * Retrieves a vector store instance for the specified index.
-	 * @param indexConfig Configuration of the index
-	 * @return VectorStore instance
-	 */
-	VectorStore getVectorStore(IndexConfig indexConfig);
+  /**
+   * Retrieves a vector store instance for the specified index.
+   *
+   * @param indexConfig Configuration of the index
+   * @return VectorStore instance
+   */
+  VectorStore getVectorStore(IndexConfig indexConfig);
 
-	/**
-	 * Lists document chunks based on search criteria.
-	 * @param indexConfig Configuration of the index
-	 * @param searchRequest Search parameters
-	 * @return Paged list of document chunks
-	 */
-	PagingList<DocumentChunk> listDocumentChunks(IndexConfig indexConfig, SearchRequest searchRequest);
+  /**
+   * Lists document chunks based on search criteria.
+   *
+   * @param indexConfig Configuration of the index
+   * @param searchRequest Search parameters
+   * @return Paged list of document chunks
+   */
+  PagingList<DocumentChunk> listDocumentChunks(
+      IndexConfig indexConfig, SearchRequest searchRequest);
 
-	/**
-	 * Updates multiple document chunks in the vector store.
-	 * @param indexConfig Configuration of the index
-	 * @param chunks List of document chunks to update
-	 */
-	void updateDocumentChunks(IndexConfig indexConfig, List<DocumentChunk> chunks);
-	/**
-	 * Updates the enabled status of specified document chunks.
-	 * @param indexConfig Configuration of the index
-	 * @param chunkIds List of chunk IDs to update
-	 * @param enabled New enabled status
-	 */
-	void updateDocumentChunkStatus(IndexConfig indexConfig, List<String> chunkIds, boolean enabled);
+  /**
+   * Updates multiple document chunks in the vector store.
+   *
+   * @param indexConfig Configuration of the index
+   * @param chunks List of document chunks to update
+   */
+  void updateDocumentChunks(IndexConfig indexConfig, List<DocumentChunk> chunks);
 
+  /**
+   * Updates the enabled status of specified document chunks.
+   *
+   * @param indexConfig Configuration of the index
+   * @param chunkIds List of chunk IDs to update
+   * @param enabled New enabled status
+   */
+  void updateDocumentChunkStatus(IndexConfig indexConfig, List<String> chunkIds, boolean enabled);
 }

@@ -1,4 +1,4 @@
-///*
+/// *
 // * Copyright 2023-2025 the original author or authors.
 // *
 // * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,52 +14,53 @@
 // * limitations under the License.
 // */
 //
-//package org.springframework.ai.vectorstore.elasticsearch;
+// package org.springframework.ai.vectorstore.elasticsearch;
 //
-//import co.elastic.clients.elasticsearch.ElasticsearchClient;
-//import co.elastic.clients.elasticsearch.core.BulkRequest;
-//import co.elastic.clients.elasticsearch.core.BulkResponse;
-//import co.elastic.clients.elasticsearch.core.SearchResponse;
-//import co.elastic.clients.elasticsearch.core.bulk.BulkResponseItem;
-//import co.elastic.clients.elasticsearch.core.search.Hit;
-//import co.elastic.clients.json.jackson.JacksonJsonpMapper;
-//import co.elastic.clients.transport.Version;
-//import co.elastic.clients.transport.rest_client.RestClientTransport;
-//import com.seaskyland.llm.workflow.runtime.exception.BizException;
-//import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
-//import com.fasterxml.jackson.databind.DeserializationFeature;
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import org.elasticsearch.client.RestClient;
-//import org.springframework.ai.document.Document;
-//import org.springframework.ai.document.DocumentMetadata;
-//import org.springframework.ai.embedding.EmbeddingModel;
-//import org.springframework.ai.embedding.EmbeddingOptionsBuilder;
-//import org.springframework.ai.model.EmbeddingUtils;
-//import org.springframework.ai.observation.conventions.VectorStoreProvider;
-//import org.springframework.ai.observation.conventions.VectorStoreSimilarityMetric;
-//import org.springframework.ai.vectorstore.AbstractVectorStoreBuilder;
-//import org.springframework.ai.vectorstore.SearchRequest;
-//import org.springframework.ai.vectorstore.SearchType;
-//import org.springframework.ai.vectorstore.filter.Filter;
-//import org.springframework.ai.vectorstore.filter.FilterExpressionConverter;
-//import org.springframework.ai.vectorstore.observation.AbstractObservationVectorStore;
-//import org.springframework.ai.vectorstore.observation.VectorStoreObservationContext;
-//import org.springframework.beans.factory.InitializingBean;
-//import org.springframework.util.Assert;
+// import co.elastic.clients.elasticsearch.ElasticsearchClient;
+// import co.elastic.clients.elasticsearch.core.BulkRequest;
+// import co.elastic.clients.elasticsearch.core.BulkResponse;
+// import co.elastic.clients.elasticsearch.core.SearchResponse;
+// import co.elastic.clients.elasticsearch.core.bulk.BulkResponseItem;
+// import co.elastic.clients.elasticsearch.core.search.Hit;
+// import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+// import co.elastic.clients.transport.Version;
+// import co.elastic.clients.transport.rest_client.RestClientTransport;
+// import com.seaskyland.llm.workflow.runtime.exception.BizException;
+// import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
+// import com.fasterxml.jackson.databind.DeserializationFeature;
+// import com.fasterxml.jackson.databind.ObjectMapper;
+// import org.elasticsearch.client.RestClient;
+// import org.springframework.ai.document.Document;
+// import org.springframework.ai.document.DocumentMetadata;
+// import org.springframework.ai.embedding.EmbeddingModel;
+// import org.springframework.ai.embedding.EmbeddingOptionsBuilder;
+// import org.springframework.ai.model.EmbeddingUtils;
+// import org.springframework.ai.observation.conventions.VectorStoreProvider;
+// import org.springframework.ai.observation.conventions.VectorStoreSimilarityMetric;
+// import org.springframework.ai.vectorstore.AbstractVectorStoreBuilder;
+// import org.springframework.ai.vectorstore.SearchRequest;
+// import org.springframework.ai.vectorstore.SearchType;
+// import org.springframework.ai.vectorstore.filter.Filter;
+// import org.springframework.ai.vectorstore.filter.FilterExpressionConverter;
+// import org.springframework.ai.vectorstore.observation.AbstractObservationVectorStore;
+// import org.springframework.ai.vectorstore.observation.VectorStoreObservationContext;
+// import org.springframework.beans.factory.InitializingBean;
+// import org.springframework.util.Assert;
 //
-//import java.io.IOException;
-//import java.util.*;
-//import java.util.concurrent.CompletableFuture;
-//import java.util.concurrent.ExecutionException;
-//import java.util.concurrent.TimeUnit;
-//import java.util.concurrent.TimeoutException;
-//import java.util.stream.Collectors;
-//import java.util.stream.Stream;
+// import java.io.IOException;
+// import java.util.*;
+// import java.util.concurrent.CompletableFuture;
+// import java.util.concurrent.ExecutionException;
+// import java.util.concurrent.TimeUnit;
+// import java.util.concurrent.TimeoutException;
+// import java.util.stream.Collectors;
+// import java.util.stream.Stream;
 //
-//import static com.seaskyland.llm.workflow.core.rag.RagConstants.SEARCH_TIMEOUT;
-//import static com.seaskyland.llm.workflow.core.utils.concurrent.ThreadPoolUtils.DEFAULT_TASK_EXECUTOR;
+// import static com.seaskyland.llm.workflow.core.rag.RagConstants.SEARCH_TIMEOUT;
+// import static
+// com.seaskyland.llm.workflow.core.utils.concurrent.ThreadPoolUtils.DEFAULT_TASK_EXECUTOR;
 //
-///**
+/// **
 // * Elasticsearch-based vector store implementation using the dense_vector field type.
 // *
 // * <p>
@@ -84,7 +85,8 @@
 // * Basic usage example:
 // * </p>
 // * <pre>{@code
-// * ElasticsearchVectorStore vectorStore = ElasticsearchVectorStore.builder(restClient, embeddingModel)
+// * ElasticsearchVectorStore vectorStore = ElasticsearchVectorStore.builder(restClient,
+// embeddingModel)
 // *     .initializeSchema(true)
 // *     .build();
 // *
@@ -112,7 +114,8 @@
 // * options.setSimilarity(SimilarityFunction.dot_product);
 // * options.setDimensions(1536);
 // *
-// * ElasticsearchVectorStore vectorStore = ElasticsearchVectorStore.builder(restClient, embeddingModel)
+// * ElasticsearchVectorStore vectorStore = ElasticsearchVectorStore.builder(restClient,
+// embeddingModel)
 // *     .options(options)
 // *     .initializeSchema(true)
 // *     .batchingStrategy(new TokenCountBatchingStrategy())
@@ -149,11 +152,14 @@
 // * @author Ilayaperumal Gopinathan
 // * @since 1.0.0
 // */
-//public class ElasticsearchVectorStore extends AbstractObservationVectorStore implements InitializingBean {
+// public class ElasticsearchVectorStore extends AbstractObservationVectorStore implements
+// InitializingBean {
 //
-//	private static final Map<SimilarityFunction, VectorStoreSimilarityMetric> SIMILARITY_TYPE_MAPPING = Map.of(
+//	private static final Map<SimilarityFunction, VectorStoreSimilarityMetric> SIMILARITY_TYPE_MAPPING
+// = Map.of(
 //			SimilarityFunction.cosine, VectorStoreSimilarityMetric.COSINE, SimilarityFunction.l2_norm,
-//			VectorStoreSimilarityMetric.EUCLIDEAN, SimilarityFunction.dot_product, VectorStoreSimilarityMetric.DOT);
+//			VectorStoreSimilarityMetric.EUCLIDEAN, SimilarityFunction.dot_product,
+// VectorStoreSimilarityMetric.DOT);
 //
 //	private final ElasticsearchClient elasticsearchClient;
 //
@@ -188,14 +194,16 @@
 //		}
 //		BulkRequest.Builder bulkRequestBuilder = new BulkRequest.Builder();
 //
-//		List<float[]> embeddings = this.embeddingModel.embed(documents, EmbeddingOptionsBuilder.builder().build(),
+//		List<float[]> embeddings = this.embeddingModel.embed(documents,
+// EmbeddingOptionsBuilder.builder().build(),
 //				this.batchingStrategy);
 //
 //		for (Document document : documents) {
 //			ElasticSearchDocument doc = new ElasticSearchDocument(document.getId(), document.getText(),
 //					document.getMetadata(), embeddings.get(documents.indexOf(document)));
 //			bulkRequestBuilder.operations(
-//					op -> op.index(idx -> idx.index(this.options.getIndexName()).id(document.getId()).document(doc)));
+//					op -> op.index(idx ->
+// idx.index(this.options.getIndexName()).id(document.getId()).document(doc)));
 //		}
 //		BulkResponse bulkRequest = bulkRequest(bulkRequestBuilder.build());
 //		if (bulkRequest.errors()) {
@@ -217,7 +225,8 @@
 //			throw new IllegalArgumentException("Index not found");
 //		}
 //		for (String id : idList) {
-//			bulkRequestBuilder.operations(op -> op.delete(idx -> idx.index(this.options.getIndexName()).id(id)));
+//			bulkRequestBuilder.operations(op -> op.delete(idx ->
+// idx.index(this.options.getIndexName()).id(id)));
 //		}
 //		if (bulkRequest(bulkRequestBuilder.build()).errors()) {
 //			throw new IllegalStateException("Delete operation failed");
@@ -258,7 +267,8 @@
 //			case SEMANTIC -> searchBySemantic(searchRequest);
 //			case FULL_TEXT -> searchByFullText(searchRequest);
 //			case HYBRID -> searchByHybrid(searchRequest);
-//			default -> throw new IllegalArgumentException("Unsupported search type: " + searchRequest.getSearchType());
+//			default -> throw new IllegalArgumentException("Unsupported search type: " +
+// searchRequest.getSearchType());
 //		};
 //	}
 //
@@ -272,7 +282,8 @@
 //		Document document = hit.source();
 //		Document.Builder documentBuilder = document.mutate();
 //		if (hit.score() != null) {
-//			documentBuilder.metadata(DocumentMetadata.DISTANCE.value(), 1 - normalizeSimilarityScore(hit.score()));
+//			documentBuilder.metadata(DocumentMetadata.DISTANCE.value(), 1 -
+// normalizeSimilarityScore(hit.score()));
 //
 //			if (searchType == SearchType.FULL_TEXT) {
 //				documentBuilder.score(1 - hit.score());
@@ -285,7 +296,8 @@
 //	}
 //
 //	// more info on score/distance calculation
-//	// https://www.elastic.co/guide/en/elasticsearch/reference/current/knn-search.html#knn-similarity-search
+//	//
+// https://www.elastic.co/guide/en/elasticsearch/reference/current/knn-search.html#knn-similarity-search
 //	private double normalizeSimilarityScore(double score) {
 //		switch (this.options.getSimilarity()) {
 //			case l2_norm:
@@ -302,7 +314,8 @@
 //
 //	public boolean indexExists() {
 //		try {
-//			return this.elasticsearchClient.indices().exists(ex -> ex.index(this.options.getIndexName())).value();
+//			return this.elasticsearchClient.indices().exists(ex ->
+// ex.index(this.options.getIndexName())).value();
 //		}
 //		catch (IOException e) {
 //			throw new RuntimeException(e);
@@ -333,13 +346,15 @@
 //	}
 //
 //	@Override
-//	public VectorStoreObservationContext.Builder createObservationContextBuilder(String operationName) {
+//	public VectorStoreObservationContext.Builder createObservationContextBuilder(String
+// operationName) {
 //		int dimensions = this.options.getDimensions();
 //		if (dimensions <= 0) {
 //			dimensions = this.embeddingModel.dimensions();
 //		}
 //
-//		return VectorStoreObservationContext.builder(VectorStoreProvider.ELASTICSEARCH.value(), operationName)
+//		return VectorStoreObservationContext.builder(VectorStoreProvider.ELASTICSEARCH.value(),
+// operationName)
 //			.collectionName(this.options.getIndexName())
 //			.dimensions(dimensions)
 //			.similarityMetric(getSimilarityMetric());
@@ -375,7 +390,8 @@
 //	 * @param metadata The metadata of the document
 //	 * @param embedding The vectors representing the content of the document
 //	 */
-//	public record ElasticSearchDocument(String id, String content, Map<String, Object> metadata, float[] embedding) {
+//	public record ElasticSearchDocument(String id, String content, Map<String, Object> metadata,
+// float[] embedding) {
 //	}
 //
 //	public static class Builder extends AbstractVectorStoreBuilder<Builder> {
@@ -386,7 +402,8 @@
 //
 //		private boolean initializeSchema = false;
 //
-//		private FilterExpressionConverter filterExpressionConverter = new ElasticsearchAiSearchFilterExpressionConverter();
+//		private FilterExpressionConverter filterExpressionConverter = new
+// ElasticsearchAiSearchFilterExpressionConverter();
 //
 //		/**
 //		 * Sets the Elasticsearch REST client.
@@ -455,17 +472,20 @@
 //			final float finalThreshold = threshold;
 //			float[] vectors = this.embeddingModel.embed(searchRequest.getQuery());
 //
-//			SearchResponse<Document> res = this.elasticsearchClient.search(sr -> sr.index(this.options.getIndexName())
+//			SearchResponse<Document> res = this.elasticsearchClient.search(sr ->
+// sr.index(this.options.getIndexName())
 //				.knn(knn -> knn.queryVector(EmbeddingUtils.toList(vectors))
 //					.similarity(finalThreshold)
 //					.k((long) searchRequest.getTopK())
 //					.field("embedding")
 //					.numCandidates((long) (1.5 * searchRequest.getTopK()))
 //					.filter(fl -> fl
-//						.queryString(qs -> qs.query(getElasticsearchQueryString(searchRequest.getFilterExpression())))))
+//						.queryString(qs ->
+// qs.query(getElasticsearchQueryString(searchRequest.getFilterExpression())))))
 //				.size(searchRequest.getTopK()), Document.class);
 //
-//			return res.hits().hits().stream().map(x -> toDocument(x, SearchType.SEMANTIC)).collect(Collectors.toList());
+//			return res.hits().hits().stream().map(x -> toDocument(x,
+// SearchType.SEMANTIC)).collect(Collectors.toList());
 //		}
 //		catch (IOException e) {
 //			throw new BizException(ErrorCode.DOCUMENT_RETRIEVAL_ERROR.toError(), e);
@@ -531,11 +551,13 @@
 //			}
 //
 //			// 去重处理
-//			List<Document> vectorList = vectorFuture.get() == null ? new ArrayList<>() : vectorFuture.get();
+//			List<Document> vectorList = vectorFuture.get() == null ? new ArrayList<>() :
+// vectorFuture.get();
 //			List<Document> fullTextList = textFuture.get() == null ? new ArrayList<>() : textFuture.get();
 //
 //			return Stream.concat(vectorList.stream(), fullTextList.stream())
-//				.collect(Collectors.toMap(Document::getId, student -> student, (existing, newStudent) -> existing))
+//				.collect(Collectors.toMap(Document::getId, student -> student, (existing, newStudent) ->
+// existing))
 //				.values()
 //				.stream()
 //				.toList();
@@ -548,4 +570,4 @@
 //		}
 //	}
 //
-//}
+// }

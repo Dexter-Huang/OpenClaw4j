@@ -16,24 +16,23 @@
 
 package com.seaskyland.llm.workflow.core.base.manager;
 
-import com.seaskyland.llm.workflow.runtime.domain.app.FileSearchOptions;
-import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.DocumentChunk;
-import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.KnowledgeBase;
+import com.seaskyland.llm.workflow.core.rag.DocumentChunkConverter;
 import com.seaskyland.llm.workflow.core.rag.KnowledgeBaseService;
 import com.seaskyland.llm.workflow.core.rag.retriever.KnowledgeBaseDocumentRetriever;
 import com.seaskyland.llm.workflow.core.rag.vectorstore.VectorStoreFactory;
-import com.seaskyland.llm.workflow.core.rag.DocumentChunkConverter;
+import com.seaskyland.llm.workflow.runtime.domain.app.FileSearchOptions;
+import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.DocumentChunk;
+import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.KnowledgeBase;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.Query;
 import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 /**
- * Manager class for document retrieval operations. Handles the creation and execution of
- * document retrievers for knowledge bases.
+ * Manager class for document retrieval operations. Handles the creation and execution of document
+ * retrievers for knowledge bases.
  *
  * @since 1.0.0.3
  */
@@ -41,32 +40,34 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DocumentRetrieverManager {
 
-	/** Factory for creating vector stores */
-	private final VectorStoreFactory vectorStoreFactory;
+  /** Factory for creating vector stores */
+  private final VectorStoreFactory vectorStoreFactory;
 
-	/** Service for managing knowledge bases */
-	private final KnowledgeBaseService knowledgeBaseService;
+  /** Service for managing knowledge bases */
+  private final KnowledgeBaseService knowledgeBaseService;
 
-	/**
-	 * Creates a document retriever for the specified search options.
-	 * @param searchOptions Options for file search
-	 * @return Configured document retriever
-	 */
-	public DocumentRetriever getDocumentRetriever(FileSearchOptions searchOptions) {
-		List<KnowledgeBase> knowledgeBases = knowledgeBaseService.listKnowledgeBases(searchOptions.getKbIds());
-		return new KnowledgeBaseDocumentRetriever(knowledgeBases, vectorStoreFactory, searchOptions);
-	}
+  /**
+   * Creates a document retriever for the specified search options.
+   *
+   * @param searchOptions Options for file search
+   * @return Configured document retriever
+   */
+  public DocumentRetriever getDocumentRetriever(FileSearchOptions searchOptions) {
+    List<KnowledgeBase> knowledgeBases =
+        knowledgeBaseService.listKnowledgeBases(searchOptions.getKbIds());
+    return new KnowledgeBaseDocumentRetriever(knowledgeBases, vectorStoreFactory, searchOptions);
+  }
 
-	/**
-	 * Retrieves document chunks based on the query and search options.
-	 * @param query Search query
-	 * @param searchOptions Options for file search
-	 * @return List of retrieved document chunks
-	 */
-	public List<DocumentChunk> retrieve(Query query, FileSearchOptions searchOptions) {
-		DocumentRetriever documentRetriever = getDocumentRetriever(searchOptions);
-		List<Document> documents = documentRetriever.retrieve(query);
-		return documents.stream().map(DocumentChunkConverter::toDocumentChunk).toList();
-	}
-
+  /**
+   * Retrieves document chunks based on the query and search options.
+   *
+   * @param query Search query
+   * @param searchOptions Options for file search
+   * @return List of retrieved document chunks
+   */
+  public List<DocumentChunk> retrieve(Query query, FileSearchOptions searchOptions) {
+    DocumentRetriever documentRetriever = getDocumentRetriever(searchOptions);
+    List<Document> documents = documentRetriever.retrieve(query);
+    return documents.stream().map(DocumentChunkConverter::toDocumentChunk).toList();
+  }
 }

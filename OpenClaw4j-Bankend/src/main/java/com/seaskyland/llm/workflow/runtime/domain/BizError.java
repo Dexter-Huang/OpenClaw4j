@@ -17,39 +17,36 @@
 package com.seaskyland.llm.workflow.runtime.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 
 /**
  * Standard error response model for API responses.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class BizError implements Serializable {
 
-	/** HTTP status code of the error */
-	@JsonProperty("status_code")
-	private Integer statusCode;
+  /** HTTP status code of the error */
+  @JsonProperty("status_code")
+  private Integer statusCode;
 
-	/** Type of the error */
-	private String type;
+  /** Type of the error */
+  private String type;
 
-	/** Error code */
-	private String code;
+  /** Error code */
+  private String code;
 
-	/** Error message */
-	private String message;
+  /** Error message */
+  private String message;
 
-	/** Parameter that caused the error */
-	private String param;
-
+  /** Parameter that caused the error */
+  private String param;
 }

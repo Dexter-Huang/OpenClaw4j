@@ -17,37 +17,34 @@
 package com.seaskyland.llm.workflow.runtime.domain.audio;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 
 /**
  * Represents an audio output response containing audio data and metadata.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class AudioOutput implements Serializable {
 
-	/** Unique identifier for the audio output */
-	@JsonProperty("id")
-	private String id;
+  /** Unique identifier for the audio output */
+  @JsonProperty("id")
+  private String id;
 
-	/** Base64 encoded audio data */
-	@JsonProperty("data")
-	private String data;
+  /** Base64 encoded audio data */
+  @JsonProperty("data")
+  private String data;
 
-	/** Expiration timestamp for the audio data */
-	@JsonProperty("expires_at")
-	private Long expiresAt;
+  /** Expiration timestamp for the audio data */
+  @JsonProperty("expires_at")
+  private Long expiresAt;
 
-	/** Text transcript of the audio content */
-	@JsonProperty("transcript")
-	private String transcript;
-
+  /** Text transcript of the audio content */
+  @JsonProperty("transcript")
+  private String transcript;
 }

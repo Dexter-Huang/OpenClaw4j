@@ -20,8 +20,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * A wrapper class for RPC (Remote Procedure Call) results. Provides standardized response
- * format with success status, error handling, and response data.
+ * A wrapper class for RPC (Remote Procedure Call) results. Provides standardized response format
+ * with success status, error handling, and response data.
  *
  * @since 1.0.0.3
  */
@@ -29,47 +29,45 @@ import lombok.Setter;
 @Setter
 public class RpcResult {
 
-	/** Indicates if the RPC call was successful */
-	private boolean success;
+  /** Indicates if the RPC call was successful */
+  private boolean success;
 
-	/** HTTP status code or custom error code */
-	private Integer code;
+  /** HTTP status code or custom error code */
+  private Integer code;
 
-	/** Error message or description */
-	private String message;
+  /** Error message or description */
+  private String message;
 
-	/** Response data from the RPC call */
-	private Object response;
+  /** Response data from the RPC call */
+  private Object response;
 
-	/** Indicates if the RPC call timed out */
-	private boolean timeout = false;
+  /** Indicates if the RPC call timed out */
+  private boolean timeout = false;
 
-	/** Original raw response from the RPC call */
-	@Setter
-	private String originResponse;
+  /** Original raw response from the RPC call */
+  @Setter private String originResponse;
 
-	public RpcResult() {
-		this.code = 200;
-	}
+  public RpcResult() {
+    this.code = 200;
+  }
 
-	public static RpcResult create() {
-		return new RpcResult();
-	}
+  public static RpcResult create() {
+    return new RpcResult();
+  }
 
-	public static RpcResult success(Object response) {
-		RpcResult result = create();
-		result.setSuccess(true);
-		result.setResponse(response);
-		result.setCode(200);
-		return result;
-	}
+  public static RpcResult success(Object response) {
+    RpcResult result = create();
+    result.setSuccess(true);
+    result.setResponse(response);
+    result.setCode(200);
+    return result;
+  }
 
-	public static RpcResult error(int code, String message) {
-		RpcResult result = create();
-		result.setSuccess(false);
-		result.setCode(code);
-		result.setMessage(message);
-		return result;
-	}
-
+  public static RpcResult error(int code, String message) {
+    RpcResult result = create();
+    result.setSuccess(false);
+    result.setCode(code);
+    result.setMessage(message);
+    return result;
+  }
 }

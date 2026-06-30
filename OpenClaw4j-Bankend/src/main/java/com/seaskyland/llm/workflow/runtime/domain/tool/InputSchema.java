@@ -16,11 +16,10 @@
 package com.seaskyland.llm.workflow.runtime.domain.tool;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import lombok.Data;
 
 /**
  * Schema definition for tool input parameters.
@@ -31,25 +30,16 @@ import java.util.Map;
 @Data
 public class InputSchema implements Serializable {
 
-	/**
-	 * The type of the input schema
-	 */
-	private String type;
+  /** The type of the input schema */
+  private String type;
 
-	/**
-	 * Properties of the input schema
-	 */
-	private Map<String, Object> properties;
+  /** Properties of the input schema */
+  private Map<String, Object> properties;
 
-	/**
-	 * List of required property names
-	 */
-	private List<String> required;
+  /** List of required property names */
+  private List<String> required;
 
-	/**
-	 * Whether additional properties are allowed
-	 */
-	@JsonProperty("additional_properties")
-	private Boolean additionalProperties;
-
+  /** Whether additional properties are allowed */
+  @JsonProperty("additional_properties")
+  private Boolean additionalProperties;
 }

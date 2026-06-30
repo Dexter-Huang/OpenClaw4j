@@ -21,9 +21,8 @@ import lombok.Data;
 @Data
 public class InitRequest {
 
-	@JsonProperty("app_id")
-	private String appId;
+  @JsonProperty("app_id")
+  private String appId;
 
-	private String version;
-
+  private String version;
 }

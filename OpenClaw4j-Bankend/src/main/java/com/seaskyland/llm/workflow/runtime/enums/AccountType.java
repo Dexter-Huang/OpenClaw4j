@@ -30,22 +30,15 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AccountType {
 
-	/**
-	 * Administrator account type
-	 */
-	@JsonProperty("admin")
-	ADMIN("admin"),
+  /** Administrator account type */
+  @JsonProperty("admin")
+  ADMIN("admin"),
 
-	/**
-	 * Regular user account type
-	 */
-	@JsonProperty("user")
-	USER("user"),;
+  /** Regular user account type */
+  @JsonProperty("user")
+  USER("user"),
+  ;
 
-	/**
-	 * The string value representing the account type
-	 */
-	@EnumValue
-	private final String type;
-
+  /** The string value representing the account type */
+  @EnumValue private final String type;
 }

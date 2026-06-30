@@ -16,67 +16,65 @@
 
 package com.seaskyland.llm.workflow.core.model.embedding;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.BatchingStrategy;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Default implementation of document batching strategy for embedding processing. Splits
- * documents into batches of specified size for efficient processing.
+ * Default implementation of document batching strategy for embedding processing. Splits documents
+ * into batches of specified size for efficient processing.
  *
  * @since 1.0.0.3
  */
 public class DefaultBatchingStrategy implements BatchingStrategy {
 
-	/** Maximum batch size for document processing */
-	private static final int MAX_BATCH_SIZE = 20;
+  /** Maximum batch size for document processing */
+  private static final int MAX_BATCH_SIZE = 20;
 
-	/** Configured batch size for document batching */
-	private final Integer batchSize;
+  /** Configured batch size for document batching */
+  private final Integer batchSize;
 
-	/**
-	 * Creates a batching strategy with default maximum batch size.
-	 */
-	public DefaultBatchingStrategy() {
-		this.batchSize = MAX_BATCH_SIZE;
-	}
+  /** Creates a batching strategy with default maximum batch size. */
+  public DefaultBatchingStrategy() {
+    this.batchSize = MAX_BATCH_SIZE;
+  }
 
-	/**
-	 * Creates a batching strategy with specified batch size.
-	 * @param batchSize the size of each batch
-	 */
-	public DefaultBatchingStrategy(Integer batchSize) {
-		this.batchSize = batchSize;
-	}
+  /**
+   * Creates a batching strategy with specified batch size.
+   *
+   * @param batchSize the size of each batch
+   */
+  public DefaultBatchingStrategy(Integer batchSize) {
+    this.batchSize = batchSize;
+  }
 
-	/**
-	 * Splits the input documents into batches.
-	 * @param documents list of documents to be batched
-	 * @return list of document batches
-	 */
-	@NotNull
-	@Override
-	public List<List<Document>> batch(@NotNull List<Document> documents) {
-		if (CollectionUtils.isEmpty(documents)) {
-			return List.of();
-		}
+  /**
+   * Splits the input documents into batches.
+   *
+   * @param documents list of documents to be batched
+   * @return list of document batches
+   */
+  @NotNull
+  @Override
+  public List<List<Document>> batch(@NotNull List<Document> documents) {
+    if (CollectionUtils.isEmpty(documents)) {
+      return List.of();
+    }
 
-		if (documents.size() <= batchSize) {
-			return List.of(documents);
-		}
+    if (documents.size() <= batchSize) {
+      return List.of(documents);
+    }
 
-		List<List<Document>> batches = new ArrayList<>();
-		for (int i = 0; i < documents.size(); i += batchSize) {
-			int end = Math.min(i + batchSize, documents.size());
-			List<Document> batch = documents.subList(i, end);
-			batches.add(batch);
-		}
+    List<List<Document>> batches = new ArrayList<>();
+    for (int i = 0; i < documents.size(); i += batchSize) {
+      int end = Math.min(i + batchSize, documents.size());
+      List<Document> batch = documents.subList(i, end);
+      batches.add(batch);
+    }
 
-		return batches;
-	}
-
+    return batches;
+  }
 }

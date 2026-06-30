@@ -22,32 +22,24 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * Enum representing different types of knowledge bases. Defines the structure type of
- * knowledge bases used in the system.
+ * Enum representing different types of knowledge bases. Defines the structure type of knowledge
+ * bases used in the system.
  *
  * @since 1.0.0.3
  */
-
 @Getter
 @AllArgsConstructor
 public enum KnowledgeBaseType {
 
-	/**
-	 * Represents unstructured knowledge base type
-	 */
-	@JsonProperty("unstructured")
-	UNSTRUCTURED("unstructured"),
+  /** Represents unstructured knowledge base type */
+  @JsonProperty("unstructured")
+  UNSTRUCTURED("unstructured"),
 
-	/**
-	 * Represents structured knowledge base type
-	 */
-	@JsonProperty("structured")
-	STRUCTURED("structured"),;
+  /** Represents structured knowledge base type */
+  @JsonProperty("structured")
+  STRUCTURED("structured"),
+  ;
 
-	/**
-	 * The string value of the enum
-	 */
-	@EnumValue
-	private final String value;
-
+  /** The string value of the enum */
+  @EnumValue private final String value;
 }

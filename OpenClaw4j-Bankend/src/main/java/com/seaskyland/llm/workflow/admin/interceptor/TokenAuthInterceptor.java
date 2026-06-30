@@ -16,19 +16,20 @@
 
 package com.seaskyland.llm.workflow.admin.interceptor;
 
-import com.seaskyland.llm.workflow.runtime.constants.ApiConstants;
-import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
-import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
-import com.seaskyland.llm.workflow.runtime.domain.Result;
-import com.seaskyland.llm.workflow.runtime.domain.account.Account;
-import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
 import com.seaskyland.llm.workflow.core.base.manager.TokenManager;
 import com.seaskyland.llm.workflow.core.base.service.AccountService;
 import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
 import com.seaskyland.llm.workflow.core.utils.LogUtils;
 import com.seaskyland.llm.workflow.core.utils.common.IdGenerator;
+import com.seaskyland.llm.workflow.runtime.constants.ApiConstants;
+import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
+import com.seaskyland.llm.workflow.runtime.domain.Result;
+import com.seaskyland.llm.workflow.runtime.domain.account.Account;
+import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
+import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -36,11 +37,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-
 /**
- * Interceptor for handling token-based authentication for console API access. Validates
- * access tokens and sets up request context for authenticated users.
+ * Interceptor for handling token-based authentication for console API access. Validates access
+ * tokens and sets up request context for authenticated users.
  *
  * @since 1.0.0.3
  */
@@ -49,102 +48,103 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class TokenAuthInterceptor extends OncePerRequestFilter {
 
-	/** Service for managing account-related operations */
-	private final AccountService accountService;
+  /** Service for managing account-related operations */
+  private final AccountService accountService;
 
-	/** Manager for handling token operations */
-	private final TokenManager tokenManager;
+  /** Manager for handling token operations */
+  private final TokenManager tokenManager;
 
-	@Override
-	protected boolean shouldNotFilter(@NotNull HttpServletRequest request) {
-		String path = request.getServletPath();
-		return path.equals("/console/v1/auth/login") || path.equals("/console/v1/auth/refresh-token")
-				|| path.startsWith("/console/v1/system/") || path.startsWith("/swagger-ui/")
-				|| path.startsWith("/v3/api-docs/") || path.startsWith("/test/");
-	}
+  @Override
+  protected boolean shouldNotFilter(@NotNull HttpServletRequest request) {
+    String path = request.getServletPath();
+    return path.equals("/console/v1/auth/login")
+        || path.equals("/console/v1/auth/refresh-token")
+        || path.startsWith("/console/v1/system/")
+        || path.startsWith("/swagger-ui/")
+        || path.startsWith("/v3/api-docs/")
+        || path.startsWith("/test/");
+  }
 
-	/**
-	 * Intercepts requests to validate authentication token and set up request context.
-	 */
-	@Override
-	protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
-			@NotNull jakarta.servlet.FilterChain filterChain) throws jakarta.servlet.ServletException, IOException {
-		long start = System.currentTimeMillis();
+  /** Intercepts requests to validate authentication token and set up request context. */
+  @Override
+  protected void doFilterInternal(
+      @NotNull HttpServletRequest request,
+      @NotNull HttpServletResponse response,
+      @NotNull jakarta.servlet.FilterChain filterChain)
+      throws jakarta.servlet.ServletException, IOException {
+    long start = System.currentTimeMillis();
 
-		if (RequestMethod.OPTIONS.name().equals(request.getMethod().toUpperCase())) {
-			filterChain.doFilter(request, response);
-			return;
-		}
+    if (RequestMethod.OPTIONS.name().equals(request.getMethod().toUpperCase())) {
+      filterChain.doFilter(request, response);
+      return;
+    }
 
-		String accountId;
-		// String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-		String authHeader = request.getHeader("X-SAA-TOKEN");
-		if (authHeader == null) {
-			authHeader = request.getParameter(ApiConstants.ACCESS_TOKEN);
-		}
-		else if (!authHeader.startsWith(ApiConstants.TOKEN_PREFIX)) {
-			returnAuthError(start, response, ErrorCode.INVALID_TOKEN);
-			return;
-		}
+    String accountId;
+    // String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+    String authHeader = request.getHeader("X-SAA-TOKEN");
+    if (authHeader == null) {
+      authHeader = request.getParameter(ApiConstants.ACCESS_TOKEN);
+    } else if (!authHeader.startsWith(ApiConstants.TOKEN_PREFIX)) {
+      returnAuthError(start, response, ErrorCode.INVALID_TOKEN);
+      return;
+    }
 
-		if (authHeader == null) {
-			returnAuthError(start, response, ErrorCode.INVALID_TOKEN);
-			return;
-		}
+    if (authHeader == null) {
+      returnAuthError(start, response, ErrorCode.INVALID_TOKEN);
+      return;
+    }
 
-		String token = authHeader.replace(ApiConstants.TOKEN_PREFIX + " ", "");
-		accountId = tokenManager.getAccountIdFromAccessToken(token);
-		if (accountId == null) {
-			returnAuthError(start, response, ErrorCode.INVALID_TOKEN);
-			return;
-		}
+    String token = authHeader.replace(ApiConstants.TOKEN_PREFIX + " ", "");
+    accountId = tokenManager.getAccountIdFromAccessToken(token);
+    if (accountId == null) {
+      returnAuthError(start, response, ErrorCode.INVALID_TOKEN);
+      return;
+    }
 
-		// login info
-		Account account = accountService.getAccount(accountId);
-		if (account == null) {
-			returnAuthError(start, response, ErrorCode.INVALID_TOKEN);
-			return;
-		}
+    // login info
+    Account account = accountService.getAccount(accountId);
+    if (account == null) {
+      returnAuthError(start, response, ErrorCode.INVALID_TOKEN);
+      return;
+    }
 
-		RequestContext context = new RequestContext();
-		context.setRequestId(IdGenerator.uuid());
-		context.setAccountId(account.getAccountId());
-		context.setUsername(account.getUsername());
-		context.setWorkspaceId(account.getDefaultWorkspaceId());
-		context.setAccountType(account.getType());
-		context.setCallerIp(request.getRemoteAddr());
-		context.setStartTime(System.currentTimeMillis());
+    RequestContext context = new RequestContext();
+    context.setRequestId(IdGenerator.uuid());
+    context.setAccountId(account.getAccountId());
+    context.setUsername(account.getUsername());
+    context.setWorkspaceId(account.getDefaultWorkspaceId());
+    context.setAccountType(account.getType());
+    context.setCallerIp(request.getRemoteAddr());
+    context.setStartTime(System.currentTimeMillis());
 
-		try {
-			RequestContextHolder.runWithRequestContext(context, () -> filterChain.doFilter(request, response));
-		}
-		catch (jakarta.servlet.ServletException | IOException ex) {
-			throw ex;
-		}
-		catch (Exception ex) {
-			throw new jakarta.servlet.ServletException(ex);
-		}
-	}
+    try {
+      RequestContextHolder.runWithRequestContext(
+          context, () -> filterChain.doFilter(request, response));
+    } catch (jakarta.servlet.ServletException | IOException ex) {
+      throw ex;
+    } catch (Exception ex) {
+      throw new jakarta.servlet.ServletException(ex);
+    }
+  }
 
-	/**
-	 * Sends an unauthorized error response with the specified error code.
-	 * @param start Start time of the request for monitoring
-	 * @param response HTTP response object
-	 * @param errorCode Error code to be returned
-	 */
-	public void returnAuthError(long start, HttpServletResponse response, ErrorCode errorCode) {
-		response.setContentType("application/json;charset=UTF-8");
-		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		Result<String> result = Result.error(IdGenerator.uuid(), errorCode);
+  /**
+   * Sends an unauthorized error response with the specified error code.
+   *
+   * @param start Start time of the request for monitoring
+   * @param response HTTP response object
+   * @param errorCode Error code to be returned
+   */
+  public void returnAuthError(long start, HttpServletResponse response, ErrorCode errorCode) {
+    response.setContentType("application/json;charset=UTF-8");
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    Result<String> result = Result.error(IdGenerator.uuid(), errorCode);
 
-		LogUtils.monitor("AuthInterceptor", "TokenAuth", start, "unauthorized", "", result);
+    LogUtils.monitor("AuthInterceptor", "TokenAuth", start, "unauthorized", "", result);
 
-		try {
-			response.getWriter().write(JsonUtils.toJson(result));
-		}
-		catch (IOException e) {
-			LogUtils.error("failed to unauthorized message: {}", result, e);
-		}
-	}
-
+    try {
+      response.getWriter().write(JsonUtils.toJson(result));
+    } catch (IOException e) {
+      LogUtils.error("failed to unauthorized message: {}", result, e);
+    }
+  }
 }

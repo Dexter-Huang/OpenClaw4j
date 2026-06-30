@@ -20,8 +20,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * A class representing text content in the MCP (Message Content Protocol) model. This
- * class extends the base Content class to handle text-based content.
+ * A class representing text content in the MCP (Message Content Protocol) model. This class extends
+ * the base Content class to handle text-based content.
  *
  * @author guning.lt
  * @since 1.0.0.3
@@ -30,9 +30,6 @@ import lombok.EqualsAndHashCode;
 @Data
 public class TextContent extends Content {
 
-	/**
-	 * The text content string
-	 */
-	private String text;
-
+  /** The text content string */
+  private String text;
 }

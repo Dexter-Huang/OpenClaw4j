@@ -11,16 +11,21 @@ import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConditionalOnProperty(name = MqConfigProperties.MQ_TYPE_PREFIX, havingValue = MqConfigProperties.REDISSON)
+@ConditionalOnProperty(
+    name = MqConfigProperties.MQ_TYPE_PREFIX,
+    havingValue = MqConfigProperties.REDISSON)
 public class RedissonMqConfig {
 
-    @Bean
-    public MqProducer documentIndexProducer(RedissonClient redissonClient, MqConfigProperties mqConfigProperties) {
-        return new RedissonMqProducer(redissonClient, mqConfigProperties, mqConfigProperties.getDocumentIndexTopic());
-    }
+  @Bean
+  public MqProducer documentIndexProducer(
+      RedissonClient redissonClient, MqConfigProperties mqConfigProperties) {
+    return new RedissonMqProducer(
+        redissonClient, mqConfigProperties, mqConfigProperties.getDocumentIndexTopic());
+  }
 
-    @Bean
-    public MqConsumer documentIndexConsumer(RedissonClient redissonClient, MqConfigProperties mqConfigProperties) {
-        return new RedissonMqConsumer(redissonClient);
-    }
+  @Bean
+  public MqConsumer documentIndexConsumer(
+      RedissonClient redissonClient, MqConfigProperties mqConfigProperties) {
+    return new RedissonMqConsumer(redissonClient);
+  }
 }

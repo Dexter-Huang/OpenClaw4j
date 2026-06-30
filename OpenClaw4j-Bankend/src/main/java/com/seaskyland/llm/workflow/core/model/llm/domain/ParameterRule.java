@@ -16,74 +16,48 @@
 package com.seaskyland.llm.workflow.core.model.llm.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-import lombok.experimental.Accessors;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
-/**
- * Parameter rule definition
- */
+/** Parameter rule definition */
 @Data
 @Accessors(chain = true)
 public class ParameterRule implements Serializable {
 
-	/**
-	 * Parameter code
-	 */
-	private String code;
+  /** Parameter code */
+  private String code;
 
-	/**
-	 * Parameter name
-	 */
-	private String name;
+  /** Parameter name */
+  private String name;
 
-	/**
-	 * Parameter description
-	 */
-	private String description;
+  /** Parameter description */
+  private String description;
 
-	/**
-	 * Parameter type
-	 */
-	private String type;
+  /** Parameter type */
+  private String type;
 
-	/**
-	 * Default value
-	 */
-	@JsonProperty("default_value")
-	private Object defaultValue;
+  /** Default value */
+  @JsonProperty("default_value")
+  private Object defaultValue;
 
-	/**
-	 * Minimum value (for numeric parameters)
-	 */
-	private Integer min;
+  /** Minimum value (for numeric parameters) */
+  private Integer min;
 
-	/**
-	 * Maximum value (for numeric parameters)
-	 */
-	private Integer max;
+  /** Maximum value (for numeric parameters) */
+  private Integer max;
 
-	/**
-	 * Precision
-	 */
-	private Integer precision;
+  /** Precision */
+  private Integer precision;
 
-	/**
-	 * Available options (for enum parameters)
-	 */
-	private List<Object> options;
+  /** Available options (for enum parameters) */
+  private List<Object> options;
 
-	/**
-	 * Whether the parameter is required
-	 */
-	private boolean required;
+  /** Whether the parameter is required */
+  private boolean required;
 
-	/**
-	 * Help text
-	 */
-	private Map<String, String> help;
-
+  /** Help text */
+  private Map<String, String> help;
 }

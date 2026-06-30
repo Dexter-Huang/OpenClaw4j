@@ -17,9 +17,8 @@
 package com.seaskyland.llm.workflow.core.model.llm.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * Model access credentials for LLM service.
@@ -29,19 +28,18 @@ import java.io.Serializable;
 @Data
 public class ModelCredential implements Serializable {
 
-	/** API endpoint URL for the model service */
-	private String endpoint;
+  /** API endpoint URL for the model service */
+  private String endpoint;
 
-	/** API key for authentication */
-	@JsonProperty("api_key")
-	private String apiKey;
+  /** API key for authentication */
+  @JsonProperty("api_key")
+  private String apiKey;
 
-	/** Chat completions API path, default is /v1/chat/completions */
-	@JsonProperty("completions_path")
-	private String completionsPath;
+  /** Chat completions API path, default is /v1/chat/completions */
+  @JsonProperty("completions_path")
+  private String completionsPath;
 
-	/** Embeddings API path, default is /v1/embeddings */
-	@JsonProperty("embeddings_path")
-	private String embeddingsPath;
-
+  /** Embeddings API path, default is /v1/embeddings */
+  @JsonProperty("embeddings_path")
+  private String embeddingsPath;
 }

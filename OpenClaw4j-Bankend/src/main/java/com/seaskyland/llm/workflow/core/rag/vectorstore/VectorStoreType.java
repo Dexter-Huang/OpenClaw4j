@@ -19,41 +19,41 @@ package com.seaskyland.llm.workflow.core.rag.vectorstore;
 import lombok.Getter;
 
 /**
- * Enum representing different types of vector stores supported by the system. Currently
- * supports Elasticsearch and Simple vector store implementations.
+ * Enum representing different types of vector stores supported by the system. Currently supports
+ * Elasticsearch and Simple vector store implementations.
  *
  * @since 1.0.0.3
  */
 @Getter
 public enum VectorStoreType {
 
-	/** Elasticsearch vector store implementation */
-	ELASTICSEARCH("elasticsearch"),
+  /** Elasticsearch vector store implementation */
+  ELASTICSEARCH("elasticsearch"),
 
-	/** Simple in-memory/file based vector store implementation */
-	SIMPLE("simple");
+  /** Simple in-memory/file based vector store implementation */
+  SIMPLE("simple");
 
-	/** The string identifier for the vector store type */
-	private final String type;
+  /** The string identifier for the vector store type */
+  private final String type;
 
-	VectorStoreType(String type) {
-		this.type = type;
-	}
+  VectorStoreType(String type) {
+    this.type = type;
+  }
 
-	/**
-	 * Converts a string type to its corresponding VectorStoreType enum value.
-	 * @param type The string identifier of the vector store type
-	 * @return The corresponding VectorStoreType enum value
-	 * @throws IllegalArgumentException if the type is not supported
-	 */
-	public static VectorStoreType of(String type) {
-		for (VectorStoreType vectorStoreType : VectorStoreType.values()) {
-			if (vectorStoreType.getType().equals(type)) {
-				return vectorStoreType;
-			}
-		}
+  /**
+   * Converts a string type to its corresponding VectorStoreType enum value.
+   *
+   * @param type The string identifier of the vector store type
+   * @return The corresponding VectorStoreType enum value
+   * @throws IllegalArgumentException if the type is not supported
+   */
+  public static VectorStoreType of(String type) {
+    for (VectorStoreType vectorStoreType : VectorStoreType.values()) {
+      if (vectorStoreType.getType().equals(type)) {
+        return vectorStoreType;
+      }
+    }
 
-		throw new IllegalArgumentException("Unknown vector store type: " + type);
-	}
-
+    throw new IllegalArgumentException("Unknown vector store type: " + type);
+  }
 }

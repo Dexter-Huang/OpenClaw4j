@@ -15,15 +15,15 @@
  */
 package com.seaskyland.llm.workflow.admin.controller;
 
+import com.seaskyland.llm.workflow.core.base.service.AccountService;
+import com.seaskyland.llm.workflow.core.utils.common.IdGenerator;
 import com.seaskyland.llm.workflow.runtime.constants.ApiConstants;
-import com.seaskyland.llm.workflow.runtime.exception.BizException;
-import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
 import com.seaskyland.llm.workflow.runtime.domain.Result;
 import com.seaskyland.llm.workflow.runtime.domain.account.LoginRequest;
 import com.seaskyland.llm.workflow.runtime.domain.account.RefreshTokenRequest;
 import com.seaskyland.llm.workflow.runtime.domain.account.TokenResponse;
-import com.seaskyland.llm.workflow.core.base.service.AccountService;
-import com.seaskyland.llm.workflow.core.utils.common.IdGenerator;
+import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
+import com.seaskyland.llm.workflow.runtime.exception.BizException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -34,67 +34,66 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controller for user authentication operations including login, token refresh, and
- * logout.
- */
+/** Controller for user authentication operations including login, token refresh, and logout. */
 @RestController
 @Tag(name = "auth")
 @RequestMapping("/console/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
-	/** Account service for handling authentication operations */
-	private final AccountService accountService;
+  /** Account service for handling authentication operations */
+  private final AccountService accountService;
 
-	/**
-	 * Authenticates user and returns access tokens.
-	 * @param loginRequest User credentials
-	 * @return Access and refresh tokens
-	 */
-	@PostMapping("/login")
-	public Result<TokenResponse> login(@RequestBody LoginRequest loginRequest) {
-		if (StringUtils.isBlank(loginRequest.getUsername())) {
-			throw new BizException(ErrorCode.INVALID_PARAMS.toError("username"));
-		}
+  /**
+   * Authenticates user and returns access tokens.
+   *
+   * @param loginRequest User credentials
+   * @return Access and refresh tokens
+   */
+  @PostMapping("/login")
+  public Result<TokenResponse> login(@RequestBody LoginRequest loginRequest) {
+    if (StringUtils.isBlank(loginRequest.getUsername())) {
+      throw new BizException(ErrorCode.INVALID_PARAMS.toError("username"));
+    }
 
-		if (StringUtils.isBlank(loginRequest.getPassword())) {
-			throw new BizException(ErrorCode.INVALID_PARAMS.toError("password"));
-		}
+    if (StringUtils.isBlank(loginRequest.getPassword())) {
+      throw new BizException(ErrorCode.INVALID_PARAMS.toError("password"));
+    }
 
-		TokenResponse response = accountService.login(loginRequest);
-		return Result.success(IdGenerator.uuid(), response);
-	}
+    TokenResponse response = accountService.login(loginRequest);
+    return Result.success(IdGenerator.uuid(), response);
+  }
 
-	/**
-	 * Refreshes access token using refresh token.
-	 * @param request Refresh token request
-	 * @return New access and refresh tokens
-	 */
-	@PostMapping("/refresh-token")
-	public Result<TokenResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
-		if (StringUtils.isBlank(request.getRefreshToken())) {
-			throw new BizException(ErrorCode.INVALID_PARAMS.toError("refreshToken"));
-		}
+  /**
+   * Refreshes access token using refresh token.
+   *
+   * @param request Refresh token request
+   * @return New access and refresh tokens
+   */
+  @PostMapping("/refresh-token")
+  public Result<TokenResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
+    if (StringUtils.isBlank(request.getRefreshToken())) {
+      throw new BizException(ErrorCode.INVALID_PARAMS.toError("refreshToken"));
+    }
 
-		TokenResponse response = accountService.refreshToken(request);
-		return Result.success(IdGenerator.uuid(), response);
-	}
+    TokenResponse response = accountService.refreshToken(request);
+    return Result.success(IdGenerator.uuid(), response);
+  }
 
-	/**
-	 * Invalidates user's access token.
-	 * @param request HTTP request containing access token
-	 * @return Success result
-	 */
-	@PostMapping("/logout")
-	public Result<Void> logout(HttpServletRequest request) {
-		String accessToken = request.getHeader(HttpHeaders.AUTHORIZATION);
-		if (StringUtils.isNotBlank(accessToken)) {
-			accessToken = accessToken.replace(ApiConstants.TOKEN_PREFIX + " ", "");
-		}
+  /**
+   * Invalidates user's access token.
+   *
+   * @param request HTTP request containing access token
+   * @return Success result
+   */
+  @PostMapping("/logout")
+  public Result<Void> logout(HttpServletRequest request) {
+    String accessToken = request.getHeader(HttpHeaders.AUTHORIZATION);
+    if (StringUtils.isNotBlank(accessToken)) {
+      accessToken = accessToken.replace(ApiConstants.TOKEN_PREFIX + " ", "");
+    }
 
-		accountService.logout(accessToken);
-		return Result.success(IdGenerator.uuid(), null);
-	}
-
+    accountService.logout(accessToken);
+    return Result.success(IdGenerator.uuid(), null);
+  }
 }

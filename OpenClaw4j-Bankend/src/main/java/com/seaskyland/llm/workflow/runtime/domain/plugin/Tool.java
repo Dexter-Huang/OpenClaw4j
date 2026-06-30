@@ -16,116 +16,91 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.plugin;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.seaskyland.llm.workflow.runtime.domain.tool.ApiParameter;
 import com.seaskyland.llm.workflow.runtime.enums.ToolStatus;
 import com.seaskyland.llm.workflow.runtime.enums.ToolTestStatus;
-import com.seaskyland.llm.workflow.runtime.domain.tool.ApiParameter;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
 
 /**
  * Plugin tool model class.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class Tool {
 
-	@JsonProperty("plugin_id")
-	private String pluginId;
+  @JsonProperty("plugin_id")
+  private String pluginId;
 
-	@JsonProperty("tool_id")
-	private String toolId;
+  @JsonProperty("tool_id")
+  private String toolId;
 
-	private Plugin plugin;
+  private Plugin plugin;
 
-	/**
-	 * Tool name
-	 */
-	private String name;
+  /** Tool name */
+  private String name;
 
-	/**
-	 * Tool description
-	 */
-	private String description;
+  /** Tool description */
+  private String description;
 
-	private ToolConfig config;
+  private ToolConfig config;
 
-	@JsonProperty("api_schema")
-	private String apiSchema;
+  @JsonProperty("api_schema")
+  private String apiSchema;
 
-	private Boolean enabled;
+  private Boolean enabled;
 
-	@JsonProperty("test_status")
-	private ToolTestStatus testStatus;
+  @JsonProperty("test_status")
+  private ToolTestStatus testStatus;
 
-	private ToolStatus status;
+  private ToolStatus status;
 
-	@JsonProperty("gmt_create")
-	private Date gmtCreate;
+  @JsonProperty("gmt_create")
+  private Date gmtCreate;
 
-	@JsonProperty("gmt_modified")
-	private Date gmtModified;
+  @JsonProperty("gmt_modified")
+  private Date gmtModified;
 
-	/**
-	 * Whether all tool parameters are required
-	 */
-	@JsonProperty("all_tool_param")
-	private boolean allToolParam;
+  /** Whether all tool parameters are required */
+  @JsonProperty("all_tool_param")
+  private boolean allToolParam;
 
-	/**
-	 * Configuration for the tool
-	 */
-	@Data
-	public static class ToolConfig implements Serializable {
+  /** Configuration for the tool */
+  @Data
+  public static class ToolConfig implements Serializable {
 
-		/**
-		 * Tool path
-		 */
-		private String path;
+    /** Tool path */
+    private String path;
 
-		private String server;
+    private String server;
 
-		/**
-		 * HTTP request method
-		 */
-		@JsonProperty("request_method")
-		private String requestMethod;
+    /** HTTP request method */
+    @JsonProperty("request_method")
+    private String requestMethod;
 
-		/**
-		 * Content type for form submission (application/json or
-		 * application/x-www-form-urlencoded)
-		 */
-		@JsonProperty("content_type")
-		private String contentType;
+    /** Content type for form submission (application/json or application/x-www-form-urlencoded) */
+    @JsonProperty("content_type")
+    private String contentType;
 
-		/**
-		 * Input parameters
-		 */
-		@JsonProperty("input_params")
-		private List<ApiParameter> inputParams;
+    /** Input parameters */
+    @JsonProperty("input_params")
+    private List<ApiParameter> inputParams;
 
-		/**
-		 * Output parameters
-		 */
-		@JsonProperty("output_params")
-		private List<ApiParameter> outputParams;
+    /** Output parameters */
+    @JsonProperty("output_params")
+    private List<ApiParameter> outputParams;
 
-		/**
-		 * Usage examples
-		 */
-		private List<ToolExample> examples;
-
-	}
-
+    /** Usage examples */
+    private List<ToolExample> examples;
+  }
 }

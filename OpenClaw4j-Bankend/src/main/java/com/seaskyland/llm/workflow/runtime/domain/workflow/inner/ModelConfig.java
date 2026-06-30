@@ -15,12 +15,11 @@
  */
 package com.seaskyland.llm.workflow.runtime.domain.workflow.inner;
 
-import com.seaskyland.llm.workflow.runtime.domain.workflow.Node;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.domain.workflow.Node;
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
 
 /**
  * 模型配置信息
@@ -30,82 +29,55 @@ import java.util.List;
 @Data
 public class ModelConfig implements Serializable {
 
-	/**
-	 * 模型ID，对应model下的name
-	 */
-	@JsonProperty("model_id")
-	private String modelId;
+  /** 模型ID，对应model下的name */
+  @JsonProperty("model_id")
+  private String modelId;
 
-	/**
-	 * 模型名称
-	 */
-	@JsonProperty("model_name")
-	private String modelName;
+  /** 模型名称 */
+  @JsonProperty("model_name")
+  private String modelName;
 
-	/**
-	 * 模型提供商
-	 */
-	private String provider;
+  /** 模型提供商 */
+  private String provider;
 
-	/**
-	 * 模型参数
-	 */
-	private List<ModelParam> params;
+  /** 模型参数 */
+  private List<ModelParam> params;
 
-	/**
-	 * 模型模式：chat或completion
-	 */
-	private String mode;
+  /** 模型模式：chat或completion */
+  private String mode;
 
-	/**
-	 * 视觉参数列表
-	 */
-	@JsonProperty("vision_config")
-	private SkillConfig visionConfig;
+  /** 视觉参数列表 */
+  @JsonProperty("vision_config")
+  private SkillConfig visionConfig;
 
-	@Data
-	public static class SkillConfig implements Serializable {
+  @Data
+  public static class SkillConfig implements Serializable {
 
-		@JsonProperty("enable")
-		private Boolean enable;
+    @JsonProperty("enable")
+    private Boolean enable;
 
-		private List<Node.InputParam> params;
+    private List<Node.InputParam> params;
+  }
 
-	}
+  /** 模型参数配置 */
+  @Data
+  public static class ModelParam implements Serializable {
 
-	/**
-	 * 模型参数配置
-	 */
-	@Data
-	public static class ModelParam implements Serializable {
+    /** 参数键名 */
+    private String key;
 
-		/**
-		 * 参数键名
-		 */
-		private String key;
+    /** 参数类型 */
+    private String type;
 
-		/**
-		 * 参数类型
-		 */
-		private String type;
+    /** 默认值 */
+    @JsonProperty("default_value")
+    private Object defaultValue;
 
-		/**
-		 * 默认值
-		 */
-		@JsonProperty("default_value")
-		private Object defaultValue;
+    /** 参数值 */
+    private Object value;
 
-		/**
-		 * 参数值
-		 */
-		private Object value;
-
-		/**
-		 * 参数开关
-		 */
-		@JsonProperty("enable")
-		private Boolean enable;
-
-	}
-
+    /** 参数开关 */
+    @JsonProperty("enable")
+    private Boolean enable;
+  }
 }

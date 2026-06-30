@@ -17,10 +17,9 @@
 package com.seaskyland.llm.workflow.runtime.domain.mcp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
 
 /**
  * Response model for MCP server tool calls
@@ -31,15 +30,10 @@ import java.util.List;
 @Data
 public class McpServerCallToolResponse implements Serializable {
 
-	/**
-	 * Indicates if the tool call resulted in an error
-	 */
-	@JsonProperty("is_error")
-	private Boolean isError;
+  /** Indicates if the tool call resulted in an error */
+  @JsonProperty("is_error")
+  private Boolean isError;
 
-	/**
-	 * List of content items returned by the tool call
-	 */
-	private List<Content> content;
-
+  /** List of content items returned by the tool call */
+  private List<Content> content;
 }

@@ -16,15 +16,14 @@
 
 package com.seaskyland.llm.workflow.core.base.entity;
 
-import com.seaskyland.llm.workflow.runtime.enums.AppStatus;
-import com.seaskyland.llm.workflow.runtime.enums.AppType;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.AppStatus;
+import com.seaskyland.llm.workflow.runtime.enums.AppType;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Entity class representing an application in the system.
@@ -35,56 +34,55 @@ import java.util.Date;
 @TableName("application")
 public class AppEntity {
 
-	/** Primary key */
-	@TableId(value = "id", type = IdType.AUTO)
-	private Long id;
+  /** Primary key */
+  @TableId(value = "id", type = IdType.AUTO)
+  private Long id;
 
-	/** Workspace identifier */
-	@TableField("workspace_id")
-	private String workspaceId;
+  /** Workspace identifier */
+  @TableField("workspace_id")
+  private String workspaceId;
 
-	/** Application identifier */
-	@TableField("app_id")
-	private String appId;
+  /** Application identifier */
+  @TableField("app_id")
+  private String appId;
 
-	/** Application type */
-	private AppType type;
+  /** Application type */
+  private AppType type;
 
-	/** Application status */
-	private AppStatus status;
+  /** Application status */
+  private AppStatus status;
 
-	/** Application name */
-	private String name;
+  /** Application name */
+  private String name;
 
-	/** Application description */
-	private String description;
+  /** Application description */
+  private String description;
 
-	/** Application icon */
-	private String icon;
+  /** Application icon */
+  private String icon;
 
-	/** Application source */
-	private String source;
+  /** Application source */
+  private String source;
 
-	/** Creation timestamp */
-	@TableField("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @TableField("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@TableField("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @TableField("gmt_modified")
+  private Date gmtModified;
 
-	/** Creator of the application */
-	private String creator;
+  /** Creator of the application */
+  private String creator;
 
-	/** Last modifier of the application */
-	private String modifier;
+  /** Last modifier of the application */
+  private String modifier;
 
-	/** Latest version of the application */
-	@TableField(exist = false)
-	private AppVersionEntity latestVersion;
+  /** Latest version of the application */
+  @TableField(exist = false)
+  private AppVersionEntity latestVersion;
 
-	/** Published version of the application */
-	@TableField(exist = false)
-	private AppVersionEntity publishedVersion;
-
+  /** Published version of the application */
+  @TableField(exist = false)
+  private AppVersionEntity publishedVersion;
 }

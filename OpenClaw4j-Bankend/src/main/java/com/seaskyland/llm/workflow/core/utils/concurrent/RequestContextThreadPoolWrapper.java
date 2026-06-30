@@ -15,191 +15,165 @@
  */
 package com.seaskyland.llm.workflow.core.utils.concurrent;
 
-import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
 import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
+import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Collection;
-import java.util.concurrent.*;
-
 /**
- * A wrapper for ExecutorService that propagates and cleans up RequestContext across
- * thread boundaries. This ensures that request context information is properly maintained
- * in asynchronous operations.
+ * A wrapper for ExecutorService that propagates and cleans up RequestContext across thread
+ * boundaries. This ensures that request context information is properly maintained in asynchronous
+ * operations.
  */
 public class RequestContextThreadPoolWrapper implements ExecutorService {
 
-	/** The underlying executor service being wrapped */
-	private final ExecutorService delegate;
+  /** The underlying executor service being wrapped */
+  private final ExecutorService delegate;
 
-	/**
-	 * Creates a new wrapper for the given executor service
-	 * @param delegate the executor service to wrap
-	 */
-	public RequestContextThreadPoolWrapper(ExecutorService delegate) {
-		this.delegate = delegate;
-	}
+  /**
+   * Creates a new wrapper for the given executor service
+   *
+   * @param delegate the executor service to wrap
+   */
+  public RequestContextThreadPoolWrapper(ExecutorService delegate) {
+    this.delegate = delegate;
+  }
 
-	/**
-	 * Executes the given command with request context propagation
-	 */
-	@Override
-	public void execute(@NotNull Runnable command) {
-		RequestContext context = RequestContextHolder.getRequestContext();
-		delegate.execute(wrap(command, context));
-	}
+  /** Executes the given command with request context propagation */
+  @Override
+  public void execute(@NotNull Runnable command) {
+    RequestContext context = RequestContextHolder.getRequestContext();
+    delegate.execute(wrap(command, context));
+  }
 
-	/**
-	 * Submits a callable task with request context propagation
-	 */
-	@NotNull
-	@Override
-	public <T> Future<T> submit(@NotNull Callable<T> task) {
-		RequestContext context = RequestContextHolder.getRequestContext();
-		return delegate.submit(wrap(task, context));
-	}
+  /** Submits a callable task with request context propagation */
+  @NotNull
+  @Override
+  public <T> Future<T> submit(@NotNull Callable<T> task) {
+    RequestContext context = RequestContextHolder.getRequestContext();
+    return delegate.submit(wrap(task, context));
+  }
 
-	/**
-	 * Submits a runnable task with request context propagation and returns the given
-	 * result
-	 */
-	@NotNull
-	@Override
-	public <T> Future<T> submit(@NotNull Runnable task, T result) {
-		RequestContext context = RequestContextHolder.getRequestContext();
-		return delegate.submit(wrap(task, context), result);
-	}
+  /** Submits a runnable task with request context propagation and returns the given result */
+  @NotNull
+  @Override
+  public <T> Future<T> submit(@NotNull Runnable task, T result) {
+    RequestContext context = RequestContextHolder.getRequestContext();
+    return delegate.submit(wrap(task, context), result);
+  }
 
-	/**
-	 * Submits a runnable task with request context propagation
-	 */
-	@NotNull
-	@Override
-	public Future<?> submit(@NotNull Runnable task) {
-		RequestContext context = RequestContextHolder.getRequestContext();
-		return delegate.submit(wrap(task, context));
-	}
+  /** Submits a runnable task with request context propagation */
+  @NotNull
+  @Override
+  public Future<?> submit(@NotNull Runnable task) {
+    RequestContext context = RequestContextHolder.getRequestContext();
+    return delegate.submit(wrap(task, context));
+  }
 
-	/**
-	 * Invokes all tasks with request context propagation
-	 */
-	@NotNull
-	@Override
-	public <T> List<Future<T>> invokeAll(@NotNull Collection<? extends Callable<T>> tasks) throws InterruptedException {
-		RequestContext context = RequestContextHolder.getRequestContext();
-		return delegate.invokeAll(wrapCallables(tasks, context));
-	}
+  /** Invokes all tasks with request context propagation */
+  @NotNull
+  @Override
+  public <T> List<Future<T>> invokeAll(@NotNull Collection<? extends Callable<T>> tasks)
+      throws InterruptedException {
+    RequestContext context = RequestContextHolder.getRequestContext();
+    return delegate.invokeAll(wrapCallables(tasks, context));
+  }
 
-	/**
-	 * Invokes all tasks with request context propagation and timeout
-	 */
-	@NotNull
-	@Override
-	public <T> List<Future<T>> invokeAll(@NotNull Collection<? extends Callable<T>> tasks, long timeout,
-			@NotNull TimeUnit unit) throws InterruptedException {
-		RequestContext context = RequestContextHolder.getRequestContext();
-		return delegate.invokeAll(wrapCallables(tasks, context), timeout, unit);
-	}
+  /** Invokes all tasks with request context propagation and timeout */
+  @NotNull
+  @Override
+  public <T> List<Future<T>> invokeAll(
+      @NotNull Collection<? extends Callable<T>> tasks, long timeout, @NotNull TimeUnit unit)
+      throws InterruptedException {
+    RequestContext context = RequestContextHolder.getRequestContext();
+    return delegate.invokeAll(wrapCallables(tasks, context), timeout, unit);
+  }
 
-	/**
-	 * Invokes any task with request context propagation
-	 */
-	@NotNull
-	@Override
-	public <T> T invokeAny(@NotNull Collection<? extends Callable<T>> tasks)
-			throws InterruptedException, ExecutionException {
-		RequestContext context = RequestContextHolder.getRequestContext();
-		return delegate.invokeAny(wrapCallables(tasks, context));
-	}
+  /** Invokes any task with request context propagation */
+  @NotNull
+  @Override
+  public <T> T invokeAny(@NotNull Collection<? extends Callable<T>> tasks)
+      throws InterruptedException, ExecutionException {
+    RequestContext context = RequestContextHolder.getRequestContext();
+    return delegate.invokeAny(wrapCallables(tasks, context));
+  }
 
-	/**
-	 * Invokes any task with request context propagation and timeout
-	 */
-	@Override
-	public <T> T invokeAny(@NotNull Collection<? extends Callable<T>> tasks, long timeout, @NotNull TimeUnit unit)
-			throws InterruptedException, ExecutionException, TimeoutException {
-		RequestContext context = RequestContextHolder.getRequestContext();
-		return delegate.invokeAny(wrapCallables(tasks, context), timeout, unit);
-	}
+  /** Invokes any task with request context propagation and timeout */
+  @Override
+  public <T> T invokeAny(
+      @NotNull Collection<? extends Callable<T>> tasks, long timeout, @NotNull TimeUnit unit)
+      throws InterruptedException, ExecutionException, TimeoutException {
+    RequestContext context = RequestContextHolder.getRequestContext();
+    return delegate.invokeAny(wrapCallables(tasks, context), timeout, unit);
+  }
 
-	/**
-	 * Wraps a collection of callables with request context propagation
-	 */
-	private <T> Collection<? extends Callable<T>> wrapCallables(Collection<? extends Callable<T>> tasks,
-			RequestContext context) {
-		return tasks.stream().map(task -> wrap(task, context)).collect(java.util.stream.Collectors.toList());
-	}
+  /** Wraps a collection of callables with request context propagation */
+  private <T> Collection<? extends Callable<T>> wrapCallables(
+      Collection<? extends Callable<T>> tasks, RequestContext context) {
+    return tasks.stream()
+        .map(task -> wrap(task, context))
+        .collect(java.util.stream.Collectors.toList());
+  }
 
-	private Runnable wrap(Runnable task, RequestContext context) {
-		return () -> {
-			try {
-				RequestContextHolder.runWithRequestContext(context, task::run);
-			}
-			catch (RuntimeException | Error ex) {
-				throw ex;
-			}
-			catch (Exception ex) {
-				throw new CompletionException(ex);
-			}
-		};
-	}
+  private Runnable wrap(Runnable task, RequestContext context) {
+    return () -> {
+      try {
+        RequestContextHolder.runWithRequestContext(context, task::run);
+      } catch (RuntimeException | Error ex) {
+        throw ex;
+      } catch (Exception ex) {
+        throw new CompletionException(ex);
+      }
+    };
+  }
 
-	private <T> Callable<T> wrap(Callable<T> task, RequestContext context) {
-		return () -> RequestContextHolder.callWithRequestContext(context, task);
-	}
+  private <T> Callable<T> wrap(Callable<T> task, RequestContext context) {
+    return () -> RequestContextHolder.callWithRequestContext(context, task);
+  }
 
-	/**
-	 * Initiates an orderly shutdown of the underlying executor
-	 */
-	@Override
-	public void shutdown() {
-		delegate.shutdown();
-	}
+  /** Initiates an orderly shutdown of the underlying executor */
+  @Override
+  public void shutdown() {
+    delegate.shutdown();
+  }
 
-	/**
-	 * Attempts to stop all actively executing tasks
-	 */
-	@NotNull
-	@Override
-	public List<Runnable> shutdownNow() {
-		return delegate.shutdownNow();
-	}
+  /** Attempts to stop all actively executing tasks */
+  @NotNull
+  @Override
+  public List<Runnable> shutdownNow() {
+    return delegate.shutdownNow();
+  }
 
-	/**
-	 * Returns true if the executor has been shut down
-	 */
-	@Override
-	public boolean isShutdown() {
-		return delegate.isShutdown();
-	}
+  /** Returns true if the executor has been shut down */
+  @Override
+  public boolean isShutdown() {
+    return delegate.isShutdown();
+  }
 
-	/**
-	 * Returns true if all tasks have completed following shutdown
-	 */
-	@Override
-	public boolean isTerminated() {
-		return delegate.isTerminated();
-	}
+  /** Returns true if all tasks have completed following shutdown */
+  @Override
+  public boolean isTerminated() {
+    return delegate.isTerminated();
+  }
 
-	/**
-	 * Blocks until all tasks have completed execution after a shutdown request
-	 */
-	@Override
-	public boolean awaitTermination(long timeout, @NotNull TimeUnit unit) throws InterruptedException {
-		return delegate.awaitTermination(timeout, unit);
-	}
+  /** Blocks until all tasks have completed execution after a shutdown request */
+  @Override
+  public boolean awaitTermination(long timeout, @NotNull TimeUnit unit)
+      throws InterruptedException {
+    return delegate.awaitTermination(timeout, unit);
+  }
 
-	/**
-	 * Returns the underlying ThreadPoolExecutor if available
-	 * @return the underlying ThreadPoolExecutor, or null if the delegate is not a
-	 * ThreadPoolExecutor
-	 */
-	public ThreadPoolExecutor getThreadPoolExecutor() {
-		if (delegate instanceof ThreadPoolExecutor) {
-			return (ThreadPoolExecutor) delegate;
-		}
-		return null;
-	}
-
+  /**
+   * Returns the underlying ThreadPoolExecutor if available
+   *
+   * @return the underlying ThreadPoolExecutor, or null if the delegate is not a ThreadPoolExecutor
+   */
+  public ThreadPoolExecutor getThreadPoolExecutor() {
+    if (delegate instanceof ThreadPoolExecutor) {
+      return (ThreadPoolExecutor) delegate;
+    }
+    return null;
+  }
 }

@@ -17,9 +17,8 @@
 package com.seaskyland.llm.workflow.runtime.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * Model DTO class for representing AI model information.
@@ -29,57 +28,53 @@ import java.io.Serializable;
 @Data
 public class Model implements Serializable {
 
-	/** Unique identifier for the model */
-	private Long id;
+  /** Unique identifier for the model */
+  private Long id;
 
-	/** External model identifier */
-	@JsonProperty("model_id")
-	private String modelId;
+  /** External model identifier */
+  @JsonProperty("model_id")
+  private String modelId;
 
-	/** Model type/category */
-	private String type;
+  /** Model type/category */
+  private String type;
 
-	/** Model status */
-	private Integer status;
+  /** Model status */
+  private Integer status;
 
-	/** Model name */
-	private String name;
+  /** Model name */
+  private String name;
 
-	/** Model description */
-	private String description;
+  /** Model description */
+  private String description;
 
-	/** Model configuration */
-	private Config config;
+  /** Model configuration */
+  private Config config;
 
-	/** Context window size */
-	private Integer context;
+  /** Context window size */
+  private Integer context;
 
-	/** Creation timestamp */
-	private Long gmtCreate;
+  /** Creation timestamp */
+  private Long gmtCreate;
 
-	/** Last modification timestamp */
-	private Long gmtModified;
+  /** Last modification timestamp */
+  private Long gmtModified;
 
-	/** Creator of the model */
-	private String creator;
+  /** Creator of the model */
+  private String creator;
 
-	/** Last modifier of the model */
-	private String modifier;
+  /** Last modifier of the model */
+  private String modifier;
 
-	/**
-	 * Configuration class for model parameters
-	 */
-	@Data
-	public static class Config implements Serializable {
+  /** Configuration class for model parameters */
+  @Data
+  public static class Config implements Serializable {
 
-		/** Maximum number of input tokens */
-		@JsonProperty("max_input_tokens")
-		private Integer maxInputTokens;
+    /** Maximum number of input tokens */
+    @JsonProperty("max_input_tokens")
+    private Integer maxInputTokens;
 
-		/** Maximum number of output tokens */
-		@JsonProperty("max_output_tokens")
-		private Integer maxOutputTokens;
-
-	}
-
+    /** Maximum number of output tokens */
+    @JsonProperty("max_output_tokens")
+    private Integer maxOutputTokens;
+  }
 }

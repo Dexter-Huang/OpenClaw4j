@@ -16,15 +16,14 @@
 
 package com.seaskyland.llm.workflow.core.workflow.processor;
 
+import com.google.common.collect.Lists;
+import com.seaskyland.llm.workflow.core.workflow.WorkflowContext;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.Edge;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.Node;
-import com.seaskyland.llm.workflow.core.workflow.WorkflowContext;
-import com.google.common.collect.Lists;
-import lombok.Data;
-import org.jgrapht.graph.DirectedAcyclicGraph;
-
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
+import org.jgrapht.graph.DirectedAcyclicGraph;
 
 /**
  * Interface for workflow execution processing
@@ -33,79 +32,70 @@ import java.util.List;
  */
 public interface ExecuteProcessor {
 
-	/**
-	 * Returns the type of the node
-	 */
-	String getNodeType();
+  /** Returns the type of the node */
+  String getNodeType();
 
-	/**
-	 * Returns the description of the node
-	 */
-	String getNodeDescription();
+  /** Returns the description of the node */
+  String getNodeDescription();
 
-	/**
-	 * Executes the node in the workflow
-	 * @param graph The directed acyclic graph representing the workflow
-	 * @param node The node to be executed
-	 * @param context The workflow execution context
-	 */
-	void execute(DirectedAcyclicGraph<String, Edge> graph, Node node, WorkflowContext context);
+  /**
+   * Executes the node in the workflow
+   *
+   * @param graph The directed acyclic graph representing the workflow
+   * @param node The node to be executed
+   * @param context The workflow execution context
+   */
+  void execute(DirectedAcyclicGraph<String, Edge> graph, Node node, WorkflowContext context);
 
-	/**
-	 * Validates the node parameters
-	 * @param graph The directed acyclic graph representing the workflow
-	 * @param node The node to be validated
-	 * @return Result of the parameter validation
-	 */
-	CheckNodeParamResult checkNodeParam(DirectedAcyclicGraph<String, Edge> graph, Node node);
+  /**
+   * Validates the node parameters
+   *
+   * @param graph The directed acyclic graph representing the workflow
+   * @param node The node to be validated
+   * @return Result of the parameter validation
+   */
+  CheckNodeParamResult checkNodeParam(DirectedAcyclicGraph<String, Edge> graph, Node node);
 
-	/**
-	 * Result of node parameter validation
-	 */
-	@Data
-	class CheckNodeParamResult implements Serializable {
+  /** Result of node parameter validation */
+  @Data
+  class CheckNodeParamResult implements Serializable {
 
-		/** Whether the validation was successful */
-		private boolean success;
+    /** Whether the validation was successful */
+    private boolean success;
 
-		/** List of error messages */
-		private List<String> errorInfos = Lists.newArrayList();
+    /** List of error messages */
+    private List<String> errorInfos = Lists.newArrayList();
 
-		/** ID of the validated node */
-		private String nodeId;
+    /** ID of the validated node */
+    private String nodeId;
 
-		/** Name of the validated node */
-		private String nodeName;
+    /** Name of the validated node */
+    private String nodeName;
 
-		/** Type of the validated node */
-		private String nodeType;
+    /** Type of the validated node */
+    private String nodeType;
 
-		public static CheckNodeParamResult success() {
-			CheckNodeParamResult checkNodeParamResult = new CheckNodeParamResult();
-			checkNodeParamResult.setSuccess(true);
-			return checkNodeParamResult;
-		}
+    public static CheckNodeParamResult success() {
+      CheckNodeParamResult checkNodeParamResult = new CheckNodeParamResult();
+      checkNodeParamResult.setSuccess(true);
+      return checkNodeParamResult;
+    }
+  }
 
-	}
+  /** Result of workflow parameter validation */
+  @Data
+  class CheckFlowParamResult implements Serializable {
 
-	/**
-	 * Result of workflow parameter validation
-	 */
-	@Data
-	class CheckFlowParamResult implements Serializable {
+    /** Whether the validation was successful */
+    private boolean success;
 
-		/** Whether the validation was successful */
-		private boolean success;
+    /** List of node validation results */
+    private List<CheckNodeParamResult> checkNodeParamResults = Lists.newArrayList();
 
-		/** List of node validation results */
-		private List<CheckNodeParamResult> checkNodeParamResults = Lists.newArrayList();
-
-		public static CheckFlowParamResult success() {
-			CheckFlowParamResult checkFlowParamResult = new CheckFlowParamResult();
-			checkFlowParamResult.setSuccess(true);
-			return checkFlowParamResult;
-		}
-
-	}
-
+    public static CheckFlowParamResult success() {
+      CheckFlowParamResult checkFlowParamResult = new CheckFlowParamResult();
+      checkFlowParamResult.setSuccess(true);
+      return checkFlowParamResult;
+    }
+  }
 }

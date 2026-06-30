@@ -16,88 +16,72 @@
 
 package com.seaskyland.llm.workflow.core.base.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.seaskyland.llm.workflow.core.base.entity.AccountEntity;
 import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
 import com.seaskyland.llm.workflow.runtime.domain.PagingList;
 import com.seaskyland.llm.workflow.runtime.domain.account.Account;
 import com.seaskyland.llm.workflow.runtime.domain.account.ChangePasswordRequest;
 import com.seaskyland.llm.workflow.runtime.domain.account.LoginRequest;
+import com.seaskyland.llm.workflow.runtime.domain.account.Oauth2User;
 import com.seaskyland.llm.workflow.runtime.domain.account.RefreshTokenRequest;
 import com.seaskyland.llm.workflow.runtime.domain.account.TokenResponse;
-import com.seaskyland.llm.workflow.core.base.entity.AccountEntity;
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.seaskyland.llm.workflow.runtime.domain.account.Oauth2User;
 
 /**
- * Account management service interface. Provides operations for user authentication,
- * account management, and profile handling.
+ * Account management service interface. Provides operations for user authentication, account
+ * management, and profile handling.
  *
  * @since 1.0.0.3
  */
 public interface AccountService extends IService<AccountEntity> {
 
-	/**
-	 * Authenticates user and returns access token
-	 */
-	TokenResponse login(LoginRequest loginRequest);
+  /** Authenticates user and returns access token */
+  TokenResponse login(LoginRequest loginRequest);
 
-	/**
-	 * Refreshes the access token using refresh token
-	 */
-	TokenResponse refreshToken(RefreshTokenRequest refreshTokenRequest);
+  /** Refreshes the access token using refresh token */
+  TokenResponse refreshToken(RefreshTokenRequest refreshTokenRequest);
 
-	/**
-	 * login with oauth user
-	 * @param oauth2User oauth2 user
-	 * @return token response
-	 */
-	TokenResponse login(Oauth2User oauth2User);
+  /**
+   * login with oauth user
+   *
+   * @param oauth2User oauth2 user
+   * @return token response
+   */
+  TokenResponse login(Oauth2User oauth2User);
 
-	/**
-	 * Invalidates the current access token
-	 */
-	void logout(String accessToken);
+  /** Invalidates the current access token */
+  void logout(String accessToken);
 
-	/**
-	 * register an account
-	 * @param account account
-	 * @return account ID
-	 */
-	String registerAccount(Account account);
+  /**
+   * register an account
+   *
+   * @param account account
+   * @return account ID
+   */
+  String registerAccount(Account account);
 
-	/**
-	 * Creates a new account
-	 * @return account ID
-	 */
-	String createAccount(Account account);
+  /**
+   * Creates a new account
+   *
+   * @return account ID
+   */
+  String createAccount(Account account);
 
-	/**
-	 * Updates existing account information
-	 */
-	void updateAccount(Account account);
+  /** Updates existing account information */
+  void updateAccount(Account account);
 
-	/**
-	 * Removes an account by ID
-	 */
-	void deleteAccount(String accountId);
+  /** Removes an account by ID */
+  void deleteAccount(String accountId);
 
-	/**
-	 * Retrieves a paginated list of accounts
-	 */
-	PagingList<Account> listAccounts(BaseQuery query);
+  /** Retrieves a paginated list of accounts */
+  PagingList<Account> listAccounts(BaseQuery query);
 
-	/**
-	 * Gets account details by ID
-	 */
-	Account getAccount(String accountId);
+  /** Gets account details by ID */
+  Account getAccount(String accountId);
 
-	/**
-	 * Updates account password
-	 */
-	void changePassword(ChangePasswordRequest request);
+  /** Updates account password */
+  void changePassword(ChangePasswordRequest request);
 
-	/**
-	 * Retrieves current user's account profile
-	 */
-	Account getAccountProfile();
-
+  /** Retrieves current user's account profile */
+  Account getAccountProfile();
 }

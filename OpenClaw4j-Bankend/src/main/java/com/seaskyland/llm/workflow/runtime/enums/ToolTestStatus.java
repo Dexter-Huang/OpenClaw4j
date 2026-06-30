@@ -26,24 +26,21 @@ import lombok.Getter;
  *
  * @since 1.0.0.3
  */
-
 @Getter
 @AllArgsConstructor
 public enum ToolTestStatus {
+  @JsonProperty("not_test")
+  NOT_TEST(1, "not_test"),
 
-	@JsonProperty("not_test")
-	NOT_TEST(1, "not_test"),
+  @JsonProperty("passed")
+  PASSED(2, "passed"),
 
-	@JsonProperty("passed")
-	PASSED(2, "passed"),
+  @JsonProperty("failed")
+  FAILED(3, "failed"),
+  ;
 
-	@JsonProperty("failed")
-	FAILED(3, "failed"),;
+  @EnumValue private final Integer status;
 
-	@EnumValue
-	private final Integer status;
-
-	/** String representation of the status */
-	private final String value;
-
+  /** String representation of the status */
+  private final String value;
 }

@@ -16,36 +16,34 @@
 
 package com.seaskyland.llm.workflow.core.utils.io;
 
+import java.io.IOException;
+import java.util.Base64;
 import org.springframework.core.io.Resource;
 import org.springframework.util.MimeType;
 
-import java.io.IOException;
-import java.util.Base64;
-
 /**
- * Utility class for handling media data operations. Provides methods for encoding media
- * resources into base64 format.
+ * Utility class for handling media data operations. Provides methods for encoding media resources
+ * into base64 format.
  *
  * @since 1.0.0.3
  */
 public class MediaDataUtils {
 
-	/**
-	 * Encodes a resource into a base64 data URL string.
-	 * @param mimeType The MIME type of the resource
-	 * @param resource The resource to be encoded
-	 * @return A base64 encoded data URL string
-	 * @throws RuntimeException if the resource cannot be read
-	 */
-	public static String base64encode(MimeType mimeType, Resource resource) {
-		try {
-			byte[] bytes = resource.getContentAsByteArray();
-			String encodedData = Base64.getEncoder().encodeToString(bytes);
-			return "data:" + mimeType + ";base64," + encodedData;
-		}
-		catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
+  /**
+   * Encodes a resource into a base64 data URL string.
+   *
+   * @param mimeType The MIME type of the resource
+   * @param resource The resource to be encoded
+   * @return A base64 encoded data URL string
+   * @throws RuntimeException if the resource cannot be read
+   */
+  public static String base64encode(MimeType mimeType, Resource resource) {
+    try {
+      byte[] bytes = resource.getContentAsByteArray();
+      String encodedData = Base64.getEncoder().encodeToString(bytes);
+      return "data:" + mimeType + ";base64," + encodedData;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

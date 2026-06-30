@@ -31,66 +31,62 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "mq")
 public class MqConfigProperties {
 
-    public static final String MQ_TYPE_PREFIX = "mq.type";
+  public static final String MQ_TYPE_PREFIX = "mq.type";
 
-    public static final String ROCKET_MQ = "ROCKET_MQ";
+  public static final String ROCKET_MQ = "ROCKET_MQ";
 
-    public static final String REDISSON = "REDISSON";
+  public static final String REDISSON = "REDISSON";
 
+  /** JVM in-process message bus – no external broker required. */
+  public static final String JVM = "JVM";
+
+  private MqType type = MqType.ROCKET_MQ;
+
+  /** RocketMQ server endpoints */
+  private String endpoints;
+
+  /** Maximum number of retry attempts for sending messages */
+  private int maxAttempts = 1;
+
+  /** Message sending timeout in milliseconds */
+  private int sendMessageTimeoutMs = 3000;
+
+  /** Maximum number of cached messages */
+  private int maxCacheMessageCount = 1024;
+
+  /** Maximum size of cached messages in bytes */
+  private int maxCacheMessageSizeInBytes = 64 * 1024 * 1024;
+
+  /** Number of consumer threads */
+  private int consumptionThreadCount = 20;
+
+  /** Topic for document indexing */
+  private String documentIndexTopic = "topic_saa_studio_document_index";
+
+  /** Consumer group for document indexing */
+  private String documentIndexGroup = "group_saa_studio_document_index";
+
+  @Getter
+  public enum MqType {
+    ROCKET_MQ(MqConfigProperties.ROCKET_MQ),
+    REDISSON(MqConfigProperties.REDISSON),
     /** JVM in-process message bus – no external broker required. */
-    public static final String JVM = "JVM";
+    JVM(MqConfigProperties.JVM),
+    ;
 
+    private final String mqType;
 
-    private MqType type = MqType.ROCKET_MQ;
-
-	/** RocketMQ server endpoints */
-	private String endpoints;
-
-	/** Maximum number of retry attempts for sending messages */
-	private int maxAttempts = 1;
-
-	/** Message sending timeout in milliseconds */
-	private int sendMessageTimeoutMs = 3000;
-
-	/** Maximum number of cached messages */
-	private int maxCacheMessageCount = 1024;
-
-	/** Maximum size of cached messages in bytes */
-	private int maxCacheMessageSizeInBytes = 64 * 1024 * 1024;
-
-	/** Number of consumer threads */
-	private int consumptionThreadCount = 20;
-
-	/** Topic for document indexing */
-	private String documentIndexTopic = "topic_saa_studio_document_index";
-
-	/** Consumer group for document indexing */
-	private String documentIndexGroup = "group_saa_studio_document_index";
-
-    @Getter
-    public enum MqType {
-
-        ROCKET_MQ(MqConfigProperties.ROCKET_MQ),
-        REDISSON(MqConfigProperties.REDISSON),
-        /** JVM in-process message bus – no external broker required. */
-        JVM(MqConfigProperties.JVM),
-        ;
-
-        private final String mqType;
-
-
-        MqType(String mqType) {
-            this.mqType = mqType;
-        }
-
-        public static MqType getMqType(String mqType) {
-            for (MqType mq : MqType.values()) {
-                if (mq.name().equals(mqType)) {
-                    return mq;
-                }
-            }
-            return null;
-        }
+    MqType(String mqType) {
+      this.mqType = mqType;
     }
 
+    public static MqType getMqType(String mqType) {
+      for (MqType mq : MqType.values()) {
+        if (mq.name().equals(mqType)) {
+          return mq;
+        }
+      }
+      return null;
+    }
+  }
 }

@@ -17,38 +17,32 @@
 package com.seaskyland.llm.workflow.runtime.domain.knowledgebase;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 /**
- * Configuration for knowledge base indexing. Defines the settings required for creating
- * and managing knowledge base indices.
+ * Configuration for knowledge base indexing. Defines the settings required for creating and
+ * managing knowledge base indices.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class IndexConfig implements Serializable {
 
-	/**
-	 * Name of the index configuration, normally it's vector store index or collection
-	 * name
-	 */
-	private String name;
+  /** Name of the index configuration, normally it's vector store index or collection name */
+  private String name;
 
-	/** Provider for the embedding service */
-	@JsonProperty("embedding_provider")
-	private String embeddingProvider;
+  /** Provider for the embedding service */
+  @JsonProperty("embedding_provider")
+  private String embeddingProvider;
 
-	/** Model used for generating embeddings */
-	@JsonProperty("embedding_model")
-	private String embeddingModel;
-
+  /** Model used for generating embeddings */
+  @JsonProperty("embedding_model")
+  private String embeddingModel;
 }

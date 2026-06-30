@@ -27,21 +27,20 @@ import lombok.Getter;
 @Getter
 public enum AppComponentTypeEnum {
 
-	/** Basic agent component */
-	Agent(1, "basic"),
+  /** Basic agent component */
+  Agent(1, "basic"),
 
-	/** Workflow component */
-	Workflow(2, "workflow");
+  /** Workflow component */
+  Workflow(2, "workflow");
 
-	/** Component type code */
-	private final Integer code;
+  /** Component type code */
+  private final Integer code;
 
-	/** Component type value */
-	private final String value;
+  /** Component type value */
+  private final String value;
 
-	AppComponentTypeEnum(Integer type, String value) {
-		this.code = type;
-		this.value = value;
-	}
-
+  AppComponentTypeEnum(Integer type, String value) {
+    this.code = type;
+    this.value = value;
+  }
 }

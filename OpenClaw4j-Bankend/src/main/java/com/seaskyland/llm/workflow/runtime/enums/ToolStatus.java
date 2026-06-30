@@ -26,26 +26,23 @@ import lombok.Getter;
  *
  * @since 1.0.0.3
  */
-
 @Getter
 @AllArgsConstructor
 public enum ToolStatus {
+  @JsonProperty("deleted")
+  DELETED(0, "deleted"),
 
-	@JsonProperty("deleted")
-	DELETED(0, "deleted"),
+  @JsonProperty("draft")
+  DRAFT(1, "draft"),
 
-	@JsonProperty("draft")
-	DRAFT(1, "draft"),
+  @JsonProperty("published")
+  PUBLISHED(2, "published"),
 
-	@JsonProperty("published")
-	PUBLISHED(2, "published"),
+  @JsonProperty("published_editing")
+  PUBLISHED_EDITING(3, "published_editing"),
+  ;
 
-	@JsonProperty("published_editing")
-	PUBLISHED_EDITING(3, "published_editing"),;
+  @EnumValue private final Integer status; // Numeric status code
 
-	@EnumValue
-	private final Integer status; // Numeric status code
-
-	private final String value; // String representation of the status
-
+  private final String value; // String representation of the status
 }

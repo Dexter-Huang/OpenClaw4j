@@ -16,15 +16,13 @@
 
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.KnowledgeBaseEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.KnowledgeBaseEntity;
 
 /**
- * Mapper interface for Knowledge Base entity. Provides basic CRUD operations for
- * knowledge base management.
+ * Mapper interface for Knowledge Base entity. Provides basic CRUD operations for knowledge base
+ * management.
  *
  * @since 1.0.0.3
  */
-public interface KnowledgeBaseMapper extends BaseMapper<KnowledgeBaseEntity> {
-
-}
+public interface KnowledgeBaseMapper extends BaseMapper<KnowledgeBaseEntity> {}

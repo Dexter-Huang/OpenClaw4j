@@ -16,15 +16,13 @@
 
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.AppEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.AppEntity;
 
 /**
- * Mapper interface for application-related database operations. Provides basic CRUD
- * operations for AppEntity using MyBatis-Plus.
+ * Mapper interface for application-related database operations. Provides basic CRUD operations for
+ * AppEntity using MyBatis-Plus.
  *
  * @since 1.0.0.3
  */
-public interface AppMapper extends BaseMapper<AppEntity> {
-
-}
+public interface AppMapper extends BaseMapper<AppEntity> {}

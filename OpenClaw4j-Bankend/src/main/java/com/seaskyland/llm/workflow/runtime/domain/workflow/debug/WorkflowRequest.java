@@ -15,14 +15,13 @@
  */
 package com.seaskyland.llm.workflow.runtime.domain.workflow.debug;
 
-import com.seaskyland.llm.workflow.runtime.domain.chat.ChatMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.seaskyland.llm.workflow.runtime.domain.chat.ChatMessage;
+import java.io.Serializable;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * workflow request.
@@ -35,28 +34,25 @@ import java.util.List;
 @NoArgsConstructor
 public class WorkflowRequest implements Serializable {
 
-	/**
-	 * ID of the app.
-	 */
-	@JsonProperty("app_id")
-	private String appId;
+  /** ID of the app. */
+  @JsonProperty("app_id")
+  private String appId;
 
-	@JsonProperty("conversation_id")
-	private String conversationId;
+  @JsonProperty("conversation_id")
+  private String conversationId;
 
-	@JsonProperty("request_id")
-	private String requestId;
+  @JsonProperty("request_id")
+  private String requestId;
 
-	@JsonProperty("messages")
-	private List<ChatMessage> messages;
+  @JsonProperty("messages")
+  private List<ChatMessage> messages;
 
-	@JsonProperty("stream")
-	private Boolean stream = false;
+  @JsonProperty("stream")
+  private Boolean stream = false;
 
-	@JsonProperty("draft")
-	private Boolean draft = false;
+  @JsonProperty("draft")
+  private Boolean draft = false;
 
-	@JsonProperty("input_params")
-	private List<TaskRunParam> inputParams;
-
+  @JsonProperty("input_params")
+  private List<TaskRunParam> inputParams;
 }

@@ -16,15 +16,12 @@
 
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.ModelEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.ModelEntity;
 
 /**
- * Mapper interface for Model entity. Provides basic CRUD operations for model data
- * persistence.
+ * Mapper interface for Model entity. Provides basic CRUD operations for model data persistence.
  *
  * @since 1.0.0.3
  */
-public interface ModelMapper extends BaseMapper<ModelEntity> {
-
-}
+public interface ModelMapper extends BaseMapper<ModelEntity> {}

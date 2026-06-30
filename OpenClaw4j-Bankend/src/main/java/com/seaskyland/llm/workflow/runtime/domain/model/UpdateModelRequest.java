@@ -18,37 +18,24 @@ package com.seaskyland.llm.workflow.runtime.domain.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-/**
- * Request for updating model information
- */
+/** Request for updating model information */
 @Data
 public class UpdateModelRequest {
 
-	/**
-	 * Model ID
-	 */
-	@JsonProperty("model_id")
-	private String modelId;
+  /** Model ID */
+  @JsonProperty("model_id")
+  private String modelId;
 
-	/**
-	 * Model name
-	 */
-	@JsonProperty("model_name")
-	private String modelName;
+  /** Model name */
+  @JsonProperty("model_name")
+  private String modelName;
 
-	/**
-	 * Model icon
-	 */
-	private String icon;
+  /** Model icon */
+  private String icon;
 
-	/**
-	 * Tags separated by commas
-	 */
-	private String tags;
+  /** Tags separated by commas */
+  private String tags;
 
-	/**
-	 * Model status
-	 */
-	private Boolean enable;
-
+  /** Model status */
+  private Boolean enable;
 }

@@ -25,63 +25,69 @@ import java.util.UUID;
  */
 public class IdGenerator {
 
-	/** Worker instance for generating sequential IDs */
-	private static final Sequence WORKER = new Sequence();
+  /** Worker instance for generating sequential IDs */
+  private static final Sequence WORKER = new Sequence();
 
-	/**
-	 * Generates an API key with "sk-" prefix
-	 * @return API key string
-	 */
-	public static String genApiKey() {
-		return "sk-" + uuid().replace("-", "").toLowerCase();
-	}
+  /**
+   * Generates an API key with "sk-" prefix
+   *
+   * @return API key string
+   */
+  public static String genApiKey() {
+    return "sk-" + uuid().replace("-", "").toLowerCase();
+  }
 
-	/**
-	 * Generates a unique numeric ID
-	 * @return unique long ID
-	 */
-	public static Long id() {
-		return WORKER.nextId();
-	}
+  /**
+   * Generates a unique numeric ID
+   *
+   * @return unique long ID
+   */
+  public static Long id() {
+    return WORKER.nextId();
+  }
 
-	/**
-	 * Generates a unique numeric ID as string
-	 * @return unique ID string
-	 */
-	public static String idStr() {
-		return String.valueOf(WORKER.nextId());
-	}
+  /**
+   * Generates a unique numeric ID as string
+   *
+   * @return unique ID string
+   */
+  public static String idStr() {
+    return String.valueOf(WORKER.nextId());
+  }
 
-	/**
-	 * Generates a standard UUID with hyphens
-	 * @return UUID string
-	 */
-	public static String uuid() {
-		return UUID.randomUUID().toString();
-	}
+  /**
+   * Generates a standard UUID with hyphens
+   *
+   * @return UUID string
+   */
+  public static String uuid() {
+    return UUID.randomUUID().toString();
+  }
 
-	/**
-	 * Generates a UUID without hyphens
-	 * @return 32-character UUID string
-	 */
-	public static String uuid32() {
-		return UUID.randomUUID().toString().replace("-", "");
-	}
+  /**
+   * Generates a UUID without hyphens
+   *
+   * @return 32-character UUID string
+   */
+  public static String uuid32() {
+    return UUID.randomUUID().toString().replace("-", "");
+  }
 
-	/**
-	 * Generates a unique agent ID with "agent_" prefix
-	 * @return agent ID string
-	 */
-	public static String generateAgentId() {
-		return "agent_" + uuid32().substring(0, 16).toLowerCase();
-	}
+  /**
+   * Generates a unique agent ID with "agent_" prefix
+   *
+   * @return agent ID string
+   */
+  public static String generateAgentId() {
+    return "agent_" + uuid32().substring(0, 16).toLowerCase();
+  }
 
-	/**
-	 * Generates a unique tool ID with "tool_" prefix
-	 * @return tool ID string
-	 */
-	public static String generateToolId() {
-		return "tool_" + uuid32().substring(0, 16).toLowerCase();
-	}
-
+  /**
+   * Generates a unique tool ID with "tool_" prefix
+   *
+   * @return tool ID string
+   */
+  public static String generateToolId() {
+    return "tool_" + uuid32().substring(0, 16).toLowerCase();
+  }
 }

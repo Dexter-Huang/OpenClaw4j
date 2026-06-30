@@ -16,93 +16,87 @@
 
 package com.seaskyland.llm.workflow.core.agent.memory;
 
-import com.seaskyland.llm.workflow.core.config.CommonConfig;
 import com.seaskyland.llm.workflow.core.base.manager.CacheManager;
-import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.stereotype.Component;
-
+import com.seaskyland.llm.workflow.core.config.CommonConfig;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.stereotype.Component;
 
 /**
- * Implementation of ChatMemory that stores conversation history in Redis. Manages message
- * history with a maximum size limit and provides methods to add, retrieve, and clear
- * messages.
+ * Implementation of ChatMemory that stores conversation history in Redis. Manages message history
+ * with a maximum size limit and provides methods to add, retrieve, and clear messages.
  *
  * @since 1.0.0.3
  */
 @Component
 public class ConversationChatMemory implements ChatMemory {
 
-	/** Redis key prefix for conversation storage */
-	public static String CONVERSATION_CHAT_MEMORY_PREFIX = "conversation_chat:%s";
+  /** Redis key prefix for conversation storage */
+  public static String CONVERSATION_CHAT_MEMORY_PREFIX = "conversation_chat:%s";
 
-	/** Redis manager for data persistence */
-	private final CacheManager cacheManager;
+  /** Redis manager for data persistence */
+  private final CacheManager cacheManager;
 
-	/** Maximum number of messages to store in history */
-	private final Integer maxMessages;
+  /** Maximum number of messages to store in history */
+  private final Integer maxMessages;
 
-	public ConversationChatMemory(CacheManager cacheManager, CommonConfig commonConfig) {
-		this.cacheManager = cacheManager;
-		this.maxMessages = commonConfig.getMaxConversationRoundInCache();
-	}
+  public ConversationChatMemory(CacheManager cacheManager, CommonConfig commonConfig) {
+    this.cacheManager = cacheManager;
+    this.maxMessages = commonConfig.getMaxConversationRoundInCache();
+  }
 
-	/**
-	 * Adds new messages to the conversation history. If the history exceeds maxMessages,
-	 * oldest messages are removed.
-	 */
-	@Override
-	public void add(String conversationId, List<Message> messages) {
-		String key = getConversationMemoryCacheKey(conversationId);
-		Deque<Message> historyMessages = cacheManager.get(key);
+  /**
+   * Adds new messages to the conversation history. If the history exceeds maxMessages, oldest
+   * messages are removed.
+   */
+  @Override
+  public void add(String conversationId, List<Message> messages) {
+    String key = getConversationMemoryCacheKey(conversationId);
+    Deque<Message> historyMessages = cacheManager.get(key);
 
-		if (Objects.isNull(historyMessages)) {
-			historyMessages = new ArrayDeque<>();
-		}
+    if (Objects.isNull(historyMessages)) {
+      historyMessages = new ArrayDeque<>();
+    }
 
-		for (Message message : messages) {
-			if (messages.size() >= maxMessages) {
-				historyMessages.poll();
-			}
+    for (Message message : messages) {
+      if (messages.size() >= maxMessages) {
+        historyMessages.poll();
+      }
 
-			historyMessages.offer(message);
-		}
+      historyMessages.offer(message);
+    }
 
-		cacheManager.put(key, historyMessages);
-	}
+    cacheManager.put(key, historyMessages);
+  }
 
-	/**
-	 * Retrieves the last N messages from the conversation history.
-	 * @return List of messages, empty if no history exists
-	 */
-	@Override
-	public List<Message> get(String conversationId) {
-		String key = getConversationMemoryCacheKey(conversationId);
-		Deque<Message> all = cacheManager.get(key);
-		// FIXME, return only topN messages
-		return all != null ? all.stream().toList() : List.of();
-		// return all != null ? all.stream().skip(Math.max(0, all.size() -
-		// lastN)).toList() : List.of();
-	}
+  /**
+   * Retrieves the last N messages from the conversation history.
+   *
+   * @return List of messages, empty if no history exists
+   */
+  @Override
+  public List<Message> get(String conversationId) {
+    String key = getConversationMemoryCacheKey(conversationId);
+    Deque<Message> all = cacheManager.get(key);
+    // FIXME, return only topN messages
+    return all != null ? all.stream().toList() : List.of();
+    // return all != null ? all.stream().skip(Math.max(0, all.size() -
+    // lastN)).toList() : List.of();
+  }
 
-	/**
-	 * Clears all messages for the given conversation.
-	 */
-	@Override
-	public void clear(String conversationId) {
-		String key = getConversationMemoryCacheKey(conversationId);
-		cacheManager.delete(key);
-	}
+  /** Clears all messages for the given conversation. */
+  @Override
+  public void clear(String conversationId) {
+    String key = getConversationMemoryCacheKey(conversationId);
+    cacheManager.delete(key);
+  }
 
-	/**
-	 * Generates the Redis key for storing conversation messages.
-	 */
-	private String getConversationMemoryCacheKey(String conversationId) {
-		return String.format(CONVERSATION_CHAT_MEMORY_PREFIX, conversationId);
-	}
-
+  /** Generates the Redis key for storing conversation messages. */
+  private String getConversationMemoryCacheKey(String conversationId) {
+    return String.format(CONVERSATION_CHAT_MEMORY_PREFIX, conversationId);
+  }
 }

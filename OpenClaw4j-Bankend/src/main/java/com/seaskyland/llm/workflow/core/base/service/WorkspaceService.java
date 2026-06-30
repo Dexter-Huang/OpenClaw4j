@@ -21,59 +21,65 @@ import com.seaskyland.llm.workflow.runtime.domain.PagingList;
 import com.seaskyland.llm.workflow.runtime.domain.account.Workspace;
 
 /**
- * Service interface for managing workspaces. Provides CRUD operations and workspace
- * listing functionality.
+ * Service interface for managing workspaces. Provides CRUD operations and workspace listing
+ * functionality.
  *
  * @since 1.0.0.3
  */
 public interface WorkspaceService {
 
-	/**
-	 * Creates a new workspace.
-	 * @param workspace The workspace to create
-	 * @return The ID of the created workspace
-	 */
-	String createWorkspace(Workspace workspace);
+  /**
+   * Creates a new workspace.
+   *
+   * @param workspace The workspace to create
+   * @return The ID of the created workspace
+   */
+  String createWorkspace(Workspace workspace);
 
-	/**
-	 * Updates an existing workspace.
-	 * @param workspace The workspace to update
-	 */
-	void updateWorkspace(Workspace workspace);
+  /**
+   * Updates an existing workspace.
+   *
+   * @param workspace The workspace to update
+   */
+  void updateWorkspace(Workspace workspace);
 
-	/**
-	 * Deletes a workspace by its ID.
-	 * @param workspaceId The ID of the workspace to delete
-	 */
-	void deleteWorkspace(String workspaceId);
+  /**
+   * Deletes a workspace by its ID.
+   *
+   * @param workspaceId The ID of the workspace to delete
+   */
+  void deleteWorkspace(String workspaceId);
 
-	/**
-	 * Retrieves a workspace by its ID.
-	 * @param workspaceId The ID of the workspace to retrieve
-	 * @return The workspace
-	 */
-	Workspace getWorkspace(String workspaceId);
+  /**
+   * Retrieves a workspace by its ID.
+   *
+   * @param workspaceId The ID of the workspace to retrieve
+   * @return The workspace
+   */
+  Workspace getWorkspace(String workspaceId);
 
-	/**
-	 * Lists workspaces based on query parameters.
-	 * @param query The query parameters for filtering and pagination
-	 * @return A paged list of workspaces
-	 */
-	PagingList<Workspace> listWorkspaces(BaseQuery query);
+  /**
+   * Lists workspaces based on query parameters.
+   *
+   * @param query The query parameters for filtering and pagination
+   * @return A paged list of workspaces
+   */
+  PagingList<Workspace> listWorkspaces(BaseQuery query);
 
-	/**
-	 * Retrieves a workspace by user ID and workspace ID.
-	 * @param uid The user ID
-	 * @param workspaceId The workspace ID
-	 * @return The workspace
-	 */
-	Workspace getWorkspace(String uid, String workspaceId);
+  /**
+   * Retrieves a workspace by user ID and workspace ID.
+   *
+   * @param uid The user ID
+   * @param workspaceId The workspace ID
+   * @return The workspace
+   */
+  Workspace getWorkspace(String uid, String workspaceId);
 
-	/**
-	 * Gets the default workspace for a user.
-	 * @param uid The user ID
-	 * @return The default workspace
-	 */
-	Workspace getDefaultWorkspace(String uid);
-
+  /**
+   * Gets the default workspace for a user.
+   *
+   * @param uid The user ID
+   * @return The default workspace
+   */
+  Workspace getDefaultWorkspace(String uid);
 }

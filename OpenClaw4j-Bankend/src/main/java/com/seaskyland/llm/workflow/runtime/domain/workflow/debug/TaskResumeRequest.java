@@ -15,35 +15,31 @@
  */
 package com.seaskyland.llm.workflow.runtime.domain.workflow.debug;
 
-import com.seaskyland.llm.workflow.runtime.domain.workflow.CommonParam;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.domain.workflow.CommonParam;
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
 
-/**
- * 调试请求
- */
+/** 调试请求 */
 @Data
 public class TaskResumeRequest implements Serializable {
 
-	@JsonProperty("app_id")
-	private String appId;
+  @JsonProperty("app_id")
+  private String appId;
 
-	@JsonProperty("task_id")
-	private String taskId;
+  @JsonProperty("task_id")
+  private String taskId;
 
-	@JsonProperty("conversation_id")
-	private String conversationId;
+  @JsonProperty("conversation_id")
+  private String conversationId;
 
-	@JsonProperty("resume_node_id")
-	private String resumeNodeId;
+  @JsonProperty("resume_node_id")
+  private String resumeNodeId;
 
-	@JsonProperty("resume_parent_id")
-	private String resumeParentId;
+  @JsonProperty("resume_parent_id")
+  private String resumeParentId;
 
-	@JsonProperty("input_params")
-	private List<CommonParam> inputParams;
-
+  @JsonProperty("input_params")
+  private List<CommonParam> inputParams;
 }

@@ -19,10 +19,9 @@ package com.seaskyland.llm.workflow.runtime.domain.account;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.seaskyland.llm.workflow.runtime.enums.AccountStatus;
 import com.seaskyland.llm.workflow.runtime.enums.AccountType;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Account entity representing user account information.
@@ -32,54 +31,53 @@ import java.util.Date;
 @Data
 public class Account implements Serializable {
 
-	/** Unique identifier for the account */
-	@JsonProperty("account_id")
-	private String accountId;
+  /** Unique identifier for the account */
+  @JsonProperty("account_id")
+  private String accountId;
 
-	/** Default workspace ID for the account */
-	@JsonProperty("default_workspace_id")
-	private String defaultWorkspaceId;
+  /** Default workspace ID for the account */
+  @JsonProperty("default_workspace_id")
+  private String defaultWorkspaceId;
 
-	/** Username for login */
-	private String username;
+  /** Username for login */
+  private String username;
 
-	/** Account password */
-	private String password;
+  /** Account password */
+  private String password;
 
-	/** User's email address */
-	private String email;
+  /** User's email address */
+  private String email;
 
-	/** User's mobile number */
-	private String mobile;
+  /** User's mobile number */
+  private String mobile;
 
-	/** Current status of the account */
-	private AccountStatus status;
+  /** Current status of the account */
+  private AccountStatus status;
 
-	/** Type of the account */
-	private AccountType type;
+  /** Type of the account */
+  private AccountType type;
 
-	/** User's display name */
-	private String nickname;
+  /** User's display name */
+  private String nickname;
 
-	/** User's profile picture URL */
-	private String icon;
+  /** User's profile picture URL */
+  private String icon;
 
-	/** Username of the account creator */
-	private String creator;
+  /** Username of the account creator */
+  private String creator;
 
-	/** Username of the last modifier */
-	private String modifier;
+  /** Username of the last modifier */
+  private String modifier;
 
-	/** Account creation timestamp */
-	@JsonProperty("gmt_create")
-	private Date gmtCreate;
+  /** Account creation timestamp */
+  @JsonProperty("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@JsonProperty("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @JsonProperty("gmt_modified")
+  private Date gmtModified;
 
-	/** Last login timestamp */
-	@JsonProperty("gmt_last_login")
-	private Date gmtLastLogin;
-
+  /** Last login timestamp */
+  @JsonProperty("gmt_last_login")
+  private Date gmtLastLogin;
 }

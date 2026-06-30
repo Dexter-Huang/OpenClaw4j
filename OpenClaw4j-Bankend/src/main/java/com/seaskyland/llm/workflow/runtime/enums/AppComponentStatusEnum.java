@@ -27,21 +27,20 @@ import lombok.Getter;
 @Getter
 public enum AppComponentStatusEnum {
 
-	/** Component is published and available */
-	Published(1, "published"),
+  /** Component is published and available */
+  Published(1, "published"),
 
-	/** Component has been deleted */
-	Delete(3, "deleted");
+  /** Component has been deleted */
+  Delete(3, "deleted");
 
-	/** Status code */
-	private final Integer code;
+  /** Status code */
+  private final Integer code;
 
-	/** Status description */
-	private final String desc;
+  /** Status description */
+  private final String desc;
 
-	AppComponentStatusEnum(Integer type, String desc) {
-		this.code = type;
-		this.desc = desc;
-	}
-
+  AppComponentStatusEnum(Integer type, String desc) {
+    this.code = type;
+    this.desc = desc;
+  }
 }

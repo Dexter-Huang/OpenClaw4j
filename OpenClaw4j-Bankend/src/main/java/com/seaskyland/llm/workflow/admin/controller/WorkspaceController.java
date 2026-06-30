@@ -16,20 +16,19 @@
 
 package com.seaskyland.llm.workflow.admin.controller;
 
-import com.seaskyland.llm.workflow.runtime.exception.BizException;
-import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
+import com.seaskyland.llm.workflow.core.base.service.WorkspaceService;
+import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
 import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
 import com.seaskyland.llm.workflow.runtime.domain.PagingList;
 import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
 import com.seaskyland.llm.workflow.runtime.domain.Result;
 import com.seaskyland.llm.workflow.runtime.domain.account.Workspace;
-import com.seaskyland.llm.workflow.core.base.service.WorkspaceService;
-import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
+import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
+import com.seaskyland.llm.workflow.runtime.exception.BizException;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Objects;
 
 /**
  * Controller for managing workspaces. Provides CRUD operations for workspace resources.
@@ -41,109 +40,113 @@ import java.util.Objects;
 @RequestMapping("/console/v1/workspaces")
 public class WorkspaceController {
 
-	/** Service for workspace operations */
-	private final WorkspaceService workspaceService;
+  /** Service for workspace operations */
+  private final WorkspaceService workspaceService;
 
-	public WorkspaceController(WorkspaceService workspaceService) {
-		this.workspaceService = workspaceService;
-	}
+  public WorkspaceController(WorkspaceService workspaceService) {
+    this.workspaceService = workspaceService;
+  }
 
-	/**
-	 * Creates a new workspace
-	 * @param workspace Workspace information
-	 * @return Result containing the created workspace ID
-	 */
-	@PostMapping()
-	public Result<String> createWorkspace(@RequestBody Workspace workspace) {
-		RequestContext context = RequestContextHolder.getRequestContext();
+  /**
+   * Creates a new workspace
+   *
+   * @param workspace Workspace information
+   * @return Result containing the created workspace ID
+   */
+  @PostMapping()
+  public Result<String> createWorkspace(@RequestBody Workspace workspace) {
+    RequestContext context = RequestContextHolder.getRequestContext();
 
-		if (Objects.isNull(workspace)) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("workspace"));
-		}
+    if (Objects.isNull(workspace)) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("workspace"));
+    }
 
-		if (StringUtils.isBlank(workspace.getName())) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("name"));
-		}
+    if (StringUtils.isBlank(workspace.getName())) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("name"));
+    }
 
-		String workspaceId = workspaceService.createWorkspace(workspace);
-		return Result.success(context.getRequestId(), workspaceId);
-	}
+    String workspaceId = workspaceService.createWorkspace(workspace);
+    return Result.success(context.getRequestId(), workspaceId);
+  }
 
-	/**
-	 * Updates an existing workspace
-	 * @param workspaceId ID of the workspace to update
-	 * @param workspace Updated workspace information
-	 * @return Result indicating success
-	 */
-	@PutMapping("/{workspaceId}")
-	public Result<String> updateWorkspace(@PathVariable("workspaceId") String workspaceId,
-			@RequestBody Workspace workspace) {
-		RequestContext context = RequestContextHolder.getRequestContext();
+  /**
+   * Updates an existing workspace
+   *
+   * @param workspaceId ID of the workspace to update
+   * @param workspace Updated workspace information
+   * @return Result indicating success
+   */
+  @PutMapping("/{workspaceId}")
+  public Result<String> updateWorkspace(
+      @PathVariable("workspaceId") String workspaceId, @RequestBody Workspace workspace) {
+    RequestContext context = RequestContextHolder.getRequestContext();
 
-		if (Objects.isNull(workspace)) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("workspace"));
-		}
+    if (Objects.isNull(workspace)) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("workspace"));
+    }
 
-		if (Objects.isNull(workspaceId)) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("workspaceId"));
-		}
+    if (Objects.isNull(workspaceId)) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("workspaceId"));
+    }
 
-		if (StringUtils.isBlank(workspace.getName())) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("name"));
-		}
+    if (StringUtils.isBlank(workspace.getName())) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("name"));
+    }
 
-		workspace.setWorkspaceId(workspaceId);
-		workspaceService.updateWorkspace(workspace);
-		return Result.success(context.getRequestId(), null);
-	}
+    workspace.setWorkspaceId(workspaceId);
+    workspaceService.updateWorkspace(workspace);
+    return Result.success(context.getRequestId(), null);
+  }
 
-	/**
-	 * Deletes a workspace
-	 * @param workspaceId ID of the workspace to delete
-	 * @return Result indicating success
-	 */
-	@DeleteMapping("/{workspaceId}")
-	public Result<Void> deleteWorkspace(@PathVariable("workspaceId") String workspaceId) {
-		RequestContext context = RequestContextHolder.getRequestContext();
-		if (Objects.isNull(workspaceId)) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("workspaceId"));
-		}
+  /**
+   * Deletes a workspace
+   *
+   * @param workspaceId ID of the workspace to delete
+   * @return Result indicating success
+   */
+  @DeleteMapping("/{workspaceId}")
+  public Result<Void> deleteWorkspace(@PathVariable("workspaceId") String workspaceId) {
+    RequestContext context = RequestContextHolder.getRequestContext();
+    if (Objects.isNull(workspaceId)) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("workspaceId"));
+    }
 
-		workspaceService.deleteWorkspace(workspaceId);
-		return Result.success(context.getRequestId(), null);
-	}
+    workspaceService.deleteWorkspace(workspaceId);
+    return Result.success(context.getRequestId(), null);
+  }
 
-	/**
-	 * Retrieves a specific workspace
-	 * @param workspaceId ID of the workspace to retrieve
-	 * @return Result containing the workspace information
-	 */
-	@GetMapping("/{workspaceId}")
-	public Result<Workspace> getWorkspace(@PathVariable("workspaceId") String workspaceId) {
-		RequestContext context = RequestContextHolder.getRequestContext();
+  /**
+   * Retrieves a specific workspace
+   *
+   * @param workspaceId ID of the workspace to retrieve
+   * @return Result containing the workspace information
+   */
+  @GetMapping("/{workspaceId}")
+  public Result<Workspace> getWorkspace(@PathVariable("workspaceId") String workspaceId) {
+    RequestContext context = RequestContextHolder.getRequestContext();
 
-		if (Objects.isNull(workspaceId)) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("workspaceId"));
-		}
+    if (Objects.isNull(workspaceId)) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("workspaceId"));
+    }
 
-		Workspace workspace = workspaceService.getWorkspace(workspaceId);
-		return Result.success(context.getRequestId(), workspace);
-	}
+    Workspace workspace = workspaceService.getWorkspace(workspaceId);
+    return Result.success(context.getRequestId(), workspace);
+  }
 
-	/**
-	 * Lists workspaces with pagination
-	 * @param query Query parameters for filtering and pagination
-	 * @return Result containing a paginated list of workspaces
-	 */
-	@GetMapping()
-	public Result<PagingList<Workspace>> listWorkspaces(@ModelAttribute BaseQuery query) {
-		RequestContext context = RequestContextHolder.getRequestContext();
-		if (Objects.isNull(query)) {
-			throw new BizException(ErrorCode.MISSING_PARAMS.toError("query"));
-		}
+  /**
+   * Lists workspaces with pagination
+   *
+   * @param query Query parameters for filtering and pagination
+   * @return Result containing a paginated list of workspaces
+   */
+  @GetMapping()
+  public Result<PagingList<Workspace>> listWorkspaces(@ModelAttribute BaseQuery query) {
+    RequestContext context = RequestContextHolder.getRequestContext();
+    if (Objects.isNull(query)) {
+      throw new BizException(ErrorCode.MISSING_PARAMS.toError("query"));
+    }
 
-		PagingList<Workspace> workspaces = workspaceService.listWorkspaces(query);
-		return Result.success(context.getRequestId(), workspaces);
-	}
-
+    PagingList<Workspace> workspaces = workspaceService.listWorkspaces(query);
+    return Result.success(context.getRequestId(), workspaces);
+  }
 }

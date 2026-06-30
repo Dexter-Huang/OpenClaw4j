@@ -16,16 +16,14 @@
 package com.seaskyland.llm.workflow.runtime.domain.workflow.debug;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class ApiTaskRunRequest {
 
-	private List<TaskRunParam> inputs;
+  private List<TaskRunParam> inputs;
 
-	@JsonProperty("conversation_id")
-	private String conversationId;
-
+  @JsonProperty("conversation_id")
+  private String conversationId;
 }

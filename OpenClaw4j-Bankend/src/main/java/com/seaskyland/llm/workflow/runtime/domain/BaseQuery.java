@@ -16,41 +16,30 @@
 
 package com.seaskyland.llm.workflow.runtime.domain;
 
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.io.Serializable;
-
 /**
  * Base query class for pagination and filtering.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
 public class BaseQuery implements Serializable {
 
-	/**
-	 * Query name for filtering
-	 */
-	private String name;
+  /** Query name for filtering */
+  private String name;
 
-	/**
-	 * Current page number
-	 */
-	@Builder.Default
-	private Integer current = 1;
+  /** Current page number */
+  @Builder.Default private Integer current = 1;
 
-	/**
-	 * Number of items per page
-	 */
-	@Builder.Default
-	private Integer size = 10;
-
+  /** Number of items per page */
+  @Builder.Default private Integer size = 10;
 }

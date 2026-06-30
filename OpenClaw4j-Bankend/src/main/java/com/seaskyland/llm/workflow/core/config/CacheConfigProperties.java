@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Configuration;
  * Configuration properties for the cache backend.
  *
  * <p>Bind via {@code cache.*} in {@code application.yml}:
+ *
  * <pre>
  * cache:
  *   type: REDIS   # or JVM
@@ -37,51 +38,48 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "cache")
 public class CacheConfigProperties {
 
-	/** Full property key used in {@code @ConditionalOnProperty}. */
-	public static final String CACHE_TYPE_PREFIX = "cache.type";
+  /** Full property key used in {@code @ConditionalOnProperty}. */
+  public static final String CACHE_TYPE_PREFIX = "cache.type";
 
-	/** String constant for the Redis backend – matches {@link CacheType#REDIS}. */
-	public static final String REDIS = "REDIS";
+  /** String constant for the Redis backend – matches {@link CacheType#REDIS}. */
+  public static final String REDIS = "REDIS";
 
-	/** String constant for the JVM in-memory backend – matches {@link CacheType#JVM}. */
-	public static final String JVM = "JVM";
+  /** String constant for the JVM in-memory backend – matches {@link CacheType#JVM}. */
+  public static final String JVM = "JVM";
 
-	/** Active cache backend type. Defaults to {@link CacheType#REDIS}. */
-	private CacheType type = CacheType.REDIS;
+  /** Active cache backend type. Defaults to {@link CacheType#REDIS}. */
+  private CacheType type = CacheType.REDIS;
 
-	/**
-	 * Supported cache backend types.
-	 */
-	@Getter
-	public enum CacheType {
+  /** Supported cache backend types. */
+  @Getter
+  public enum CacheType {
 
-		/** Redis-backed distributed cache via Redisson (requires a running Redis instance). */
-		REDIS(CacheConfigProperties.REDIS),
+    /** Redis-backed distributed cache via Redisson (requires a running Redis instance). */
+    REDIS(CacheConfigProperties.REDIS),
 
-		/** JVM in-memory cache (no Redis required, single-node only). */
-		JVM(CacheConfigProperties.JVM),
-		;
+    /** JVM in-memory cache (no Redis required, single-node only). */
+    JVM(CacheConfigProperties.JVM),
+    ;
 
-		private final String cacheType;
+    private final String cacheType;
 
-		CacheType(String cacheType) {
-			this.cacheType = cacheType;
-		}
+    CacheType(String cacheType) {
+      this.cacheType = cacheType;
+    }
 
-		/**
-		 * Looks up a {@link CacheType} by its string name (case-sensitive).
-		 * @param cacheType the string value (e.g. {@code "REDIS"})
-		 * @return the matching {@link CacheType}, or {@code null} if not found
-		 */
-		public static CacheType getCacheType(String cacheType) {
-			for (CacheType ct : CacheType.values()) {
-				if (ct.name().equals(cacheType)) {
-					return ct;
-				}
-			}
-			return null;
-		}
-
-	}
-
+    /**
+     * Looks up a {@link CacheType} by its string name (case-sensitive).
+     *
+     * @param cacheType the string value (e.g. {@code "REDIS"})
+     * @return the matching {@link CacheType}, or {@code null} if not found
+     */
+    public static CacheType getCacheType(String cacheType) {
+      for (CacheType ct : CacheType.values()) {
+        if (ct.name().equals(cacheType)) {
+          return ct;
+        }
+      }
+      return null;
+    }
+  }
 }

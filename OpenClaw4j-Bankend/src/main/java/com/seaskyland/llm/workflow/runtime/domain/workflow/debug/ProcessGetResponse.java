@@ -15,72 +15,67 @@
  */
 package com.seaskyland.llm.workflow.runtime.domain.workflow.debug;
 
-import com.seaskyland.llm.workflow.runtime.domain.workflow.NodeResult;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.domain.workflow.NodeResult;
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
 
-/**
- * 工作流控制台调试结果出参
- */
+/** 工作流控制台调试结果出参 */
 @Data
 public class ProcessGetResponse implements Serializable {
 
-	@JsonProperty("task_id")
-	private String taskId;
+  @JsonProperty("task_id")
+  private String taskId;
 
-	@JsonProperty("request_id")
-	private String requestId;
+  @JsonProperty("request_id")
+  private String requestId;
 
-	@JsonProperty("conversation_id")
-	private String conversationId;
+  @JsonProperty("conversation_id")
+  private String conversationId;
 
-	@JsonProperty("task_status")
-	private String taskStatus;
+  @JsonProperty("task_status")
+  private String taskStatus;
 
-	@JsonProperty("task_results")
-	private List<ProcessOutput> taskResults;
+  @JsonProperty("task_results")
+  private List<ProcessOutput> taskResults;
 
-	@JsonProperty("error_code")
-	private String errorCode;
+  @JsonProperty("error_code")
+  private String errorCode;
 
-	@JsonProperty("error_info")
-	private String errorInfo;
+  @JsonProperty("error_info")
+  private String errorInfo;
 
-	@JsonProperty("task_exec_time")
-	private String taskExecTime;
+  @JsonProperty("task_exec_time")
+  private String taskExecTime;
 
-	@JsonProperty("node_results")
-	private List<NodeResult> nodeResults;
+  @JsonProperty("node_results")
+  private List<NodeResult> nodeResults;
 
-	// 变量内容 todo
+  // 变量内容 todo
 
-	@Data
-	public static class ProcessOutput {
+  @Data
+  public static class ProcessOutput {
 
-		@JsonProperty("node_type")
-		private String nodeType;
+    @JsonProperty("node_type")
+    private String nodeType;
 
-		@JsonProperty("node_name")
-		private String nodeName;
+    @JsonProperty("node_name")
+    private String nodeName;
 
-		@JsonProperty("node_id")
-		private String nodeId;
+    @JsonProperty("node_id")
+    private String nodeId;
 
-		@JsonProperty("parent_node_id")
-		private String parentNodeId;
+    @JsonProperty("parent_node_id")
+    private String parentNodeId;
 
-		@JsonProperty("node_content")
-		private Object nodeContent;
+    @JsonProperty("node_content")
+    private Object nodeContent;
 
-		@JsonProperty("node_status")
-		private String nodeStatus;
+    @JsonProperty("node_status")
+    private String nodeStatus;
 
-		@JsonProperty("index")
-		private Integer index;
-
-	}
-
+    @JsonProperty("index")
+    private Integer index;
+  }
 }

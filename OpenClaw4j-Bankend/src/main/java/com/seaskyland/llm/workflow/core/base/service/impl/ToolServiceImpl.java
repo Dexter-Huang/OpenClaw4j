@@ -16,6 +16,9 @@
 
 package com.seaskyland.llm.workflow.core.base.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.seaskyland.llm.workflow.core.base.entity.ToolEntity;
 import com.seaskyland.llm.workflow.core.base.mapper.ToolMapper;
 import com.seaskyland.llm.workflow.core.base.service.ToolService;
@@ -24,14 +27,10 @@ import com.seaskyland.llm.workflow.core.utils.common.IdGenerator;
 import com.seaskyland.llm.workflow.runtime.domain.PagingList;
 import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
 import com.seaskyland.llm.workflow.runtime.enums.ToolStatus;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 /**
  * Implementation of ToolService for CRUD operations.
@@ -41,106 +40,105 @@ import java.util.List;
 @Service
 public class ToolServiceImpl extends ServiceImpl<ToolMapper, ToolEntity> implements ToolService {
 
-	@Override
-	public ToolEntity createTool(ToolEntity toolEntity) {
-		RequestContext requestContext = RequestContextHolder.getRequestContext();
+  @Override
+  public ToolEntity createTool(ToolEntity toolEntity) {
+    RequestContext requestContext = RequestContextHolder.getRequestContext();
 
-		// Set default values
-		if (StringUtils.isBlank(toolEntity.getToolId())) {
-			toolEntity.setToolId(IdGenerator.generateToolId());
-		}
-		toolEntity.setWorkspaceId(requestContext.getWorkspaceId());
-		toolEntity.setStatus(ToolStatus.PUBLISHED);
-		toolEntity.setEnabled(true);
-		toolEntity.setGmtCreate(new Date());
-		toolEntity.setGmtModified(new Date());
-		toolEntity.setCreator(requestContext.getAccountId());
-		toolEntity.setModifier(requestContext.getAccountId());
+    // Set default values
+    if (StringUtils.isBlank(toolEntity.getToolId())) {
+      toolEntity.setToolId(IdGenerator.generateToolId());
+    }
+    toolEntity.setWorkspaceId(requestContext.getWorkspaceId());
+    toolEntity.setStatus(ToolStatus.PUBLISHED);
+    toolEntity.setEnabled(true);
+    toolEntity.setGmtCreate(new Date());
+    toolEntity.setGmtModified(new Date());
+    toolEntity.setCreator(requestContext.getAccountId());
+    toolEntity.setModifier(requestContext.getAccountId());
 
-		save(toolEntity);
-		return toolEntity;
-	}
+    save(toolEntity);
+    return toolEntity;
+  }
 
-	@Override
-	public ToolEntity updateTool(ToolEntity toolEntity) {
-		RequestContext requestContext = RequestContextHolder.getRequestContext();
+  @Override
+  public ToolEntity updateTool(ToolEntity toolEntity) {
+    RequestContext requestContext = RequestContextHolder.getRequestContext();
 
-		ToolEntity existing = getById(toolEntity.getId());
-		if (existing == null) {
-			throw new IllegalArgumentException("Tool not found with id: " + toolEntity.getId());
-		}
+    ToolEntity existing = getById(toolEntity.getId());
+    if (existing == null) {
+      throw new IllegalArgumentException("Tool not found with id: " + toolEntity.getId());
+    }
 
-		// Update fields
-		toolEntity.setGmtModified(new Date());
-		toolEntity.setModifier(requestContext.getAccountId());
+    // Update fields
+    toolEntity.setGmtModified(new Date());
+    toolEntity.setModifier(requestContext.getAccountId());
 
-		updateById(toolEntity);
-		return toolEntity;
-	}
+    updateById(toolEntity);
+    return toolEntity;
+  }
 
-	@Override
-	public void deleteTool(Long id) {
-		removeById(id);
-	}
+  @Override
+  public void deleteTool(Long id) {
+    removeById(id);
+  }
 
-	@Override
-	public ToolEntity getToolById(Long id) {
-		return getById(id);
-	}
+  @Override
+  public ToolEntity getToolById(Long id) {
+    return getById(id);
+  }
 
-	@Override
-	public List<ToolEntity> getToolsByWorkspaceId(String workspaceId) {
-		LambdaQueryWrapper<ToolEntity> queryWrapper = new LambdaQueryWrapper<>();
-		queryWrapper.eq(ToolEntity::getWorkspaceId, workspaceId);
-		queryWrapper.orderByDesc(ToolEntity::getGmtModified);
-		return list(queryWrapper);
-	}
+  @Override
+  public List<ToolEntity> getToolsByWorkspaceId(String workspaceId) {
+    LambdaQueryWrapper<ToolEntity> queryWrapper = new LambdaQueryWrapper<>();
+    queryWrapper.eq(ToolEntity::getWorkspaceId, workspaceId);
+    queryWrapper.orderByDesc(ToolEntity::getGmtModified);
+    return list(queryWrapper);
+  }
 
-	@Override
-	public PagingList<ToolEntity> getToolsByWorkspaceId(String workspaceId, Page<ToolEntity> page) {
-		LambdaQueryWrapper<ToolEntity> queryWrapper = new LambdaQueryWrapper<>();
-		queryWrapper.eq(ToolEntity::getWorkspaceId, workspaceId);
-		queryWrapper.orderByDesc(ToolEntity::getGmtModified);
+  @Override
+  public PagingList<ToolEntity> getToolsByWorkspaceId(String workspaceId, Page<ToolEntity> page) {
+    LambdaQueryWrapper<ToolEntity> queryWrapper = new LambdaQueryWrapper<>();
+    queryWrapper.eq(ToolEntity::getWorkspaceId, workspaceId);
+    queryWrapper.orderByDesc(ToolEntity::getGmtModified);
 
-		Page<ToolEntity> result = page(page, queryWrapper);
-		return PagingList.<ToolEntity>builder()
-			.current((int) result.getCurrent())
-			.size((int) result.getSize())
-			.total(result.getTotal())
-			.records(result.getRecords())
-			.build();
-	}
+    Page<ToolEntity> result = page(page, queryWrapper);
+    return PagingList.<ToolEntity>builder()
+        .current((int) result.getCurrent())
+        .size((int) result.getSize())
+        .total(result.getTotal())
+        .records(result.getRecords())
+        .build();
+  }
 
-	@Override
-	public List<ToolEntity> getToolsByName(String name, String workspaceId) {
-		LambdaQueryWrapper<ToolEntity> queryWrapper = new LambdaQueryWrapper<>();
-		queryWrapper.eq(ToolEntity::getWorkspaceId, workspaceId);
-		queryWrapper.like(ToolEntity::getName, name);
-		queryWrapper.orderByDesc(ToolEntity::getGmtModified);
-		return list(queryWrapper);
-	}
+  @Override
+  public List<ToolEntity> getToolsByName(String name, String workspaceId) {
+    LambdaQueryWrapper<ToolEntity> queryWrapper = new LambdaQueryWrapper<>();
+    queryWrapper.eq(ToolEntity::getWorkspaceId, workspaceId);
+    queryWrapper.like(ToolEntity::getName, name);
+    queryWrapper.orderByDesc(ToolEntity::getGmtModified);
+    return list(queryWrapper);
+  }
 
-	@Override
-	public void setToolEnabled(Long id, Boolean enabled) {
-		ToolEntity tool = getById(id);
-		if (tool == null) {
-			throw new IllegalArgumentException("Tool not found with id: " + id);
-		}
+  @Override
+  public void setToolEnabled(Long id, Boolean enabled) {
+    ToolEntity tool = getById(id);
+    if (tool == null) {
+      throw new IllegalArgumentException("Tool not found with id: " + id);
+    }
 
-		tool.setEnabled(enabled);
-		tool.setGmtModified(new Date());
-		tool.setModifier(RequestContextHolder.getRequestContext().getAccountId());
+    tool.setEnabled(enabled);
+    tool.setGmtModified(new Date());
+    tool.setModifier(RequestContextHolder.getRequestContext().getAccountId());
 
-		updateById(tool);
-	}
+    updateById(tool);
+  }
 
-	@Override
-	public List<ToolEntity> getToolsByPluginId(String pluginId, String workspaceId) {
-		LambdaQueryWrapper<ToolEntity> queryWrapper = new LambdaQueryWrapper<>();
-		queryWrapper.eq(ToolEntity::getWorkspaceId, workspaceId);
-		queryWrapper.eq(ToolEntity::getPluginId, pluginId);
-		queryWrapper.orderByDesc(ToolEntity::getGmtModified);
-		return list(queryWrapper);
-	}
-
+  @Override
+  public List<ToolEntity> getToolsByPluginId(String pluginId, String workspaceId) {
+    LambdaQueryWrapper<ToolEntity> queryWrapper = new LambdaQueryWrapper<>();
+    queryWrapper.eq(ToolEntity::getWorkspaceId, workspaceId);
+    queryWrapper.eq(ToolEntity::getPluginId, pluginId);
+    queryWrapper.orderByDesc(ToolEntity::getGmtModified);
+    return list(queryWrapper);
+  }
 }

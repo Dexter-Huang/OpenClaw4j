@@ -16,15 +16,14 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.app;
 
-import com.seaskyland.llm.workflow.runtime.enums.AppStatus;
-import com.seaskyland.llm.workflow.runtime.enums.AppType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.AppStatus;
+import com.seaskyland.llm.workflow.runtime.enums.AppType;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
+import lombok.Data;
 
 /**
  * Represents an application in the Spring AI Alibaba Studio system.
@@ -34,49 +33,46 @@ import java.util.Map;
 @Data
 public class Application implements Serializable {
 
-	/** Unique identifier for the application */
-	@JsonProperty("app_id")
-	private String appId;
+  /** Unique identifier for the application */
+  @JsonProperty("app_id")
+  private String appId;
 
-	/** Name of the application */
-	private String name;
+  /** Name of the application */
+  private String name;
 
-	/** Description of the application */
-	private String description;
+  /** Description of the application */
+  private String description;
 
-	/** Type of the application */
-	private AppType type;
+  /** Type of the application */
+  private AppType type;
 
-	/** Current status of the application */
-	private AppStatus status;
+  /** Current status of the application */
+  private AppStatus status;
 
-	/** Raw configuration string */
-	@JsonIgnore
-	private String configStr;
+  /** Raw configuration string */
+  @JsonIgnore private String configStr;
 
-	/** Raw public configuration string */
-	@JsonIgnore
-	private String pubConfigStr;
+  /** Raw public configuration string */
+  @JsonIgnore private String pubConfigStr;
 
-	/** Application configuration map */
-	private Map<String, Object> config;
+  /** Application configuration map */
+  private Map<String, Object> config;
 
-	/** published configuration map */
-	@JsonProperty("pub_config")
-	private Map<String, Object> pubConfig;
+  /** published configuration map */
+  @JsonProperty("pub_config")
+  private Map<String, Object> pubConfig;
 
-	/** Application icon */
-	private String icon;
+  /** Application icon */
+  private String icon;
 
-	/** Source of the application, defaults to "console" */
-	private String source = "console";
+  /** Source of the application, defaults to "console" */
+  private String source = "console";
 
-	/** Creation timestamp */
-	@JsonProperty("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @JsonProperty("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@JsonProperty("gmt_modified")
-	private Date gmtModified;
-
+  /** Last modification timestamp */
+  @JsonProperty("gmt_modified")
+  private Date gmtModified;
 }

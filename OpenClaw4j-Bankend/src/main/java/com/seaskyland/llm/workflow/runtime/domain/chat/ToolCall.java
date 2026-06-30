@@ -16,16 +16,15 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.chat;
 
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 /**
- * Represents a tool call in the chat system. Contains information about the tool being
- * called and its execution details.
+ * Represents a tool call in the chat system. Contains information about the tool being called and
+ * its execution details.
  *
  * @since 1.0.0.3
  */
@@ -35,36 +34,32 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class ToolCall implements Serializable {
 
-	/** Unique identifier for the tool call */
-	private String id;
+  /** Unique identifier for the tool call */
+  private String id;
 
-	/** Type of the tool call */
-	private ToolCallType type;
+  /** Type of the tool call */
+  private ToolCallType type;
 
-	/** Index of the tool call in a sequence */
-	private Integer index;
+  /** Index of the tool call in a sequence */
+  private Integer index;
 
-	/** Function details of the tool call */
-	private Function function;
+  /** Function details of the tool call */
+  private Function function;
 
-	/**
-	 * Represents the function details of a tool call.
-	 */
-	@Data
-	@Builder
-	@AllArgsConstructor
-	@NoArgsConstructor
-	public static class Function implements Serializable {
+  /** Represents the function details of a tool call. */
+  @Data
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class Function implements Serializable {
 
-		/** Name of the function */
-		private String name;
+    /** Name of the function */
+    private String name;
 
-		/** Arguments passed to the function */
-		private String arguments;
+    /** Arguments passed to the function */
+    private String arguments;
 
-		/** Output result of the function execution */
-		private String output;
-
-	}
-
+    /** Output result of the function execution */
+    private String output;
+  }
 }

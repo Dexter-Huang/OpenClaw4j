@@ -16,77 +16,77 @@
 
 package com.seaskyland.llm.workflow.core.rag;
 
+import static com.seaskyland.llm.workflow.core.rag.RagConstants.*;
+
 import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.DocumentChunk;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.ai.document.Document;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.seaskyland.llm.workflow.core.rag.RagConstants.*;
-
 /**
- * Utility class for converting between Document and DocumentChunk objects. Provides
- * methods to transform document data between different formats.
+ * Utility class for converting between Document and DocumentChunk objects. Provides methods to
+ * transform document data between different formats.
  *
  * @since 1.0.0.3
  */
 public class DocumentChunkConverter {
 
-	/**
-	 * Converts a Spring AI Document to a DocumentChunk. Maps metadata fields and content
-	 * from Document to DocumentChunk format.
-	 * @param document The source Document object
-	 * @return Converted DocumentChunk object
-	 */
-	public static DocumentChunk toDocumentChunk(Document document) {
-		Map<String, Object> metadata = document.getMetadata();
-		return DocumentChunk.builder()
-			.chunkId(document.getId())
-			.docId(MapUtils.getString(metadata, KEY_DOC_ID, null))
-			.docName(MapUtils.getString(metadata, KEY_DOC_NAME, null))
-			.title(MapUtils.getString(metadata, KEY_TITLE, null))
-			.enabled(MapUtils.getBoolean(metadata, KEY_ENABLED, false))
-			.text(document.getText())
-			.score(document.getScore())
-			.pageNumber(MapUtils.getInteger(metadata, "page_number", 0))
-			.build();
-	}
+  /**
+   * Converts a Spring AI Document to a DocumentChunk. Maps metadata fields and content from
+   * Document to DocumentChunk format.
+   *
+   * @param document The source Document object
+   * @return Converted DocumentChunk object
+   */
+  public static DocumentChunk toDocumentChunk(Document document) {
+    Map<String, Object> metadata = document.getMetadata();
+    return DocumentChunk.builder()
+        .chunkId(document.getId())
+        .docId(MapUtils.getString(metadata, KEY_DOC_ID, null))
+        .docName(MapUtils.getString(metadata, KEY_DOC_NAME, null))
+        .title(MapUtils.getString(metadata, KEY_TITLE, null))
+        .enabled(MapUtils.getBoolean(metadata, KEY_ENABLED, false))
+        .text(document.getText())
+        .score(document.getScore())
+        .pageNumber(MapUtils.getInteger(metadata, "page_number", 0))
+        .build();
+  }
 
-	/**
-	 * Converts a DocumentChunk to a Spring AI Document. Maps fields from DocumentChunk to
-	 * Document format with appropriate metadata.
-	 * @param chunk The source DocumentChunk object
-	 * @return Converted Document object
-	 */
-	public static Document toDocument(DocumentChunk chunk) {
-		Map<String, Object> metadata = new HashMap<>();
+  /**
+   * Converts a DocumentChunk to a Spring AI Document. Maps fields from DocumentChunk to Document
+   * format with appropriate metadata.
+   *
+   * @param chunk The source DocumentChunk object
+   * @return Converted Document object
+   */
+  public static Document toDocument(DocumentChunk chunk) {
+    Map<String, Object> metadata = new HashMap<>();
 
-		if (chunk.getPageNumber() != null) {
-			metadata.put("page_number", chunk.getPageNumber());
-		}
+    if (chunk.getPageNumber() != null) {
+      metadata.put("page_number", chunk.getPageNumber());
+    }
 
-		if (chunk.getTitle() != null) {
-			metadata.put(KEY_TITLE, chunk.getTitle());
-		}
+    if (chunk.getTitle() != null) {
+      metadata.put(KEY_TITLE, chunk.getTitle());
+    }
 
-		if (chunk.getDocName() != null) {
-			metadata.put(KEY_WORKSPACE_ID, chunk.getWorkspaceId());
-		}
+    if (chunk.getDocName() != null) {
+      metadata.put(KEY_WORKSPACE_ID, chunk.getWorkspaceId());
+    }
 
-		if (chunk.getDocId() != null) {
-			metadata.put(KEY_DOC_ID, chunk.getDocId());
-		}
+    if (chunk.getDocId() != null) {
+      metadata.put(KEY_DOC_ID, chunk.getDocId());
+    }
 
-		if (chunk.getEnabled() != null) {
-			metadata.put(KEY_ENABLED, chunk.getEnabled());
-		}
+    if (chunk.getEnabled() != null) {
+      metadata.put(KEY_ENABLED, chunk.getEnabled());
+    }
 
-		return Document.builder()
-			.text(chunk.getText())
-			.id(chunk.getChunkId())
-			.metadata(metadata)
-			.build();
-	}
-
+    return Document.builder()
+        .text(chunk.getText())
+        .id(chunk.getChunkId())
+        .metadata(metadata)
+        .build();
+  }
 }

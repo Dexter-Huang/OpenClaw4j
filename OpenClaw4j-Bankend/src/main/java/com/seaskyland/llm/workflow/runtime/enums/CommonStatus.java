@@ -23,62 +23,54 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * Common status enum for managing entity states. Provides standard status values and
- * conversion methods.
+ * Common status enum for managing entity states. Provides standard status values and conversion
+ * methods.
  *
  * @since 1.0.0.3
  */
-
 @Getter
 @AllArgsConstructor
 public enum CommonStatus implements IEnum<Integer> {
 
-	/**
-	 * Represents a deleted entity
-	 */
-	@JsonProperty("deleted")
-	DELETED(0, "deleted"),
+  /** Represents a deleted entity */
+  @JsonProperty("deleted")
+  DELETED(0, "deleted"),
 
-	/**
-	 * Represents a normal/active entity
-	 */
-	@JsonProperty("normal")
-	NORMAL(1, "normal"),;
+  /** Represents a normal/active entity */
+  @JsonProperty("normal")
+  NORMAL(1, "normal"),
+  ;
 
-	/**
-	 * Numeric status code
-	 */
-	@EnumValue
-	private final Integer status;
+  /** Numeric status code */
+  @EnumValue private final Integer status;
 
-	/**
-	 * String representation of the status
-	 */
-	private final String value;
+  /** String representation of the status */
+  private final String value;
 
-	/**
-	 * Returns the database value for this enum (required by IEnum interface)
-	 * @return the status integer value
-	 */
-	@Override
-	public Integer getValue() {
-		return this.status;
-	}
+  /**
+   * Returns the database value for this enum (required by IEnum interface)
+   *
+   * @return the status integer value
+   */
+  @Override
+  public Integer getValue() {
+    return this.status;
+  }
 
-	/**
-	 * Converts a numeric status code to its corresponding enum value
-	 * @param status numeric status code
-	 * @return corresponding CommonStatus enum value
-	 * @throws IllegalArgumentException if the status code is invalid
-	 */
-	public static CommonStatus of(Integer status) {
-		for (CommonStatus commonStatus : CommonStatus.values()) {
-			if (commonStatus.status.equals(status)) {
-				return commonStatus;
-			}
-		}
+  /**
+   * Converts a numeric status code to its corresponding enum value
+   *
+   * @param status numeric status code
+   * @return corresponding CommonStatus enum value
+   * @throws IllegalArgumentException if the status code is invalid
+   */
+  public static CommonStatus of(Integer status) {
+    for (CommonStatus commonStatus : CommonStatus.values()) {
+      if (commonStatus.status.equals(status)) {
+        return commonStatus;
+      }
+    }
 
-		throw new IllegalArgumentException("Invalid status: " + status);
-	}
-
+    throw new IllegalArgumentException("Invalid status: " + status);
+  }
 }

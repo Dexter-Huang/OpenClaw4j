@@ -21,33 +21,32 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * Enum representing different types of text chunking strategies. Each type defines a
- * specific method for dividing text into chunks.
+ * Enum representing different types of text chunking strategies. Each type defines a specific
+ * method for dividing text into chunks.
  *
  * @since 1.0.0.3
  */
-
 @Getter
 @AllArgsConstructor
 public enum ChunkType {
 
-	/** Chunks text based on character length */
-	@JsonProperty("length")
-	LENGTH("length"),
+  /** Chunks text based on character length */
+  @JsonProperty("length")
+  LENGTH("length"),
 
-	/** Chunks text based on page boundaries */
-	@JsonProperty("page")
-	PAGE("page"),
+  /** Chunks text based on page boundaries */
+  @JsonProperty("page")
+  PAGE("page"),
 
-	/** Chunks text based on title sections */
-	@JsonProperty("title")
-	TITLE("title"),
+  /** Chunks text based on title sections */
+  @JsonProperty("title")
+  TITLE("title"),
 
-	/** Chunks text based on regex patterns */
-	@JsonProperty("regex")
-	REGEX("regex"),;
+  /** Chunks text based on regex patterns */
+  @JsonProperty("regex")
+  REGEX("regex"),
+  ;
 
-	/** The string value representing the chunk type */
-	private final String value;
-
+  /** The string value representing the chunk type */
+  private final String value;
 }

@@ -21,44 +21,41 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/**
- * Enum representing the different states of an application.
- */
+/** Enum representing the different states of an application. */
 @Getter
 @AllArgsConstructor
 public enum AppStatus {
+  @JsonProperty("deleted")
+  DELETED(0, "deleted"),
 
-	@JsonProperty("deleted")
-	DELETED(0, "deleted"),
+  @JsonProperty("draft")
+  DRAFT(1, "draft"),
 
-	@JsonProperty("draft")
-	DRAFT(1, "draft"),
+  @JsonProperty("published")
+  PUBLISHED(2, "published"),
 
-	@JsonProperty("published")
-	PUBLISHED(2, "published"),
+  @JsonProperty("published_editing")
+  PUBLISHED_EDITING(3, "published_editing"),
+  ;
 
-	@JsonProperty("published_editing")
-	PUBLISHED_EDITING(3, "published_editing"),;
+  @EnumValue private final Integer status; // Numeric status code
 
-	@EnumValue
-	private final Integer status; // Numeric status code
+  private final String value; // String representation of the status
 
-	private final String value; // String representation of the status
+  /**
+   * Converts a numeric status code to its corresponding AppStatus enum value.
+   *
+   * @param status Numeric status code
+   * @return Corresponding AppStatus enum value
+   * @throws IllegalArgumentException if the status code is invalid
+   */
+  public static AppStatus of(Integer status) {
+    for (AppStatus appStatus : AppStatus.values()) {
+      if (appStatus.status.equals(status)) {
+        return appStatus;
+      }
+    }
 
-	/**
-	 * Converts a numeric status code to its corresponding AppStatus enum value.
-	 * @param status Numeric status code
-	 * @return Corresponding AppStatus enum value
-	 * @throws IllegalArgumentException if the status code is invalid
-	 */
-	public static AppStatus of(Integer status) {
-		for (AppStatus appStatus : AppStatus.values()) {
-			if (appStatus.status.equals(status)) {
-				return appStatus;
-			}
-		}
-
-		throw new IllegalArgumentException("Invalid status: " + status);
-	}
-
+    throw new IllegalArgumentException("Invalid status: " + status);
+  }
 }

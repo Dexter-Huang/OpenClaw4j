@@ -16,10 +16,9 @@
 
 package com.seaskyland.llm.workflow.core.base.service;
 
+import com.seaskyland.llm.workflow.core.base.entity.ReferEntity;
 import com.seaskyland.llm.workflow.runtime.domain.app.Application;
 import com.seaskyland.llm.workflow.runtime.domain.refer.Refer;
-import com.seaskyland.llm.workflow.core.base.entity.ReferEntity;
-
 import java.util.List;
 
 /**
@@ -30,55 +29,61 @@ import java.util.List;
  */
 public interface ReferService {
 
-	/**
-	 * Save a single refer entity
-	 * @param refer the refer entity to save
-	 * @return true if saved successfully
-	 */
-	Boolean saveRefer(ReferEntity refer);
+  /**
+   * Save a single refer entity
+   *
+   * @param refer the refer entity to save
+   * @return true if saved successfully
+   */
+  Boolean saveRefer(ReferEntity refer);
 
-	/**
-	 * Save a list of refer entities
-	 * @param refers list of refer entities to save
-	 * @return true if all saved successfully
-	 */
-	Boolean saveReferList(List<ReferEntity> refers);
+  /**
+   * Save a list of refer entities
+   *
+   * @param refers list of refer entities to save
+   * @return true if all saved successfully
+   */
+  Boolean saveReferList(List<ReferEntity> refers);
 
-	/**
-	 * Delete a refer entity by refer code and main code
-	 * @param referCode the refer code
-	 * @param mainCode the main code
-	 * @return true if deleted successfully
-	 */
-	Boolean deleteRefer(String referCode, String mainCode);
+  /**
+   * Delete a refer entity by refer code and main code
+   *
+   * @param referCode the refer code
+   * @param mainCode the main code
+   * @return true if deleted successfully
+   */
+  Boolean deleteRefer(String referCode, String mainCode);
 
-	/**
-	 * Delete refer entities by main code and refer type
-	 * @param mainCode the main code
-	 * @param referType the refer type
-	 * @return true if all deleted successfully
-	 */
-	Boolean deleteReferList(String mainCode, Integer referType);
+  /**
+   * Delete refer entities by main code and refer type
+   *
+   * @param mainCode the main code
+   * @param referType the refer type
+   * @return true if all deleted successfully
+   */
+  Boolean deleteReferList(String mainCode, Integer referType);
 
-	/**
-	 * Get refer list by main code
-	 * @param mainCode the main code
-	 * @return list of refers
-	 */
-	List<Refer> getReferListByMainCode(String mainCode);
+  /**
+   * Get refer list by main code
+   *
+   * @param mainCode the main code
+   * @return list of refers
+   */
+  List<Refer> getReferListByMainCode(String mainCode);
 
-	/**
-	 * Get refer list by refer code
-	 * @param referCode the refer code
-	 * @return list of refers
-	 */
-	List<Refer> getReferListByReferCode(String referCode);
+  /**
+   * Get refer list by refer code
+   *
+   * @param referCode the refer code
+   * @return list of refers
+   */
+  List<Refer> getReferListByReferCode(String referCode);
 
-	/**
-	 * Construct refer entities from application
-	 * @param app the application
-	 * @return list of constructed refer entities
-	 */
-	List<ReferEntity> constructRefers(Application app);
-
+  /**
+   * Construct refer entities from application
+   *
+   * @param app the application
+   * @return list of constructed refer entities
+   */
+  List<ReferEntity> constructRefers(Application app);
 }

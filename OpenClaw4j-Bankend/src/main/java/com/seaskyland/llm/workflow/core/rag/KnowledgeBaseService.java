@@ -19,55 +19,59 @@ package com.seaskyland.llm.workflow.core.rag;
 import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
 import com.seaskyland.llm.workflow.runtime.domain.PagingList;
 import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.KnowledgeBase;
-
 import java.util.List;
 
 /**
- * Service interface for managing knowledge bases. Provides CRUD operations and query
- * capabilities for knowledge base resources.
+ * Service interface for managing knowledge bases. Provides CRUD operations and query capabilities
+ * for knowledge base resources.
  *
  * @since 1.0.0.3
  */
 public interface KnowledgeBaseService {
 
-	/**
-	 * Creates a new knowledge base.
-	 * @param kb The knowledge base to create
-	 * @return The ID of the created knowledge base
-	 */
-	String createKnowledgeBase(KnowledgeBase kb);
+  /**
+   * Creates a new knowledge base.
+   *
+   * @param kb The knowledge base to create
+   * @return The ID of the created knowledge base
+   */
+  String createKnowledgeBase(KnowledgeBase kb);
 
-	/**
-	 * Retrieves a knowledge base by its ID.
-	 * @param kbId The ID of the knowledge base to retrieve
-	 * @return The knowledge base instance
-	 */
-	KnowledgeBase getKnowledgeBase(String kbId);
+  /**
+   * Retrieves a knowledge base by its ID.
+   *
+   * @param kbId The ID of the knowledge base to retrieve
+   * @return The knowledge base instance
+   */
+  KnowledgeBase getKnowledgeBase(String kbId);
 
-	/**
-	 * Lists knowledge bases with pagination support.
-	 * @param query The query parameters including pagination info
-	 * @return A paged list of knowledge bases
-	 */
-	PagingList<KnowledgeBase> listKnowledgeBases(BaseQuery query);
+  /**
+   * Lists knowledge bases with pagination support.
+   *
+   * @param query The query parameters including pagination info
+   * @return A paged list of knowledge bases
+   */
+  PagingList<KnowledgeBase> listKnowledgeBases(BaseQuery query);
 
-	/**
-	 * Updates an existing knowledge base.
-	 * @param kb The knowledge base to update
-	 */
-	void updateKnowledgeBase(KnowledgeBase kb);
+  /**
+   * Updates an existing knowledge base.
+   *
+   * @param kb The knowledge base to update
+   */
+  void updateKnowledgeBase(KnowledgeBase kb);
 
-	/**
-	 * Deletes a knowledge base by its ID.
-	 * @param kbId The ID of the knowledge base to delete
-	 */
-	void deleteKnowledgeBase(String kbId);
+  /**
+   * Deletes a knowledge base by its ID.
+   *
+   * @param kbId The ID of the knowledge base to delete
+   */
+  void deleteKnowledgeBase(String kbId);
 
-	/**
-	 * Retrieves multiple knowledge bases by their IDs.
-	 * @param kbIds List of knowledge base IDs to retrieve
-	 * @return List of knowledge base instances
-	 */
-	List<KnowledgeBase> listKnowledgeBases(List<String> kbIds);
-
+  /**
+   * Retrieves multiple knowledge bases by their IDs.
+   *
+   * @param kbIds List of knowledge base IDs to retrieve
+   * @return List of knowledge base instances
+   */
+  List<KnowledgeBase> listKnowledgeBases(List<String> kbIds);
 }

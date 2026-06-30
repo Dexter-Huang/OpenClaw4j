@@ -25,18 +25,19 @@ import org.springframework.lang.Nullable;
  */
 public interface RerankerOptions {
 
-	/**
-	 * Gets the name of the reranker model to use
-	 * @return model name
-	 */
-	@Nullable
-	String getModel();
+  /**
+   * Gets the name of the reranker model to use
+   *
+   * @return model name
+   */
+  @Nullable
+  String getModel();
 
-	/**
-	 * Gets the number of top results to return after reranking
-	 * @return number of top results
-	 */
-	@Nullable
-	Integer getTopN();
-
+  /**
+   * Gets the number of top results to return after reranking
+   *
+   * @return number of top results
+   */
+  @Nullable
+  Integer getTopN();
 }

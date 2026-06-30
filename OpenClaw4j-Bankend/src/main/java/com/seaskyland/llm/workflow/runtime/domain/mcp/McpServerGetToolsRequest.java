@@ -17,41 +17,31 @@
 package com.seaskyland.llm.workflow.runtime.domain.mcp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * Request model for getting tools from MCP server
  *
  * @author guning.lt
  * @since 1.0.0.3
- **/
+ */
 @Data
 public class McpServerGetToolsRequest implements Serializable {
 
-	/**
-	 * Unique identifier for the request
-	 */
-	@JsonProperty("request_id")
-	private String requestId;
+  /** Unique identifier for the request */
+  @JsonProperty("request_id")
+  private String requestId;
 
-	/**
-	 * Server code identifier
-	 */
-	@JsonProperty("server_code")
-	private String serverCode;
+  /** Server code identifier */
+  @JsonProperty("server_code")
+  private String serverCode;
 
-	/**
-	 * Workspace identifier
-	 */
-	@JsonProperty("workspace_id")
-	private String workspaceId;
+  /** Workspace identifier */
+  @JsonProperty("workspace_id")
+  private String workspaceId;
 
-	/**
-	 * Account identifier
-	 */
-	@JsonProperty("account_id")
-	private String accountId;
-
+  /** Account identifier */
+  @JsonProperty("account_id")
+  private String accountId;
 }

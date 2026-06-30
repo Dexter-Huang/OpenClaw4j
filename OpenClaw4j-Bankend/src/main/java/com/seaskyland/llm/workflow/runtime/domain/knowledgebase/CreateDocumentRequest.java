@@ -16,13 +16,12 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.knowledgebase;
 
-import com.seaskyland.llm.workflow.runtime.enums.DocumentType;
-import com.seaskyland.llm.workflow.runtime.domain.file.UploadPolicy;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.domain.file.UploadPolicy;
+import com.seaskyland.llm.workflow.runtime.enums.DocumentType;
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
 
 /**
  * Request model for creating a document in the knowledge base.
@@ -32,18 +31,17 @@ import java.util.List;
 @Data
 public class CreateDocumentRequest implements Serializable {
 
-	/** ID of the knowledge base */
-	@JsonProperty("kb_id")
-	private String kbId;
+  /** ID of the knowledge base */
+  @JsonProperty("kb_id")
+  private String kbId;
 
-	/** List of files to be uploaded */
-	private List<UploadPolicy> files;
+  /** List of files to be uploaded */
+  private List<UploadPolicy> files;
 
-	/** Type of the document */
-	private DocumentType type;
+  /** Type of the document */
+  private DocumentType type;
 
-	/** Configuration for document processing */
-	@JsonProperty("process_config")
-	private ProcessConfig processConfig;
-
+  /** Configuration for document processing */
+  @JsonProperty("process_config")
+  private ProcessConfig processConfig;
 }

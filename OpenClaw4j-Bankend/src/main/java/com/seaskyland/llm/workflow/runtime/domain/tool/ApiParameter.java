@@ -17,82 +17,59 @@
 package com.seaskyland.llm.workflow.runtime.domain.tool;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Represents API parameter information.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class ApiParameter implements Serializable {
 
-	/**
-	 * Parameter name
-	 */
-	private String key;
+  /** Parameter name */
+  private String key;
 
-	/**
-	 * Parameter type
-	 */
-	private String type;
+  /** Parameter type */
+  private String type;
 
-	/**
-	 * Parameter description
-	 */
-	private String description;
+  /** Parameter description */
+  private String description;
 
-	/**
-	 * Parameter location
-	 */
-	private String location;
+  /** Parameter location */
+  private String location;
 
-	/**
-	 * Default value
-	 */
-	@JsonProperty("default_value")
-	private String defaultValue;
+  /** Default value */
+  @JsonProperty("default_value")
+  private String defaultValue;
 
-	/**
-	 * Whether the parameter is required
-	 */
-	private boolean required;
+  /** Whether the parameter is required */
+  private boolean required;
 
-	/**
-	 * Whether the parameter requires user input
-	 */
-	@JsonProperty("user_input")
-	private boolean userInput;
+  /** Whether the parameter requires user input */
+  @JsonProperty("user_input")
+  private boolean userInput;
 
-	/**
-	 * Enum values for the parameter
-	 */
-	private List enums;
+  /** Enum values for the parameter */
+  private List enums;
 
-	/**
-	 * Sub-properties for object type parameters
-	 */
-	private List<ApiParameter> properties;
+  /** Sub-properties for object type parameters */
+  private List<ApiParameter> properties;
 
-	/**
-	 * Adds a sub-parameter to the properties list
-	 */
-	public void addSubParam(ApiParameter subParam) {
-		if (properties == null) {
-			properties = new ArrayList<>();
-		}
-		properties.add(subParam);
-	}
-
+  /** Adds a sub-parameter to the properties list */
+  public void addSubParam(ApiParameter subParam) {
+    if (properties == null) {
+      properties = new ArrayList<>();
+    }
+    properties.add(subParam);
+  }
 }

@@ -16,6 +16,12 @@
 
 package com.seaskyland.llm.workflow.admin.controller;
 
+import static com.seaskyland.llm.workflow.core.utils.LogUtils.FAIL;
+import static com.seaskyland.llm.workflow.core.utils.LogUtils.SUCCESS;
+
+import com.seaskyland.llm.workflow.core.base.service.AgentService;
+import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
+import com.seaskyland.llm.workflow.core.utils.LogUtils;
 import com.seaskyland.llm.workflow.runtime.domain.BizError;
 import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
 import com.seaskyland.llm.workflow.runtime.domain.agent.AgentRequest;
@@ -23,9 +29,6 @@ import com.seaskyland.llm.workflow.runtime.domain.agent.AgentResponse;
 import com.seaskyland.llm.workflow.runtime.domain.agent.AgentStatus;
 import com.seaskyland.llm.workflow.runtime.utils.ExceptionUtils;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
-import com.seaskyland.llm.workflow.core.base.service.AgentService;
-import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
-import com.seaskyland.llm.workflow.core.utils.LogUtils;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
@@ -39,12 +42,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SignalType;
 
-import static com.seaskyland.llm.workflow.core.utils.LogUtils.FAIL;
-import static com.seaskyland.llm.workflow.core.utils.LogUtils.SUCCESS;
-
 /**
- * Controller for handling chat completions and streaming responses. Provides endpoints
- * for both synchronous and streaming chat interactions.
+ * Controller for handling chat completions and streaming responses. Provides endpoints for both
+ * synchronous and streaming chat interactions.
  *
  * @since 1.0.0.3
  */
@@ -53,112 +53,156 @@ import static com.seaskyland.llm.workflow.core.utils.LogUtils.SUCCESS;
 @RequestMapping("/console/v1/apps")
 public class AppChatController {
 
-	/** Service for handling agent-related operations */
-	private final AgentService agentService;
+  /** Service for handling agent-related operations */
+  private final AgentService agentService;
 
-	public AppChatController(AgentService agentService) {
-		this.agentService = agentService;
-	}
+  public AppChatController(AgentService agentService) {
+    this.agentService = agentService;
+  }
 
-	/**
-	 * Handles chat completion requests, supporting both streaming and non-streaming
-	 * responses. For streaming responses, uses Server-Sent Events (SSE) to deliver
-	 * real-time updates.
-	 * @param request The chat request containing user input and configuration
-	 * @param response HTTP response object for setting headers and status
-	 * @return Either a streaming response or a single completion response
-	 */
-	@PostMapping(value = { "/chat/completions" })
-	public Object completion(@RequestBody AgentRequest request, HttpServletResponse response) {
-		long start = System.currentTimeMillis();
+  /**
+   * Handles chat completion requests, supporting both streaming and non-streaming responses. For
+   * streaming responses, uses Server-Sent Events (SSE) to deliver real-time updates.
+   *
+   * @param request The chat request containing user input and configuration
+   * @param response HTTP response object for setting headers and status
+   * @return Either a streaming response or a single completion response
+   */
+  @PostMapping(value = {"/chat/completions"})
+  public Object completion(@RequestBody AgentRequest request, HttpServletResponse response) {
+    long start = System.currentTimeMillis();
 
-		RequestContext context = RequestContextHolder.getRequestContext();
-		context.setStartTime(System.currentTimeMillis());
+    RequestContext context = RequestContextHolder.getRequestContext();
+    context.setStartTime(System.currentTimeMillis());
 
-		LogUtils.trace(context, "startCall", LogUtils.SUCCESS, start, request, null);
-		request.setDraft(true);
-		if (request.getStream() != null && request.getStream()) {
-			Flux<AgentResponse> responseFlux = agentService.streamCall(Flux.just(request));
+    LogUtils.trace(context, "startCall", LogUtils.SUCCESS, start, request, null);
+    request.setDraft(true);
+    if (request.getStream() != null && request.getStream()) {
+      Flux<AgentResponse> responseFlux = agentService.streamCall(Flux.just(request));
 
-			// in case nginx will buffer the response, we need to disable it
-			response.addHeader("X-Accel-Buffering", "no");
-			response.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_EVENT_STREAM_VALUE);
+      // in case nginx will buffer the response, we need to disable it
+      response.addHeader("X-Accel-Buffering", "no");
+      response.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_EVENT_STREAM_VALUE);
 
-			SseEmitter emitter = new SseEmitter(0L);
-			responseFlux.doOnNext(data -> sendStreamingResponse(context, request, emitter, data, response))
-				.onErrorResume(err -> handleError(context, request, err))
-				.doFinally(type -> handleComplete(context, type, emitter))
-				.subscribe();
+      SseEmitter emitter = new SseEmitter(0L);
+      responseFlux
+          .doOnNext(data -> sendStreamingResponse(context, request, emitter, data, response))
+          .onErrorResume(err -> handleError(context, request, err))
+          .doFinally(type -> handleComplete(context, type, emitter))
+          .subscribe();
 
-			return emitter;
-		}
+      return emitter;
+    }
 
-		try {
-			AgentResponse completion = agentService.call(request);
-			String result = JsonUtils.toJson(completion);
+    try {
+      AgentResponse completion = agentService.call(request);
+      String result = JsonUtils.toJson(completion);
 
-			LogUtils.monitor(context, "AgentChatController", "endCall", context.getStartTime(), LogUtils.SUCCESS,
-					request, result);
-			return result;
-		}
-		catch (Exception e) {
-			BizError error = ExceptionUtils.convertError(e);
-			response.setStatus(error.getStatusCode());
+      LogUtils.monitor(
+          context,
+          "AgentChatController",
+          "endCall",
+          context.getStartTime(),
+          LogUtils.SUCCESS,
+          request,
+          result);
+      return result;
+    } catch (Exception e) {
+      BizError error = ExceptionUtils.convertError(e);
+      response.setStatus(error.getStatusCode());
 
-			String result = JsonUtils.toJson(error);
-			LogUtils.monitor(context, "AgentChatController", "endCallError", context.getStartTime(), FAIL, request,
-					result, e);
+      String result = JsonUtils.toJson(error);
+      LogUtils.monitor(
+          context,
+          "AgentChatController",
+          "endCallError",
+          context.getStartTime(),
+          FAIL,
+          request,
+          result,
+          e);
 
-			return result;
-		}
-	}
+      return result;
+    }
+  }
 
-	/**
-	 * Sends a streaming response to the client using SSE. Handles error status codes and
-	 * logs completion status.
-	 */
-	private void sendStreamingResponse(RequestContext context, AgentRequest request, SseEmitter emitter,
-			AgentResponse completion, HttpServletResponse response) {
-		if (completion.getError() != null) {
-			response.setStatus(completion.getError().getStatusCode());
-		}
+  /**
+   * Sends a streaming response to the client using SSE. Handles error status codes and logs
+   * completion status.
+   */
+  private void sendStreamingResponse(
+      RequestContext context,
+      AgentRequest request,
+      SseEmitter emitter,
+      AgentResponse completion,
+      HttpServletResponse response) {
+    if (completion.getError() != null) {
+      response.setStatus(completion.getError().getStatusCode());
+    }
 
-		String json = JsonUtils.toJson(completion);
-		try {
-			emitter.send(json, MediaType.TEXT_EVENT_STREAM);
-		}
-		catch (Exception e) {
-			LogUtils.monitor(context, "AgentChatController", "endStreamCallError", context.getStartTime(), FAIL,
-					request, e.getMessage(), e);
-		}
+    String json = JsonUtils.toJson(completion);
+    try {
+      emitter.send(json, MediaType.TEXT_EVENT_STREAM);
+    } catch (Exception e) {
+      LogUtils.monitor(
+          context,
+          "AgentChatController",
+          "endStreamCallError",
+          context.getStartTime(),
+          FAIL,
+          request,
+          e.getMessage(),
+          e);
+    }
 
-		if (completion.getStatus() == AgentStatus.COMPLETED) {
-			LogUtils.trace(context, "AgentChatController", "endStreamCall", context.getStartTime(), SUCCESS, request,
-					json);
-		}
-	}
+    if (completion.getStatus() == AgentStatus.COMPLETED) {
+      LogUtils.trace(
+          context,
+          "AgentChatController",
+          "endStreamCall",
+          context.getStartTime(),
+          SUCCESS,
+          request,
+          json);
+    }
+  }
 
-	/**
-	 * Handles errors during streaming by converting them to appropriate error responses.
-	 * Logs the error and returns a formatted error response.
-	 */
-	private Mono<AgentResponse> handleError(RequestContext context, AgentRequest request, Throwable err) {
-		LogUtils.monitor(context, "AgentChatController", "endStreamCallError", context.getStartTime(), FAIL, request,
-				err.getMessage(), err);
+  /**
+   * Handles errors during streaming by converting them to appropriate error responses. Logs the
+   * error and returns a formatted error response.
+   */
+  private Mono<AgentResponse> handleError(
+      RequestContext context, AgentRequest request, Throwable err) {
+    LogUtils.monitor(
+        context,
+        "AgentChatController",
+        "endStreamCallError",
+        context.getStartTime(),
+        FAIL,
+        request,
+        err.getMessage(),
+        err);
 
-		BizError error = ExceptionUtils.convertError(err);
-		AgentResponse completion = AgentResponse.builder().requestId(context.getRequestId()).error(error).build();
+    BizError error = ExceptionUtils.convertError(err);
+    AgentResponse completion =
+        AgentResponse.builder().requestId(context.getRequestId()).error(error).build();
 
-		return Mono.just(completion);
-	}
+    return Mono.just(completion);
+  }
 
-	/**
-	 * Handles completion of the streaming response. Completes the SSE emitter and logs
-	 * the completion status.
-	 */
-	private void handleComplete(RequestContext context, SignalType signalType, SseEmitter emitter) {
-		emitter.complete();
-		LogUtils.monitor(context, "AgentChatController", "endStreamCall", context.getStartTime(), SUCCESS, null, null);
-	}
-
+  /**
+   * Handles completion of the streaming response. Completes the SSE emitter and logs the completion
+   * status.
+   */
+  private void handleComplete(RequestContext context, SignalType signalType, SseEmitter emitter) {
+    emitter.complete();
+    LogUtils.monitor(
+        context,
+        "AgentChatController",
+        "endStreamCall",
+        context.getStartTime(),
+        SUCCESS,
+        null,
+        null);
+  }
 }

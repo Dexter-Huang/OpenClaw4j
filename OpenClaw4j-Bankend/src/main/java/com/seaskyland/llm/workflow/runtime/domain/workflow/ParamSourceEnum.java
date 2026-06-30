@@ -16,7 +16,7 @@
 package com.seaskyland.llm.workflow.runtime.domain.workflow;
 
 public enum ParamSourceEnum {
-
-	sys, user, conversation
-
+  sys,
+  user,
+  conversation
 }

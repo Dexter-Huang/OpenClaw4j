@@ -21,14 +21,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * MCP Tool implementation. Extends ToolCallSchema to provide MCP-specific tool
- * functionality.
+ * MCP Tool implementation. Extends ToolCallSchema to provide MCP-specific tool functionality.
  *
  * @author guning.lt
  * @since 1.0.0.3
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class McpTool extends ToolCallSchema {
-
-}
+public class McpTool extends ToolCallSchema {}

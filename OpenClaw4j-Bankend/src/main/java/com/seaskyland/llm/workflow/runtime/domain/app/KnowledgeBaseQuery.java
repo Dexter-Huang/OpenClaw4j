@@ -15,24 +15,18 @@
  */
 package com.seaskyland.llm.workflow.runtime.domain.app;
 
-import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
+import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.List;
-
-/**
- * Query model for knowledge base operations
- */
+/** Query model for knowledge base operations */
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class KnowledgeBaseQuery extends BaseQuery {
 
-	/**
-	 * List of knowledge base IDs to query
-	 */
-	@JsonProperty("kb_ids")
-	private List<String> kbIds;
-
+  /** List of knowledge base IDs to query */
+  @JsonProperty("kb_ids")
+  private List<String> kbIds;
 }

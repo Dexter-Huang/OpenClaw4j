@@ -16,20 +16,19 @@
 
 package com.seaskyland.llm.workflow.core.base.mq;
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
- * A generic message class for message queue operations. Supports different message types
- * and properties.
+ * A generic message class for message queue operations. Supports different message types and
+ * properties.
  *
  * @since 1.0.0.3
  */
@@ -39,47 +38,46 @@ import java.util.Map;
 @NoArgsConstructor
 public class MqMessage implements Serializable {
 
-	/** Unique identifier for the message */
-	private String messageId;
+  /** Unique identifier for the message */
+  private String messageId;
 
-	/** Topic to which the message belongs */
-	@NotNull
-	private String topic;
+  /** Topic to which the message belongs */
+  @NotNull private String topic;
 
-	/** Message tag for categorization */
-	@NotNull
-	private String tag;
+  /** Message tag for categorization */
+  @NotNull private String tag;
 
-	/** List of message keys for identification */
-	private List<String> keys;
+  /** List of message keys for identification */
+  private List<String> keys;
 
-	/** Actual content of the message */
-	private String body;
+  /** Actual content of the message */
+  private String body;
 
-	/** Additional properties associated with the message */
-	private Map<String, String> properties = new HashMap<>();
+  /** Additional properties associated with the message */
+  private Map<String, String> properties = new HashMap<>();
 
-	/** Timestamp when the message was delivered */
-	private Long deliveryTimestamp;
+  /** Timestamp when the message was delivered */
+  private Long deliveryTimestamp;
 
-	/**
-	 * Adds a property to the message
-	 * @param key property key
-	 * @param value property value
-	 * @return this message instance
-	 */
-	public MqMessage addProperty(String key, String value) {
-		this.properties.put(key, value);
-		return this;
-	}
+  /**
+   * Adds a property to the message
+   *
+   * @param key property key
+   * @param value property value
+   * @return this message instance
+   */
+  public MqMessage addProperty(String key, String value) {
+    this.properties.put(key, value);
+    return this;
+  }
 
-	/**
-	 * Retrieves a property value by its key
-	 * @param key property key
-	 * @return property value
-	 */
-	public String getProperty(String key) {
-		return this.properties.get(key);
-	}
-
+  /**
+   * Retrieves a property value by its key
+   *
+   * @param key property key
+   * @return property value
+   */
+  public String getProperty(String key) {
+    return this.properties.get(key);
+  }
 }

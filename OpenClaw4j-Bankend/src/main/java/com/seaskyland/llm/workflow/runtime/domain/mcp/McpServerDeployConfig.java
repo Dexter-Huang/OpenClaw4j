@@ -17,11 +17,11 @@
 package com.seaskyland.llm.workflow.runtime.domain.mcp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Data;
 
 /**
  * Configuration for MCP server deployment
@@ -32,31 +32,30 @@ import java.util.Map;
 @Data
 public class McpServerDeployConfig implements Serializable {
 
-	/** Startup command for the server */
-	private List<String> startCmd;
+  /** Startup command for the server */
+  private List<String> startCmd;
 
-	/** Installation script for npx package or corresponding value */
-	@JsonProperty("install_config")
-	private String installConfig;
+  /** Installation script for npx package or corresponding value */
+  @JsonProperty("install_config")
+  private String installConfig;
 
-	/** List of environment variable names */
-	private List<String> envs;
+  /** List of environment variable names */
+  private List<String> envs;
 
-	/** Map of environment variable values */
-	private Map<String, String> envValue;
+  /** Map of environment variable values */
+  private Map<String, String> envValue;
 
-	/** Authentication key for server access */
-	private String authorization;
+  /** Authentication key for server access */
+  private String authorization;
 
-	/** Remote server address */
-	@JsonProperty("remote_address")
-	private String remoteAddress;
+  /** Remote server address */
+  @JsonProperty("remote_address")
+  private String remoteAddress;
 
-	/** Remote endpoint path */
-	@JsonProperty("remote_endpoint")
-	private String remoteEndpoint;
+  /** Remote endpoint path */
+  @JsonProperty("remote_endpoint")
+  private String remoteEndpoint;
 
-	/** Headers for SSE (Server-Sent Events) connection */
-	private HashMap<String, String> remoteHeader;
-
+  /** Headers for SSE (Server-Sent Events) connection */
+  private HashMap<String, String> remoteHeader;
 }

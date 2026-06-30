@@ -16,6 +16,14 @@
 
 package com.seaskyland.llm.workflow.core.workflow.processor.impl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.seaskyland.llm.workflow.core.base.manager.CacheManager;
+import com.seaskyland.llm.workflow.core.base.manager.DocumentRetrieverManager;
+import com.seaskyland.llm.workflow.core.config.CommonConfig;
+import com.seaskyland.llm.workflow.core.utils.common.VariableUtils;
+import com.seaskyland.llm.workflow.core.workflow.WorkflowContext;
+import com.seaskyland.llm.workflow.core.workflow.WorkflowInnerService;
+import com.seaskyland.llm.workflow.core.workflow.processor.AbstractExecuteProcessor;
 import com.seaskyland.llm.workflow.runtime.domain.app.FileSearchOptions;
 import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.DocumentChunk;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.Edge;
@@ -24,14 +32,7 @@ import com.seaskyland.llm.workflow.runtime.domain.workflow.NodeResult;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.NodeTypeEnum;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.inner.ShortTermMemory;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
-import com.seaskyland.llm.workflow.core.config.CommonConfig;
-import com.seaskyland.llm.workflow.core.base.manager.DocumentRetrieverManager;
-import com.seaskyland.llm.workflow.core.base.manager.CacheManager;
-import com.seaskyland.llm.workflow.core.workflow.WorkflowContext;
-import com.seaskyland.llm.workflow.core.utils.common.VariableUtils;
-import com.seaskyland.llm.workflow.core.workflow.WorkflowInnerService;
-import com.seaskyland.llm.workflow.core.workflow.processor.AbstractExecuteProcessor;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.apache.commons.collections.CollectionUtils;
@@ -40,152 +41,150 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.rag.Query;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 /**
  * Knowledge Base Retrieval Node Processor
- * <p>
- * This class is responsible for handling the execution of knowledge base retrieval nodes
- * in the workflow. It provides functionality for: 1. Retrieving relevant document chunks
- * from knowledge bases 2. Supporting multiple knowledge base sources 3. Configurable
- * similarity thresholds and top-k retrieval 4. Integration with short-term memory for
- * context-aware retrieval 5. Customizable retrieval strategies 6. Input validation and
- * error handling 7. Result aggregation and formatting
+ *
+ * <p>This class is responsible for handling the execution of knowledge base retrieval nodes in the
+ * workflow. It provides functionality for: 1. Retrieving relevant document chunks from knowledge
+ * bases 2. Supporting multiple knowledge base sources 3. Configurable similarity thresholds and
+ * top-k retrieval 4. Integration with short-term memory for context-aware retrieval 5. Customizable
+ * retrieval strategies 6. Input validation and error handling 7. Result aggregation and formatting
  *
  * @version 1.0.0-M1
  */
 @Component("RetrievalExecuteProcessor")
 public class RetrievalExecuteProcessor extends AbstractExecuteProcessor {
 
-	private final DocumentRetrieverManager documentRetrieverManager;
+  private final DocumentRetrieverManager documentRetrieverManager;
 
-	public RetrievalExecuteProcessor(CacheManager cacheManager, WorkflowInnerService workflowInnerService,
-                                     ChatMemory conversationChatMemory, CommonConfig commonConfig,
-                                     DocumentRetrieverManager documentRetrieverManager) {
-		super(cacheManager, workflowInnerService, conversationChatMemory, commonConfig);
-		this.documentRetrieverManager = documentRetrieverManager;
-	}
+  public RetrievalExecuteProcessor(
+      CacheManager cacheManager,
+      WorkflowInnerService workflowInnerService,
+      ChatMemory conversationChatMemory,
+      CommonConfig commonConfig,
+      DocumentRetrieverManager documentRetrieverManager) {
+    super(cacheManager, workflowInnerService, conversationChatMemory, commonConfig);
+    this.documentRetrieverManager = documentRetrieverManager;
+  }
 
-	@Override
-	public String getNodeType() {
-		return NodeTypeEnum.RETRIEVAL.getCode();
-	}
+  @Override
+  public String getNodeType() {
+    return NodeTypeEnum.RETRIEVAL.getCode();
+  }
 
-	@Override
-	public String getNodeDescription() {
-		return NodeTypeEnum.RETRIEVAL.getDesc();
-	}
+  @Override
+  public String getNodeDescription() {
+    return NodeTypeEnum.RETRIEVAL.getDesc();
+  }
 
-	/**
-	 * Executes the knowledge base retrieval operation
-	 * @param graph The workflow graph
-	 * @param node The current node to be executed
-	 * @param context The workflow context
-	 * @return NodeResult containing the retrieved document chunks
-	 */
-	@Override
-	public NodeResult innerExecute(DirectedAcyclicGraph<String, Edge> graph, Node node, WorkflowContext context) {
-		NodeResult nodeResult = initNodeResultAndRefreshContext(node, context);
+  /**
+   * Executes the knowledge base retrieval operation
+   *
+   * @param graph The workflow graph
+   * @param node The current node to be executed
+   * @param context The workflow context
+   * @return NodeResult containing the retrieved document chunks
+   */
+  @Override
+  public NodeResult innerExecute(
+      DirectedAcyclicGraph<String, Edge> graph, Node node, WorkflowContext context) {
+    NodeResult nodeResult = initNodeResultAndRefreshContext(node, context);
 
-		FileSearchOptions searchOptions = new FileSearchOptions();
-		NodeParam config = JsonUtils.fromMap(node.getConfig().getNodeParam(), NodeParam.class);
-		searchOptions.setTopK(config.getTopK());
-		float similarityThreshold = config.getSimilarityThreshold() == null ? 0.5f : config.getSimilarityThreshold();
-		searchOptions.setSimilarityThreshold(similarityThreshold);
-		searchOptions.setKbIds(config.getKnowledgeBaseIds());
+    FileSearchOptions searchOptions = new FileSearchOptions();
+    NodeParam config = JsonUtils.fromMap(node.getConfig().getNodeParam(), NodeParam.class);
+    searchOptions.setTopK(config.getTopK());
+    float similarityThreshold =
+        config.getSimilarityThreshold() == null ? 0.5f : config.getSimilarityThreshold();
+    searchOptions.setSimilarityThreshold(similarityThreshold);
+    searchOptions.setKbIds(config.getKnowledgeBaseIds());
 
-		List<Node.InputParam> inputParams = node.getConfig().getInputParams();
-		String userInput = VariableUtils.getValueStringFromContext(inputParams.get(0), context);
-		ShortTermMemory shortMemory = config.getShortMemory();
+    List<Node.InputParam> inputParams = node.getConfig().getInputParams();
+    String userInput = VariableUtils.getValueStringFromContext(inputParams.get(0), context);
+    ShortTermMemory shortMemory = config.getShortMemory();
 
-		assert userInput != null;
-		Query query = Query.builder()
-			.text(userInput)
-			.history(constructShortTermMemory(node, shortMemory, context))
-			.build();
-		List<DocumentChunk> chunks = documentRetrieverManager.retrieve(query, searchOptions);
+    assert userInput != null;
+    Query query =
+        Query.builder()
+            .text(userInput)
+            .history(constructShortTermMemory(node, shortMemory, context))
+            .build();
+    List<DocumentChunk> chunks = documentRetrieverManager.retrieve(query, searchOptions);
 
-		nodeResult.setInput(JsonUtils.toJson(constructInputParamsMap(node, context)));
-		RetrievalResult retrievalResult = new RetrievalResult().setChunkList(chunks);
-		nodeResult.setOutput(JsonUtils.toJson(retrievalResult));
-		return nodeResult;
-	}
+    nodeResult.setInput(JsonUtils.toJson(constructInputParamsMap(node, context)));
+    RetrievalResult retrievalResult = new RetrievalResult().setChunkList(chunks);
+    nodeResult.setOutput(JsonUtils.toJson(retrievalResult));
+    return nodeResult;
+  }
 
-	/**
-	 * Result container for retrieval operations
-	 */
-	@Data
-	@Accessors(chain = true)
-	public static class RetrievalResult {
+  /** Result container for retrieval operations */
+  @Data
+  @Accessors(chain = true)
+  public static class RetrievalResult {
 
-		@JsonProperty("chunk_list")
-		private List<DocumentChunk> chunkList;
+    @JsonProperty("chunk_list")
+    private List<DocumentChunk> chunkList;
+  }
 
-	}
+  /** Configuration parameters for the retrieval node */
+  @Data
+  public static class NodeParam {
 
-	/**
-	 * Configuration parameters for the retrieval node
-	 */
-	@Data
-	public static class NodeParam {
+    // 知识库ids
+    @JsonProperty("knowledge_base_ids")
+    private List<String> knowledgeBaseIds;
 
-		// 知识库ids
-		@JsonProperty("knowledge_base_ids")
-		private List<String> knowledgeBaseIds;
+    // 知识库检索策略
+    @JsonProperty("prompt_strategy")
+    private String promptStrategy = "topk";
 
-		// 知识库检索策略
-		@JsonProperty("prompt_strategy")
-		private String promptStrategy = "topk";
+    // 检索topK
+    @JsonProperty("top_k")
+    private Integer topK;
 
-		// 检索topK
-		@JsonProperty("top_k")
-		private Integer topK;
+    @JsonProperty("similarity_threshold")
+    private Float similarityThreshold;
 
-		@JsonProperty("similarity_threshold")
-		private Float similarityThreshold;
+    @JsonProperty("short_memory")
+    private ShortTermMemory shortMemory;
+  }
 
-		@JsonProperty("short_memory")
-		private ShortTermMemory shortMemory;
+  /**
+   * Validates the input parameters for the retrieval operation
+   *
+   * @param inputParams List of input parameters to validate
+   * @return CheckNodeParamResult containing validation results
+   */
+  @Override
+  protected CheckNodeParamResult checkInputParams(List<Node.InputParam> inputParams) {
+    CheckNodeParamResult result = CheckNodeParamResult.success();
+    if (CollectionUtils.isEmpty(inputParams) || inputParams.get(0).getValue() == null) {
+      result.setSuccess(false);
+      result.getErrorInfos().add("Input is empty");
+    }
+    return result;
+  }
 
-	}
-
-	/**
-	 * Validates the input parameters for the retrieval operation
-	 * @param inputParams List of input parameters to validate
-	 * @return CheckNodeParamResult containing validation results
-	 */
-	@Override
-	protected CheckNodeParamResult checkInputParams(List<Node.InputParam> inputParams) {
-		CheckNodeParamResult result = CheckNodeParamResult.success();
-		if (CollectionUtils.isEmpty(inputParams) || inputParams.get(0).getValue() == null) {
-			result.setSuccess(false);
-			result.getErrorInfos().add("Input is empty");
-		}
-		return result;
-	}
-
-	/**
-	 * Validates the node parameters including input parameters and knowledge base
-	 * configuration
-	 * @param graph The workflow graph
-	 * @param node The node to validate
-	 * @return CheckNodeParamResult containing validation results
-	 */
-	@Override
-	public CheckNodeParamResult checkNodeParam(DirectedAcyclicGraph<String, Edge> graph, Node node) {
-		CheckNodeParamResult result = super.checkNodeParam(graph, node);
-		CheckNodeParamResult inputParamsResult = checkInputParams(node.getConfig().getInputParams());
-		if (!inputParamsResult.isSuccess()) {
-			result.setSuccess(false);
-			result.getErrorInfos().addAll(inputParamsResult.getErrorInfos());
-		}
-		NodeParam nodeParam = JsonUtils.fromMap(node.getConfig().getNodeParam(), NodeParam.class);
-		List<String> knowledgeBaseCodeList = nodeParam.getKnowledgeBaseIds();
-		if (CollectionUtils.isEmpty(knowledgeBaseCodeList)) {
-			result.setSuccess(false);
-			result.getErrorInfos().add("[KnowledgeBase] is null");
-		}
-		return result;
-	}
-
+  /**
+   * Validates the node parameters including input parameters and knowledge base configuration
+   *
+   * @param graph The workflow graph
+   * @param node The node to validate
+   * @return CheckNodeParamResult containing validation results
+   */
+  @Override
+  public CheckNodeParamResult checkNodeParam(DirectedAcyclicGraph<String, Edge> graph, Node node) {
+    CheckNodeParamResult result = super.checkNodeParam(graph, node);
+    CheckNodeParamResult inputParamsResult = checkInputParams(node.getConfig().getInputParams());
+    if (!inputParamsResult.isSuccess()) {
+      result.setSuccess(false);
+      result.getErrorInfos().addAll(inputParamsResult.getErrorInfos());
+    }
+    NodeParam nodeParam = JsonUtils.fromMap(node.getConfig().getNodeParam(), NodeParam.class);
+    List<String> knowledgeBaseCodeList = nodeParam.getKnowledgeBaseIds();
+    if (CollectionUtils.isEmpty(knowledgeBaseCodeList)) {
+      result.setSuccess(false);
+      result.getErrorInfos().add("[KnowledgeBase] is null");
+    }
+    return result;
+  }
 }

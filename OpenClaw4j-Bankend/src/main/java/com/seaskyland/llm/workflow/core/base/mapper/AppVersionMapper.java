@@ -16,15 +16,13 @@
 
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.AppVersionEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.AppVersionEntity;
 
 /**
- * Mapper interface for managing application version data. Provides basic CRUD operations
- * for AppVersionEntity.
+ * Mapper interface for managing application version data. Provides basic CRUD operations for
+ * AppVersionEntity.
  *
  * @since 1.0.0.3
  */
-public interface AppVersionMapper extends BaseMapper<AppVersionEntity> {
-
-}
+public interface AppVersionMapper extends BaseMapper<AppVersionEntity> {}

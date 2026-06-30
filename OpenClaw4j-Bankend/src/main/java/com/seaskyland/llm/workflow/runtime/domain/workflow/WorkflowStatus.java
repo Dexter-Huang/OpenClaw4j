@@ -22,19 +22,18 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum WorkflowStatus {
+  @JsonProperty("completed")
+  COMPLETED("completed"),
 
-	@JsonProperty("completed")
-	COMPLETED("completed"),
+  @JsonProperty("failed")
+  FAILED("failed"),
 
-	@JsonProperty("failed")
-	FAILED("failed"),
+  @JsonProperty("in_progress")
+  IN_PROGRESS("in_progress"),
 
-	@JsonProperty("in_progress")
-	IN_PROGRESS("in_progress"),
+  @JsonProperty("pause")
+  PAUSE("pause"),
+  ;
 
-	@JsonProperty("pause")
-	PAUSE("pause"),;
-
-	private final String value;
-
+  private final String value;
 }

@@ -16,9 +16,9 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.knowledgebase;
 
-import com.seaskyland.llm.workflow.runtime.enums.DocumentIndexStatus;
-import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
+import com.seaskyland.llm.workflow.runtime.enums.DocumentIndexStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -27,15 +27,11 @@ import lombok.EqualsAndHashCode;
  *
  * @since 1.0.0.3
  */
-
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class DocumentQuery extends BaseQuery {
 
-	/**
-	 * Current indexing status of the document
-	 */
-	@JsonProperty("index_status")
-	private DocumentIndexStatus indexStatus;
-
+  /** Current indexing status of the document */
+  @JsonProperty("index_status")
+  private DocumentIndexStatus indexStatus;
 }

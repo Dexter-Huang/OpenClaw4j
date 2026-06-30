@@ -16,18 +16,23 @@
 
 package com.seaskyland.llm.workflow.core.workflow.processor.impl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.seaskyland.llm.workflow.core.base.manager.CacheManager;
+import com.seaskyland.llm.workflow.core.config.CommonConfig;
+import com.seaskyland.llm.workflow.core.utils.common.VariableUtils;
+import com.seaskyland.llm.workflow.core.workflow.WorkflowContext;
+import com.seaskyland.llm.workflow.core.workflow.WorkflowInnerService;
+import com.seaskyland.llm.workflow.core.workflow.processor.AbstractExecuteProcessor;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.Edge;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.Node;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.NodeResult;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.NodeTypeEnum;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.ValueFromEnum;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
-import com.seaskyland.llm.workflow.core.config.CommonConfig;
-import com.seaskyland.llm.workflow.core.base.manager.CacheManager;
-import com.seaskyland.llm.workflow.core.workflow.WorkflowContext;
-import com.seaskyland.llm.workflow.core.utils.common.VariableUtils;
-import com.seaskyland.llm.workflow.core.workflow.WorkflowInnerService;
-import com.seaskyland.llm.workflow.core.workflow.processor.AbstractExecuteProcessor;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -38,23 +43,15 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * End Node Processor
- * <p>
- * This processor is responsible for handling the end node in the workflow. It supports
- * both text and JSON output, and integrates with the output node processor for text
- * template rendering.
- * <p>
- * Features: 1. Supports text and JSON output types 2. Integrates with
- * OutputExecuteProcessor for text template rendering 3. Handles output parameter
- * construction and validation 4. Manages node execution timing and error handling
+ *
+ * <p>This processor is responsible for handling the end node in the workflow. It supports both text
+ * and JSON output, and integrates with the output node processor for text template rendering.
+ *
+ * <p>Features: 1. Supports text and JSON output types 2. Integrates with OutputExecuteProcessor for
+ * text template rendering 3. Handles output parameter construction and validation 4. Manages node
+ * execution timing and error handling
  *
  * @version 1.0.0-M1
  */
@@ -62,210 +59,209 @@ import java.util.Map;
 @Component("EndExecuteProcessor")
 public class EndExecuteProcessor extends AbstractExecuteProcessor {
 
-	private final OutputExecuteProcessor outputExecuteProcessor;
+  private final OutputExecuteProcessor outputExecuteProcessor;
 
-	/**
-	 * Constructor for EndExecuteProcessor
-	 * @param cacheManager Redis manager for caching
-	 * @param workflowInnerService Workflow inner service for context management
-	 * @param conversationChatMemory Chat memory for conversation context
-	 * @param commonConfig Common configuration settings
-	 * @param outputExecuteProcessor Output node processor for text template rendering
-	 */
-	public EndExecuteProcessor(CacheManager cacheManager, WorkflowInnerService workflowInnerService,
-                               ChatMemory conversationChatMemory, CommonConfig commonConfig,
-                               OutputExecuteProcessor outputExecuteProcessor) {
-		super(cacheManager, workflowInnerService, conversationChatMemory, commonConfig);
-		this.outputExecuteProcessor = outputExecuteProcessor;
-	}
+  /**
+   * Constructor for EndExecuteProcessor
+   *
+   * @param cacheManager Redis manager for caching
+   * @param workflowInnerService Workflow inner service for context management
+   * @param conversationChatMemory Chat memory for conversation context
+   * @param commonConfig Common configuration settings
+   * @param outputExecuteProcessor Output node processor for text template rendering
+   */
+  public EndExecuteProcessor(
+      CacheManager cacheManager,
+      WorkflowInnerService workflowInnerService,
+      ChatMemory conversationChatMemory,
+      CommonConfig commonConfig,
+      OutputExecuteProcessor outputExecuteProcessor) {
+    super(cacheManager, workflowInnerService, conversationChatMemory, commonConfig);
+    this.outputExecuteProcessor = outputExecuteProcessor;
+  }
 
-	/**
-	 * Output type enumeration
-	 */
-	@Getter
-	public enum OutputType {
+  /** Output type enumeration */
+  @Getter
+  public enum OutputType {
+    TEXT("text"),
+    JSON("json");
 
-		TEXT("text"), JSON("json");
+    private final String value;
 
-		private final String value;
+    OutputType(String value) {
+      this.value = value;
+    }
 
-		OutputType(String value) {
-			this.value = value;
-		}
+    public static OutputType fromString(String value) {
+      if (StringUtils.isBlank(value)) {
+        return TEXT;
+      }
+      for (OutputType type : values()) {
+        if (type.value.equalsIgnoreCase(value)) {
+          return type;
+        }
+      }
+      return TEXT;
+    }
+  }
 
-		public static OutputType fromString(String value) {
-			if (StringUtils.isBlank(value)) {
-				return TEXT;
-			}
-			for (OutputType type : values()) {
-				if (type.value.equalsIgnoreCase(value)) {
-					return type;
-				}
-			}
-			return TEXT;
-		}
+  @Override
+  public String getNodeType() {
+    return NodeTypeEnum.END.getCode();
+  }
 
-	}
+  @Override
+  public String getNodeDescription() {
+    return NodeTypeEnum.END.getDesc();
+  }
 
-	@Override
-	public String getNodeType() {
-		return NodeTypeEnum.END.getCode();
-	}
+  /**
+   * Execute the end node processing Handles both text and JSON output types, integrates with
+   * OutputExecuteProcessor for text templates.
+   *
+   * @param graph The workflow graph
+   * @param node The current node to execute
+   * @param context The workflow context
+   * @return NodeResult containing the end node execution status and results
+   */
+  @Override
+  public NodeResult innerExecute(
+      DirectedAcyclicGraph<String, Edge> graph, Node node, WorkflowContext context) {
+    long start = System.currentTimeMillis();
+    try {
+      NodeResult endNodeResult = initNodeResultAndRefreshContext(node, context);
+      NodeParam nodeParam = JsonUtils.fromMap(node.getConfig().getNodeParam(), NodeParam.class);
+      String outputType = nodeParam.getOutputType();
+      OutputType type = OutputType.fromString(outputType);
+      endNodeResult.setOutputType(type.getValue());
+      String result;
+      if (OutputType.TEXT.equals(type)) {
+        outputExecuteProcessor.handleTextTemplate(
+            graph,
+            nodeParam.getTextTemplate(),
+            BooleanUtils.isTrue(nodeParam.getStreamSwitch()),
+            endNodeResult,
+            context);
+      } else {
+        // JSON output type
+        result = JsonUtils.toJson(constructJsonResult(nodeParam.getJsonParams(), context));
+        endNodeResult.setOutput(result);
+      }
+      endNodeResult.setNodeExecTime((System.currentTimeMillis() - start) + "ms");
+      endNodeResult.setUsages(null);
+      return endNodeResult;
+    } catch (Exception e) {
+      log.error("innerExecute error:{}", JsonUtils.toJson(node), e);
+      // Node execution error, save result and record error info
+      return NodeResult.error(node, e.getMessage());
+    }
+  }
 
-	@Override
-	public String getNodeDescription() {
-		return NodeTypeEnum.END.getDesc();
-	}
+  /**
+   * Construct JSON result from input parameters
+   *
+   * @param jsonParams List of input parameters
+   * @param context The workflow context
+   * @return Map containing constructed JSON result
+   */
+  private Map<String, Object> constructJsonResult(
+      List<Node.InputParam> jsonParams, WorkflowContext context) {
+    Map<String, Object> result = new HashMap<>();
+    jsonParams.forEach(
+        inputParam -> {
+          String valueFrom = inputParam.getValueFrom();
+          Object value = inputParam.getValue();
+          if (valueFrom.equals(ValueFromEnum.refer.name())) {
+            if (value == null) {
+              return;
+            }
+            String expression = VariableUtils.getExpressionFromBracket((String) value);
+            if (expression == null) {
+              return;
+            }
+            Object finalValue = VariableUtils.getValueFromContext(inputParam, context);
+            if (finalValue == null) {
+              return;
+            }
+            result.put(inputParam.getKey(), finalValue);
+          } else {
+            if (value == null) {
+              return;
+            }
+            result.put(inputParam.getKey(), value);
+          }
+        });
+    return result;
+  }
 
-	/**
-	 * Execute the end node processing Handles both text and JSON output types, integrates
-	 * with OutputExecuteProcessor for text templates.
-	 * @param graph The workflow graph
-	 * @param node The current node to execute
-	 * @param context The workflow context
-	 * @return NodeResult containing the end node execution status and results
-	 */
-	@Override
-	public NodeResult innerExecute(DirectedAcyclicGraph<String, Edge> graph, Node node, WorkflowContext context) {
-		long start = System.currentTimeMillis();
-		try {
-			NodeResult endNodeResult = initNodeResultAndRefreshContext(node, context);
-			NodeParam nodeParam = JsonUtils.fromMap(node.getConfig().getNodeParam(), NodeParam.class);
-			String outputType = nodeParam.getOutputType();
-			OutputType type = OutputType.fromString(outputType);
-			endNodeResult.setOutputType(type.getValue());
-			String result;
-			if (OutputType.TEXT.equals(type)) {
-				outputExecuteProcessor.handleTextTemplate(graph, nodeParam.getTextTemplate(),
-						BooleanUtils.isTrue(nodeParam.getStreamSwitch()), endNodeResult, context);
-			}
-			else {
-				// JSON output type
-				result = JsonUtils.toJson(constructJsonResult(nodeParam.getJsonParams(), context));
-				endNodeResult.setOutput(result);
-			}
-			endNodeResult.setNodeExecTime((System.currentTimeMillis() - start) + "ms");
-			endNodeResult.setUsages(null);
-			return endNodeResult;
-		}
-		catch (Exception e) {
-			log.error("innerExecute error:{}", JsonUtils.toJson(node), e);
-			// Node execution error, save result and record error info
-			return NodeResult.error(node, e.getMessage());
-		}
-	}
+  /**
+   * Get text template result (not used in main logic)
+   *
+   * @param nodeParam Node parameter
+   * @param context The workflow context
+   * @return String result after template replacement
+   */
+  private String getTextTemplateResult(NodeParam nodeParam, WorkflowContext context) {
+    // Template mode
+    String textTemplate = nodeParam.getTextTemplate();
+    return replaceTemplateContent(textTemplate, context);
+  }
 
-	/**
-	 * Construct JSON result from input parameters
-	 * @param jsonParams List of input parameters
-	 * @param context The workflow context
-	 * @return Map containing constructed JSON result
-	 */
-	private Map<String, Object> constructJsonResult(List<Node.InputParam> jsonParams, WorkflowContext context) {
-		Map<String, Object> result = new HashMap<>();
-		jsonParams.forEach(inputParam -> {
-			String valueFrom = inputParam.getValueFrom();
-			Object value = inputParam.getValue();
-			if (valueFrom.equals(ValueFromEnum.refer.name())) {
-				if (value == null) {
-					return;
-				}
-				String expression = VariableUtils.getExpressionFromBracket((String) value);
-				if (expression == null) {
-					return;
-				}
-				Object finalValue = VariableUtils.getValueFromContext(inputParam, context);
-				if (finalValue == null) {
-					return;
-				}
-				result.put(inputParam.getKey(), finalValue);
-			}
-			else {
-				if (value == null) {
-					return;
-				}
-				result.put(inputParam.getKey(), value);
-			}
-		});
-		return result;
-	}
+  @Data
+  public static class NodeParam implements Serializable {
 
-	/**
-	 * Get text template result (not used in main logic)
-	 * @param nodeParam Node parameter
-	 * @param context The workflow context
-	 * @return String result after template replacement
-	 */
-	private String getTextTemplateResult(NodeParam nodeParam, WorkflowContext context) {
-		// Template mode
-		String textTemplate = nodeParam.getTextTemplate();
-		return replaceTemplateContent(textTemplate, context);
-	}
+    /** Output type (text or json) */
+    @JsonProperty("output_type")
+    private String outputType;
 
-	@Data
-	public static class NodeParam implements Serializable {
+    /** Text template for output */
+    @JsonProperty("text_template")
+    private String textTemplate;
 
-		/**
-		 * Output type (text or json)
-		 */
-		@JsonProperty("output_type")
-		private String outputType;
+    /** JSON parameters for output */
+    @JsonProperty("json_params")
+    private List<Node.InputParam> jsonParams;
 
-		/**
-		 * Text template for output
-		 */
-		@JsonProperty("text_template")
-		private String textTemplate;
+    /** Streaming switch */
+    @JsonProperty("stream_switch")
+    private Boolean streamSwitch;
+  }
 
-		/**
-		 * JSON parameters for output
-		 */
-		@JsonProperty("json_params")
-		private List<Node.InputParam> jsonParams;
+  /** End node does not need to handle variable values */
+  @Override
+  public void handleVariables(
+      DirectedAcyclicGraph<String, Edge> graph,
+      Node node,
+      WorkflowContext context,
+      NodeResult nodeResult) {
+    // End node does not need to handle variable values
+  }
 
-		/**
-		 * Streaming switch
-		 */
-		@JsonProperty("stream_switch")
-		private Boolean streamSwitch;
-
-	}
-
-	/**
-	 * End node does not need to handle variable values
-	 */
-	@Override
-	public void handleVariables(DirectedAcyclicGraph<String, Edge> graph, Node node, WorkflowContext context,
-			NodeResult nodeResult) {
-		// End node does not need to handle variable values
-	}
-
-	/**
-	 * Check node parameter validity
-	 * @param graph The workflow graph
-	 * @param node The current node
-	 * @return CheckNodeParamResult with validation status
-	 */
-	@Override
-	public CheckNodeParamResult checkNodeParam(DirectedAcyclicGraph<String, Edge> graph, Node node) {
-		CheckNodeParamResult result = super.checkNodeParam(graph, node);
-		NodeParam nodeParam = JsonUtils.fromMap(node.getConfig().getNodeParam(), NodeParam.class);
-		if (nodeParam == null) {
-			result.setSuccess(false);
-			result.getErrorInfos().add("[nodeParam] is null");
-			return result;
-		}
-		String outputType = nodeParam.getOutputType();
-		OutputType type = OutputType.fromString(outputType);
-		if (OutputType.TEXT.equals(type) && StringUtils.isBlank(nodeParam.getTextTemplate())) {
-			result.setSuccess(false);
-			result.getErrorInfos().add("[output] is empty");
-		}
-		else if (OutputType.JSON.equals(type) && CollectionUtils.isEmpty(nodeParam.getJsonParams())) {
-			result.setSuccess(false);
-			result.getErrorInfos().add("[output] is empty");
-		}
-		return result;
-	}
-
+  /**
+   * Check node parameter validity
+   *
+   * @param graph The workflow graph
+   * @param node The current node
+   * @return CheckNodeParamResult with validation status
+   */
+  @Override
+  public CheckNodeParamResult checkNodeParam(DirectedAcyclicGraph<String, Edge> graph, Node node) {
+    CheckNodeParamResult result = super.checkNodeParam(graph, node);
+    NodeParam nodeParam = JsonUtils.fromMap(node.getConfig().getNodeParam(), NodeParam.class);
+    if (nodeParam == null) {
+      result.setSuccess(false);
+      result.getErrorInfos().add("[nodeParam] is null");
+      return result;
+    }
+    String outputType = nodeParam.getOutputType();
+    OutputType type = OutputType.fromString(outputType);
+    if (OutputType.TEXT.equals(type) && StringUtils.isBlank(nodeParam.getTextTemplate())) {
+      result.setSuccess(false);
+      result.getErrorInfos().add("[output] is empty");
+    } else if (OutputType.JSON.equals(type) && CollectionUtils.isEmpty(nodeParam.getJsonParams())) {
+      result.setSuccess(false);
+      result.getErrorInfos().add("[output] is empty");
+    }
+    return result;
+  }
 }

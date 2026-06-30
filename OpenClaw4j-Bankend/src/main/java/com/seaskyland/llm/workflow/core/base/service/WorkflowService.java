@@ -29,22 +29,23 @@ import reactor.core.publisher.Flux;
  */
 public interface WorkflowService {
 
-	/**
-	 * Synchronous call for workflow
-	 * @param request agent call response
-	 * @return chat response
-	 */
-	WorkflowResponse call(WorkflowRequest request);
+  /**
+   * Synchronous call for workflow
+   *
+   * @param request agent call response
+   * @return chat response
+   */
+  WorkflowResponse call(WorkflowRequest request);
 
-	/**
-	 * Synchronous streaming call for workflow
-	 * @param requestFlux agent call request
-	 * @return agent call response
-	 */
-	Flux<WorkflowResponse> streamCall(Flux<WorkflowRequest> requestFlux);
+  /**
+   * Synchronous streaming call for workflow
+   *
+   * @param requestFlux agent call request
+   * @return agent call response
+   */
+  Flux<WorkflowResponse> streamCall(Flux<WorkflowRequest> requestFlux);
 
-	TaskRunResponse asyncCall(WorkflowRequest request);
+  TaskRunResponse asyncCall(WorkflowRequest request);
 
-	Boolean stop(TaskStopRequest request);
-
+  Boolean stop(TaskStopRequest request);
 }

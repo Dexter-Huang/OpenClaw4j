@@ -16,12 +16,11 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.plugin;
 
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
 
 /**
  * Example model for tool configuration.
@@ -34,13 +33,12 @@ import java.util.Map;
 @Builder
 public class ToolExample {
 
-	/** The query string for the tool */
-	private String query;
+  /** The query string for the tool */
+  private String query;
 
-	/** Parameters for the tool */
-	private Map<String, Object> parameters;
+  /** Parameters for the tool */
+  private Map<String, Object> parameters;
 
-	/** The relative path if tool api */
-	private String path;
-
+  /** The relative path if tool api */
+  private String path;
 }

@@ -16,93 +16,69 @@
 
 package com.seaskyland.llm.workflow.core.base.service;
 
-import com.seaskyland.llm.workflow.runtime.enums.ToolTestStatus;
 import com.seaskyland.llm.workflow.runtime.domain.BaseQuery;
 import com.seaskyland.llm.workflow.runtime.domain.PagingList;
 import com.seaskyland.llm.workflow.runtime.domain.plugin.Plugin;
 import com.seaskyland.llm.workflow.runtime.domain.plugin.Tool;
 import com.seaskyland.llm.workflow.runtime.domain.plugin.ToolQuery;
-
+import com.seaskyland.llm.workflow.runtime.enums.ToolTestStatus;
 import java.util.List;
 
 /**
- * Service interface for managing plugins and tools. Provides CRUD operations and
- * management functions for plugins and their associated tools.
+ * Service interface for managing plugins and tools. Provides CRUD operations and management
+ * functions for plugins and their associated tools.
  *
  * @since 1.0.0.3
  */
 public interface PluginService {
 
-	/**
-	 * Creates a new plugin
-	 * @return the ID of the created plugin
-	 */
-	String createPlugin(Plugin plugin);
+  /**
+   * Creates a new plugin
+   *
+   * @return the ID of the created plugin
+   */
+  String createPlugin(Plugin plugin);
 
-	/**
-	 * Updates an existing plugin
-	 */
-	void updatePlugin(Plugin plugin);
+  /** Updates an existing plugin */
+  void updatePlugin(Plugin plugin);
 
-	/**
-	 * Deletes a plugin by its ID
-	 */
-	void deletePlugin(String pluginId);
+  /** Deletes a plugin by its ID */
+  void deletePlugin(String pluginId);
 
-	/**
-	 * Retrieves a plugin by its ID
-	 */
-	Plugin getPlugin(String pluginId);
+  /** Retrieves a plugin by its ID */
+  Plugin getPlugin(String pluginId);
 
-	/**
-	 * Lists plugins with pagination support
-	 */
-	PagingList<Plugin> listPlugins(BaseQuery query);
+  /** Lists plugins with pagination support */
+  PagingList<Plugin> listPlugins(BaseQuery query);
 
-	/**
-	 * Creates a new tool
-	 * @return the ID of the created tool
-	 */
-	String createTool(Tool tool);
+  /**
+   * Creates a new tool
+   *
+   * @return the ID of the created tool
+   */
+  String createTool(Tool tool);
 
-	/**
-	 * Updates an existing tool
-	 */
-	void updateTool(Tool tool);
+  /** Updates an existing tool */
+  void updateTool(Tool tool);
 
-	/**
-	 * Deletes a tool by its ID
-	 */
-	void deleteTool(String toolId);
+  /** Deletes a tool by its ID */
+  void deleteTool(String toolId);
 
-	/**
-	 * Retrieves a tool by its ID
-	 */
-	Tool getTool(String toolId);
+  /** Retrieves a tool by its ID */
+  Tool getTool(String toolId);
 
-	/**
-	 * Lists tools with pagination and filtering support
-	 */
-	PagingList<Tool> listTools(ToolQuery query);
+  /** Lists tools with pagination and filtering support */
+  PagingList<Tool> listTools(ToolQuery query);
 
-	/**
-	 * Retrieves multiple tools by their IDs
-	 */
-	List<Tool> getTools(List<String> toolIds);
+  /** Retrieves multiple tools by their IDs */
+  List<Tool> getTools(List<String> toolIds);
 
-	/**
-	 * Updates the enabled status of a tool
-	 */
-	void updateEnableStatus(String toolId, Boolean enabled);
+  /** Updates the enabled status of a tool */
+  void updateEnableStatus(String toolId, Boolean enabled);
 
-	/**
-	 * Updates the test status of a tool
-	 */
-	void updateTestStatus(String toolId, ToolTestStatus testStatus);
+  /** Updates the test status of a tool */
+  void updateTestStatus(String toolId, ToolTestStatus testStatus);
 
-	/**
-	 * Publishes a tool
-	 */
-	void publishTool(String toolId);
-
+  /** Publishes a tool */
+  void publishTool(String toolId);
 }

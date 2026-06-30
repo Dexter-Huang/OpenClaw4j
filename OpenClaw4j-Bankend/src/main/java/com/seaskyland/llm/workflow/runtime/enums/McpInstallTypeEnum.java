@@ -24,32 +24,32 @@ package com.seaskyland.llm.workflow.runtime.enums;
  */
 public enum McpInstallTypeEnum {
 
-	/** NPX installation type */
-	NPX,
+  /** NPX installation type */
+  NPX,
 
-	/** UVX installation type */
-	UVX,
+  /** UVX installation type */
+  UVX,
 
-	/** SSE installation type */
-	SSE;
+  /** SSE installation type */
+  SSE;
 
-	/**
-	 * Converts a string to the corresponding McpInstallTypeEnum value.
-	 * @param installType the installation type string
-	 * @return the corresponding McpInstallTypeEnum value, or null if not found
-	 */
-	public static McpInstallTypeEnum of(String installType) {
-		if (installType == null) {
-			return null;
-		}
+  /**
+   * Converts a string to the corresponding McpInstallTypeEnum value.
+   *
+   * @param installType the installation type string
+   * @return the corresponding McpInstallTypeEnum value, or null if not found
+   */
+  public static McpInstallTypeEnum of(String installType) {
+    if (installType == null) {
+      return null;
+    }
 
-		for (McpInstallTypeEnum installTypeEnum : McpInstallTypeEnum.values()) {
-			if (installTypeEnum.name().equals(installType)) {
-				return installTypeEnum;
-			}
-		}
+    for (McpInstallTypeEnum installTypeEnum : McpInstallTypeEnum.values()) {
+      if (installTypeEnum.name().equals(installType)) {
+        return installTypeEnum;
+      }
+    }
 
-		return null;
-	}
-
+    return null;
+  }
 }

@@ -16,58 +16,55 @@
 
 package com.seaskyland.llm.workflow.core.base.entity;
 
-import com.seaskyland.llm.workflow.runtime.enums.CommonStatus;
 import com.baomidou.mybatisplus.annotation.*;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.CommonStatus;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Workspace entity representing a user's workspace in the system.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @TableName("workspace")
 public class WorkspaceEntity {
 
-	/** Primary key */
-	@TableId(value = "id", type = IdType.AUTO)
-	private Long id;
+  /** Primary key */
+  @TableId(value = "id", type = IdType.AUTO)
+  private Long id;
 
-	/** Associated account identifier */
-	@TableField("account_id")
-	private String accountId;
+  /** Associated account identifier */
+  @TableField("account_id")
+  private String accountId;
 
-	/** Unique workspace identifier */
-	@TableField("workspace_id")
-	private String workspaceId;
+  /** Unique workspace identifier */
+  @TableField("workspace_id")
+  private String workspaceId;
 
-	/** Current status of the workspace */
-	private CommonStatus status;
+  /** Current status of the workspace */
+  private CommonStatus status;
 
-	/** Name of the workspace */
-	private String name;
+  /** Name of the workspace */
+  private String name;
 
-	/** Description of the workspace */
-	private String description;
+  /** Description of the workspace */
+  private String description;
 
-	/** Workspace configuration in JSON format */
-	private String config;
+  /** Workspace configuration in JSON format */
+  private String config;
 
-	/** Creation timestamp */
-	@TableField("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @TableField("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@TableField("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @TableField("gmt_modified")
+  private Date gmtModified;
 
-	/** Username of the creator */
-	private String creator;
+  /** Username of the creator */
+  private String creator;
 
-	/** Username of the last modifier */
-	private String modifier;
-
+  /** Username of the last modifier */
+  private String modifier;
 }

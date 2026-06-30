@@ -15,12 +15,11 @@
  */
 package com.seaskyland.llm.workflow.runtime.domain.workflow.inner;
 
-import com.seaskyland.llm.workflow.runtime.domain.workflow.CommonParam;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.domain.workflow.CommonParam;
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
 
 /**
  * 异常处理配置
@@ -30,19 +29,18 @@ import java.util.List;
 @Data
 public class TryCatchConfig implements Serializable {
 
-	/**
-	 * @see StrategyEnum
-	 */
-	@JsonProperty("strategy")
-	private String strategy;
+  /**
+   * @see StrategyEnum
+   */
+  @JsonProperty("strategy")
+  private String strategy;
 
-	@JsonProperty("default_values")
-	private List<CommonParam> defaultValues;
+  @JsonProperty("default_values")
+  private List<CommonParam> defaultValues;
 
-	public enum StrategyEnum {
-
-		noop, defaultValue, failBranch
-
-	}
-
+  public enum StrategyEnum {
+    noop,
+    defaultValue,
+    failBranch
+  }
 }

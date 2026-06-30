@@ -16,77 +16,73 @@
 
 package com.seaskyland.llm.workflow.core.agent;
 
-import com.seaskyland.llm.workflow.runtime.enums.AppType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
 import com.seaskyland.llm.workflow.runtime.domain.agent.AgentRequest;
 import com.seaskyland.llm.workflow.runtime.domain.agent.AgentResponse;
 import com.seaskyland.llm.workflow.runtime.domain.app.AgentConfig;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.seaskyland.llm.workflow.runtime.enums.AppType;
+import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import reactor.core.publisher.Sinks;
 
-import java.util.Map;
-
 /**
- * Context class for agent requests and responses. Contains all necessary information for
- * processing agent interactions.
+ * Context class for agent requests and responses. Contains all necessary information for processing
+ * agent interactions.
  *
  * @since 1.0.0.3
  */
-
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class AgentContext extends RequestContext {
 
-	public AgentContext() {
-		startTime = System.currentTimeMillis();
-	}
+  public AgentContext() {
+    startTime = System.currentTimeMillis();
+  }
 
-	/** Request source */
-	private String source;
+  /** Request source */
+  private String source;
 
-	/** Start time of the request */
-	private long startTime;
+  /** Start time of the request */
+  private long startTime;
 
-	/** End time of the request */
-	private long endTime;
+  /** End time of the request */
+  private long endTime;
 
-	/** Time of first response */
-	private long firstResponseTime;
+  /** Time of first response */
+  private long firstResponseTime;
 
-	/** Application id */
-	private String appId;
+  /** Application id */
+  private String appId;
 
-	/** Type of the application */
-	private AppType appType;
+  /** Type of the application */
+  private AppType appType;
 
-	/** Id for the conversation */
-	private String conversationId;
+  /** Id for the conversation */
+  private String conversationId;
 
-	/** Model id */
-	private String model;
+  /** Model id */
+  private String model;
 
-	/** Flag indicating if streaming is enabled */
-	private Boolean stream = false;
+  /** Flag indicating if streaming is enabled */
+  private Boolean stream = false;
 
-	/** Sink for handling response events */
-	@JsonIgnore
-	private Sinks.Many<AgentResponse> eventSink;
+  /** Sink for handling response events */
+  @JsonIgnore private Sinks.Many<AgentResponse> eventSink;
 
-	/** Flag indicating if memory is enabled */
-	private boolean memoryEnabled;
+  /** Flag indicating if memory is enabled */
+  private boolean memoryEnabled;
 
-	/** Agent configuration */
-	private AgentConfig config;
+  /** Agent configuration */
+  private AgentConfig config;
 
-	/** Original agent request */
-	private AgentRequest request;
+  /** Original agent request */
+  private AgentRequest request;
 
-	/** Agent response */
-	private AgentResponse response;
+  /** Agent response */
+  private AgentResponse response;
 
-	/** Variables used in prompts */
-	private Map<String, Object> promptVariables;
-
+  /** Variables used in prompts */
+  private Map<String, Object> promptVariables;
 }

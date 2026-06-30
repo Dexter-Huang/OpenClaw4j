@@ -17,11 +17,9 @@
 package com.seaskyland.llm.workflow.core.agent;
 
 /**
- * Abstract base class for agent executors. Provides the foundation for implementing
- * specific agent execution strategies.
+ * Abstract base class for agent executors. Provides the foundation for implementing specific agent
+ * execution strategies.
  *
  * @since 1.0.0.3
  */
-public abstract class AbstractAgentExecutor implements AgentExecutor {
-
-}
+public abstract class AbstractAgentExecutor implements AgentExecutor {}

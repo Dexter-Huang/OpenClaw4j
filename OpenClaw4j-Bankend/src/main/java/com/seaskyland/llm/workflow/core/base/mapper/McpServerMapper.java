@@ -15,16 +15,13 @@
  */
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.McpServerEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.McpServerEntity;
 
 /**
- * Mapper interface for McpServer entity. Provides database operations for McpServer
- * table.
+ * Mapper interface for McpServer entity. Provides database operations for McpServer table.
  *
  * @author guning.lt
  * @since 1.0.0.3
  */
-public interface McpServerMapper extends BaseMapper<McpServerEntity> {
-
-}
+public interface McpServerMapper extends BaseMapper<McpServerEntity> {}

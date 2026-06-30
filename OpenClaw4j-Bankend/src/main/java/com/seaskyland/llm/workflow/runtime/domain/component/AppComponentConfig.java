@@ -17,11 +17,10 @@
 package com.seaskyland.llm.workflow.runtime.domain.component;
 
 import com.seaskyland.llm.workflow.runtime.enums.APIPluginValueSourceEnum;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Data;
 
 /**
  * Configuration class for application components
@@ -32,64 +31,60 @@ import java.util.List;
 @Data
 public class AppComponentConfig implements Serializable {
 
-	/** Input configuration for the component */
-	private Input input;
+  /** Input configuration for the component */
+  private Input input;
 
-	/** List of output parameters */
-	private List<Params> output = new ArrayList<>();
+  /** List of output parameters */
+  private List<Params> output = new ArrayList<>();
 
-	@Data
-	public static class Input {
+  @Data
+  public static class Input {
 
-		/** User-defined parameters */
-		private List<UserParams> userParams = new ArrayList<>();
+    /** User-defined parameters */
+    private List<UserParams> userParams = new ArrayList<>();
 
-		/** System-defined parameters */
-		private List<Params> systemParams = new ArrayList<>();
+    /** System-defined parameters */
+    private List<Params> systemParams = new ArrayList<>();
+  }
 
-	}
+  @Data
+  public static class UserParams {
 
-	@Data
-	public static class UserParams {
+    /** Parameter code */
+    private String code;
 
-		/** Parameter code */
-		private String code;
+    /** Parameter name */
+    private String name;
 
-		/** Parameter name */
-		private String name;
+    /** List of parameter configurations */
+    private List<Params> params = new ArrayList<>();
+  }
 
-		/** List of parameter configurations */
-		private List<Params> params = new ArrayList<>();
+  @Data
+  public static class Params {
 
-	}
+    /** Field identifier */
+    private String field;
 
-	@Data
-	public static class Params {
+    /** Parameter description */
+    private String description;
 
-		/** Field identifier */
-		private String field;
+    /** Parameter type */
+    private String type;
 
-		/** Parameter description */
-		private String description;
+    /** Whether the parameter is required */
+    private Boolean required = false;
 
-		/** Parameter type */
-		private String type;
+    /** Whether to display the parameter */
+    private Boolean display = true;
 
-		/** Whether the parameter is required */
-		private Boolean required = false;
+    /** Default value for the parameter */
+    private Object defaultValue;
 
-		/** Whether to display the parameter */
-		private Boolean display = true;
+    /** Alternative name for the parameter */
+    private String alias;
 
-		/** Default value for the parameter */
-		private Object defaultValue;
-
-		/** Alternative name for the parameter */
-		private String alias;
-
-		/** Source of the parameter value */
-		private String source = APIPluginValueSourceEnum.MODEL.getCode();
-
-	}
-
+    /** Source of the parameter value */
+    private String source = APIPluginValueSourceEnum.MODEL.getCode();
+  }
 }

@@ -13,24 +13,32 @@ import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 
 class MybatisPlusRuntimeHintsTest {
 
-	@Test
-	void registersMybatisPlusReflectionAndResourceHints() {
-		RuntimeHints hints = new RuntimeHints();
+  @Test
+  void registersMybatisPlusReflectionAndResourceHints() {
+    RuntimeHints hints = new RuntimeHints();
 
-		new MybatisPlusRuntimeHints().registerHints(hints, getClass().getClassLoader());
+    new MybatisPlusRuntimeHints().registerHints(hints, getClass().getClassLoader());
 
-		assertTrue(RuntimeHintsPredicates.reflection().onType(AccountEntity.class)
-			.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_METHODS,
-					MemberCategory.ACCESS_DECLARED_FIELDS)
-			.test(hints));
-		assertTrue(RuntimeHintsPredicates.reflection().onType(AppEntity.class)
-			.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_METHODS,
-					MemberCategory.ACCESS_DECLARED_FIELDS)
-			.test(hints));
-		assertTrue(RuntimeHintsPredicates.reflection().onType(DocumentMapper.class).test(hints));
-		assertTrue(RuntimeHintsPredicates.resource().forResource("mapper/DocumentMapper.xml").test(hints));
-		assertEquals(16, MybatisPlusRuntimeHints.MYBATIS_PLUS_ENTITY_TYPES.size());
-		assertEquals(15, MybatisPlusRuntimeHints.MYBATIS_PLUS_MAPPER_TYPES.size());
-	}
-
+    assertTrue(
+        RuntimeHintsPredicates.reflection()
+            .onType(AccountEntity.class)
+            .withMemberCategories(
+                MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                MemberCategory.INVOKE_PUBLIC_METHODS,
+                MemberCategory.ACCESS_DECLARED_FIELDS)
+            .test(hints));
+    assertTrue(
+        RuntimeHintsPredicates.reflection()
+            .onType(AppEntity.class)
+            .withMemberCategories(
+                MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                MemberCategory.INVOKE_PUBLIC_METHODS,
+                MemberCategory.ACCESS_DECLARED_FIELDS)
+            .test(hints));
+    assertTrue(RuntimeHintsPredicates.reflection().onType(DocumentMapper.class).test(hints));
+    assertTrue(
+        RuntimeHintsPredicates.resource().forResource("mapper/DocumentMapper.xml").test(hints));
+    assertEquals(16, MybatisPlusRuntimeHints.MYBATIS_PLUS_ENTITY_TYPES.size());
+    assertEquals(15, MybatisPlusRuntimeHints.MYBATIS_PLUS_MAPPER_TYPES.size());
+  }
 }

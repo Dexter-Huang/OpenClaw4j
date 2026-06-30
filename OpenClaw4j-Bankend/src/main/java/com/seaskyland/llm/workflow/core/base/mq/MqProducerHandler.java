@@ -4,8 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface MqProducerHandler<INPUT, OUTPUT> {
 
-    OUTPUT send(INPUT var1);
+  OUTPUT send(INPUT var1);
 
-
-    CompletableFuture<OUTPUT> sendAsync(INPUT var1);
+  CompletableFuture<OUTPUT> sendAsync(INPUT var1);
 }

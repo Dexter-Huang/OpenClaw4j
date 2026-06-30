@@ -16,10 +16,13 @@
 
 package com.seaskyland.llm.workflow.core.utils;
 
-import com.seaskyland.llm.workflow.runtime.exception.BizException;
-import com.seaskyland.llm.workflow.runtime.domain.BizError;
-import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.seaskyland.llm.workflow.runtime.domain.BizError;
+import com.seaskyland.llm.workflow.runtime.exception.BizException;
+import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
@@ -27,101 +30,102 @@ import org.springframework.lang.NonNull;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.ResponseErrorHandler;
 
-import java.io.IOException;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-
 /**
- * Utility class for handling HTTP response errors from different model providers.
- * Provides standardized error handling for DashScope and OpenAI API responses.
+ * Utility class for handling HTTP response errors from different model providers. Provides
+ * standardized error handling for DashScope and OpenAI API responses.
  *
  * @since 1.0.0.3
  */
 @Slf4j
 public class ErrorHandlerUtils {
 
-	/**
-	 * Error handler for DashScope API responses. Converts HTTP error responses into
-	 * standardized BizException.
-	 */
-	public static final ResponseErrorHandler DASHSCOPE_RESPONSE_ERROR_HANDLER = new ResponseErrorHandler() {
+  /**
+   * Error handler for DashScope API responses. Converts HTTP error responses into standardized
+   * BizException.
+   */
+  public static final ResponseErrorHandler DASHSCOPE_RESPONSE_ERROR_HANDLER =
+      new ResponseErrorHandler() {
 
-		@Override
-		public boolean hasError(@NonNull ClientHttpResponse response) throws IOException {
-			return response.getStatusCode().isError();
-		}
+        @Override
+        public boolean hasError(@NonNull ClientHttpResponse response) throws IOException {
+          return response.getStatusCode().isError();
+        }
 
-		@Override
-		public void handleError(@NonNull URI url, @NonNull HttpMethod method, @NonNull ClientHttpResponse response) throws IOException {
-			if (response.getStatusCode().isError()) {
-				String body = StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8);
-				JsonNode node = JsonUtils.fromJson(body);
+        @Override
+        public void handleError(
+            @NonNull URI url, @NonNull HttpMethod method, @NonNull ClientHttpResponse response)
+            throws IOException {
+          if (response.getStatusCode().isError()) {
+            String body = StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8);
+            JsonNode node = JsonUtils.fromJson(body);
 
-				String code = "ModelCall";
-				if (node.has("code")) {
-					code = node.get("code").asText();
-				}
+            String code = "ModelCall";
+            if (node.has("code")) {
+              code = node.get("code").asText();
+            }
 
-				String message;
-				if (node.has("message")) {
-					message = node.get("message").asText();
-				}
-				else {
-					message = body;
-				}
+            String message;
+            if (node.has("message")) {
+              message = node.get("message").asText();
+            } else {
+              message = body;
+            }
 
-				BizError error = BizError.builder()
-					.statusCode(response.getStatusCode().value())
-					.code(code)
-					.message(message)
-					.build();
-				throw new BizException(error);
-			}
-		}
-	};
+            BizError error =
+                BizError.builder()
+                    .statusCode(response.getStatusCode().value())
+                    .code(code)
+                    .message(message)
+                    .build();
+            throw new BizException(error);
+          }
+        }
+      };
 
-	/**
-	 * Error handler for OpenAI API responses. Converts HTTP error responses into
-	 * standardized BizException.
-	 */
-	public static final ResponseErrorHandler OPENAI_RESPONSE_ERROR_HANDLER = new ResponseErrorHandler() {
+  /**
+   * Error handler for OpenAI API responses. Converts HTTP error responses into standardized
+   * BizException.
+   */
+  public static final ResponseErrorHandler OPENAI_RESPONSE_ERROR_HANDLER =
+      new ResponseErrorHandler() {
 
-		@Override
-		public boolean hasError(@NonNull ClientHttpResponse response) throws IOException {
-			return response.getStatusCode().isError();
-		}
+        @Override
+        public boolean hasError(@NonNull ClientHttpResponse response) throws IOException {
+          return response.getStatusCode().isError();
+        }
 
-		@Override
-		public void handleError(@NonNull URI url, @NonNull HttpMethod method, @NonNull ClientHttpResponse response) throws IOException {
-			if (response.getStatusCode().isError()) {
-				String body = StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8);
-				log.error("failed to call openai model, code: {}, body: {}", response.getStatusCode(), body);
+        @Override
+        public void handleError(
+            @NonNull URI url, @NonNull HttpMethod method, @NonNull ClientHttpResponse response)
+            throws IOException {
+          if (response.getStatusCode().isError()) {
+            String body = StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8);
+            log.error(
+                "failed to call openai model, code: {}, body: {}", response.getStatusCode(), body);
 
-				BizError error = parseOpenAiError(response.getStatusCode().value(), body);
-				throw new BizException(error);
-			}
-		}
-	};
+            BizError error = parseOpenAiError(response.getStatusCode().value(), body);
+            throw new BizException(error);
+          }
+        }
+      };
 
-	public static BizError parseOpenAiError(int statusCode, String body) {
-		JsonNode node = JsonUtils.fromJson(body);
+  public static BizError parseOpenAiError(int statusCode, String body) {
+    JsonNode node = JsonUtils.fromJson(body);
 
-		String code = "ModelCall";
-		String message = "";
-		if (node.has("error")) {
-			node = node.get("error");
-			if (node.has("code")) {
-				code = node.get("code").asText();
-			}
-			if (node.has("message")) {
-				message = node.get("message").asText();
-			}
-		}
-		else {
-			message = body;
-		}
+    String code = "ModelCall";
+    String message = "";
+    if (node.has("error")) {
+      node = node.get("error");
+      if (node.has("code")) {
+        code = node.get("code").asText();
+      }
+      if (node.has("message")) {
+        message = node.get("message").asText();
+      }
+    } else {
+      message = body;
+    }
 
-		return BizError.builder().statusCode(statusCode).code(code).message(message).build();
-	}
-
+    return BizError.builder().statusCode(statusCode).code(code).message(message).build();
+  }
 }

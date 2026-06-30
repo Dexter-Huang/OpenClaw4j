@@ -16,15 +16,13 @@
 
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.AccountEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.AccountEntity;
 
 /**
- * Mapper interface for account-related database operations. Extends BaseMapper to provide
- * basic CRUD operations for AccountEntity.
+ * Mapper interface for account-related database operations. Extends BaseMapper to provide basic
+ * CRUD operations for AccountEntity.
  *
  * @since 1.0.0.3
  */
-public interface AccountMapper extends BaseMapper<AccountEntity> {
-
-}
+public interface AccountMapper extends BaseMapper<AccountEntity> {}

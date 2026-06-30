@@ -16,111 +16,104 @@
 
 package com.seaskyland.llm.workflow.core.agent.tool;
 
-import com.seaskyland.llm.workflow.runtime.enums.AppComponentTypeEnum;
+import com.seaskyland.llm.workflow.core.base.manager.AppComponentManager;
 import com.seaskyland.llm.workflow.runtime.domain.agent.AgentResponse;
 import com.seaskyland.llm.workflow.runtime.domain.chat.ToolCallType;
 import com.seaskyland.llm.workflow.runtime.domain.component.AppComponentRequest;
 import com.seaskyland.llm.workflow.runtime.domain.tool.ToolCallSchema;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.debug.WorkflowResponse;
+import com.seaskyland.llm.workflow.runtime.enums.AppComponentTypeEnum;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
-import com.seaskyland.llm.workflow.core.base.manager.AppComponentManager;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.ai.tool.metadata.ToolMetadata;
 
-import java.util.Map;
-
 /**
- * Tool callback implementation for app components. Handles the execution of agent and
- * workflow components.
+ * Tool callback implementation for app components. Handles the execution of agent and workflow
+ * components.
  *
  * @since 1.0.0.3
  */
 @RequiredArgsConstructor
 public class AppComponentToolCallback implements AgentToolCallback {
 
-	/** Manager for handling app component operations */
-	private final AppComponentManager appComponentManager;
+  /** Manager for handling app component operations */
+  private final AppComponentManager appComponentManager;
 
-	/** Unique identifier for the app component */
-	private final String appComponentId;
+  /** Unique identifier for the app component */
+  private final String appComponentId;
 
-	/** Schema defining the tool's call structure */
-	private final ToolCallSchema toolCallSchema;
+  /** Schema defining the tool's call structure */
+  private final ToolCallSchema toolCallSchema;
 
-	/** Additional parameters for tool execution */
-	private final Map<String, Object> extraParams;
+  /** Additional parameters for tool execution */
+  private final Map<String, Object> extraParams;
 
-	/** Type of the app component (Agent or Workflow) */
-	private final AppComponentTypeEnum componentType;
+  /** Type of the app component (Agent or Workflow) */
+  private final AppComponentTypeEnum componentType;
 
-	/**
-	 * Returns the tool definition based on the tool call schema.
-	 */
-	@NotNull
-	@Override
-	public ToolDefinition getToolDefinition() {
-		return ToolDefinition.builder()
-			.name(toolCallSchema.getName())
-			.description(toolCallSchema.getDescription())
-			.inputSchema(JsonUtils.toJson(toolCallSchema.getInputSchema()))
-			.build();
-	}
+  /** Returns the tool definition based on the tool call schema. */
+  @NotNull
+  @Override
+  public ToolDefinition getToolDefinition() {
+    return ToolDefinition.builder()
+        .name(toolCallSchema.getName())
+        .description(toolCallSchema.getDescription())
+        .inputSchema(JsonUtils.toJson(toolCallSchema.getInputSchema()))
+        .build();
+  }
 
-	/**
-	 * Executes the tool with the given input. Merges extra parameters if available and
-	 * processes based on component type.
-	 */
-	@NotNull
-	@Override
-	public String call(@NotNull String toolInput) {
-		Map<String, Object> arguments = ToolArgumentsHelper.mergeToolArguments(toolInput, extraParams, appComponentId);
+  /**
+   * Executes the tool with the given input. Merges extra parameters if available and processes
+   * based on component type.
+   */
+  @NotNull
+  @Override
+  public String call(@NotNull String toolInput) {
+    Map<String, Object> arguments =
+        ToolArgumentsHelper.mergeToolArguments(toolInput, extraParams, appComponentId);
 
-		AppComponentRequest request = new AppComponentRequest();
-		request.setBizVars(arguments);
-		request.setCode(appComponentId);
-		request.setStreamMode(false);
-		request.setType(componentType.getValue());
+    AppComponentRequest request = new AppComponentRequest();
+    request.setBizVars(arguments);
+    request.setCode(appComponentId);
+    request.setStreamMode(false);
+    request.setType(componentType.getValue());
 
-		if (componentType == AppComponentTypeEnum.Agent) {
-			AgentResponse response = appComponentManager.executeAgentComponent(request);
-			if (!response.isSuccess()) {
-				return JsonUtils.toJson(response.getError());
-			}
+    if (componentType == AppComponentTypeEnum.Agent) {
+      AgentResponse response = appComponentManager.executeAgentComponent(request);
+      if (!response.isSuccess()) {
+        return JsonUtils.toJson(response.getError());
+      }
 
-			return String.valueOf(response.getMessage().getContent());
-		}
-		else if (componentType == AppComponentTypeEnum.Workflow) {
-			WorkflowResponse response = appComponentManager.executeWorkflowComponent(request);
-			if (!response.isSuccess()) {
-				return JsonUtils.toJson(response.getError());
-			}
+      return String.valueOf(response.getMessage().getContent());
+    } else if (componentType == AppComponentTypeEnum.Workflow) {
+      WorkflowResponse response = appComponentManager.executeWorkflowComponent(request);
+      if (!response.isSuccess()) {
+        return JsonUtils.toJson(response.getError());
+      }
 
-			return String.valueOf(response.getMessage().getContent());
-		}
-		else {
-			throw new IllegalArgumentException("unknown component type: " + componentType.getValue());
-		}
-	}
+      return String.valueOf(response.getMessage().getContent());
+    } else {
+      throw new IllegalArgumentException("unknown component type: " + componentType.getValue());
+    }
+  }
 
-	/**
-	 * Returns tool metadata indicating direct return behavior.
-	 */
-	@NotNull
-	@Override
-	public ToolMetadata getToolMetadata() {
-		return ToolMetadata.builder().returnDirect(true).build();
-	}
+  /** Returns tool metadata indicating direct return behavior. */
+  @NotNull
+  @Override
+  public ToolMetadata getToolMetadata() {
+    return ToolMetadata.builder().returnDirect(true).build();
+  }
 
-	@Override
-	public String getId() {
-		return appComponentId;
-	}
+  @Override
+  public String getId() {
+    return appComponentId;
+  }
 
-	@Override
-	public ToolCallType getToolCallType() {
-		return ToolCallType.COMPONENT_TOOL_CALL;
-	}
-
+  @Override
+  public ToolCallType getToolCallType() {
+    return ToolCallType.COMPONENT_TOOL_CALL;
+  }
 }

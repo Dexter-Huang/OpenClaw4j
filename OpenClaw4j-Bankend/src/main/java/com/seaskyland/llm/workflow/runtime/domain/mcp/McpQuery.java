@@ -17,12 +17,11 @@
 package com.seaskyland.llm.workflow.runtime.domain.mcp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-
-import java.util.List;
 
 /**
  * Query parameters for MCP (Model Control Panel) operations
@@ -36,24 +35,23 @@ import java.util.List;
 @SuperBuilder
 public class McpQuery {
 
-	/** Whether tools are needed */
-	@JsonProperty("need_tools")
-	private Boolean needTools = false;
+  /** Whether tools are needed */
+  @JsonProperty("need_tools")
+  private Boolean needTools = false;
 
-	/** List of server codes to query */
-	@JsonProperty("server_codes")
-	private List<String> serverCodes;
+  /** List of server codes to query */
+  @JsonProperty("server_codes")
+  private List<String> serverCodes;
 
-	/** Query status */
-	private Integer status;
+  /** Query status */
+  private Integer status;
 
-	/** Query name */
-	private String name;
+  /** Query name */
+  private String name;
 
-	/** Current page number */
-	private Integer current = 1;
+  /** Current page number */
+  private Integer current = 1;
 
-	/** Page size */
-	private Integer size = 10;
-
+  /** Page size */
+  private Integer size = 10;
 }

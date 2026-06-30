@@ -21,53 +21,52 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * Enum representing different types of tool calls in the system. Each type corresponds to
- * a specific interaction pattern between the client and tools.
+ * Enum representing different types of tool calls in the system. Each type corresponds to a
+ * specific interaction pattern between the client and tools.
  *
  * @since 1.0.0.3
  */
-
 @Getter
 @AllArgsConstructor
 public enum ToolCallType {
 
-	/** Standard function call type */
-	@JsonProperty("function")
-	FUNCTION("function"),
+  /** Standard function call type */
+  @JsonProperty("function")
+  FUNCTION("function"),
 
-	/** Basic tool call type */
-	@JsonProperty("tool_call")
-	TOOL_CALL("tool_call"),
+  /** Basic tool call type */
+  @JsonProperty("tool_call")
+  TOOL_CALL("tool_call"),
 
-	/** Result of a tool call */
-	@JsonProperty("tool_result")
-	TOOL_RESULT("tool_result"),
+  /** Result of a tool call */
+  @JsonProperty("tool_result")
+  TOOL_RESULT("tool_result"),
 
-	/** MCP tool call type */
-	@JsonProperty("mcp_tool_call")
-	MCP_TOOL_CALL("mcp_tool_call"),
+  /** MCP tool call type */
+  @JsonProperty("mcp_tool_call")
+  MCP_TOOL_CALL("mcp_tool_call"),
 
-	/** Result of an MCP tool call */
-	@JsonProperty("mcp_tool_result")
-	MCP_TOOL_RESULT("mcp_tool_result"),
+  /** Result of an MCP tool call */
+  @JsonProperty("mcp_tool_result")
+  MCP_TOOL_RESULT("mcp_tool_result"),
 
-	/** Component-specific tool call type */
-	@JsonProperty("component_tool_call")
-	COMPONENT_TOOL_CALL("component_tool_call"),
+  /** Component-specific tool call type */
+  @JsonProperty("component_tool_call")
+  COMPONENT_TOOL_CALL("component_tool_call"),
 
-	/** Result of a component tool call */
-	@JsonProperty("component_tool_result")
-	COMPONENT_TOOL_RESULT("component_tool_result"),
+  /** Result of a component tool call */
+  @JsonProperty("component_tool_result")
+  COMPONENT_TOOL_RESULT("component_tool_result"),
 
-	/** File search operation call type */
-	@JsonProperty("file_search_call")
-	FILE_SEARCH_CALL("file_search_call"),
+  /** File search operation call type */
+  @JsonProperty("file_search_call")
+  FILE_SEARCH_CALL("file_search_call"),
 
-	/** Result of a file search operation */
-	@JsonProperty("file_search_result")
-	FILE_SEARCH_RESULT("file_search_result"),;
+  /** Result of a file search operation */
+  @JsonProperty("file_search_result")
+  FILE_SEARCH_RESULT("file_search_result"),
+  ;
 
-	/** The string value representing this tool call type */
-	private final String value;
-
+  /** The string value representing this tool call type */
+  private final String value;
 }

@@ -16,106 +16,99 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.knowledgebase;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.seaskyland.llm.workflow.runtime.enums.CommonStatus;
 import com.seaskyland.llm.workflow.runtime.enums.DocumentIndexStatus;
 import com.seaskyland.llm.workflow.runtime.enums.DocumentType;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-import java.util.Date;
-
 /**
- * Represents a document in the knowledge base system. Contains metadata and processing
- * information for documents.
+ * Represents a document in the knowledge base system. Contains metadata and processing information
+ * for documents.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Document implements Serializable {
 
-	/** Id for the document */
-	@JsonProperty("doc_id")
-	private String docId;
+  /** Id for the document */
+  @JsonProperty("doc_id")
+  private String docId;
 
-	/** Knowledge base id this document belongs to */
-	@JsonProperty("kb_id")
-	private String kbId;
+  /** Knowledge base id this document belongs to */
+  @JsonProperty("kb_id")
+  private String kbId;
 
-	/** Type of the document */
-	private DocumentType type;
+  /** Type of the document */
+  private DocumentType type;
 
-	/** Current status of the document */
-	private CommonStatus status;
+  /** Current status of the document */
+  private CommonStatus status;
 
-	/** Name of the document */
-	private String name;
+  /** Name of the document */
+  private String name;
 
-	/** File format of the document */
-	private String format;
+  /** File format of the document */
+  private String format;
 
-	/** Size of the document in bytes */
-	private Long size;
+  /** Size of the document in bytes */
+  private Long size;
 
-	/** Additional metadata for the document */
-	private Metadata metadata;
+  /** Additional metadata for the document */
+  private Metadata metadata;
 
-	/** Whether the document is enabled */
-	@Builder.Default
-	private Boolean enabled = true;
+  /** Whether the document is enabled */
+  @Builder.Default private Boolean enabled = true;
 
-	/** Current indexing status of the document */
-	@JsonProperty("index_status")
-	private DocumentIndexStatus indexStatus;
+  /** Current indexing status of the document */
+  @JsonProperty("index_status")
+  private DocumentIndexStatus indexStatus;
 
-	/** Original path of the document */
-	private String path;
+  /** Original path of the document */
+  private String path;
 
-	/** Path after document parsing */
-	@JsonProperty("parsed_path")
-	private String parsedPath;
+  /** Path after document parsing */
+  @JsonProperty("parsed_path")
+  private String parsedPath;
 
-	/** Configuration for document processing */
-	@JsonProperty("process_config")
-	private ProcessConfig processConfig;
+  /** Configuration for document processing */
+  @JsonProperty("process_config")
+  private ProcessConfig processConfig;
 
-	/** Error message if any processing failed */
-	private String error;
+  /** Error message if any processing failed */
+  private String error;
 
-	/** Creation timestamp */
-	@JsonProperty("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @JsonProperty("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@JsonProperty("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @JsonProperty("gmt_modified")
+  private Date gmtModified;
 
-	/** Creator of the document */
-	private String creator;
+  /** Creator of the document */
+  private String creator;
 
-	/** Last modifier of the document */
-	private String modifier;
+  /** Last modifier of the document */
+  private String modifier;
 
-	/**
-	 * Inner class containing document metadata information
-	 */
-	@Data
-	@Builder
-	@AllArgsConstructor
-	@NoArgsConstructor
-	public static class Metadata implements Serializable {
+  /** Inner class containing document metadata information */
+  @Data
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class Metadata implements Serializable {
 
-		/** MIME type of the document content */
-		@JsonProperty("content_type")
-		private String contentType;
-
-	}
-
+    /** MIME type of the document content */
+    @JsonProperty("content_type")
+    private String contentType;
+  }
 }

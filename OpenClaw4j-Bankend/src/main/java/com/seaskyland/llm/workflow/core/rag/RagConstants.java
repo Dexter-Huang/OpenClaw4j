@@ -23,46 +23,45 @@ package com.seaskyland.llm.workflow.core.rag;
  */
 public interface RagConstants {
 
-	/** Field name for text content */
-	String TEXT_FIELD = "content";
+  /** Field name for text content */
+  String TEXT_FIELD = "content";
 
-	/** Field name for vector embeddings */
-	String VECTOR_FIELD = "embedding";
+  /** Field name for vector embeddings */
+  String VECTOR_FIELD = "embedding";
 
-	/** Key for document ID */
-	String KEY_DOC_ID = "doc_id";
+  /** Key for document ID */
+  String KEY_DOC_ID = "doc_id";
 
-	/** Key for document name */
-	String KEY_DOC_NAME = "doc_name";
+  /** Key for document name */
+  String KEY_DOC_NAME = "doc_name";
 
-	/** Key for document title */
-	String KEY_TITLE = "title";
+  /** Key for document title */
+  String KEY_TITLE = "title";
 
-	/** Key for workspace ID */
-	String KEY_WORKSPACE_ID = "workspace_id";
+  /** Key for workspace ID */
+  String KEY_WORKSPACE_ID = "workspace_id";
 
-	/** Key for enabled status */
-	String KEY_ENABLED = "enabled";
+  /** Key for enabled status */
+  String KEY_ENABLED = "enabled";
 
-	/** Key for chunk index */
-	String KEY_CHUNK_INDEX = "index";
+  /** Key for chunk index */
+  String KEY_CHUNK_INDEX = "index";
 
-	/** Default dimension for vector embeddings */
-	int DEFAULT_DIMENSION = 1536;
+  /** Default dimension for vector embeddings */
+  int DEFAULT_DIMENSION = 1536;
 
-	/** Search timeout in seconds */
-	int SEARCH_TIMEOUT = 30;
+  /** Search timeout in seconds */
+  int SEARCH_TIMEOUT = 30;
 
-	/** Placeholder for documents */
-	String DOCUMENTS_PLACEHOLDER = "documents";
+  /** Placeholder for documents */
+  String DOCUMENTS_PLACEHOLDER = "documents";
 
-	/** File search call identifier */
-	String FILE_SEARCH_CALL = "file_search_call";
+  /** File search call identifier */
+  String FILE_SEARCH_CALL = "file_search_call";
 
-	/** File search result identifier */
-	String FILE_SEARCH_RESULT = "file_search_result";
+  /** File search result identifier */
+  String FILE_SEARCH_RESULT = "file_search_result";
 
-	/** Request context identifier */
-	String REQUEST_CONTEXT = "request_context";
-
+  /** Request context identifier */
+  String REQUEST_CONTEXT = "request_context";
 }

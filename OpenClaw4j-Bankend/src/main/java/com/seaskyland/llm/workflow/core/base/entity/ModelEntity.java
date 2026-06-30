@@ -19,47 +19,45 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-
 import java.util.Date;
+import lombok.Data;
 
 @Data
 @TableName("model")
 public class ModelEntity {
 
-	@TableId(value = "id", type = IdType.AUTO)
-	private Long id;
+  @TableId(value = "id", type = IdType.AUTO)
+  private Long id;
 
-	@TableField("workspace_id")
-	private String workspaceId;
+  @TableField("workspace_id")
+  private String workspaceId;
 
-	private String icon;
+  private String icon;
 
-	private String name;
+  private String name;
 
-	@TableField("model_id")
-	private String modelId;
+  @TableField("model_id")
+  private String modelId;
 
-	private String provider;
+  private String provider;
 
-	private String type;
+  private String type;
 
-	private Boolean enable;
+  private Boolean enable;
 
-	private String tags;
+  private String tags;
 
-	private String mode;
+  private String mode;
 
-	private String source;
+  private String source;
 
-	@TableField("gmt_create")
-	private Date gmtCreate;
+  @TableField("gmt_create")
+  private Date gmtCreate;
 
-	@TableField("gmt_modified")
-	private Date gmtModified;
+  @TableField("gmt_modified")
+  private Date gmtModified;
 
-	private String creator;
+  private String creator;
 
-	private String modifier;
-
+  private String modifier;
 }

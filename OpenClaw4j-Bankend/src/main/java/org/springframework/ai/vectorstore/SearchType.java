@@ -22,13 +22,10 @@ package org.springframework.ai.vectorstore;
  *
  * @since 1.0.0.3
  */
-
 public enum SearchType {
+  SEMANTIC,
 
-	SEMANTIC,
+  FULL_TEXT,
 
-	FULL_TEXT,
-
-	HYBRID
-
+  HYBRID
 }

@@ -16,105 +16,106 @@
 
 package com.seaskyland.llm.workflow.runtime.domain;
 
-import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 /**
- * A generic result wrapper class for API responses. This class encapsulates the response
- * data, status, and error information.
+ * A generic result wrapper class for API responses. This class encapsulates the response data,
+ * status, and error information.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class Result<T> implements Serializable {
 
-	/** Unique identifier for the request */
-	@JsonProperty("request_id")
-	private String requestId;
+  /** Unique identifier for the request */
+  @JsonProperty("request_id")
+  private String requestId;
 
-	/** The actual response data */
-	private T data;
+  /** The actual response data */
+  private T data;
 
-	/** Flag indicating if the request was successful */
-	@JsonIgnore
-	private boolean success = true;
+  /** Flag indicating if the request was successful */
+  @JsonIgnore private boolean success = true;
 
-	/** Error code if the request failed */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String code;
+  /** Error code if the request failed */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String code;
 
-	/** Error message if the request failed */
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String message;
+  /** Error message if the request failed */
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String message;
 
-	/**
-	 * Creates a successful result with data
-	 * @param data The response data
-	 * @return Result instance
-	 */
-	public static <T> Result<T> success(T data) {
-		return success(null, data);
-	}
+  /**
+   * Creates a successful result with data
+   *
+   * @param data The response data
+   * @return Result instance
+   */
+  public static <T> Result<T> success(T data) {
+    return success(null, data);
+  }
 
-	/**
-	 * Creates a successful result with request ID and data
-	 * @param requestId The request identifier
-	 * @param data The response data
-	 * @return Result instance
-	 */
-	public static <T> Result<T> success(String requestId, T data) {
-		return Result.<T>builder().success(true).requestId(requestId).data(data).build();
-	}
+  /**
+   * Creates a successful result with request ID and data
+   *
+   * @param requestId The request identifier
+   * @param data The response data
+   * @return Result instance
+   */
+  public static <T> Result<T> success(String requestId, T data) {
+    return Result.<T>builder().success(true).requestId(requestId).data(data).build();
+  }
 
-	/**
-	 * Creates an error result with error code
-	 * @param errorCode The error code
-	 * @return Result instance
-	 */
-	public static <T> Result<T> error(ErrorCode errorCode) {
-		return error(null, errorCode);
-	}
+  /**
+   * Creates an error result with error code
+   *
+   * @param errorCode The error code
+   * @return Result instance
+   */
+  public static <T> Result<T> error(ErrorCode errorCode) {
+    return error(null, errorCode);
+  }
 
-	/**
-	 * Creates an error result with request ID and error code
-	 * @param requestId The request identifier
-	 * @param errorCode The error code
-	 * @return Result instance
-	 */
-	public static <T> Result<T> error(String requestId, ErrorCode errorCode) {
-		return Result.<T>builder()
-			.requestId(requestId)
-			.success(false)
-			.code(errorCode.getCode())
-			.message(errorCode.toError().getMessage())
-			.build();
-	}
+  /**
+   * Creates an error result with request ID and error code
+   *
+   * @param requestId The request identifier
+   * @param errorCode The error code
+   * @return Result instance
+   */
+  public static <T> Result<T> error(String requestId, ErrorCode errorCode) {
+    return Result.<T>builder()
+        .requestId(requestId)
+        .success(false)
+        .code(errorCode.getCode())
+        .message(errorCode.toError().getMessage())
+        .build();
+  }
 
-	/**
-	 * Creates an error result with request ID and error details
-	 * @param requestId The request identifier
-	 * @param error The error details
-	 * @return Result instance
-	 */
-	public static <T> Result<T> error(String requestId, BizError error) {
-		return Result.<T>builder()
-			.requestId(requestId)
-			.success(false)
-			.code(error.getCode())
-			.message(error.getMessage())
-			.build();
-	}
-
+  /**
+   * Creates an error result with request ID and error details
+   *
+   * @param requestId The request identifier
+   * @param error The error details
+   * @return Result instance
+   */
+  public static <T> Result<T> error(String requestId, BizError error) {
+    return Result.<T>builder()
+        .requestId(requestId)
+        .success(false)
+        .code(error.getCode())
+        .message(error.getMessage())
+        .build();
+  }
 }

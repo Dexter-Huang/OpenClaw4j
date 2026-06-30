@@ -16,15 +16,13 @@
 
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.ProviderEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.ProviderEntity;
 
 /**
- * Mapper interface for managing provider data. Extends BaseMapper to provide basic CRUD
- * operations for ProviderEntity.
+ * Mapper interface for managing provider data. Extends BaseMapper to provide basic CRUD operations
+ * for ProviderEntity.
  *
  * @since 1.0.0.3
  */
-public interface ProviderMapper extends BaseMapper<ProviderEntity> {
-
-}
+public interface ProviderMapper extends BaseMapper<ProviderEntity> {}

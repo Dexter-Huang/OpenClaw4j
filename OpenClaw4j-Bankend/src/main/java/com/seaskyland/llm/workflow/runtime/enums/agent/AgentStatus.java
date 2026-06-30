@@ -23,35 +23,34 @@ package com.seaskyland.llm.workflow.runtime.enums.agent;
  */
 public enum AgentStatus {
 
-	/** Agent is active and available for use */
-	ACTIVE("active"),
+  /** Agent is active and available for use */
+  ACTIVE("active"),
 
-	/** Agent is inactive and cannot be used */
-	INACTIVE("inactive"),
+  /** Agent is inactive and cannot be used */
+  INACTIVE("inactive"),
 
-	/** Agent is being configured */
-	CONFIGURING("configuring"),
+  /** Agent is being configured */
+  CONFIGURING("configuring"),
 
-	/** Agent has an error */
-	ERROR("error");
+  /** Agent has an error */
+  ERROR("error");
 
-	private final String code;
+  private final String code;
 
-	AgentStatus(String code) {
-		this.code = code;
-	}
+  AgentStatus(String code) {
+    this.code = code;
+  }
 
-	public String getCode() {
-		return code;
-	}
+  public String getCode() {
+    return code;
+  }
 
-	public static AgentStatus fromCode(String code) {
-		for (AgentStatus status : values()) {
-			if (status.getCode().equals(code)) {
-				return status;
-			}
-		}
-		throw new IllegalArgumentException("Unknown agent status code: " + code);
-	}
-
+  public static AgentStatus fromCode(String code) {
+    for (AgentStatus status : values()) {
+      if (status.getCode().equals(code)) {
+        return status;
+      }
+    }
+    throw new IllegalArgumentException("Unknown agent status code: " + code);
+  }
 }

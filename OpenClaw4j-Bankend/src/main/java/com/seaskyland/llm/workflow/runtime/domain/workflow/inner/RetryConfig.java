@@ -16,9 +16,8 @@
 package com.seaskyland.llm.workflow.runtime.domain.workflow.inner;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
+import lombok.Data;
 
 /**
  * 错误重试配置
@@ -28,13 +27,12 @@ import java.io.Serializable;
 @Data
 public class RetryConfig implements Serializable {
 
-	@JsonProperty("max_retries")
-	private Integer maxRetries;
+  @JsonProperty("max_retries")
+  private Integer maxRetries;
 
-	@JsonProperty("retry_enabled")
-	private Boolean retryEnabled;
+  @JsonProperty("retry_enabled")
+  private Boolean retryEnabled;
 
-	@JsonProperty("retry_interval")
-	private Integer retryInterval;
-
+  @JsonProperty("retry_interval")
+  private Integer retryInterval;
 }

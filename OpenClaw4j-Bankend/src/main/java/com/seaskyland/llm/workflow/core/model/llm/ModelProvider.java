@@ -15,10 +15,9 @@
  */
 package com.seaskyland.llm.workflow.core.model.llm;
 
-import com.seaskyland.llm.workflow.runtime.domain.model.CredentialSpec;
 import com.seaskyland.llm.workflow.core.model.llm.domain.ModelConfigInfo;
 import com.seaskyland.llm.workflow.core.model.llm.domain.ParameterRule;
-
+import com.seaskyland.llm.workflow.runtime.domain.model.CredentialSpec;
 import java.util.List;
 import java.util.Map;
 
@@ -29,62 +28,71 @@ import java.util.Map;
  */
 public interface ModelProvider {
 
-	/**
-	 * Get provider code
-	 * @return provider code
-	 */
-	String getCode();
+  /**
+   * Get provider code
+   *
+   * @return provider code
+   */
+  String getCode();
 
-	/**
-	 * Get provider name
-	 * @return provider name
-	 */
-	String getName();
+  /**
+   * Get provider name
+   *
+   * @return provider name
+   */
+  String getName();
 
-	/**
-	 * Get provider description
-	 * @return provider description
-	 */
-	String getDescription();
+  /**
+   * Get provider description
+   *
+   * @return provider description
+   */
+  String getDescription();
 
-	/**
-	 * Get list of preset models for this provider
-	 * @return list of preset models
-	 */
-	List<ModelConfigInfo> getPresetModels();
+  /**
+   * Get list of preset models for this provider
+   *
+   * @return list of preset models
+   */
+  List<ModelConfigInfo> getPresetModels();
 
-	/**
-	 * Get model protocol
-	 * @return protocol
-	 */
-	String getProtocol();
+  /**
+   * Get model protocol
+   *
+   * @return protocol
+   */
+  String getProtocol();
 
-	/**
-	 * Get provider endpoint
-	 * @return endpoint URL
-	 */
-	String getEndpoint();
+  /**
+   * Get provider endpoint
+   *
+   * @return endpoint URL
+   */
+  String getEndpoint();
 
-	/**
-	 * Validate provider credentials
-	 * @param credentialSpecs credential specifications
-	 * @param credentialMap credential values
-	 * @return validation result
-	 */
-	boolean validateCredentials(List<CredentialSpec> credentialSpecs, Map<String, Object> credentialMap);
+  /**
+   * Validate provider credentials
+   *
+   * @param credentialSpecs credential specifications
+   * @param credentialMap credential values
+   * @return validation result
+   */
+  boolean validateCredentials(
+      List<CredentialSpec> credentialSpecs, Map<String, Object> credentialMap);
 
-	/**
-	 * Get credential specifications
-	 * @return list of credential specifications
-	 */
-	List<CredentialSpec> getCredentialSpecs();
+  /**
+   * Get credential specifications
+   *
+   * @return list of credential specifications
+   */
+  List<CredentialSpec> getCredentialSpecs();
 
-	/**
-	 * Get parameter rules for a specific model
-	 * @param modelId model identifier
-	 * @param modelType model type
-	 * @return list of parameter rules
-	 */
-	List<ParameterRule> getParameterRules(String modelId, String modelType);
-
+  /**
+   * Get parameter rules for a specific model
+   *
+   * @param modelId model identifier
+   * @param modelType model type
+   * @return list of parameter rules
+   */
+  List<ParameterRule> getParameterRules(String modelId, String modelType);
 }

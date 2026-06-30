@@ -16,15 +16,12 @@
 
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.ApiKeyEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.ApiKeyEntity;
 
 /**
- * Mapper interface for managing API keys. Provides database operations for API key
- * entities.
+ * Mapper interface for managing API keys. Provides database operations for API key entities.
  *
  * @since 1.0.0.3
  */
-public interface ApiKeyMapper extends BaseMapper<ApiKeyEntity> {
-
-}
+public interface ApiKeyMapper extends BaseMapper<ApiKeyEntity> {}

@@ -17,12 +17,9 @@
 package com.seaskyland.llm.workflow.runtime.domain.audio;
 
 /**
- * Represents different voice options for audio processing. This enum defines the
- * available voice types that can be used for text-to-speech or voice-related operations
- * in the system.
+ * Represents different voice options for audio processing. This enum defines the available voice
+ * types that can be used for text-to-speech or voice-related operations in the system.
  *
  * @since 1.0.0.3
  */
-public enum Voice {
-
-}
+public enum Voice {}

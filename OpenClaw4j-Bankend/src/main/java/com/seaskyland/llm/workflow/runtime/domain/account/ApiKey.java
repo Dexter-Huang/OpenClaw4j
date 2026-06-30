@@ -16,51 +16,48 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.account;
 
-import com.seaskyland.llm.workflow.runtime.enums.CommonStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.CommonStatus;
 import java.io.Serializable;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Represents an API key entity for authentication and authorization.
  *
  * @since 1.0.0.3
  */
-
 @Data
 public class ApiKey implements Serializable {
 
-	/** Unique identifier for the API key */
-	private Long id;
+  /** Unique identifier for the API key */
+  private Long id;
 
-	/** The actual API key value used for authentication */
-	@JsonProperty("api_key")
-	private String apiKey;
+  /** The actual API key value used for authentication */
+  @JsonProperty("api_key")
+  private String apiKey;
 
-	/** Description of the API key's purpose */
-	private String description;
+  /** Description of the API key's purpose */
+  private String description;
 
-	/** ID of the account this API key belongs to */
-	@JsonProperty("account_id")
-	private String accountId;
+  /** ID of the account this API key belongs to */
+  @JsonProperty("account_id")
+  private String accountId;
 
-	/** Current status of the API key (e.g., active, inactive) */
-	private CommonStatus status;
+  /** Current status of the API key (e.g., active, inactive) */
+  private CommonStatus status;
 
-	/** Creation timestamp */
-	@JsonProperty("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @JsonProperty("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@JsonProperty("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @JsonProperty("gmt_modified")
+  private Date gmtModified;
 
-	/** Username of the creator */
-	private String creator;
+  /** Username of the creator */
+  private String creator;
 
-	/** Username of the last modifier */
-	private String modifier;
-
+  /** Username of the last modifier */
+  private String modifier;
 }

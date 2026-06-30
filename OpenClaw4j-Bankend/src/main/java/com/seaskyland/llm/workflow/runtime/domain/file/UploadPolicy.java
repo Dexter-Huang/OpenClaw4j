@@ -18,45 +18,42 @@ package com.seaskyland.llm.workflow.runtime.domain.file;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.seaskyland.llm.workflow.runtime.enums.UploadType;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.io.Serializable;
-
 /**
  * Policy for file upload operations.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class UploadPolicy implements Serializable {
 
-	/** Name of the file to be uploaded */
-	private String name;
+  /** Name of the file to be uploaded */
+  private String name;
 
-	/** Target path for the file upload */
-	private String path;
+  /** Target path for the file upload */
+  private String path;
 
-	/** File extension */
-	private String extension;
+  /** File extension */
+  private String extension;
 
-	/** MIME type of the file */
-	@JsonProperty("content_type")
-	private String contentType;
+  /** MIME type of the file */
+  @JsonProperty("content_type")
+  private String contentType;
 
-	/** Size of the file in bytes */
-	private Long size;
+  /** Size of the file in bytes */
+  private Long size;
 
-	/** upload file */
-	@JsonProperty("upload_type")
-	@Builder.Default
-	private UploadType uploadType = UploadType.FILE;
-
+  /** upload file */
+  @JsonProperty("upload_type")
+  @Builder.Default
+  private UploadType uploadType = UploadType.FILE;
 }

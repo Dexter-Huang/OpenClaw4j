@@ -24,43 +24,42 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * JVM in-process {@link MqConsumer} implementation backed by {@link JvmMessageBus}.
  *
- * <p>Subscribing a handler via {@link #subscribe(String, String, MqConsumerHandler)}
- * registers it on the shared {@link JvmMessageBus}; messages are delivered in-process
- * without any network or serialization overhead.
+ * <p>Subscribing a handler via {@link #subscribe(String, String, MqConsumerHandler)} registers it
+ * on the shared {@link JvmMessageBus}; messages are delivered in-process without any network or
+ * serialization overhead.
  *
  * @since 1.0.0.3
  */
 @Slf4j
 public class JvmMqConsumer implements MqConsumer {
 
-	private final JvmMessageBus messageBus;
+  private final JvmMessageBus messageBus;
 
-	public JvmMqConsumer(JvmMessageBus messageBus) {
-		this.messageBus = messageBus;
-	}
+  public JvmMqConsumer(JvmMessageBus messageBus) {
+    this.messageBus = messageBus;
+  }
 
-	/**
-	 * Registers {@code handler} to receive messages for the given {@code topic}.
-	 * The {@code group} parameter is accepted for API compatibility but is not used
-	 * in the JVM implementation (there is no consumer group concept in-process).
-	 *
-	 * @param group   consumer group name (ignored in JVM mode)
-	 * @param topic   topic to subscribe to
-	 * @param handler handler invoked for every message on {@code topic}
-	 */
-	@Override
-	public void subscribe(String group, String topic, MqConsumerHandler<MqMessage> handler) {
-		log.info("[JvmMQ] subscribing to topic '{}' (group='{}' is ignored in JVM mode)", topic, group);
-		messageBus.subscribe(topic, handler);
-	}
+  /**
+   * Registers {@code handler} to receive messages for the given {@code topic}. The {@code group}
+   * parameter is accepted for API compatibility but is not used in the JVM implementation (there is
+   * no consumer group concept in-process).
+   *
+   * @param group consumer group name (ignored in JVM mode)
+   * @param topic topic to subscribe to
+   * @param handler handler invoked for every message on {@code topic}
+   */
+  @Override
+  public void subscribe(String group, String topic, MqConsumerHandler<MqMessage> handler) {
+    log.info("[JvmMQ] subscribing to topic '{}' (group='{}' is ignored in JVM mode)", topic, group);
+    messageBus.subscribe(topic, handler);
+  }
 
-	/**
-	 * No-op in JVM mode: the shared {@link JvmMessageBus} manages its own lifecycle
-	 * and shuts down via its own {@code @PreDestroy} hook.
-	 */
-	@Override
-	public void shutdown() {
-		log.info("[JvmMQ] JvmMqConsumer shutdown (bus lifecycle managed separately)");
-	}
-
+  /**
+   * No-op in JVM mode: the shared {@link JvmMessageBus} manages its own lifecycle and shuts down
+   * via its own {@code @PreDestroy} hook.
+   */
+  @Override
+  public void shutdown() {
+    log.info("[JvmMQ] JvmMqConsumer shutdown (bus lifecycle managed separately)");
+  }
 }

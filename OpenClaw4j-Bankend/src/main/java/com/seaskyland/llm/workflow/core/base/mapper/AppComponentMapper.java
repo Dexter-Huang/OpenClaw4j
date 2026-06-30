@@ -15,8 +15,8 @@
  */
 package com.seaskyland.llm.workflow.core.base.mapper;
 
-import com.seaskyland.llm.workflow.core.base.entity.AppComponentEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.seaskyland.llm.workflow.core.base.entity.AppComponentEntity;
 
 /**
  * Mapper interface for AppComponent entity. Provides database operations for application
@@ -25,6 +25,4 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author guning.lt
  * @since 1.0.0.3
  */
-public interface AppComponentMapper extends BaseMapper<AppComponentEntity> {
-
-}
+public interface AppComponentMapper extends BaseMapper<AppComponentEntity> {}

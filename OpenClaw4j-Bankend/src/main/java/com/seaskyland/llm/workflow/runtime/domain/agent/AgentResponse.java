@@ -16,63 +16,60 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.agent;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.seaskyland.llm.workflow.runtime.domain.BizError;
 import com.seaskyland.llm.workflow.runtime.domain.chat.ChatMessage;
 import com.seaskyland.llm.workflow.runtime.domain.chat.Usage;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 
 /**
  * Response model for agent completion requests.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AgentResponse implements Serializable {
 
-	/** Unique identifier for the request */
-	@JsonProperty("request_id")
-	private String requestId;
+  /** Unique identifier for the request */
+  @JsonProperty("request_id")
+  private String requestId;
 
-	/** Unique identifier for the conversation */
-	@JsonProperty("conversation_id")
-	private String conversationId;
+  /** Unique identifier for the conversation */
+  @JsonProperty("conversation_id")
+  private String conversationId;
 
-	/** Current status of the agent */
-	private AgentStatus status;
+  /** Current status of the agent */
+  private AgentStatus status;
 
-	/** Index of the response in the conversation */
-	private String index;
+  /** Index of the response in the conversation */
+  private String index;
 
-	/** The chat message content */
-	private ChatMessage message;
+  /** The chat message content */
+  private ChatMessage message;
 
-	/** Timestamp when the response was created */
-	private Long created;
+  /** Timestamp when the response was created */
+  private Long created;
 
-	/** Model identifier used for generating the response */
-	private String model;
+  /** Model identifier used for generating the response */
+  private String model;
 
-	/** Usage statistics for the request */
-	private Usage usage;
+  /** Usage statistics for the request */
+  private Usage usage;
 
-	/** Error information if the request failed */
-	private BizError error;
+  /** Error information if the request failed */
+  private BizError error;
 
-	/** Checks if the response was successful */
-	@JsonIgnore
-	public boolean isSuccess() {
-		return error == null;
-	}
-
+  /** Checks if the response was successful */
+  @JsonIgnore
+  public boolean isSuccess() {
+    return error == null;
+  }
 }

@@ -27,31 +27,30 @@ import lombok.Getter;
 @Getter
 public enum McpServerStatusEnum {
 
-	/** Server is not available */
-	Unavailable(0, "unavailable"),
+  /** Server is not available */
+  Unavailable(0, "unavailable"),
 
-	/** Server is running normally */
-	Normal(1, "normal"),
+  /** Server is running normally */
+  Normal(1, "normal"),
 
-	/** Server has been deleted */
-	Deleted(3, "deleted");
+  /** Server has been deleted */
+  Deleted(3, "deleted");
 
-	/** Status code */
-	private final Integer Code;
+  /** Status code */
+  private final Integer Code;
 
-	/** Status description */
-	private final String Status;
+  /** Status description */
+  private final String Status;
 
-	McpServerStatusEnum(Integer code, String status) {
-		Code = code;
-		Status = status;
-	}
+  McpServerStatusEnum(Integer code, String status) {
+    Code = code;
+    Status = status;
+  }
 
-	/**
-	 * @return the status message
-	 */
-	public String getMessage() {
-		return this.Status;
-	}
-
+  /**
+   * @return the status message
+   */
+  public String getMessage() {
+    return this.Status;
+  }
 }

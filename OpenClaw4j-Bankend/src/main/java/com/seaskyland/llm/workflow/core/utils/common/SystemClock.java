@@ -22,85 +22,79 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * System clock implementation that provides efficient time access. Uses a background
- * thread to update the current time at regular intervals.
+ * System clock implementation that provides efficient time access. Uses a background thread to
+ * update the current time at regular intervals.
  *
  * @since 1.0.0.3
  */
 public class SystemClock {
 
-	/**
-	 * Clock update interval in milliseconds
-	 */
-	private final long period;
+  /** Clock update interval in milliseconds */
+  private final long period;
 
-	/**
-	 * Current time in milliseconds
-	 */
-	private volatile long now;
+  /** Current time in milliseconds */
+  private volatile long now;
 
-	/**
-	 * Constructor
-	 */
-	private SystemClock(long period) {
-		this.period = period;
-		this.now = System.currentTimeMillis();
-		scheduleClockUpdating();
-	}
+  /** Constructor */
+  private SystemClock(long period) {
+    this.period = period;
+    this.now = System.currentTimeMillis();
+    scheduleClockUpdating();
+  }
 
-	/**
-	 * Starts the clock update scheduler
-	 */
-	private void scheduleClockUpdating() {
-		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> {
-			Thread thread = new Thread(runnable, "System Clock");
-			thread.setDaemon(true);
-			return thread;
-		});
-		scheduler.scheduleAtFixedRate(new Runnable() {
-			public void run() {
-				now = System.currentTimeMillis();
-			}
-		}, period, period, TimeUnit.MILLISECONDS);
-	}
+  /** Starts the clock update scheduler */
+  private void scheduleClockUpdating() {
+    ScheduledExecutorService scheduler =
+        Executors.newSingleThreadScheduledExecutor(
+            runnable -> {
+              Thread thread = new Thread(runnable, "System Clock");
+              thread.setDaemon(true);
+              return thread;
+            });
+    scheduler.scheduleAtFixedRate(
+        new Runnable() {
+          public void run() {
+            now = System.currentTimeMillis();
+          }
+        },
+        period,
+        period,
+        TimeUnit.MILLISECONDS);
+  }
 
-	/**
-	 * @return Current time in milliseconds
-	 */
-	private long currentTimeMillis() {
-		return now;
-	}
+  /**
+   * @return Current time in milliseconds
+   */
+  private long currentTimeMillis() {
+    return now;
+  }
 
-	// ------------------------------------------------------------------------ static
+  // ------------------------------------------------------------------------ static
 
-	/**
-	 * Singleton holder
-	 */
-	private static class InstanceHolder {
+  /** Singleton holder */
+  private static class InstanceHolder {
 
-		public static final SystemClock INSTANCE = new SystemClock(1);
+    public static final SystemClock INSTANCE = new SystemClock(1);
+  }
 
-	}
+  /**
+   * @return Singleton instance
+   */
+  private static SystemClock instance() {
+    return InstanceHolder.INSTANCE;
+  }
 
-	/**
-	 * @return Singleton instance
-	 */
-	private static SystemClock instance() {
-		return InstanceHolder.INSTANCE;
-	}
+  /**
+   * @return Current time in milliseconds
+   */
+  public static long now() {
+    return instance().currentTimeMillis();
+  }
 
-	/**
-	 * @return Current time in milliseconds
-	 */
-	public static long now() {
-		return instance().currentTimeMillis();
-	}
-
-	/**
-	 * @return Current time as a string
-	 */
-	public static String nowDate() {
-		return new Timestamp(instance().currentTimeMillis()).toString();
-	}
-
+  /**
+   * @return Current time as a string
+   */
+  public static String nowDate() {
+    return new Timestamp(instance().currentTimeMillis()).toString();
+  }
 }

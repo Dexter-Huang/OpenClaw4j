@@ -16,68 +16,62 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.component;
 
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
 
 /**
  * Custom parameter model for application components and plugins
  *
  * @author guning.lt
  * @since 1.0.0.3
- **/
+ */
 @Data
 public class CustomParam implements Serializable {
 
-	/** Unique identifier code */
-	private String code;
+  /** Unique identifier code */
+  private String code;
 
-	/** Display name */
-	private String name;
+  /** Display name */
+  private String name;
 
-	/** Detailed description */
-	private String description;
+  /** Detailed description */
+  private String description;
 
-	/** Parameter type */
-	private String type;
+  /** Parameter type */
+  private String type;
 
-	/** List of parameter definitions */
-	private List<Param> params;
+  /** List of parameter definitions */
+  private List<Param> params;
 
-	/** Additional information in JSON format */
-	private String extendInfo;
+  /** Additional information in JSON format */
+  private String extendInfo;
 
-	/**
-	 * Parameter definition class
-	 */
-	@Data
-	public static class Param {
+  /** Parameter definition class */
+  @Data
+  public static class Param {
 
-		/** Field name */
-		private String field;
+    /** Field name */
+    private String field;
 
-		/** Data type */
-		private String type;
+    /** Data type */
+    private String type;
 
-		/** Parameter value */
-		private Object value;
+    /** Parameter value */
+    private Object value;
 
-		/** Field description */
-		private String description;
+    /** Field description */
+    private String description;
 
-		/** Whether the field is required */
-		private boolean required;
+    /** Whether the field is required */
+    private boolean required;
+  }
 
-	}
-
-	/**
-	 * Parameter type enumeration
-	 */
-	public enum ParamType {
-
-		flow, plugin, agentComponent, workflowComponent
-
-	}
-
+  /** Parameter type enumeration */
+  public enum ParamType {
+    flow,
+    plugin,
+    agentComponent,
+    workflowComponent
+  }
 }

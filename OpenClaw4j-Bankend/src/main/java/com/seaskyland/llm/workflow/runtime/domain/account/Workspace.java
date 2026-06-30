@@ -17,11 +17,10 @@
 package com.seaskyland.llm.workflow.runtime.domain.account;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
+import lombok.Data;
 
 /**
  * Represents a workspace entity in the system.
@@ -31,35 +30,34 @@ import java.util.Map;
 @Data
 public class Workspace implements Serializable {
 
-	/** Unique identifier of the workspace */
-	@JsonProperty("workspace_id")
-	private String workspaceId;
+  /** Unique identifier of the workspace */
+  @JsonProperty("workspace_id")
+  private String workspaceId;
 
-	/** Name of the workspace */
-	private String name;
+  /** Name of the workspace */
+  private String name;
 
-	/** Description of the workspace */
-	private String description;
+  /** Description of the workspace */
+  private String description;
 
-	/** Configuration settings for the workspace */
-	private Map<String, Object> config;
+  /** Configuration settings for the workspace */
+  private Map<String, Object> config;
 
-	/** Associated account identifier */
-	@JsonProperty("account_id")
-	private String accountId;
+  /** Associated account identifier */
+  @JsonProperty("account_id")
+  private String accountId;
 
-	/** Creation timestamp */
-	@JsonProperty("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @JsonProperty("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@JsonProperty("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @JsonProperty("gmt_modified")
+  private Date gmtModified;
 
-	/** Username of the creator */
-	private String creator;
+  /** Username of the creator */
+  private String creator;
 
-	/** Username of the last modifier */
-	private String modifier;
-
+  /** Username of the last modifier */
+  private String modifier;
 }

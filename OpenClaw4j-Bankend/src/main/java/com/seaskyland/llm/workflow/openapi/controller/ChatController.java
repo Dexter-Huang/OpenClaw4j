@@ -1,4 +1,4 @@
-package com.seaskyland.llm.workflow.openapi.controller; ///*
+package com.seaskyland.llm.workflow.openapi.controller; /// *
 // * Copyright 2025 the original author or authors.
 // *
 // * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,70 +14,71 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 // * limitations under the License.
 // */
 //
-//package com.seaskyland.llm.workflow.controller;
+// package com.seaskyland.llm.workflow.controller;
 //
-//import com.seaskyland.llm.workflow.runtime.domain.workflow.debug.AsyncResultRequest;
-//import com.seaskyland.llm.workflow.runtime.domain.workflow.debug.AsyncResultResponse;
-//import com.seaskyland.llm.workflow.runtime.domain.workflow.debug.TaskRunResponse;
-//import com.seaskyland.llm.workflow.runtime.domain.workflow.debug.TaskStopRequest;
-//import com.seaskyland.llm.workflow.runtime.domain.workflow.debug.WorkflowRequest;
-//import com.seaskyland.llm.workflow.runtime.domain.workflow.debug.WorkflowResponse;
-//import com.seaskyland.llm.workflow.runtime.domain.Error;
-//import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
-//import com.seaskyland.llm.workflow.runtime.domain.Result;
-//import com.seaskyland.llm.workflow.runtime.domain.agent.AgentRequest;
-//import com.seaskyland.llm.workflow.runtime.domain.agent.AgentResponse;
-//import com.seaskyland.llm.workflow.runtime.domain.agent.AgentStatus;
-//import com.seaskyland.llm.workflow.runtime.domain.workflow.NodeResult;
-//import com.seaskyland.llm.workflow.runtime.domain.workflow.NodeTypeEnum;
-//import com.seaskyland.llm.workflow.runtime.domain.workflow.WorkflowStatus;
-//import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
-//import com.seaskyland.llm.workflow.runtime.exception.BizException;
-//import com.seaskyland.llm.workflow.runtime.utils.ExceptionUtils;
-//import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
-//import com.seaskyland.llm.workflow.core.base.service.AgentService;
-//import com.seaskyland.llm.workflow.core.base.service.WorkflowService;
-//import com.seaskyland.llm.workflow.core.base.manager.RedisManager;
-//import com.seaskyland.llm.workflow.core.workflow.WorkflowContext;
-//import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
-//import com.seaskyland.llm.workflow.core.utils.LogUtils;
-//import com.google.common.collect.Lists;
-//import io.swagger.v3.oas.annotations.tags.Tag;
-//import jakarta.servlet.http.HttpServletResponse;
-//import java.util.List;
-//import java.util.concurrent.ConcurrentHashMap;
-//import java.util.concurrent.CopyOnWriteArrayList;
+// import com.seaskyland.llm.workflow.runtime.domain.workflow.debug.AsyncResultRequest;
+// import com.seaskyland.llm.workflow.runtime.domain.workflow.debug.AsyncResultResponse;
+// import com.seaskyland.llm.workflow.runtime.domain.workflow.debug.TaskRunResponse;
+// import com.seaskyland.llm.workflow.runtime.domain.workflow.debug.TaskStopRequest;
+// import com.seaskyland.llm.workflow.runtime.domain.workflow.debug.WorkflowRequest;
+// import com.seaskyland.llm.workflow.runtime.domain.workflow.debug.WorkflowResponse;
+// import com.seaskyland.llm.workflow.runtime.domain.Error;
+// import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
+// import com.seaskyland.llm.workflow.runtime.domain.Result;
+// import com.seaskyland.llm.workflow.runtime.domain.agent.AgentRequest;
+// import com.seaskyland.llm.workflow.runtime.domain.agent.AgentResponse;
+// import com.seaskyland.llm.workflow.runtime.domain.agent.AgentStatus;
+// import com.seaskyland.llm.workflow.runtime.domain.workflow.NodeResult;
+// import com.seaskyland.llm.workflow.runtime.domain.workflow.NodeTypeEnum;
+// import com.seaskyland.llm.workflow.runtime.domain.workflow.WorkflowStatus;
+// import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
+// import com.seaskyland.llm.workflow.runtime.exception.BizException;
+// import com.seaskyland.llm.workflow.runtime.utils.ExceptionUtils;
+// import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
+// import com.seaskyland.llm.workflow.core.base.service.AgentService;
+// import com.seaskyland.llm.workflow.core.base.service.WorkflowService;
+// import com.seaskyland.llm.workflow.core.base.manager.RedisManager;
+// import com.seaskyland.llm.workflow.core.workflow.WorkflowContext;
+// import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
+// import com.seaskyland.llm.workflow.core.utils.LogUtils;
+// import com.google.common.collect.Lists;
+// import io.swagger.v3.oas.annotations.tags.Tag;
+// import jakarta.servlet.http.HttpServletResponse;
+// import java.util.List;
+// import java.util.concurrent.ConcurrentHashMap;
+// import java.util.concurrent.CopyOnWriteArrayList;
 //
-//import static com.seaskyland.llm.workflow.core.base.constants.CacheConstants.WORKFLOW_TASK_CONTEXT_PREFIX;
+// import static
+// com.seaskyland.llm.workflow.core.base.constants.CacheConstants.WORKFLOW_TASK_CONTEXT_PREFIX;
 //
-//import org.apache.commons.collections4.CollectionUtils;
-//import org.apache.commons.lang3.StringUtils;
-//import org.springframework.http.HttpHeaders;
-//import org.springframework.http.MediaType;
-//import org.springframework.web.bind.annotation.PostMapping;
-//import org.springframework.web.bind.annotation.RequestBody;
-//import org.springframework.web.bind.annotation.RequestMapping;
-//import org.springframework.web.bind.annotation.RestController;
-//import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-//import lombok.extern.slf4j.Slf4j;
-//import reactor.core.publisher.Flux;
-//import reactor.core.publisher.Mono;
-//import reactor.core.publisher.SignalType;
+// import org.apache.commons.collections4.CollectionUtils;
+// import org.apache.commons.lang3.StringUtils;
+// import org.springframework.http.HttpHeaders;
+// import org.springframework.http.MediaType;
+// import org.springframework.web.bind.annotation.PostMapping;
+// import org.springframework.web.bind.annotation.RequestBody;
+// import org.springframework.web.bind.annotation.RequestMapping;
+// import org.springframework.web.bind.annotation.RestController;
+// import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+// import lombok.extern.slf4j.Slf4j;
+// import reactor.core.publisher.Flux;
+// import reactor.core.publisher.Mono;
+// import reactor.core.publisher.SignalType;
 //
-//import static com.seaskyland.llm.workflow.core.utils.LogUtils.FAIL;
-//import static com.seaskyland.llm.workflow.core.utils.LogUtils.SUCCESS;
+// import static com.seaskyland.llm.workflow.core.utils.LogUtils.FAIL;
+// import static com.seaskyland.llm.workflow.core.utils.LogUtils.SUCCESS;
 //
-///**
+/// **
 // * Controller for handling chat and workflow completions. Provides endpoints for both
 // * streaming and non-streaming responses.
 // *
 // * @since 1.0.0.3
 // */
-//@Slf4j
-//@RestController
-//@Tag(name = "chat")
-//@RequestMapping("/api/v1/apps")
-//public class ChatController {
+// @Slf4j
+// @RestController
+// @Tag(name = "chat")
+// @RequestMapping("/api/v1/apps")
+// public class ChatController {
 //
 //	/** Service for handling agent-related operations */
 //	private final AgentService agentService;
@@ -88,7 +89,8 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //	/** Redis manager for cache operations */
 //	private final RedisManager redisManager;
 //
-//	public ChatController(AgentService agentService, WorkflowService workflowService, RedisManager redisManager) {
+//	public ChatController(AgentService agentService, WorkflowService workflowService, RedisManager
+// redisManager) {
 //		this.agentService = agentService;
 //		this.workflowService = workflowService;
 //		this.redisManager = redisManager;
@@ -130,7 +132,8 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //			AgentResponse completion = agentService.call(request);
 //			String result = JsonUtils.toJson(completion);
 //
-//			LogUtils.monitor(context, "ChatController", "endCall", context.getStartTime(), LogUtils.SUCCESS, request,
+//			LogUtils.monitor(context, "ChatController", "endCall", context.getStartTime(),
+// LogUtils.SUCCESS, request,
 //					result);
 //			return result;
 //		}
@@ -139,7 +142,8 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //			response.setStatus(error.getStatusCode());
 //
 //			String result = JsonUtils.toJson(error);
-//			LogUtils.monitor(context, "ChatController", "endCallError", context.getStartTime(), FAIL, request, result,
+//			LogUtils.monitor(context, "ChatController", "endCallError", context.getStartTime(), FAIL,
+// request, result,
 //					e);
 //
 //			return result;
@@ -182,7 +186,8 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //			WorkflowResponse completion = workflowService.call(request);
 //			String result = JsonUtils.toJson(completion);
 //
-//			LogUtils.monitor(context, "ChatController", "endCall", context.getStartTime(), LogUtils.SUCCESS, request,
+//			LogUtils.monitor(context, "ChatController", "endCall", context.getStartTime(),
+// LogUtils.SUCCESS, request,
 //					result);
 //			return result;
 //		}
@@ -191,7 +196,8 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //			response.setStatus(error.getStatusCode());
 //
 //			String result = JsonUtils.toJson(error);
-//			LogUtils.monitor(context, "ChatController", "endCallError", context.getStartTime(), FAIL, request, result,
+//			LogUtils.monitor(context, "ChatController", "endCallError", context.getStartTime(), FAIL,
+// request, result,
 //					e);
 //
 //			return result;
@@ -206,7 +212,8 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //	 * @param completion The agent response
 //	 * @param response The HTTP servlet response
 //	 */
-//	private void sendStreamingResponse(RequestContext context, AgentRequest request, SseEmitter emitter,
+//	private void sendStreamingResponse(RequestContext context, AgentRequest request, SseEmitter
+// emitter,
 //			AgentResponse completion, HttpServletResponse response) {
 //		if (completion.getError() != null) {
 //			response.setStatus(completion.getError().getStatusCode());
@@ -217,12 +224,14 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //			emitter.send(json, MediaType.TEXT_EVENT_STREAM);
 //		}
 //		catch (Exception e) {
-//			LogUtils.monitor(context, "ChatController", "endStreamCallError", context.getStartTime(), FAIL, request,
+//			LogUtils.monitor(context, "ChatController", "endStreamCallError", context.getStartTime(), FAIL,
+// request,
 //					e.getMessage(), e);
 //		}
 //
 //		if (completion.getStatus() == AgentStatus.COMPLETED) {
-//			LogUtils.trace(context, "ChatController", "endStreamCall", context.getStartTime(), SUCCESS, request, json);
+//			LogUtils.trace(context, "ChatController", "endStreamCall", context.getStartTime(), SUCCESS,
+// request, json);
 //		}
 //	}
 //
@@ -233,12 +242,15 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //	 * @param err The error
 //	 * @return A mono containing the agent response
 //	 */
-//	private Mono<AgentResponse> handleError(RequestContext context, AgentRequest request, Throwable err) {
-//		LogUtils.monitor(context, "ChatController", "endStreamCallError", context.getStartTime(), FAIL, request,
+//	private Mono<AgentResponse> handleError(RequestContext context, AgentRequest request, Throwable
+// err) {
+//		LogUtils.monitor(context, "ChatController", "endStreamCallError", context.getStartTime(), FAIL,
+// request,
 //				err.getMessage(), err);
 //
 //		Error error = ExceptionUtils.convertError(err);
-//		AgentResponse completion = AgentResponse.builder().requestId(context.getRequestId()).error(error).build();
+//		AgentResponse completion =
+// AgentResponse.builder().requestId(context.getRequestId()).error(error).build();
 //
 //		return Mono.just(completion);
 //	}
@@ -251,7 +263,8 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //	 * @param completion The workflow response
 //	 * @param response The HTTP servlet response
 //	 */
-//	private void sendStreamingResponse(RequestContext context, WorkflowRequest request, SseEmitter emitter,
+//	private void sendStreamingResponse(RequestContext context, WorkflowRequest request, SseEmitter
+// emitter,
 //			WorkflowResponse completion, HttpServletResponse response) {
 //		if (completion.getError() != null) {
 //			response.setStatus(completion.getError().getStatusCode());
@@ -262,12 +275,14 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //			emitter.send(json, MediaType.TEXT_EVENT_STREAM);
 //		}
 //		catch (Exception e) {
-//			LogUtils.monitor(context, "ChatController", "endStreamCallError", context.getStartTime(), FAIL, request,
+//			LogUtils.monitor(context, "ChatController", "endStreamCallError", context.getStartTime(), FAIL,
+// request,
 //					e.getMessage(), e);
 //		}
 //
 //		if (completion.getStatus() == WorkflowStatus.COMPLETED) {
-//			LogUtils.trace(context, "ChatController", "endStreamCall", context.getStartTime(), SUCCESS, request, json);
+//			LogUtils.trace(context, "ChatController", "endStreamCall", context.getStartTime(), SUCCESS,
+// request, json);
 //		}
 //	}
 //
@@ -278,12 +293,15 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //	 * @param err The error
 //	 * @return A mono containing the workflow response
 //	 */
-//	private Mono<WorkflowResponse> handleError(RequestContext context, WorkflowRequest request, Throwable err) {
-//		LogUtils.monitor(context, "ChatController", "endStreamCallError", context.getStartTime(), FAIL, request,
+//	private Mono<WorkflowResponse> handleError(RequestContext context, WorkflowRequest request,
+// Throwable err) {
+//		LogUtils.monitor(context, "ChatController", "endStreamCallError", context.getStartTime(), FAIL,
+// request,
 //				err.getMessage(), err);
 //
 //		Error error = ExceptionUtils.convertError(err);
-//		WorkflowResponse completion = WorkflowResponse.builder().requestId(context.getRequestId()).error(error).build();
+//		WorkflowResponse completion =
+// WorkflowResponse.builder().requestId(context.getRequestId()).error(error).build();
 //
 //		return Mono.just(completion);
 //	}
@@ -296,7 +314,8 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //	 */
 //	private void handleComplete(RequestContext context, SignalType signalType, SseEmitter emitter) {
 //		emitter.complete();
-//		LogUtils.monitor(context, "ChatController", "endStreamCall", context.getStartTime(), SUCCESS, null, null);
+//		LogUtils.monitor(context, "ChatController", "endStreamCall", context.getStartTime(), SUCCESS,
+// null, null);
 //	}
 //
 //	@PostMapping(value = { "/workflow/async-completions" })
@@ -313,7 +332,8 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //		long start = System.currentTimeMillis();
 //		RequestContext requestContext = RequestContextHolder.getRequestContext();
 //		if (request == null || StringUtils.isBlank(request.getTaskId())) {
-//			return Result.error(requestContext.getRequestId(), ErrorCode.MISSING_PARAMS.toError("taskId is null"));
+//			return Result.error(requestContext.getRequestId(), ErrorCode.MISSING_PARAMS.toError("taskId is
+// null"));
 //		}
 //		return Result.success(workflowService.stop(request));
 //	}
@@ -330,7 +350,8 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //			}
 //
 //			// 从Redis中获取工作流上下文
-//			String cacheKey = WORKFLOW_TASK_CONTEXT_PREFIX + context.getWorkspaceId() + "_" + request.getTaskId();
+//			String cacheKey = WORKFLOW_TASK_CONTEXT_PREFIX + context.getWorkspaceId() + "_" +
+// request.getTaskId();
 //			WorkflowContext wfContext = redisManager.get(cacheKey);
 //
 //			if (wfContext == null) {
@@ -381,21 +402,24 @@ package com.seaskyland.llm.workflow.openapi.controller; ///*
 //			// 设置节点结果
 //			response.setOutputs(outputs);
 //
-//			LogUtils.monitor(context, "ChatController", "getAsyncResults", context.getStartTime(), SUCCESS, request,
+//			LogUtils.monitor(context, "ChatController", "getAsyncResults", context.getStartTime(), SUCCESS,
+// request,
 //					"Task status: " + wfContext.getTaskStatus());
 //
 //			return Result.success(response);
 //		}
 //		catch (BizException e) {
-//			LogUtils.monitor(context, "ChatController", "getAsyncResults", context.getStartTime(), FAIL, request,
+//			LogUtils.monitor(context, "ChatController", "getAsyncResults", context.getStartTime(), FAIL,
+// request,
 //					e.getError(), e);
 //			throw e;
 //		}
 //		catch (Exception e) {
-//			LogUtils.monitor(context, "ChatController", "getAsyncResults", context.getStartTime(), FAIL, request,
+//			LogUtils.monitor(context, "ChatController", "getAsyncResults", context.getStartTime(), FAIL,
+// request,
 //					e.getMessage(), e);
 //			return Result.error(ErrorCode.WORKFLOW_DEBUG_GET_PROCESS_FAIL);
 //		}
 //	}
 //
-//}
+// }

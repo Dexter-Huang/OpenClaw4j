@@ -25,46 +25,46 @@ import lombok.Getter;
  *
  * @since 1.0.0.3
  */
-
 @Getter
 @AllArgsConstructor
 public enum AgentStatus {
 
-	/** Indicates that the agent has completed its task successfully */
-	@JsonProperty("completed")
-	COMPLETED("completed"),
+  /** Indicates that the agent has completed its task successfully */
+  @JsonProperty("completed")
+  COMPLETED("completed"),
 
-	/** Indicates that the agent's task has failed */
-	@JsonProperty("failed")
-	FAILED("failed"),
+  /** Indicates that the agent's task has failed */
+  @JsonProperty("failed")
+  FAILED("failed"),
 
-	/** Indicates that the agent is currently processing its task */
-	@JsonProperty("in_progress")
-	IN_PROGRESS("in_progress"),
+  /** Indicates that the agent is currently processing its task */
+  @JsonProperty("in_progress")
+  IN_PROGRESS("in_progress"),
 
-	/** Indicates that the agent's task is incomplete */
-	@JsonProperty("incomplete")
-	INCOMPLETE("incomplete"),;
+  /** Indicates that the agent's task is incomplete */
+  @JsonProperty("incomplete")
+  INCOMPLETE("incomplete"),
+  ;
 
-	/** The string value representing the status */
-	private final String value;
+  /** The string value representing the status */
+  private final String value;
 
-	/**
-	 * Converts a finish reason string to the corresponding AgentStatus.
-	 * @param finishReason The reason for task completion
-	 * @return The corresponding AgentStatus
-	 */
-	public static AgentStatus toAgentStatus(String finishReason) {
-		if (finishReason == null || finishReason.isEmpty()) {
-			return AgentStatus.IN_PROGRESS;
-		}
+  /**
+   * Converts a finish reason string to the corresponding AgentStatus.
+   *
+   * @param finishReason The reason for task completion
+   * @return The corresponding AgentStatus
+   */
+  public static AgentStatus toAgentStatus(String finishReason) {
+    if (finishReason == null || finishReason.isEmpty()) {
+      return AgentStatus.IN_PROGRESS;
+    }
 
-		finishReason = finishReason.toLowerCase();
-		return switch (finishReason) {
-			case "stop", "length" -> AgentStatus.COMPLETED;
-			case "tool_calls" -> AgentStatus.IN_PROGRESS;
-			default -> AgentStatus.FAILED;
-		};
-	}
-
+    finishReason = finishReason.toLowerCase();
+    return switch (finishReason) {
+      case "stop", "length" -> AgentStatus.COMPLETED;
+      case "tool_calls" -> AgentStatus.IN_PROGRESS;
+      default -> AgentStatus.FAILED;
+    };
+  }
 }

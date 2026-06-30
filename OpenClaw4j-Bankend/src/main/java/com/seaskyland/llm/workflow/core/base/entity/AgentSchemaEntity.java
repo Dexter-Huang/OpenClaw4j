@@ -16,16 +16,15 @@
 
 package com.seaskyland.llm.workflow.core.base.entity;
 
-import com.seaskyland.llm.workflow.runtime.enums.agent.AgentStatus;
-import com.seaskyland.llm.workflow.runtime.enums.agent.AgentType;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.agent.AgentStatus;
+import com.seaskyland.llm.workflow.runtime.enums.agent.AgentType;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Entity class representing an agent schema in the system.
@@ -36,72 +35,71 @@ import java.util.Date;
 @TableName("agent_schema")
 public class AgentSchemaEntity {
 
-	/** Primary key */
-	@TableId(value = "id", type = IdType.AUTO)
-	private Long id;
+  /** Primary key */
+  @TableId(value = "id", type = IdType.AUTO)
+  private Long id;
 
-	/** Unique identifier for the agent */
-	@TableField("agent_id")
-	private String agentId;
+  /** Unique identifier for the agent */
+  @TableField("agent_id")
+  private String agentId;
 
-	/** Workspace identifier where the agent belongs */
-	@TableField("workspace_id")
-	private String workspaceId;
+  /** Workspace identifier where the agent belongs */
+  @TableField("workspace_id")
+  private String workspaceId;
 
-	/** Name of the agent */
-	private String name;
+  /** Name of the agent */
+  private String name;
 
-	/** Description of the agent */
-	private String description;
+  /** Description of the agent */
+  private String description;
 
-	/** Type of the agent */
-	private AgentType type;
+  /** Type of the agent */
+  private AgentType type;
 
-	/** System instruction for the agent */
-	@TableField("instruction")
-	private String instruction;
+  /** System instruction for the agent */
+  @TableField("instruction")
+  private String instruction;
 
-	/** Input keys for the agent */
-	@TableField("input_keys")
-	@JsonProperty("inputKeys")
-	private String inputKeys;
+  /** Input keys for the agent */
+  @TableField("input_keys")
+  @JsonProperty("inputKeys")
+  private String inputKeys;
 
-	/** Output key for the agent */
-	@TableField("output_key")
-	@JsonProperty("outputKey")
-	private String outputKey;
+  /** Output key for the agent */
+  @TableField("output_key")
+  @JsonProperty("outputKey")
+  private String outputKey;
 
-	/** Handle configuration in JSON format */
-	private String handle;
+  /** Handle configuration in JSON format */
+  private String handle;
 
-	/** Sub-agents configuration in JSON format */
-	@TableField("sub_agents")
-	@JsonProperty("subAgents")
-	private String subAgents;
+  /** Sub-agents configuration in JSON format */
+  @TableField("sub_agents")
+  @JsonProperty("subAgents")
+  private String subAgents;
 
-	/** Generated YAML schema */
-	@TableField("yaml_schema")
-	@JsonProperty("yamlSchema")
-	private String yamlSchema;
+  /** Generated YAML schema */
+  @TableField("yaml_schema")
+  @JsonProperty("yamlSchema")
+  private String yamlSchema;
 
-	/** Current status of the agent */
-	private AgentStatus status;
+  /** Current status of the agent */
+  private AgentStatus status;
 
-	/** Whether the agent is enabled */
-	private Boolean enabled;
+  /** Whether the agent is enabled */
+  private Boolean enabled;
 
-	/** Creation timestamp */
-	@TableField("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @TableField("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@TableField("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @TableField("gmt_modified")
+  private Date gmtModified;
 
-	/** Creator of the agent */
-	private String creator;
+  /** Creator of the agent */
+  private String creator;
 
-	/** Last modifier of the agent */
-	private String modifier;
-
+  /** Last modifier of the agent */
+  private String modifier;
 }

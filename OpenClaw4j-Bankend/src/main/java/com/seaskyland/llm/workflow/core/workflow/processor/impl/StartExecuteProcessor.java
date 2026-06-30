@@ -16,6 +16,16 @@
 
 package com.seaskyland.llm.workflow.core.workflow.processor.impl;
 
+import static com.seaskyland.llm.workflow.core.base.constants.CacheConstants.WORKFLOW_SESSION_VARIABLE_KEY_TEMPLATE;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.seaskyland.llm.workflow.core.base.manager.CacheManager;
+import com.seaskyland.llm.workflow.core.config.CommonConfig;
+import com.seaskyland.llm.workflow.core.workflow.WorkflowConfig;
+import com.seaskyland.llm.workflow.core.workflow.WorkflowContext;
+import com.seaskyland.llm.workflow.core.workflow.WorkflowInnerService;
+import com.seaskyland.llm.workflow.core.workflow.processor.AbstractExecuteProcessor;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.CommonParam;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.Edge;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.Node;
@@ -23,24 +33,13 @@ import com.seaskyland.llm.workflow.runtime.domain.workflow.NodeResult;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.NodeTypeEnum;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.ParamSourceEnum;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
-import com.seaskyland.llm.workflow.core.config.CommonConfig;
-import com.seaskyland.llm.workflow.core.base.manager.CacheManager;
-import com.seaskyland.llm.workflow.core.workflow.WorkflowConfig;
-import com.seaskyland.llm.workflow.core.workflow.WorkflowContext;
-import com.seaskyland.llm.workflow.core.workflow.WorkflowInnerService;
-import com.seaskyland.llm.workflow.core.workflow.processor.AbstractExecuteProcessor;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.jgrapht.graph.DirectedAcyclicGraph;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.seaskyland.llm.workflow.core.base.constants.CacheConstants.WORKFLOW_SESSION_VARIABLE_KEY_TEMPLATE;
 
 /**
  * 应用编排执行接口类
@@ -50,99 +49,125 @@ import static com.seaskyland.llm.workflow.core.base.constants.CacheConstants.WOR
 @Component("StartExecuteProcessor")
 public class StartExecuteProcessor extends AbstractExecuteProcessor {
 
-	public StartExecuteProcessor(CacheManager cacheManager, WorkflowInnerService workflowInnerService,
-                                 ChatMemory conversationChatMemory, CommonConfig commonConfig) {
-		super(cacheManager, workflowInnerService, conversationChatMemory, commonConfig);
-	}
+  public StartExecuteProcessor(
+      CacheManager cacheManager,
+      WorkflowInnerService workflowInnerService,
+      ChatMemory conversationChatMemory,
+      CommonConfig commonConfig) {
+    super(cacheManager, workflowInnerService, conversationChatMemory, commonConfig);
+  }
 
-	@Override
-	public String getNodeType() {
-		return NodeTypeEnum.START.getCode();
-	}
+  @Override
+  public String getNodeType() {
+    return NodeTypeEnum.START.getCode();
+  }
 
-	@Override
-	public String getNodeDescription() {
-		return NodeTypeEnum.START.getDesc();
-	}
+  @Override
+  public String getNodeDescription() {
+    return NodeTypeEnum.START.getDesc();
+  }
 
-	@Override
-	public NodeResult innerExecute(DirectedAcyclicGraph<String, Edge> graph, Node node, WorkflowContext context) {
-		long start = System.currentTimeMillis();
+  @Override
+  public NodeResult innerExecute(
+      DirectedAcyclicGraph<String, Edge> graph, Node node, WorkflowContext context) {
+    long start = System.currentTimeMillis();
 
-		NodeResult nodeResult = initNodeResultAndRefreshContext(node, context);
+    NodeResult nodeResult = initNodeResultAndRefreshContext(node, context);
 
-		// 设置系统变量
-		Map<String, Object> sysMap = context.getSysMap();
-		if (sysMap != null) {
-			sysMap.keySet().forEach(key -> {
-				if (!context.getVariablesMap().containsKey("sys")) {
-					Map<String, Object> sysObj = new HashMap<>();
-					sysObj.put(key, sysMap.get(key));
-					context.getVariablesMap().put("sys", sysObj);
-				}
-				else {
-					Map<String, Object> sysObj = (Map<String, Object>) context.getVariablesMap().get("sys");
-					sysObj.put(key, sysMap.get(key));
-				}
-			});
-		}
+    // 设置系统变量
+    Map<String, Object> sysMap = context.getSysMap();
+    if (sysMap != null) {
+      sysMap
+          .keySet()
+          .forEach(
+              key -> {
+                if (!context.getVariablesMap().containsKey("sys")) {
+                  Map<String, Object> sysObj = new HashMap<>();
+                  sysObj.put(key, sysMap.get(key));
+                  context.getVariablesMap().put("sys", sysObj);
+                } else {
+                  Map<String, Object> sysObj =
+                      (Map<String, Object>) context.getVariablesMap().get("sys");
+                  sysObj.put(key, sysMap.get(key));
+                }
+              });
+    }
 
-		// 设置会话变量
-		WorkflowConfig.GlobalConfig globalConfig = context.getWorkflowConfig().getGlobalConfig();
-		List<CommonParam> sessionParamList = (globalConfig == null || globalConfig.getVariableConfig() == null)
-				? Lists.newArrayList() : globalConfig.getVariableConfig().getConversationParams();
-		if (!CollectionUtils.isEmpty(sessionParamList)) {
-			sessionParamList.stream().forEach(sessionParam -> {
-				if (!context.getVariablesMap().containsKey(ParamSourceEnum.conversation.name())) {
-					Map<String, Object> sessionObj = new HashMap<>();
-					Object value = cacheManager.get(String.format(WORKFLOW_SESSION_VARIABLE_KEY_TEMPLATE,
-							context.getAppId(), context.getConversationId(), sessionParam.getKey()));
-					value = value == null ? sessionParam.getDefaultValue() : value;
-					sessionObj.put(sessionParam.getKey(), value);
-					context.getVariablesMap().put(ParamSourceEnum.conversation.name(), sessionObj);
-				}
-				else {
-					Map<String, Object> sessionObj = (Map<String, Object>) context.getVariablesMap().get("session");
-					Object value = cacheManager.get(String.format(WORKFLOW_SESSION_VARIABLE_KEY_TEMPLATE,
-							context.getAppId(), context.getConversationId(), sessionParam.getKey()));
-					value = value == null ? sessionParam.getDefaultValue() : value;
-					sessionObj.put(sessionParam.getKey(), value);
-				}
-			});
-		}
+    // 设置会话变量
+    WorkflowConfig.GlobalConfig globalConfig = context.getWorkflowConfig().getGlobalConfig();
+    List<CommonParam> sessionParamList =
+        (globalConfig == null || globalConfig.getVariableConfig() == null)
+            ? Lists.newArrayList()
+            : globalConfig.getVariableConfig().getConversationParams();
+    if (!CollectionUtils.isEmpty(sessionParamList)) {
+      sessionParamList.stream()
+          .forEach(
+              sessionParam -> {
+                if (!context.getVariablesMap().containsKey(ParamSourceEnum.conversation.name())) {
+                  Map<String, Object> sessionObj = new HashMap<>();
+                  Object value =
+                      cacheManager.get(
+                          String.format(
+                              WORKFLOW_SESSION_VARIABLE_KEY_TEMPLATE,
+                              context.getAppId(),
+                              context.getConversationId(),
+                              sessionParam.getKey()));
+                  value = value == null ? sessionParam.getDefaultValue() : value;
+                  sessionObj.put(sessionParam.getKey(), value);
+                  context.getVariablesMap().put(ParamSourceEnum.conversation.name(), sessionObj);
+                } else {
+                  Map<String, Object> sessionObj =
+                      (Map<String, Object>) context.getVariablesMap().get("session");
+                  Object value =
+                      cacheManager.get(
+                          String.format(
+                              WORKFLOW_SESSION_VARIABLE_KEY_TEMPLATE,
+                              context.getAppId(),
+                              context.getConversationId(),
+                              sessionParam.getKey()));
+                  value = value == null ? sessionParam.getDefaultValue() : value;
+                  sessionObj.put(sessionParam.getKey(), value);
+                }
+              });
+    }
 
-		// 设置用户透传参数，放入Start节点下的变量关联
-		Map<String, Object> userMap = context.getUserMap();
-		if (userMap != null) {
-			userMap.keySet().forEach(key -> {
-				if (!context.getVariablesMap().containsKey(node.getId())) {
-					Map<String, Object> userObj = new HashMap<>();
-					userObj.put(key, userMap.get(key));
-					context.getVariablesMap().put(node.getId(), userObj);
-				}
-				else {
-					Map<String, Object> userObj = (Map<String, Object>) context.getVariablesMap().get(node.getId());
-					userObj.put(key, userMap.get(key));
-					context.getVariablesMap().put(node.getId(), userObj);
-				}
-			});
-		}
+    // 设置用户透传参数，放入Start节点下的变量关联
+    Map<String, Object> userMap = context.getUserMap();
+    if (userMap != null) {
+      userMap
+          .keySet()
+          .forEach(
+              key -> {
+                if (!context.getVariablesMap().containsKey(node.getId())) {
+                  Map<String, Object> userObj = new HashMap<>();
+                  userObj.put(key, userMap.get(key));
+                  context.getVariablesMap().put(node.getId(), userObj);
+                } else {
+                  Map<String, Object> userObj =
+                      (Map<String, Object>) context.getVariablesMap().get(node.getId());
+                  userObj.put(key, userMap.get(key));
+                  context.getVariablesMap().put(node.getId(), userObj);
+                }
+              });
+    }
 
-		Map<String, Object> resultMap = Maps.newHashMap();
-		resultMap.put("user", context.getUserMap());
-		resultMap.put("sys", context.getSysMap());
-		resultMap.put("session", context.getVariablesMap().get("session"));
-		nodeResult.setInput(JsonUtils.toJson(resultMap));
-		nodeResult.setOutput(JsonUtils.toJson(resultMap));
-		nodeResult.setNodeExecTime((System.currentTimeMillis() - start) + "ms");
+    Map<String, Object> resultMap = Maps.newHashMap();
+    resultMap.put("user", context.getUserMap());
+    resultMap.put("sys", context.getSysMap());
+    resultMap.put("session", context.getVariablesMap().get("session"));
+    nodeResult.setInput(JsonUtils.toJson(resultMap));
+    nodeResult.setOutput(JsonUtils.toJson(resultMap));
+    nodeResult.setNodeExecTime((System.currentTimeMillis() - start) + "ms");
 
-		return nodeResult;
-	}
+    return nodeResult;
+  }
 
-	@Override
-	public void handleVariables(DirectedAcyclicGraph<String, Edge> graph, Node node, WorkflowContext context,
-			NodeResult nodeResult) {
-		// 开始节点不需要处理variableMap，上面已处理
-	}
-
+  @Override
+  public void handleVariables(
+      DirectedAcyclicGraph<String, Edge> graph,
+      Node node,
+      WorkflowContext context,
+      NodeResult nodeResult) {
+    // 开始节点不需要处理variableMap，上面已处理
+  }
 }

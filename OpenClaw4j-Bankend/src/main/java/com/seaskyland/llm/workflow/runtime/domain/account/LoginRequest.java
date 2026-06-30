@@ -15,24 +15,16 @@
  */
 package com.seaskyland.llm.workflow.runtime.domain.account;
 
+import java.io.Serializable;
 import lombok.Data;
 
-import java.io.Serializable;
-
-/**
- * Request model for user login
- */
+/** Request model for user login */
 @Data
 public class LoginRequest implements Serializable {
 
-	/**
-	 * Username for authentication
-	 */
-	private String username;
+  /** Username for authentication */
+  private String username;
 
-	/**
-	 * Password for authentication
-	 */
-	private String password;
-
+  /** Password for authentication */
+  private String password;
 }

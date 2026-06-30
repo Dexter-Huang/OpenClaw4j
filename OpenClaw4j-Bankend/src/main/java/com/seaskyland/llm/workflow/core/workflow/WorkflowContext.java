@@ -15,17 +15,14 @@
  */
 package com.seaskyland.llm.workflow.core.workflow;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.Maps;
+import com.seaskyland.llm.workflow.runtime.domain.BizError;
 import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
 import com.seaskyland.llm.workflow.runtime.domain.chat.Usage;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.InvokeSourceEnum;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.NodeResult;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.collect.Maps;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -39,7 +36,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import com.seaskyland.llm.workflow.runtime.domain.BizError;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Context for workflow execution and management
@@ -51,104 +50,103 @@ import com.seaskyland.llm.workflow.runtime.domain.BizError;
 @Data
 public class WorkflowContext extends RequestContext {
 
-	/** Application identifier */
-	private String appId;
+  /** Application identifier */
+  private String appId;
 
-	/** Task identifier */
-	private String taskId;
+  /** Task identifier */
+  private String taskId;
 
-	/** Conversation identifier */
-	private String conversationId;
+  /** Conversation identifier */
+  private String conversationId;
 
-	/** Current status of the task */
-	private String taskStatus;
+  /** Current status of the task */
+  private String taskStatus;
 
-	/** Result of the task execution */
-	private String taskResult;
+  /** Result of the task execution */
+  private String taskResult;
 
-	/** Error code if task fails */
-	private String errorCode;
+  /** Error code if task fails */
+  private String errorCode;
 
-	/** Error information if task fails */
-	private String errorInfo;
+  /** Error information if task fails */
+  private String errorInfo;
 
-	/** Error object containing detailed error information */
-	private BizError error;
+  /** Error object containing detailed error information */
+  private BizError error;
 
-	/** Map of sub-workflow contexts */
-	private HashMap<String, WorkflowContext> subWorkflowContextMap = new HashMap<>();
+  /** Map of sub-workflow contexts */
+  private HashMap<String, WorkflowContext> subWorkflowContextMap = new HashMap<>();
 
-	/** Source of invocation: api or console */
-	private String invokeSource = InvokeSourceEnum.api.getCode();
+  /** Source of invocation: api or console */
+  private String invokeSource = InvokeSourceEnum.api.getCode();
 
-	/** Collection of user input parameters, e.g., ${user.abc} */
-	private Map<String, Object> userMap = Maps.newHashMap();
+  /** Collection of user input parameters, e.g., ${user.abc} */
+  private Map<String, Object> userMap = Maps.newHashMap();
 
-	/** Collection of system parameters, e.g., ${sys.abc} */
-	private Map<String, Object> sysMap = Maps.newHashMap();
+  /** Collection of system parameters, e.g., ${sys.abc} */
+  private Map<String, Object> sysMap = Maps.newHashMap();
 
-	/** Workflow configuration information */
-	private WorkflowConfig workflowConfig;
+  /** Workflow configuration information */
+  private WorkflowConfig workflowConfig;
 
-	/** Cache for intermediate variables used in variable substitution */
-	private ConcurrentHashMap<String, Object> variablesMap = new ConcurrentHashMap<>();
+  /** Cache for intermediate variables used in variable substitution */
+  private ConcurrentHashMap<String, Object> variablesMap = new ConcurrentHashMap<>();
 
-	/** Cache for node execution results, used for debugging and node evaluation */
-	private ConcurrentHashMap<String, NodeResult> nodeResultMap = new ConcurrentHashMap<>();
+  /** Cache for node execution results, used for debugging and node evaluation */
+  private ConcurrentHashMap<String, NodeResult> nodeResultMap = new ConcurrentHashMap<>();
 
-	/** List of execution order */
-	private CopyOnWriteArrayList<String> executeOrderList = new CopyOnWriteArrayList<>();
+  /** List of execution order */
+  private CopyOnWriteArrayList<String> executeOrderList = new CopyOnWriteArrayList<>();
 
-	/** Lock to ensure single execution of a node at a time */
-	@JsonIgnore
-	private transient Lock lock = new ReentrantLock();
+  /** Lock to ensure single execution of a node at a time */
+  @JsonIgnore private transient Lock lock = new ReentrantLock();
 
-	/** Set of sub-task IDs (currently only used by agentgroup) */
-	private Set<String> subTaskIdSet = new CopyOnWriteArraySet<>();
+  /** Set of sub-task IDs (currently only used by agentgroup) */
+  private Set<String> subTaskIdSet = new CopyOnWriteArraySet<>();
 
-	/** Usage statistics */
-	private List<Usage> usages;
+  /** Usage statistics */
+  private List<Usage> usages;
 
-	/** API key identifier */
-	private String apikeyId;
+  /** API key identifier */
+  private String apikeyId;
 
-	/** Flag indicating if streaming is enabled */
-	private boolean stream;
+  /** Flag indicating if streaming is enabled */
+  private boolean stream;
 
-	/** End time of the workflow */
-	private long endTime;
+  /** End time of the workflow */
+  private long endTime;
 
-	/** Time of first response */
-	private long firstResponseTime;
+  /** Time of first response */
+  private long firstResponseTime;
 
-	/** Version number for conflict detection and merging */
-	private long version = 1L;
+  /** Version number for conflict detection and merging */
+  private long version = 1L;
 
-	/**
-	 * Creates a deep copy of the workflow context
-	 * @param context The context to copy
-	 * @return A deep copy of the context
-	 */
-	public static WorkflowContext deepCopy(WorkflowContext context) {
-		try {
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-			objectOutputStream.writeObject(context);
-			ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-			ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-			WorkflowContext copy = (WorkflowContext) objectInputStream.readObject();
-			// Reinitialize lock object after deserialization
-			copy.lock = new ReentrantLock();
-			// 确保版本号被正确复制
-			if (copy.getVersion() == 0) {
-				copy.setVersion(1L);
-			}
-			return copy;
-		}
-		catch (Exception e) {
-			log.error("WorkflowContext deepCopy error:{}", JsonUtils.toJson(context), e);
-			return null;
-		}
-	}
-
+  /**
+   * Creates a deep copy of the workflow context
+   *
+   * @param context The context to copy
+   * @return A deep copy of the context
+   */
+  public static WorkflowContext deepCopy(WorkflowContext context) {
+    try {
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+      objectOutputStream.writeObject(context);
+      ByteArrayInputStream byteArrayInputStream =
+          new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+      ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+      WorkflowContext copy = (WorkflowContext) objectInputStream.readObject();
+      // Reinitialize lock object after deserialization
+      copy.lock = new ReentrantLock();
+      // 确保版本号被正确复制
+      if (copy.getVersion() == 0) {
+        copy.setVersion(1L);
+      }
+      return copy;
+    } catch (Exception e) {
+      log.error("WorkflowContext deepCopy error:{}", JsonUtils.toJson(context), e);
+      return null;
+    }
+  }
 }

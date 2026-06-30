@@ -30,6 +30,7 @@ import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
@@ -37,11 +38,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-
 /**
- * Interceptor for API key authentication in OpenAPI requests. Validates API keys and sets
- * up request context for authenticated users.
+ * Interceptor for API key authentication in OpenAPI requests. Validates API keys and sets up
+ * request context for authenticated users.
  *
  * @since 1.0.0.3
  */
@@ -49,84 +48,85 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class ApiKeyAuthInterceptor extends OncePerRequestFilter {
 
-	/** Service for managing account-related operations */
-	private final AccountService accountService;
+  /** Service for managing account-related operations */
+  private final AccountService accountService;
 
-	/** Service for managing API key operations */
-	private final ApiKeyService apiKeyService;
+  /** Service for managing API key operations */
+  private final ApiKeyService apiKeyService;
 
-	/**
-	 * Intercepts requests to validate API key authentication. Sets up request context for
-	 * authenticated users.
-	 * @return true if authentication succeeds, false otherwise
-	 */
-	@Override
-	protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
-			@NotNull jakarta.servlet.FilterChain filterChain) throws jakarta.servlet.ServletException, IOException {
-		long start = System.currentTimeMillis();
+  /**
+   * Intercepts requests to validate API key authentication. Sets up request context for
+   * authenticated users.
+   *
+   * @return true if authentication succeeds, false otherwise
+   */
+  @Override
+  protected void doFilterInternal(
+      @NotNull HttpServletRequest request,
+      @NotNull HttpServletResponse response,
+      @NotNull jakarta.servlet.FilterChain filterChain)
+      throws jakarta.servlet.ServletException, IOException {
+    long start = System.currentTimeMillis();
 
-		if (RequestMethod.OPTIONS.name().equals(request.getMethod().toUpperCase())) {
-			filterChain.doFilter(request, response);
-			return;
-		}
+    if (RequestMethod.OPTIONS.name().equals(request.getMethod().toUpperCase())) {
+      filterChain.doFilter(request, response);
+      return;
+    }
 
-		String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-		if (authorization == null || !authorization.startsWith(ApiConstants.TOKEN_PREFIX)) {
-			returnAuthError(start, response, ErrorCode.INVALID_API_KEY);
-			return;
-		}
+    String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+    if (authorization == null || !authorization.startsWith(ApiConstants.TOKEN_PREFIX)) {
+      returnAuthError(start, response, ErrorCode.INVALID_API_KEY);
+      return;
+    }
 
-		String token = authorization.replace(ApiConstants.TOKEN_PREFIX + " ", "");
-		ApiKey apiKey = apiKeyService.getApiKey(token);
-		if (apiKey == null) {
-			returnAuthError(start, response, ErrorCode.INVALID_API_KEY);
-			return;
-		}
+    String token = authorization.replace(ApiConstants.TOKEN_PREFIX + " ", "");
+    ApiKey apiKey = apiKeyService.getApiKey(token);
+    if (apiKey == null) {
+      returnAuthError(start, response, ErrorCode.INVALID_API_KEY);
+      return;
+    }
 
-		// login info
-		Account account = accountService.getAccount(apiKey.getAccountId());
-		if (account == null) {
-			returnAuthError(start, response, ErrorCode.INVALID_API_KEY);
-			return;
-		}
+    // login info
+    Account account = accountService.getAccount(apiKey.getAccountId());
+    if (account == null) {
+      returnAuthError(start, response, ErrorCode.INVALID_API_KEY);
+      return;
+    }
 
-		RequestContext context = new RequestContext();
-		context.setRequestId(IdGenerator.uuid());
-		context.setAccountId(account.getAccountId());
-		context.setUsername(account.getUsername());
-		context.setWorkspaceId(account.getDefaultWorkspaceId());
-		context.setAccountType(account.getType());
-		context.setCallerIp(request.getRemoteAddr());
-		context.setStartTime(System.currentTimeMillis());
+    RequestContext context = new RequestContext();
+    context.setRequestId(IdGenerator.uuid());
+    context.setAccountId(account.getAccountId());
+    context.setUsername(account.getUsername());
+    context.setWorkspaceId(account.getDefaultWorkspaceId());
+    context.setAccountType(account.getType());
+    context.setCallerIp(request.getRemoteAddr());
+    context.setStartTime(System.currentTimeMillis());
 
-		try {
-			RequestContextHolder.runWithRequestContext(context, () -> filterChain.doFilter(request, response));
-		}
-		catch (jakarta.servlet.ServletException | IOException ex) {
-			throw ex;
-		}
-		catch (Exception ex) {
-			throw new jakarta.servlet.ServletException(ex);
-		}
-	}
+    try {
+      RequestContextHolder.runWithRequestContext(
+          context, () -> filterChain.doFilter(request, response));
+    } catch (jakarta.servlet.ServletException | IOException ex) {
+      throw ex;
+    } catch (Exception ex) {
+      throw new jakarta.servlet.ServletException(ex);
+    }
+  }
 
-	/**
-	 * Returns an unauthorized error response with the specified error code. Logs the
-	 * authentication failure for monitoring purposes.
-	 */
-	public void returnAuthError(long start, HttpServletResponse response, ErrorCode errorCode) {
-		response.setContentType("application/json;charset=UTF-8");
-		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		Result<String> result = Result.error(IdGenerator.uuid(), errorCode);
+  /**
+   * Returns an unauthorized error response with the specified error code. Logs the authentication
+   * failure for monitoring purposes.
+   */
+  public void returnAuthError(long start, HttpServletResponse response, ErrorCode errorCode) {
+    response.setContentType("application/json;charset=UTF-8");
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    Result<String> result = Result.error(IdGenerator.uuid(), errorCode);
 
-		LogUtils.monitor("ApiAuthInterceptor", "apiKeyAuth", start, "unauthorized", "", result);
+    LogUtils.monitor("ApiAuthInterceptor", "apiKeyAuth", start, "unauthorized", "", result);
 
-		try {
-			response.getWriter().write(JsonUtils.toJson(result));
-		}
-		catch (IOException e) {
-			LogUtils.error("failed to unauthorized api key: {}", result, e);
-		}
-	}
-
+    try {
+      response.getWriter().write(JsonUtils.toJson(result));
+    } catch (IOException e) {
+      LogUtils.error("failed to unauthorized api key: {}", result, e);
+    }
+  }
 }

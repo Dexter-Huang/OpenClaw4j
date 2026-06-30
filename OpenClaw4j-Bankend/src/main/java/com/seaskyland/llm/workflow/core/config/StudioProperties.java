@@ -24,77 +24,75 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @since 1.0.0.3
  */
-
 @ConfigurationProperties(StudioProperties.CONFIG_PREFIX)
 @Data
 public class StudioProperties {
 
-	/** Configuration prefix for studio properties */
-	public static final String CONFIG_PREFIX = "spring.ai.alibaba.studio";
+  /** Configuration prefix for studio properties */
+  public static final String CONFIG_PREFIX = "spring.ai.alibaba.studio";
 
-	/** Storage path for studio data */
-	private String storagePath;
+  /** Storage path for studio data */
+  private String storagePath;
 
-	/** Connection timeout in seconds */
-	private Integer connectTimeout = 30;
+  /** Connection timeout in seconds */
+  private Integer connectTimeout = 30;
 
-	/** Read timeout in seconds */
-	private Integer readTimeout = 300;
+  /** Read timeout in seconds */
+  private Integer readTimeout = 300;
 
-	/** Stream read timeout in seconds */
-	private Integer streamReadTimeout = 60;
+  /** Stream read timeout in seconds */
+  private Integer streamReadTimeout = 60;
 
-	/** Maximum number of connections */
-	private Integer maxConnections = 200;
+  /** Maximum number of connections */
+  private Integer maxConnections = 200;
 
-	/** Maximum number of connections per route */
-	private Integer maxConnectionsPerRoute = 100;
+  /** Maximum number of connections per route */
+  private Integer maxConnectionsPerRoute = 100;
 
-	/** Type of vector store to use */
-//    private String vectorStoreType = "elasticsearch";
-    private String vectorStoreType = "simple";
+  /** Type of vector store to use */
+  //    private String vectorStoreType = "elasticsearch";
+  private String vectorStoreType = "simple";
 
-	/** login method, like github oauth2 login */
-	private String loginMethod = "third_party";
+  /** login method, like github oauth2 login */
+  private String loginMethod = "third_party";
 
-	/** upload method like oss, local file */
-	private String uploadMethod = "file";
+  /** upload method like oss, local file */
+  private String uploadMethod = "file";
 
-	/** oss config */
-	private Oss oss;
+  /** oss config */
+  private Oss oss;
 
-	/**
-	 * Gets the storage path. If not set, defaults to user home directory.
-	 * @return the storage path
-	 */
-	public String getStoragePath() {
-		if (storagePath == null) {
-			storagePath = System.getProperty("user.home") + "/saa/storage";
-		}
+  /**
+   * Gets the storage path. If not set, defaults to user home directory.
+   *
+   * @return the storage path
+   */
+  public String getStoragePath() {
+    if (storagePath == null) {
+      storagePath = System.getProperty("user.home") + "/saa/storage";
+    }
 
-		return storagePath;
-	}
+    return storagePath;
+  }
 
-	@Data
-	public static class Oss {
+  @Data
+  public static class Oss {
 
-		/** oss endpoint */
-		private String endpoint;
+    /** oss endpoint */
+    private String endpoint;
 
-		/** internal endpoint */
-		private String internalEndpoint;
+    /** internal endpoint */
+    private String internalEndpoint;
 
-		/** oss access key id */
-		private String accessKeyId;
+    /** oss access key id */
+    private String accessKeyId;
 
-		/** oss access key secret */
-		private String accessKeySecret;
+    /** oss access key secret */
+    private String accessKeySecret;
 
-		/** oss bucket name */
-		private String bucket;
+    /** oss bucket name */
+    private String bucket;
 
-		private String region;
-
-	}
-
+    private String region;
+  }
 }

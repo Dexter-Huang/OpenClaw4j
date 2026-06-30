@@ -16,52 +16,50 @@
 
 package com.seaskyland.llm.workflow.runtime.exception;
 
+import com.seaskyland.llm.workflow.runtime.domain.BizError;
+import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.io.Serializable;
-import com.seaskyland.llm.workflow.runtime.domain.BizError;
 
 /**
  * Custom exception class for handling business logic errors in the application.
  *
  * @since 1.0.0.3
  */
-
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class BizException extends RuntimeException implements Serializable {
 
-	/** Contains error details including message and additional error information */
-	private BizError error;
+  /** Contains error details including message and additional error information */
+  private BizError error;
 
-	/** Default constructor */
-	public BizException() {
-		super();
-	}
+  /** Default constructor */
+  public BizException() {
+    super();
+  }
 
-	/** Constructor with error details */
-	public BizException(BizError error) {
-		super(error.getMessage());
-		this.error = error;
-	}
+  /** Constructor with error details */
+  public BizException(BizError error) {
+    super(error.getMessage());
+    this.error = error;
+  }
 
-	/** Constructor with error details and cause */
-	public BizException(BizError error, Throwable cause) {
-		super(error.getMessage(), cause);
-		this.error = error;
-	}
+  /** Constructor with error details and cause */
+  public BizException(BizError error, Throwable cause) {
+    super(error.getMessage(), cause);
+    this.error = error;
+  }
 
-	public BizException(BizError error, String message) {
-		super(message);
-		this.error = error;
-		this.error.setMessage(message);
-	}
+  public BizException(BizError error, String message) {
+    super(message);
+    this.error = error;
+    this.error.setMessage(message);
+  }
 
-	/** Constructor with error details, cause, and stack trace options */
-	public BizException(BizError error, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-		super(error.getMessage(), cause, enableSuppression, writableStackTrace);
-		this.error = error;
-	}
-
+  /** Constructor with error details, cause, and stack trace options */
+  public BizException(
+      BizError error, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    super(error.getMessage(), cause, enableSuppression, writableStackTrace);
+    this.error = error;
+  }
 }

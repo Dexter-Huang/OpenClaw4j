@@ -1,4 +1,4 @@
-///*
+/// *
 // * Copyright 2025 the original author or authors.
 // *
 // * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,44 +14,45 @@
 // * limitations under the License.
 // */
 //
-//package com.seaskyland.llm.workflow.admin.interceptor;
+// package com.seaskyland.llm.workflow.admin.interceptor;
 //
-//import com.seaskyland.llm.workflow.runtime.enums.AccountType;
-//import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
-//import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
-//import com.seaskyland.llm.workflow.runtime.domain.Result;
-//import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
-//import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
-//import com.seaskyland.llm.workflow.core.utils.LogUtils;
-//import com.seaskyland.llm.workflow.core.utils.common.IdGenerator;
-//import jakarta.servlet.http.HttpServletRequest;
-//import jakarta.servlet.http.HttpServletResponse;
-//import lombok.RequiredArgsConstructor;
-//import lombok.extern.slf4j.Slf4j;
-//import org.jetbrains.annotations.NotNull;
-//import org.springframework.stereotype.Component;
-//import org.springframework.web.bind.annotation.RequestMethod;
-//import org.springframework.web.servlet.HandlerInterceptor;
+// import com.seaskyland.llm.workflow.runtime.enums.AccountType;
+// import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
+// import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
+// import com.seaskyland.llm.workflow.runtime.domain.Result;
+// import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
+// import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
+// import com.seaskyland.llm.workflow.core.utils.LogUtils;
+// import com.seaskyland.llm.workflow.core.utils.common.IdGenerator;
+// import jakarta.servlet.http.HttpServletRequest;
+// import jakarta.servlet.http.HttpServletResponse;
+// import lombok.RequiredArgsConstructor;
+// import lombok.extern.slf4j.Slf4j;
+// import org.jetbrains.annotations.NotNull;
+// import org.springframework.stereotype.Component;
+// import org.springframework.web.bind.annotation.RequestMethod;
+// import org.springframework.web.servlet.HandlerInterceptor;
 //
-//import java.io.IOException;
+// import java.io.IOException;
 //
-///**
+/// **
 // * Interceptor for handling token-based authentication for console API access. Validates
 // * access tokens and sets up request context for authenticated users.
 // *
 // * @since 1.0.0.3
 // */
-//@Slf4j
-//@Component
-//@RequiredArgsConstructor
-//public class TokenFakeAuthInterceptor implements HandlerInterceptor {
+// @Slf4j
+// @Component
+// @RequiredArgsConstructor
+// public class TokenFakeAuthInterceptor implements HandlerInterceptor {
 //
 //	/**
 //	 * Intercepts requests to validate authentication token and set up request context.
 //	 * Returns true if authentication is successful, false otherwise.
 //	 */
 //	@Override
-//	public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
+//	public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse
+// response,
 //			@NotNull Object handler) {
 //		if (RequestMethod.OPTIONS.name().equals(request.getMethod().toUpperCase())) {
 //			return true;
@@ -90,4 +91,4 @@
 //		}
 //	}
 //
-//}
+// }

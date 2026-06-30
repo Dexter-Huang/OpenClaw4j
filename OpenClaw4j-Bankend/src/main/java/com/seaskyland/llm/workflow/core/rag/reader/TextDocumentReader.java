@@ -16,52 +16,50 @@
 
 package com.seaskyland.llm.workflow.core.rag.reader;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.document.DocumentReader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
 /**
- * A document reader implementation for text files. Reads and processes text content from
- * files or resources.
+ * A document reader implementation for text files. Reads and processes text content from files or
+ * resources.
  *
  * @since 1.0.0.3
  */
 public class TextDocumentReader implements DocumentReader {
 
-	/** The resource containing the text content to be read */
-	private final Resource resource;
+  /** The resource containing the text content to be read */
+  private final Resource resource;
 
-	/**
-	 * Creates a new TextDocumentReader for the specified file.
-	 * @param file file
-	 */
-	public TextDocumentReader(File file) {
-		resource = new FileSystemResource(file);
-	}
+  /**
+   * Creates a new TextDocumentReader for the specified file.
+   *
+   * @param file file
+   */
+  public TextDocumentReader(File file) {
+    resource = new FileSystemResource(file);
+  }
 
-	public TextDocumentReader(Resource resource) {
-		this.resource = resource;
-	}
+  public TextDocumentReader(Resource resource) {
+    this.resource = resource;
+  }
 
-	@Override
-	public List<Document> get() {
-		try {
-			String text = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-			if (text.isBlank()) {
-				return List.of();
-			}
+  @Override
+  public List<Document> get() {
+    try {
+      String text = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+      if (text.isBlank()) {
+        return List.of();
+      }
 
-			return List.of(new Document(text));
-		}
-		catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
+      return List.of(new Document(text));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

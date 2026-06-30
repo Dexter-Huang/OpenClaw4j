@@ -16,15 +16,14 @@
 
 package com.seaskyland.llm.workflow.core.base.entity;
 
-import com.seaskyland.llm.workflow.runtime.enums.ToolStatus;
-import com.seaskyland.llm.workflow.runtime.enums.ToolTestStatus;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.ToolStatus;
+import com.seaskyland.llm.workflow.runtime.enums.ToolTestStatus;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Entity class representing a tool in the system.
@@ -35,56 +34,55 @@ import java.util.Date;
 @TableName("tool")
 public class ToolEntity {
 
-	/** Primary key */
-	@TableId(value = "id", type = IdType.AUTO)
-	private Long id;
+  /** Primary key */
+  @TableId(value = "id", type = IdType.AUTO)
+  private Long id;
 
-	/** Unique identifier for the tool */
-	@TableField("tool_id")
-	private String toolId;
+  /** Unique identifier for the tool */
+  @TableField("tool_id")
+  private String toolId;
 
-	/** Associated plugin identifier */
-	@TableField("plugin_id")
-	private String pluginId;
+  /** Associated plugin identifier */
+  @TableField("plugin_id")
+  private String pluginId;
 
-	/** Workspace identifier where the tool belongs */
-	@TableField("workspace_id")
-	private String workspaceId;
+  /** Workspace identifier where the tool belongs */
+  @TableField("workspace_id")
+  private String workspaceId;
 
-	/** Current status of the tool */
-	private ToolStatus status;
+  /** Current status of the tool */
+  private ToolStatus status;
 
-	/** Whether the tool is enabled */
-	private Boolean enabled;
+  /** Whether the tool is enabled */
+  private Boolean enabled;
 
-	/** Test status of the tool */
-	private ToolTestStatus testStatus;
+  /** Test status of the tool */
+  private ToolTestStatus testStatus;
 
-	/** Name of the tool */
-	private String name;
+  /** Name of the tool */
+  private String name;
 
-	/** Description of the tool */
-	private String description;
+  /** Description of the tool */
+  private String description;
 
-	/** Configuration settings for the tool */
-	private String config;
+  /** Configuration settings for the tool */
+  private String config;
 
-	/** API schema definition */
-	@TableField("api_schema")
-	private String apiSchema;
+  /** API schema definition */
+  @TableField("api_schema")
+  private String apiSchema;
 
-	/** Creation timestamp */
-	@TableField("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @TableField("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@TableField("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @TableField("gmt_modified")
+  private Date gmtModified;
 
-	/** Creator of the tool */
-	private String creator;
+  /** Creator of the tool */
+  private String creator;
 
-	/** Last modifier of the tool */
-	private String modifier;
-
+  /** Last modifier of the tool */
+  private String modifier;
 }

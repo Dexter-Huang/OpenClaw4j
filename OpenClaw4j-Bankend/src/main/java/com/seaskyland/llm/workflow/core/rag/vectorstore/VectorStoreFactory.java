@@ -17,46 +17,45 @@
 package com.seaskyland.llm.workflow.core.rag.vectorstore;
 
 import com.seaskyland.llm.workflow.core.config.StudioProperties;
+import java.util.Map;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
 /**
- * Factory class for creating vector store services. Provides a centralized way to obtain
- * the appropriate vector store implementation based on configuration.
+ * Factory class for creating vector store services. Provides a centralized way to obtain the
+ * appropriate vector store implementation based on configuration.
  *
  * @since 1.0.0.3
  */
 @Component
 public class VectorStoreFactory {
 
-	/** Configuration properties for the application */
-	private final StudioProperties studioProperties;
+  /** Configuration properties for the application */
+  private final StudioProperties studioProperties;
 
-	/** Map of available vector store service implementations */
-	private final Map<String, VectorStoreService> vdbServiceMap;
+  /** Map of available vector store service implementations */
+  private final Map<String, VectorStoreService> vdbServiceMap;
 
-	public VectorStoreFactory(StudioProperties studioProperties, Map<String, VectorStoreService> vdbServiceMap) {
-		this.studioProperties = studioProperties;
-		this.vdbServiceMap = vdbServiceMap;
-	}
+  public VectorStoreFactory(
+      StudioProperties studioProperties, Map<String, VectorStoreService> vdbServiceMap) {
+    this.studioProperties = studioProperties;
+    this.vdbServiceMap = vdbServiceMap;
+  }
 
-	/**
-	 * Retrieves the configured vector store service. Supports Elasticsearch and Simple
-	 * implementations.
-	 * @return The configured vector store service
-	 * @throws IllegalArgumentException if the configured vector store type is not
-	 * supported
-	 */
-	public VectorStoreService getVectorStoreService() {
-		VectorStoreType type = VectorStoreType.of(studioProperties.getVectorStoreType());
-		if (type == VectorStoreType.ELASTICSEARCH) {
-			return vdbServiceMap.get("elasticSearchVectorStoreService");
-		}
-		if (type == VectorStoreType.SIMPLE) {
-			return vdbServiceMap.get("simpleVectorStoreService");
-		}
-		throw new IllegalArgumentException("Unsupported vector store type: " + type);
-	}
-
+  /**
+   * Retrieves the configured vector store service. Supports Elasticsearch and Simple
+   * implementations.
+   *
+   * @return The configured vector store service
+   * @throws IllegalArgumentException if the configured vector store type is not supported
+   */
+  public VectorStoreService getVectorStoreService() {
+    VectorStoreType type = VectorStoreType.of(studioProperties.getVectorStoreType());
+    if (type == VectorStoreType.ELASTICSEARCH) {
+      return vdbServiceMap.get("elasticSearchVectorStoreService");
+    }
+    if (type == VectorStoreType.SIMPLE) {
+      return vdbServiceMap.get("simpleVectorStoreService");
+    }
+    throw new IllegalArgumentException("Unsupported vector store type: " + type);
+  }
 }

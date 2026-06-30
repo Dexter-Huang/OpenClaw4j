@@ -20,25 +20,26 @@ import com.seaskyland.llm.workflow.runtime.domain.plugin.ToolExecutionRequest;
 import com.seaskyland.llm.workflow.runtime.domain.plugin.ToolExecutionResult;
 
 /**
- * Service interface for tool execution operations. Handles the execution of various tools
- * and API calls.
+ * Service interface for tool execution operations. Handles the execution of various tools and API
+ * calls.
  *
  * @since 1.0.0.3
  */
 public interface ToolExecutionService {
 
-	/**
-	 * Executes a tool based on the provided request.
-	 * @param request The tool execution request containing necessary parameters
-	 * @return The result of the tool execution
-	 */
-	ToolExecutionResult executeTool(ToolExecutionRequest request);
+  /**
+   * Executes a tool based on the provided request.
+   *
+   * @param request The tool execution request containing necessary parameters
+   * @return The result of the tool execution
+   */
+  ToolExecutionResult executeTool(ToolExecutionRequest request);
 
-	/**
-	 * Makes an OpenAPI call based on the provided request.
-	 * @param request The API call request containing necessary parameters
-	 * @return The result of the API call
-	 */
-	ToolExecutionResult callOpenApi(ToolExecutionRequest request);
-
+  /**
+   * Makes an OpenAPI call based on the provided request.
+   *
+   * @param request The API call request containing necessary parameters
+   * @return The result of the API call
+   */
+  ToolExecutionResult callOpenApi(ToolExecutionRequest request);
 }

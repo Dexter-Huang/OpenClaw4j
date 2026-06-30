@@ -17,19 +17,18 @@
 package com.seaskyland.llm.workflow.core.utils.common;
 
 /**
- * A callback interface for bean copying operations. Provides a mechanism to customize the
- * copying process between source and target objects.
+ * A callback interface for bean copying operations. Provides a mechanism to customize the copying
+ * process between source and target objects.
  *
  * @since 1.0.0.3
  */
-
 public interface BeanCopierUtilsCallback<S, T> {
 
-	/**
-	 * Callback method executed during the bean copying process.
-	 * @param s source object
-	 * @param t target object
-	 */
-	void callback(S s, T t);
-
+  /**
+   * Callback method executed during the bean copying process.
+   *
+   * @param s source object
+   * @param t target object
+   */
+  void callback(S s, T t);
 }

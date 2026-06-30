@@ -17,42 +17,40 @@
 package com.seaskyland.llm.workflow.runtime.domain.mcp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.Map;
+import lombok.Data;
 
 /**
  * MCP server tool call request
  *
  * @author guning.lt
  * @since 1.0.0.3
- **/
+ */
 @Data
 public class McpServerCallToolRequest implements Serializable {
 
-	/** Unique identifier for the request */
-	@JsonProperty("request_id")
-	private String requestId;
+  /** Unique identifier for the request */
+  @JsonProperty("request_id")
+  private String requestId;
 
-	/** Server code identifier */
-	@JsonProperty("server_code")
-	private String serverCode;
+  /** Server code identifier */
+  @JsonProperty("server_code")
+  private String serverCode;
 
-	/** Name of the tool to be called */
-	@JsonProperty("tool_name")
-	private String toolName;
+  /** Name of the tool to be called */
+  @JsonProperty("tool_name")
+  private String toolName;
 
-	/** Workspace identifier */
-	@JsonProperty("workspace_id")
-	private String workspaceId;
+  /** Workspace identifier */
+  @JsonProperty("workspace_id")
+  private String workspaceId;
 
-	/** Account identifier */
-	@JsonProperty("account_id")
-	private String accountId;
+  /** Account identifier */
+  @JsonProperty("account_id")
+  private String accountId;
 
-	/** Parameters for the tool call */
-	@JsonProperty("tool_params")
-	private Map<String, Object> toolParams;
-
+  /** Parameters for the tool call */
+  @JsonProperty("tool_params")
+  private Map<String, Object> toolParams;
 }

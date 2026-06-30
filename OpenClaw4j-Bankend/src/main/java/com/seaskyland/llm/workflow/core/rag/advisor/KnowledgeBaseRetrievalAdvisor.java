@@ -16,10 +16,9 @@
 
 package com.seaskyland.llm.workflow.core.rag.advisor;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import static com.seaskyland.llm.workflow.core.rag.RagConstants.FILE_SEARCH_CALL;
+import static com.seaskyland.llm.workflow.core.rag.RagConstants.FILE_SEARCH_RESULT;
+import static com.seaskyland.llm.workflow.core.rag.RagConstants.REQUEST_CONTEXT;
 
 import com.seaskyland.llm.workflow.core.agent.AgentContext;
 import com.seaskyland.llm.workflow.core.config.CommonConfig;
@@ -30,10 +29,10 @@ import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
 import com.seaskyland.llm.workflow.runtime.domain.app.FileSearchOptions;
 import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
 import com.seaskyland.llm.workflow.runtime.exception.BizException;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.AdvisorUtils;
@@ -59,262 +58,291 @@ import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-
-import static com.seaskyland.llm.workflow.core.rag.RagConstants.FILE_SEARCH_CALL;
-import static com.seaskyland.llm.workflow.core.rag.RagConstants.FILE_SEARCH_RESULT;
-import static com.seaskyland.llm.workflow.core.rag.RagConstants.REQUEST_CONTEXT;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 /**
- * Knowledge base retrieval advisor that enhances chat requests with relevant document
- * context. This advisor retrieves documents based on user queries and augments the system
- * prompt with retrieved content.
+ * Knowledge base retrieval advisor that enhances chat requests with relevant document context. This
+ * advisor retrieves documents based on user queries and augments the system prompt with retrieved
+ * content.
  *
  * @since 1.0.0.3
  */
 public class KnowledgeBaseRetrievalAdvisor implements BaseAdvisor {
 
-	/** Document retriever for fetching relevant documents */
-	private final DocumentRetriever documentRetriever;
+  /** Document retriever for fetching relevant documents */
+  private final DocumentRetriever documentRetriever;
 
-	/** Scheduler for handling asynchronous operations */
-	private final Scheduler scheduler;
+  /** Scheduler for handling asynchronous operations */
+  private final Scheduler scheduler;
 
-	/** Order of execution in the advisor chain */
-	private final int order;
+  /** Order of execution in the advisor chain */
+  private final int order;
 
-	/** Context containing agent configuration and state */
-	private final AgentContext agentContext;
+  /** Context containing agent configuration and state */
+  private final AgentContext agentContext;
 
-	private KnowledgeBaseRetrievalAdvisor(DocumentRetriever documentRetriever, @Nullable Scheduler scheduler,
-			Integer order, CommonConfig commonConfig, AgentContext agentContext) {
-		Assert.notNull(documentRetriever, "documentRetriever cannot be null");
-		Assert.notNull(documentRetriever, "documentRetriever cannot be null");
-		Assert.notNull(commonConfig, "common config cannot be null");
-		Assert.notNull(agentContext, "agent context cannot be null");
+  private KnowledgeBaseRetrievalAdvisor(
+      DocumentRetriever documentRetriever,
+      @Nullable Scheduler scheduler,
+      Integer order,
+      CommonConfig commonConfig,
+      AgentContext agentContext) {
+    Assert.notNull(documentRetriever, "documentRetriever cannot be null");
+    Assert.notNull(documentRetriever, "documentRetriever cannot be null");
+    Assert.notNull(commonConfig, "common config cannot be null");
+    Assert.notNull(agentContext, "agent context cannot be null");
 
-		this.agentContext = agentContext;
-		this.documentRetriever = documentRetriever;
-		this.scheduler = scheduler != null ? scheduler : BaseAdvisor.DEFAULT_SCHEDULER;
-		this.order = order != null ? order : 0;
-	}
+    this.agentContext = agentContext;
+    this.documentRetriever = documentRetriever;
+    this.scheduler = scheduler != null ? scheduler : BaseAdvisor.DEFAULT_SCHEDULER;
+    this.order = order != null ? order : 0;
+  }
 
-	public static Builder builder() {
-		return new Builder();
-	}
+  public static Builder builder() {
+    return new Builder();
+  }
 
-	@Override
-	public ChatClientRequest before(ChatClientRequest chatClientRequest, @Nullable AdvisorChain advisorChain) {
-		// if (chatClientRequest.prompt().getUserMessage() == null) {
-		// return ChatClientRequest.builder().build();
-		// }
+  @Override
+  public ChatClientRequest before(
+      ChatClientRequest chatClientRequest, @Nullable AdvisorChain advisorChain) {
+    // if (chatClientRequest.prompt().getUserMessage() == null) {
+    // return ChatClientRequest.builder().build();
+    // }
 
-		UserMessage request = chatClientRequest.prompt().getUserMessage();
+    UserMessage request = chatClientRequest.prompt().getUserMessage();
 
-		Map<String, Object> context = new HashMap<>(chatClientRequest.context());
+    Map<String, Object> context = new HashMap<>(chatClientRequest.context());
 
-		// 1. build query
-		FileSearchOptions searchOptions = agentContext.getConfig().getFileSearch();
-		Map<String, Object> queryContext = new HashMap<>();
-		queryContext.put(REQUEST_CONTEXT, BeanCopierUtils.copy(agentContext, RequestContext.class));
-		queryContext.put(FILE_SEARCH_CALL, buildFileSearchRequestContext(request.getText(), searchOptions));
+    // 1. build query
+    FileSearchOptions searchOptions = agentContext.getConfig().getFileSearch();
+    Map<String, Object> queryContext = new HashMap<>();
+    queryContext.put(REQUEST_CONTEXT, BeanCopierUtils.copy(agentContext, RequestContext.class));
+    queryContext.put(
+        FILE_SEARCH_CALL, buildFileSearchRequestContext(request.getText(), searchOptions));
 
-		Query query = Query.builder()
-			.text(chatClientRequest.prompt().getUserMessage().getText())
-			.history(chatClientRequest.prompt().getInstructions())
-			.context(queryContext)
-			.build();
+    Query query =
+        Query.builder()
+            .text(chatClientRequest.prompt().getUserMessage().getText())
+            .history(chatClientRequest.prompt().getInstructions())
+            .context(queryContext)
+            .build();
 
-		// 2. retrieve relevant documents
-		List<Document> documents = this.documentRetriever.retrieve(query);
+    // 2. retrieve relevant documents
+    List<Document> documents = this.documentRetriever.retrieve(query);
 
-		// 3. Augment user query with the document contextual data.
-		String documentContext = documents.stream()
-			.map(Document::getText)
-			.collect(Collectors.joining(System.lineSeparator()));
+    // 3. Augment user query with the document contextual data.
+    String documentContext =
+        documents.stream()
+            .map(Document::getText)
+            .collect(Collectors.joining(System.lineSeparator()));
 
-		// 3.1. Define prompt parameters.
-		Map<String, Object> promptParameters = new HashMap<>();
-		promptParameters.put(RagConstants.DOCUMENTS_PLACEHOLDER, documentContext);
+    // 3.1. Define prompt parameters.
+    Map<String, Object> promptParameters = new HashMap<>();
+    promptParameters.put(RagConstants.DOCUMENTS_PLACEHOLDER, documentContext);
 
-		Map<String, Object> promptVariables = agentContext.getPromptVariables();
-		LogUtils.info("query augment, prompt variables: {}", promptVariables);
-		if (!CollectionUtils.isEmpty(promptVariables)) {
-			promptParameters.putAll(promptVariables);
-		}
+    Map<String, Object> promptVariables = agentContext.getPromptVariables();
+    LogUtils.info("query augment, prompt variables: {}", promptVariables);
+    if (!CollectionUtils.isEmpty(promptVariables)) {
+      promptParameters.putAll(promptVariables);
+    }
 
-		// 3.2. Augment user prompt with document context.
-		SystemMessage templatedSystemMessage = chatClientRequest.prompt().getSystemMessage();
+    // 3.2. Augment user prompt with document context.
+    SystemMessage templatedSystemMessage = chatClientRequest.prompt().getSystemMessage();
 
-		PromptTemplate promptTemplate = new SystemPromptTemplate(templatedSystemMessage.getText());
-		try {
-			PromptAssert.templateHasRequiredPlaceholders(promptTemplate, RagConstants.DOCUMENTS_PLACEHOLDER);
-		}
-		catch (Exception e) {
-			throw new BizException(
-					ErrorCode.INVALID_PARAMS.toError("documents", "{documents} placeholder is missing in instructions"),
-					e);
-		}
+    PromptTemplate promptTemplate = new SystemPromptTemplate(templatedSystemMessage.getText());
+    try {
+      PromptAssert.templateHasRequiredPlaceholders(
+          promptTemplate, RagConstants.DOCUMENTS_PLACEHOLDER);
+    } catch (Exception e) {
+      throw new BizException(
+          ErrorCode.INVALID_PARAMS.toError(
+              "documents", "{documents} placeholder is missing in instructions"),
+          e);
+    }
 
-		Message systemMessage = promptTemplate.createMessage(promptParameters);
-		chatClientRequest.prompt()
-			.getInstructions()
-			.removeIf(element -> element.getMessageType() == MessageType.SYSTEM);
-		chatClientRequest.prompt().getInstructions().add(0, systemMessage);
+    Message systemMessage = promptTemplate.createMessage(promptParameters);
+    chatClientRequest
+        .prompt()
+        .getInstructions()
+        .removeIf(element -> element.getMessageType() == MessageType.SYSTEM);
+    chatClientRequest.prompt().getInstructions().add(0, systemMessage);
 
-		// 4. Update advised request with augmented prompt.
-		context.put(FILE_SEARCH_RESULT, documents);
+    // 4. Update advised request with augmented prompt.
+    context.put(FILE_SEARCH_RESULT, documents);
 
-		return chatClientRequest.mutate()
-			.prompt(chatClientRequest.prompt().augmentUserMessage(request.getText()))
-			.context(context)
-			.build();
-	}
+    return chatClientRequest
+        .mutate()
+        .prompt(chatClientRequest.prompt().augmentUserMessage(request.getText()))
+        .context(context)
+        .build();
+  }
 
-	/**
-	 * Processes a single query by routing it to document retrievers and collecting
-	 * documents.
-	 */
-	private Map.Entry<Query, List<Document>> getDocumentsForQuery(Query query) {
-		List<Document> documents = this.documentRetriever.retrieve(query);
-		return Map.entry(query, documents);
-	}
+  /** Processes a single query by routing it to document retrievers and collecting documents. */
+  private Map.Entry<Query, List<Document>> getDocumentsForQuery(Query query) {
+    List<Document> documents = this.documentRetriever.retrieve(query);
+    return Map.entry(query, documents);
+  }
 
-	@Override
-	public ChatClientResponse after(ChatClientResponse chatClientResponse, @Nullable AdvisorChain advisorChain) {
-		ChatResponse.Builder chatResponseBuilder;
-		if (chatClientResponse.chatResponse() == null) {
-			chatResponseBuilder = ChatResponse.builder();
-		}
-		else {
-			chatResponseBuilder = ChatResponse.builder().from(chatClientResponse.chatResponse());
-		}
+  @Override
+  public ChatClientResponse after(
+      ChatClientResponse chatClientResponse, @Nullable AdvisorChain advisorChain) {
+    ChatResponse.Builder chatResponseBuilder;
+    if (chatClientResponse.chatResponse() == null) {
+      chatResponseBuilder = ChatResponse.builder();
+    } else {
+      chatResponseBuilder = ChatResponse.builder().from(chatClientResponse.chatResponse());
+    }
 
-		if (!agentContext.getStream()) {
-			chatResponseBuilder.metadata(FILE_SEARCH_CALL, chatClientResponse.context().get(FILE_SEARCH_CALL));
-			chatResponseBuilder.metadata(FILE_SEARCH_RESULT, chatClientResponse.context().get(FILE_SEARCH_RESULT));
-		}
-		return ChatClientResponse.builder()
-			.chatResponse(chatResponseBuilder.build())
-			.context(chatClientResponse.context())
-			.build();
-	}
+    if (!agentContext.getStream()) {
+      chatResponseBuilder.metadata(
+          FILE_SEARCH_CALL, chatClientResponse.context().get(FILE_SEARCH_CALL));
+      chatResponseBuilder.metadata(
+          FILE_SEARCH_RESULT, chatClientResponse.context().get(FILE_SEARCH_RESULT));
+    }
+    return ChatClientResponse.builder()
+        .chatResponse(chatResponseBuilder.build())
+        .context(chatClientResponse.context())
+        .build();
+  }
 
-	@Override
-	public Flux<ChatClientResponse> adviseStream(ChatClientRequest chatClientRequest, StreamAdvisorChain chain) {
-		Assert.notNull(chatClientRequest, "advisedRequest cannot be null");
-		Assert.notNull(chain, "chain cannot be null");
-		Assert.notNull(getScheduler(), "scheduler cannot be null");
+  @Override
+  public Flux<ChatClientResponse> adviseStream(
+      ChatClientRequest chatClientRequest, StreamAdvisorChain chain) {
+    Assert.notNull(chatClientRequest, "advisedRequest cannot be null");
+    Assert.notNull(chain, "chain cannot be null");
+    Assert.notNull(getScheduler(), "scheduler cannot be null");
 
-		Flux<ChatClientResponse> chatClientResponseFlux = Mono.just(chatClientRequest)
-			.publishOn(getScheduler())
-			.flatMapMany(req -> {
-				// 1. emit file search option
-				ChatResponse.Builder response = ChatResponse.builder()
-					.generations(List.of(new Generation(new AssistantMessage(""))));
-				if (chatClientRequest.prompt().getUserMessage() != null) {
-					response.metadata(FILE_SEARCH_CALL,
-							buildFileSearchRequestContext(chatClientRequest.prompt().getUserMessage().getText(),
-									agentContext.getConfig().getFileSearch()));
-				}
-				ChatClientResponse preAdvice = ChatClientResponse.builder()
-					.chatResponse(response.build())
-					.context(chatClientRequest.context())
-					.build();
+    Flux<ChatClientResponse> chatClientResponseFlux =
+        Mono.just(chatClientRequest)
+            .publishOn(getScheduler())
+            .flatMapMany(
+                req -> {
+                  // 1. emit file search option
+                  ChatResponse.Builder response =
+                      ChatResponse.builder()
+                          .generations(List.of(new Generation(new AssistantMessage(""))));
+                  if (chatClientRequest.prompt().getUserMessage() != null) {
+                    response.metadata(
+                        FILE_SEARCH_CALL,
+                        buildFileSearchRequestContext(
+                            chatClientRequest.prompt().getUserMessage().getText(),
+                            agentContext.getConfig().getFileSearch()));
+                  }
+                  ChatClientResponse preAdvice =
+                      ChatClientResponse.builder()
+                          .chatResponse(response.build())
+                          .context(chatClientRequest.context())
+                          .build();
 
-				// 2. emit immediate response
-				return Flux.concat(Flux.just(preAdvice),
-						Mono.just(req).map(request -> this.before(request, chain)).flatMapMany(adviseReq -> {
-							ChatClientResponse immediateResponse = ChatClientResponse.builder()
-								.chatResponse(ChatResponse.builder()
-									.generations(List.of(new Generation(new AssistantMessage(""))))
-									.metadata(FILE_SEARCH_RESULT, chatClientRequest.context().get(FILE_SEARCH_RESULT))
-									.build())
-								.context(chatClientRequest.context())
-								.build();
-							return Flux.just(immediateResponse).concatWith(chain.nextStream(adviseReq));
-						}));
-			});
+                  // 2. emit immediate response
+                  return Flux.concat(
+                      Flux.just(preAdvice),
+                      Mono.just(req)
+                          .map(request -> this.before(request, chain))
+                          .flatMapMany(
+                              adviseReq -> {
+                                ChatClientResponse immediateResponse =
+                                    ChatClientResponse.builder()
+                                        .chatResponse(
+                                            ChatResponse.builder()
+                                                .generations(
+                                                    List.of(
+                                                        new Generation(new AssistantMessage(""))))
+                                                .metadata(
+                                                    FILE_SEARCH_RESULT,
+                                                    chatClientRequest
+                                                        .context()
+                                                        .get(FILE_SEARCH_RESULT))
+                                                .build())
+                                        .context(chatClientRequest.context())
+                                        .build();
+                                return Flux.just(immediateResponse)
+                                    .concatWith(chain.nextStream(adviseReq));
+                              }));
+                });
 
-		return chatClientResponseFlux.map(ar -> {
-			if (AdvisorUtils.onFinishReason().test(ar)) {
-				ar = after(ar, chain);
-			}
-			return ar;
-		}).onErrorResume(error -> Flux.error(new IllegalStateException("Stream processing failed", error)));
-	}
+    return chatClientResponseFlux
+        .map(
+            ar -> {
+              if (AdvisorUtils.onFinishReason().test(ar)) {
+                ar = after(ar, chain);
+              }
+              return ar;
+            })
+        .onErrorResume(
+            error -> Flux.error(new IllegalStateException("Stream processing failed", error)));
+  }
 
-	@Override
-	public Scheduler getScheduler() {
-		return this.scheduler;
-	}
+  @Override
+  public Scheduler getScheduler() {
+    return this.scheduler;
+  }
 
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
+  @Override
+  public int getOrder() {
+    return this.order;
+  }
 
-	private static TaskExecutor buildDefaultTaskExecutor() {
-		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-		taskExecutor.setThreadNamePrefix("ai-advisor-");
-		taskExecutor.setCorePoolSize(4);
-		taskExecutor.setMaxPoolSize(16);
-		taskExecutor.setTaskDecorator(new ContextPropagatingTaskDecorator());
-		taskExecutor.initialize();
-		return taskExecutor;
-	}
+  private static TaskExecutor buildDefaultTaskExecutor() {
+    ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+    taskExecutor.setThreadNamePrefix("ai-advisor-");
+    taskExecutor.setCorePoolSize(4);
+    taskExecutor.setMaxPoolSize(16);
+    taskExecutor.setTaskDecorator(new ContextPropagatingTaskDecorator());
+    taskExecutor.initialize();
+    return taskExecutor;
+  }
 
-	public static final class Builder {
+  public static final class Builder {
 
-		private DocumentRetriever documentRetriever;
+    private DocumentRetriever documentRetriever;
 
-		private Scheduler scheduler;
+    private Scheduler scheduler;
 
-		private Integer order;
+    private Integer order;
 
-		private CommonConfig commonConfig;
+    private CommonConfig commonConfig;
 
-		private AgentContext agentContext;
+    private AgentContext agentContext;
 
-		private Builder() {
-		}
+    private Builder() {}
 
-		public Builder documentRetriever(DocumentRetriever documentRetriever) {
-			this.documentRetriever = documentRetriever;
-			return this;
-		}
+    public Builder documentRetriever(DocumentRetriever documentRetriever) {
+      this.documentRetriever = documentRetriever;
+      return this;
+    }
 
-		public Builder scheduler(Scheduler scheduler) {
-			this.scheduler = scheduler;
-			return this;
-		}
+    public Builder scheduler(Scheduler scheduler) {
+      this.scheduler = scheduler;
+      return this;
+    }
 
-		public Builder order(Integer order) {
-			this.order = order;
-			return this;
-		}
+    public Builder order(Integer order) {
+      this.order = order;
+      return this;
+    }
 
-		public Builder commonConfig(CommonConfig commonConfig) {
-			this.commonConfig = commonConfig;
-			return this;
-		}
+    public Builder commonConfig(CommonConfig commonConfig) {
+      this.commonConfig = commonConfig;
+      return this;
+    }
 
-		public Builder agentContext(AgentContext agentContext) {
-			this.agentContext = agentContext;
-			return this;
-		}
+    public Builder agentContext(AgentContext agentContext) {
+      this.agentContext = agentContext;
+      return this;
+    }
 
-		public KnowledgeBaseRetrievalAdvisor build() {
-			return new KnowledgeBaseRetrievalAdvisor(this.documentRetriever, this.scheduler, this.order,
-					this.commonConfig, this.agentContext);
-		}
+    public KnowledgeBaseRetrievalAdvisor build() {
+      return new KnowledgeBaseRetrievalAdvisor(
+          this.documentRetriever, this.scheduler, this.order, this.commonConfig, this.agentContext);
+    }
+  }
 
-	}
-
-	/**
-	 * Builds the file search request context with query and search options.
-	 */
-	private Map<String, Object> buildFileSearchRequestContext(String query, FileSearchOptions fileSearchOptions) {
-		return Map.of("query", query, "search_options", fileSearchOptions);
-	}
-
+  /** Builds the file search request context with query and search options. */
+  private Map<String, Object> buildFileSearchRequestContext(
+      String query, FileSearchOptions fileSearchOptions) {
+    return Map.of("query", query, "search_options", fileSearchOptions);
+  }
 }

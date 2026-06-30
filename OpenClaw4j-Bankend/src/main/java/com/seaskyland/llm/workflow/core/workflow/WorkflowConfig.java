@@ -15,82 +15,57 @@
  */
 package com.seaskyland.llm.workflow.core.workflow;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.CommonParam;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.Edge;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.Node;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.List;
+import lombok.Data;
 
-/**
- * Workflow configuration information
- *
- *
- */
+/** Workflow configuration information */
 @Data
 public class WorkflowConfig implements Serializable {
 
-	/**
-	 * List of workflow nodes
-	 */
-	private List<Node> nodes;
+  /** List of workflow nodes */
+  private List<Node> nodes;
 
-	/**
-	 * List of workflow edges
-	 */
-	private List<Edge> edges;
+  /** List of workflow edges */
+  private List<Edge> edges;
 
-	/**
-	 * Global configuration settings
-	 */
-	@JsonProperty("global_config")
-	private GlobalConfig globalConfig;
+  /** Global configuration settings */
+  @JsonProperty("global_config")
+  private GlobalConfig globalConfig;
 
-	@Data
-	public static class GlobalConfig implements Serializable {
+  @Data
+  public static class GlobalConfig implements Serializable {
 
-		@JsonProperty("history_config")
-		private HistoryConfig historyConfig;
+    @JsonProperty("history_config")
+    private HistoryConfig historyConfig;
 
-		@JsonProperty("variable_config")
-		private VariableConfig variableConfig;
+    @JsonProperty("variable_config")
+    private VariableConfig variableConfig;
+  }
 
-	}
+  /** Configuration for workflow variables */
+  @Data
+  public static class VariableConfig implements Serializable {
 
-	/**
-	 * Configuration for workflow variables
-	 */
-	@Data
-	public static class VariableConfig implements Serializable {
+    /** Conversation parameters shared within the session */
+    @JsonProperty("conversation_params")
+    private List<CommonParam> conversationParams;
+  }
 
-		/**
-		 * Conversation parameters shared within the session
-		 */
-		@JsonProperty("conversation_params")
-		private List<CommonParam> conversationParams;
+  /** Configuration for conversation history */
+  @Data
+  public static class HistoryConfig implements Serializable {
 
-	}
+    /** Toggle for conversation history */
+    @JsonProperty("history_switch")
+    private Boolean historySwitch = false;
 
-	/**
-	 * Configuration for conversation history
-	 */
-	@Data
-	public static class HistoryConfig implements Serializable {
-
-		/**
-		 * Toggle for conversation history
-		 */
-		@JsonProperty("history_switch")
-		private Boolean historySwitch = false;
-
-		/**
-		 * Maximum number of conversation rounds, defaults to 5
-		 */
-		@JsonProperty("history_max_round")
-		private Integer historyMaxRound = 5;
-
-	}
-
+    /** Maximum number of conversation rounds, defaults to 5 */
+    @JsonProperty("history_max_round")
+    private Integer historyMaxRound = 5;
+  }
 }

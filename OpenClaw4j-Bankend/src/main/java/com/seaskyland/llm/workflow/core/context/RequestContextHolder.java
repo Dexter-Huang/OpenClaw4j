@@ -17,7 +17,6 @@
 package com.seaskyland.llm.workflow.core.context;
 
 import com.seaskyland.llm.workflow.runtime.domain.RequestContext;
-
 import java.util.concurrent.Callable;
 
 /**
@@ -27,52 +26,53 @@ import java.util.concurrent.Callable;
  */
 public class RequestContextHolder {
 
-	/**
-	 * Scoped request context for the current execution path.
-	 */
-	private static final ScopedValue<RequestContext> REQUEST_CONTEXT = ScopedValue.newInstance();
+  /** Scoped request context for the current execution path. */
+  private static final ScopedValue<RequestContext> REQUEST_CONTEXT = ScopedValue.newInstance();
 
-	/**
-	 * Runs the operation with the request context bound to the current lexical scope.
-	 * @param requestContext the context to bind
-	 * @param operation the operation to run
-	 */
-	public static void runWithRequestContext(RequestContext requestContext, ScopedOperation operation) throws Exception {
-		callWithRequestContext(requestContext, () -> {
-			operation.run();
-			return null;
-		});
-	}
+  /**
+   * Runs the operation with the request context bound to the current lexical scope.
+   *
+   * @param requestContext the context to bind
+   * @param operation the operation to run
+   */
+  public static void runWithRequestContext(RequestContext requestContext, ScopedOperation operation)
+      throws Exception {
+    callWithRequestContext(
+        requestContext,
+        () -> {
+          operation.run();
+          return null;
+        });
+  }
 
-	/**
-	 * Calls the operation with the request context bound to the current lexical scope.
-	 * @param requestContext the context to bind
-	 * @param operation the operation to call
-	 * @return the operation result
-	 */
-	public static <T> T callWithRequestContext(RequestContext requestContext, Callable<T> operation) throws Exception {
-		if (requestContext == null) {
-			return operation.call();
-		}
-		return ScopedValue.where(REQUEST_CONTEXT, requestContext).call(() -> operation.call());
-	}
+  /**
+   * Calls the operation with the request context bound to the current lexical scope.
+   *
+   * @param requestContext the context to bind
+   * @param operation the operation to call
+   * @return the operation result
+   */
+  public static <T> T callWithRequestContext(RequestContext requestContext, Callable<T> operation)
+      throws Exception {
+    if (requestContext == null) {
+      return operation.call();
+    }
+    return ScopedValue.where(REQUEST_CONTEXT, requestContext).call(() -> operation.call());
+  }
 
-	/**
-	 * Gets the request context for the current lexical scope.
-	 * @return the current request context, or null when no context is bound
-	 */
-	public static RequestContext getRequestContext() {
-		return REQUEST_CONTEXT.isBound() ? REQUEST_CONTEXT.get() : null;
-	}
+  /**
+   * Gets the request context for the current lexical scope.
+   *
+   * @return the current request context, or null when no context is bound
+   */
+  public static RequestContext getRequestContext() {
+    return REQUEST_CONTEXT.isBound() ? REQUEST_CONTEXT.get() : null;
+  }
 
-	/**
-	 * Scoped operation that may throw checked exceptions.
-	 */
-	@FunctionalInterface
-	public interface ScopedOperation {
+  /** Scoped operation that may throw checked exceptions. */
+  @FunctionalInterface
+  public interface ScopedOperation {
 
-		void run() throws Exception;
-
-	}
-
+    void run() throws Exception;
+  }
 }

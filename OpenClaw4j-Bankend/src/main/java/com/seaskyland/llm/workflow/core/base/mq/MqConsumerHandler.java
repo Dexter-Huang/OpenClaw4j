@@ -17,18 +17,18 @@
 package com.seaskyland.llm.workflow.core.base.mq;
 
 /**
- * Message Queue consumer handler interface. Provides a generic interface for handling
- * messages from a message queue.
+ * Message Queue consumer handler interface. Provides a generic interface for handling messages from
+ * a message queue.
  *
  * @param <T> the type of message to be handled
  * @since 1.0.0.3
  */
 public interface MqConsumerHandler<T> {
 
-	/**
-	 * Handles the received message.
-	 * @param message the message to be processed
-	 */
-	void handle(T message);
-
+  /**
+   * Handles the received message.
+   *
+   * @param message the message to be processed
+   */
+  void handle(T message);
 }

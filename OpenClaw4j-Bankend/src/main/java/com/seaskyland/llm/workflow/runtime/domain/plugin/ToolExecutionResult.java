@@ -17,38 +17,29 @@
 package com.seaskyland.llm.workflow.runtime.domain.plugin;
 
 import com.seaskyland.llm.workflow.runtime.domain.BizError;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 
 /**
  * Represents the execution result of a tool call.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ToolExecutionResult implements Serializable {
 
-	/**
-	 * Indicates whether the tool execution was successful
-	 */
-	private boolean success;
+  /** Indicates whether the tool execution was successful */
+  private boolean success;
 
-	/**
-	 * Error information if the tool execution failed
-	 */
-	private BizError error;
+  /** Error information if the tool execution failed */
+  private BizError error;
 
-	/**
-	 * Output result from the tool execution
-	 */
-	private String output;
-
+  /** Output result from the tool execution */
+  private String output;
 }

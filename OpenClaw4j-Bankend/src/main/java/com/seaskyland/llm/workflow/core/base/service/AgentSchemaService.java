@@ -16,11 +16,10 @@
 
 package com.seaskyland.llm.workflow.core.base.service;
 
-import com.seaskyland.llm.workflow.core.base.entity.AgentSchemaEntity;
-import com.seaskyland.llm.workflow.runtime.domain.PagingList;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-
+import com.seaskyland.llm.workflow.core.base.entity.AgentSchemaEntity;
+import com.seaskyland.llm.workflow.runtime.domain.PagingList;
 import java.util.List;
 
 /**
@@ -30,61 +29,69 @@ import java.util.List;
  */
 public interface AgentSchemaService extends IService<AgentSchemaEntity> {
 
-	/**
-	 * Create a new agent schema
-	 * @param agentSchemaEntity the agent schema entity to create
-	 * @return the created agent schema entity
-	 */
-	AgentSchemaEntity createAgentSchema(AgentSchemaEntity agentSchemaEntity);
+  /**
+   * Create a new agent schema
+   *
+   * @param agentSchemaEntity the agent schema entity to create
+   * @return the created agent schema entity
+   */
+  AgentSchemaEntity createAgentSchema(AgentSchemaEntity agentSchemaEntity);
 
-	/**
-	 * Update an existing agent schema
-	 * @param agentSchemaEntity the agent schema entity to update
-	 * @return the updated agent schema entity
-	 */
-	AgentSchemaEntity updateAgentSchema(AgentSchemaEntity agentSchemaEntity);
+  /**
+   * Update an existing agent schema
+   *
+   * @param agentSchemaEntity the agent schema entity to update
+   * @return the updated agent schema entity
+   */
+  AgentSchemaEntity updateAgentSchema(AgentSchemaEntity agentSchemaEntity);
 
-	/**
-	 * Delete an agent schema by ID
-	 * @param id the agent schema ID
-	 */
-	void deleteAgentSchema(Long id);
+  /**
+   * Delete an agent schema by ID
+   *
+   * @param id the agent schema ID
+   */
+  void deleteAgentSchema(Long id);
 
-	/**
-	 * Get an agent schema by ID
-	 * @param id the agent schema ID
-	 * @return the agent schema entity
-	 */
-	AgentSchemaEntity getAgentSchemaById(Long id);
+  /**
+   * Get an agent schema by ID
+   *
+   * @param id the agent schema ID
+   * @return the agent schema entity
+   */
+  AgentSchemaEntity getAgentSchemaById(Long id);
 
-	/**
-	 * Get agent schemas by workspace ID
-	 * @param workspaceId the workspace ID
-	 * @return list of agent schema entities
-	 */
-	List<AgentSchemaEntity> getAgentSchemasByWorkspaceId(String workspaceId);
+  /**
+   * Get agent schemas by workspace ID
+   *
+   * @param workspaceId the workspace ID
+   * @return list of agent schema entities
+   */
+  List<AgentSchemaEntity> getAgentSchemasByWorkspaceId(String workspaceId);
 
-	/**
-	 * Get agent schemas by workspace ID with pagination
-	 * @param workspaceId the workspace ID
-	 * @param page the page information
-	 * @return paginated list of agent schema entities
-	 */
-	PagingList<AgentSchemaEntity> getAgentSchemasByWorkspaceId(String workspaceId, Page<AgentSchemaEntity> page);
+  /**
+   * Get agent schemas by workspace ID with pagination
+   *
+   * @param workspaceId the workspace ID
+   * @param page the page information
+   * @return paginated list of agent schema entities
+   */
+  PagingList<AgentSchemaEntity> getAgentSchemasByWorkspaceId(
+      String workspaceId, Page<AgentSchemaEntity> page);
 
-	/**
-	 * Get agent schemas by name
-	 * @param name the agent name
-	 * @param workspaceId the workspace ID
-	 * @return list of agent schema entities
-	 */
-	List<AgentSchemaEntity> getAgentSchemasByName(String name, String workspaceId);
+  /**
+   * Get agent schemas by name
+   *
+   * @param name the agent name
+   * @param workspaceId the workspace ID
+   * @return list of agent schema entities
+   */
+  List<AgentSchemaEntity> getAgentSchemasByName(String name, String workspaceId);
 
-	/**
-	 * Enable or disable an agent schema
-	 * @param id the agent schema ID
-	 * @param enabled whether to enable the agent
-	 */
-	void setAgentSchemaEnabled(Long id, Boolean enabled);
-
+  /**
+   * Enable or disable an agent schema
+   *
+   * @param id the agent schema ID
+   * @param enabled whether to enable the agent
+   */
+  void setAgentSchemaEnabled(Long id, Boolean enabled);
 }

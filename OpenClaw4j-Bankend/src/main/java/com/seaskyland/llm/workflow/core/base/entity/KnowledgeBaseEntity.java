@@ -16,78 +16,75 @@
 
 package com.seaskyland.llm.workflow.core.base.entity;
 
-import com.seaskyland.llm.workflow.runtime.enums.CommonStatus;
-import com.seaskyland.llm.workflow.runtime.enums.KnowledgeBaseType;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-
+import com.seaskyland.llm.workflow.runtime.enums.CommonStatus;
+import com.seaskyland.llm.workflow.runtime.enums.KnowledgeBaseType;
 import java.util.Date;
+import lombok.Data;
 
 /**
  * Entity class representing a knowledge base in the system.
  *
  * @since 1.0.0.3
  */
-
 @Data
 @TableName("knowledge_base")
 public class KnowledgeBaseEntity {
 
-	/** Primary key ID */
-	@TableId(value = "id", type = IdType.AUTO)
-	private Long id;
+  /** Primary key ID */
+  @TableId(value = "id", type = IdType.AUTO)
+  private Long id;
 
-	/** Unique identifier for the knowledge base */
-	@TableField("kb_id")
-	private String kbId;
+  /** Unique identifier for the knowledge base */
+  @TableField("kb_id")
+  private String kbId;
 
-	/** ID of the workspace this knowledge base belongs to */
-	@TableField("workspace_id")
-	private String workspaceId;
+  /** ID of the workspace this knowledge base belongs to */
+  @TableField("workspace_id")
+  private String workspaceId;
 
-	/** Type of the knowledge base */
-	private KnowledgeBaseType type;
+  /** Type of the knowledge base */
+  private KnowledgeBaseType type;
 
-	/** Current status of the knowledge base */
-	private CommonStatus status;
+  /** Current status of the knowledge base */
+  private CommonStatus status;
 
-	/** Name of the knowledge base */
-	private String name;
+  /** Name of the knowledge base */
+  private String name;
 
-	/** Description of the knowledge base */
-	private String description;
+  /** Description of the knowledge base */
+  private String description;
 
-	/** Configuration for document processing */
-	@TableField("process_config")
-	private String processConfig;
+  /** Configuration for document processing */
+  @TableField("process_config")
+  private String processConfig;
 
-	/** Configuration for indexing */
-	@TableField("index_config")
-	private String indexConfig;
+  /** Configuration for indexing */
+  @TableField("index_config")
+  private String indexConfig;
 
-	/** Configuration for search functionality */
-	@TableField("search_config")
-	private String searchConfig;
+  /** Configuration for search functionality */
+  @TableField("search_config")
+  private String searchConfig;
 
-	/** Total number of documents in the knowledge base */
-	@TableField("total_docs")
-	private Long totalDocs;
+  /** Total number of documents in the knowledge base */
+  @TableField("total_docs")
+  private Long totalDocs;
 
-	/** Creation timestamp */
-	@TableField("gmt_create")
-	private Date gmtCreate;
+  /** Creation timestamp */
+  @TableField("gmt_create")
+  private Date gmtCreate;
 
-	/** Last modification timestamp */
-	@TableField("gmt_modified")
-	private Date gmtModified;
+  /** Last modification timestamp */
+  @TableField("gmt_modified")
+  private Date gmtModified;
 
-	/** Creator of the knowledge base */
-	private String creator;
+  /** Creator of the knowledge base */
+  private String creator;
 
-	/** Last modifier of the knowledge base */
-	private String modifier;
-
+  /** Last modifier of the knowledge base */
+  private String modifier;
 }
