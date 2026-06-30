@@ -47,6 +47,8 @@ public class PasswordCryptUtils {
   /** Base64 decoder */
   private static final Base64.Decoder b64decoder = Base64.getDecoder();
 
+  private static final SecureRandom secureRandom = new SecureRandom();
+
   /**
    * Encodes a password using Argon2id algorithm.
    *
@@ -145,7 +147,6 @@ public class PasswordCryptUtils {
    * @return 16-byte random salt
    */
   private static byte[] genSalt() {
-    SecureRandom secureRandom = new SecureRandom();
     byte[] salt = new byte[16];
     secureRandom.nextBytes(salt);
 

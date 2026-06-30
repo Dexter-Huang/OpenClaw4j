@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
 public class Sequence {
 
   /** Maximum initialization time interval in nanoseconds */
-  public static long MAX_START_INTERVAL_TIME = TimeUnit.SECONDS.toNanos(5);
+  public static final long MAX_START_INTERVAL_TIME = TimeUnit.SECONDS.toNanos(5);
 
   private static final Logger logger = LoggerFactory.getLogger(Sequence.class);
 

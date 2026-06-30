@@ -114,10 +114,10 @@ public class ApiExampleController {
     items.add(item);
 
     Map<String, Object> item2 = new HashMap<>();
-    item.put("itemId", "2002");
-    item.put("itemName", "亚狮龙7号");
-    item.put("price", 99.5);
-    items.add(item);
+    item2.put("itemId", "2002");
+    item2.put("itemName", "亚狮龙7号");
+    item2.put("price", 99.5);
+    items.add(item2);
 
     result.put("items", items);
 

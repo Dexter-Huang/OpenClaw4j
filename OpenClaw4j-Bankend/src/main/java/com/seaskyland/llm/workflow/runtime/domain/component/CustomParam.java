@@ -49,7 +49,7 @@ public class CustomParam implements Serializable {
 
   /** Parameter definition class */
   @Data
-  public static class Param {
+  public static class Param implements Serializable {
 
     /** Field name */
     private String field;

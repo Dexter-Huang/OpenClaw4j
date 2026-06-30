@@ -55,7 +55,7 @@ import org.yaml.snakeyaml.error.YAMLException;
 public class OpenApiUtils {
 
   /** Default value description text */
-  public static String DEFAULT_VALUE_WORD =
+  public static final String DEFAULT_VALUE_WORD =
       "If the parameter value cannot be determined or generated";
 
   /** Parameter locations that don't require request body */

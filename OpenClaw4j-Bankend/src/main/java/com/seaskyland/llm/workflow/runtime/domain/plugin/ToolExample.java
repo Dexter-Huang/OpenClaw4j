@@ -16,6 +16,7 @@
 
 package com.seaskyland.llm.workflow.runtime.domain.plugin;
 
+import java.io.Serializable;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,7 +32,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ToolExample {
+public class ToolExample implements Serializable {
 
   /** The query string for the tool */
   private String query;

@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @since 1.0.0.3
  */
-public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
+public class DateUtils {
 
   private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
@@ -187,6 +187,11 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     } catch (ParseException e) {
       return null;
     }
+  }
+
+  /** Parse date string with specified patterns. */
+  public static Date parseDate(String str, String... parsePatterns) throws ParseException {
+    return org.apache.commons.lang3.time.DateUtils.parseDate(str, parsePatterns);
   }
 
   /** Parse date string in EEE MMM dd HH:mm:ss zzz yyyy format */

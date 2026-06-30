@@ -55,7 +55,7 @@ public class ProcessGetResponse implements Serializable {
   // 变量内容 todo
 
   @Data
-  public static class ProcessOutput {
+  public static class ProcessOutput implements Serializable {
 
     @JsonProperty("node_type")
     private String nodeType;

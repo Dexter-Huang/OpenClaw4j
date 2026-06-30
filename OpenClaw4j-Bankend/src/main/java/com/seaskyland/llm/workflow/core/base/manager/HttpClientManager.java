@@ -35,7 +35,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.*;
-import org.apache.http.client.ServiceUnavailableRetryStrategy;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
@@ -49,7 +48,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
@@ -135,21 +133,6 @@ public class HttpClientManager implements InitializingBean {
     ochestraHttpClientBuilder.disableAutomaticRetries();
     ochestraHttpClientBuilder.setConnectionManager(orchestraClientConnectionManager);
     ochestraHttpClientBuilder.setRedirectStrategy(redirectStrategy);
-
-    // Configure no retry strategy for workflow client
-    ServiceUnavailableRetryStrategy noRetryStrategy =
-        new ServiceUnavailableRetryStrategy() {
-          @Override
-          public boolean retryRequest(
-              HttpResponse response, int executionCount, HttpContext context) {
-            return false;
-          }
-
-          @Override
-          public long getRetryInterval() {
-            return 0; // Not used as retries are disabled
-          }
-        };
 
     ochestraHttpClientBuilder.setRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
     RequestConfig ochestraRequestConfig =

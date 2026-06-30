@@ -38,7 +38,7 @@ public class AppComponentConfig implements Serializable {
   private List<Params> output = new ArrayList<>();
 
   @Data
-  public static class Input {
+  public static class Input implements Serializable {
 
     /** User-defined parameters */
     private List<UserParams> userParams = new ArrayList<>();
@@ -48,7 +48,7 @@ public class AppComponentConfig implements Serializable {
   }
 
   @Data
-  public static class UserParams {
+  public static class UserParams implements Serializable {
 
     /** Parameter code */
     private String code;
@@ -61,7 +61,7 @@ public class AppComponentConfig implements Serializable {
   }
 
   @Data
-  public static class Params {
+  public static class Params implements Serializable {
 
     /** Field identifier */
     private String field;

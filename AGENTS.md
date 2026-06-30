@@ -65,6 +65,25 @@ Generated and legacy-problematic backend sources should stay excluded from quali
 - `src/main/java/com/seaskyland/llm/workflow/admin/generator/**`
 - `src/main/java/com/seaskyland/llm/workflow/admin/utils/ContributorFileUtil.java`
 
+## 代码质量门禁
+
+- 每一次代码编写、修改、格式化、重构或修复后，在声明完成前都必须执行代码格式检查和代码质量检查。
+- 使用项目 skill `openclaw4j-code-quality-gate` 选择具体流程和命令。
+- 后端 Java 改动至少运行：
+
+```powershell
+cd OpenClaw4j-Bankend
+$env:JAVA_HOME='D:\jdk-26'
+$env:Path='D:\jdk-26\bin;' + $env:Path
+mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' spotless:check
+mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' checkstyle:check
+mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' spotbugs:check
+```
+
+- 如果明确需要格式化，先运行 `spotless:apply`，再重新运行 `spotless:check`。
+- 前端改动从 `OpenClaw4j-Frontend/` 运行相关 formatter、linter 或 build 脚本；如果没有更窄的脚本，运行 `npm run build:app`。
+- 如果必要的质量检查因为已知历史基线问题无法通过，必须报告精确命令、退出码和剩余问题；不要把任务描述为 clean 或 fully passing。
+
 ## Leyden / AOT
 
 - Keep the default startup optimization on HotSpot JVM with the JDK Project Leyden style AOT cache.

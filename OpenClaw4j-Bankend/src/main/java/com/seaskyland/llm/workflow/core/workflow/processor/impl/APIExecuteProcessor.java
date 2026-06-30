@@ -130,7 +130,7 @@ public class APIExecuteProcessor extends AbstractExecuteProcessor {
     nodeResult.setUsages(null);
 
     // Node execution result
-    if (result != null && result.isSuccess() && result.getCode() == 200) {
+    if (result.isSuccess() && result.getCode() == 200) {
       String outputType = config.getOutputType() == null ? "json" : config.getOutputType();
       Map<String, Object> outputParamsMap;
       Object resultObj;

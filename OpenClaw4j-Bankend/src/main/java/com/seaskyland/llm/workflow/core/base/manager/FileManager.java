@@ -186,7 +186,7 @@ public class FileManager {
                 "vision param is valid", url + " has invalid media type"));
       }
       return mediaType;
-    } catch (Exception e) {
+    } catch (IOException | BizException e) {
       throw new BizException(
           ErrorCode.INVALID_PARAMS.toError(
               "vision param is valid", url + " has invalid media type"));

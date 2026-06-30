@@ -168,7 +168,7 @@ public class ParallelExecuteProcessor extends AbstractExecuteProcessor {
 
     // Batch processing node concurrency
     int concurrentSize =
-        nodeParam.getConcurrentSize() > 0 & nodeParam.getConcurrentSize() <= 10
+        nodeParam.getConcurrentSize() > 0 && nodeParam.getConcurrentSize() <= 10
             ? nodeParam.getConcurrentSize()
             : 1;
     Semaphore semaphore = new Semaphore(concurrentSize);

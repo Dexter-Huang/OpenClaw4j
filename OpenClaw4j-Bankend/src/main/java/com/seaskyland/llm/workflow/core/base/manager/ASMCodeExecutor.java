@@ -18,7 +18,8 @@ import org.springframework.util.DigestUtils;
 /** 基于ASM的代码执行器 使用ASM字节码操作框架动态生成和执行代码，具有更高的性能 */
 public class ASMCodeExecutor {
 
-  public static ConcurrentHashMap<String, byte[]> compiledClasses = new ConcurrentHashMap<>();
+  private static final ConcurrentHashMap<String, byte[]> compiledClasses =
+      new ConcurrentHashMap<>();
 
   /**
    * 使用ASM生成并执行代码中的Main类的main方法

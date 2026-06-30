@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 public class ConversationChatMemory implements ChatMemory {
 
   /** Redis key prefix for conversation storage */
-  public static String CONVERSATION_CHAT_MEMORY_PREFIX = "conversation_chat:%s";
+  public static final String CONVERSATION_CHAT_MEMORY_PREFIX = "conversation_chat:%s";
 
   /** Redis manager for data persistence */
   private final CacheManager cacheManager;
