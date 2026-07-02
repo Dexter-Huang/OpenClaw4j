@@ -78,31 +78,31 @@ class LeydenBuildConfigurationTest {
   }
 
   @Test
-  void localMysqlComposeInitializesMysql97PrimaryReplicaShardsWithApplicationSchema()
-      throws IOException {
+  void localMysqlComposeInitializesSingleMysql97InstanceWithApplicationSchema() throws IOException {
     String compose =
         Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
-    String readme = read("README.md");
 
     assertTrue(compose.contains("image: mysql:9.7.1"));
-    assertTrue(compose.contains("mysql-0-primary"));
-    assertTrue(compose.contains("mysql-0-replica"));
-    assertTrue(compose.contains("mysql-1-primary"));
-    assertTrue(compose.contains("mysql-1-replica"));
-    assertTrue(compose.contains("mysql-replication-init"));
-    assertTrue(compose.contains("MYSQL_DATABASE: openclaw4j_ds_0"));
-    assertTrue(compose.contains("MYSQL_DATABASE: openclaw4j_ds_1"));
+    assertTrue(compose.contains("mysql:"));
+    assertTrue(compose.contains("container_name: openclaw4j-mysql"));
+    assertTrue(compose.contains("\"3306:3306\""));
+    assertTrue(compose.contains("MYSQL_DATABASE: openclaw4j"));
     assertTrue(compose.contains("MYSQL_USER: openclaw"));
     assertTrue(compose.contains("MYSQL_PASSWORD: openclaw123"));
-    assertTrue(compose.contains("--gtid-mode=ON"));
-    assertTrue(compose.contains("--binlog-format=ROW"));
     assertTrue(
         compose.contains(
             "../OpenClaw4j-Bankend/src/main/resources/sql/MySQL/V0.0.1__init.sql:/docker-entrypoint-initdb.d/01-openclaw4j-init.sql:ro"));
-    assertTrue(compose.contains("./data/mysql-0-primary:/var/lib/mysql"));
-    assertTrue(compose.contains("./data/mysql-0-replica:/var/lib/mysql"));
-    assertTrue(compose.contains("./data/mysql-1-primary:/var/lib/mysql"));
-    assertTrue(compose.contains("./data/mysql-1-replica:/var/lib/mysql"));
+    assertTrue(compose.contains("./data/mysql:/var/lib/mysql"));
+    assertFalse(compose.contains("mysql-0-primary"));
+    assertFalse(compose.contains("mysql-0-replica"));
+    assertFalse(compose.contains("mysql-1-primary"));
+    assertFalse(compose.contains("mysql-1-replica"));
+    assertFalse(compose.contains("mysql-replication-init"));
+    assertFalse(compose.contains("openclaw4j_ds_"));
+    assertFalse(compose.contains("--gtid-mode=ON"));
+    assertFalse(compose.contains("--binlog-format=ROW"));
+
+    String readme = read("README.md");
     assertTrue(
         readme.contains("docker compose -f ../deploy/docker-compose.middleware.yml up -d --build"));
     assertTrue(readme.contains("spring.sql.init.mode=never"));
@@ -147,13 +147,13 @@ class LeydenBuildConfigurationTest {
     assertTrue(compose.contains("./data/redis-master:/data"));
     assertTrue(compose.contains("redis-sentinel-1"));
 
-    assertTrue(readme.contains("Redis master remains available at `127.0.0.1:6379`, database `0`"));
+    assertTrue(readme.contains("Redis master 仍可通过 `127.0.0.1:6379`、database `0`"));
     assertTrue(readme.contains("openclaw4j-master"));
     assertTrue(readme.contains("cache.type=REDIS"));
   }
 
   @Test
-  void deployMiddlewareComposeUsesShardingSphereAndRedisSentinel() throws IOException {
+  void deployMiddlewareComposeUsesSingleMysqlAndRedisSentinel() throws IOException {
     String compose =
         Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
     String sentinel =
@@ -165,17 +165,17 @@ class LeydenBuildConfigurationTest {
     String redisReplica2 =
         Files.readString(PROJECT_DIR.getParent().resolve("deploy/redis/redis-replica-2.conf"));
 
-    assertTrue(compose.contains("shardingsphere-proxy"));
-    assertTrue(compose.contains("3306:3307"));
-    assertTrue(compose.contains("mysql-0-primary"));
-    assertTrue(compose.contains("mysql-0-replica"));
-    assertTrue(compose.contains("mysql-1-primary"));
-    assertTrue(compose.contains("mysql-1-replica"));
-    assertTrue(compose.contains("./data/mysql-0-primary:/var/lib/mysql"));
-    assertTrue(compose.contains("./data/mysql-0-replica:/var/lib/mysql"));
-    assertTrue(compose.contains("./data/mysql-1-primary:/var/lib/mysql"));
-    assertTrue(compose.contains("./data/mysql-1-replica:/var/lib/mysql"));
-    assertTrue(compose.contains("./shardingsphere/conf:/opt/shardingsphere-proxy/conf"));
+    assertTrue(compose.contains("mysql:"));
+    assertTrue(compose.contains("container_name: openclaw4j-mysql"));
+    assertTrue(compose.contains("\"3306:3306\""));
+    assertTrue(compose.contains("./data/mysql:/var/lib/mysql"));
+    assertFalse(compose.contains("shardingsphere"));
+    assertFalse(compose.contains("3306:3307"));
+    assertFalse(compose.contains("mysql-0-primary"));
+    assertFalse(compose.contains("mysql-0-replica"));
+    assertFalse(compose.contains("mysql-1-primary"));
+    assertFalse(compose.contains("mysql-1-replica"));
+    assertFalse(compose.contains("./shardingsphere/conf:/opt/shardingsphere-proxy/conf"));
     assertTrue(compose.contains("redis-master"));
     assertTrue(compose.contains("redis-replica-1"));
     assertTrue(compose.contains("redis-replica-2"));
@@ -200,11 +200,10 @@ class LeydenBuildConfigurationTest {
     assertFalse(redisReplica2.contains("appendonly yes"));
     assertTrue(compose.contains("master_link_status:up"));
     assertFalse(
-        Files.readString(
-                PROJECT_DIR
-                    .getParent()
-                    .resolve("deploy/shardingsphere/conf/database-openclaw4j.yaml"))
-            .contains("defaultDataSourceName"));
+        Files.exists(
+            PROJECT_DIR
+                .getParent()
+                .resolve("deploy/shardingsphere/conf/database-openclaw4j.yaml")));
     assertFalse(compose.contains("openclaw4j-mysql-data:"));
     assertFalse(compose.contains("openclaw4j-redis-data:"));
   }

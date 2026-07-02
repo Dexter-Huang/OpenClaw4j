@@ -1,17 +1,14 @@
 # cbes-llm
 
-## Local ShardingSphere MySQL and Redis Sentinel
+## 本地单实例 MySQL 与 Redis Sentinel
 
-The backend uses MySQL 8 as the primary database and Redis for persistent login
-token/cache storage. The local middleware stack lives in the repository-level
-`deploy/` directory and runs MySQL through ShardingSphere Proxy plus Redis
-Sentinel:
+后端使用 MySQL 作为主数据库，并使用 Redis 持久化登录 token 和缓存数据。本地中间件栈放在仓库根目录的 `deploy/` 目录中，当前部署方案只启动一个 MySQL 实例，不再使用 ShardingSphere、分库分表或读写分离；Redis 仍使用 Sentinel 拓扑：
 
 ```powershell
 docker compose -f ../deploy/docker-compose.middleware.yml up -d --build
 ```
 
-Default local connection settings:
+默认本地连接配置：
 
 ```text
 url      = jdbc:mysql://127.0.0.1:3306/openclaw4j?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
@@ -19,41 +16,30 @@ username = openclaw
 password = openclaw123
 ```
 
-`127.0.0.1:3306` is ShardingSphere Proxy. The physical MySQL nodes are exposed
-for debugging on `127.0.0.1:33061/openclaw4j_ds_0` and
-`127.0.0.1:33062/openclaw4j_ds_1`.
+`127.0.0.1:3306` 直接连接单个 MySQL 容器，数据库名为 `openclaw4j`。
 
-Redis master remains available at `127.0.0.1:6379`, database `0`, for simple
-local clients. Sentinel is available at `127.0.0.1:26379` with master name
-`openclaw4j-master`; two additional sentinels are published on `26380` and
-`26381`.
+Redis master 仍可通过 `127.0.0.1:6379`、database `0` 供简单本地客户端访问。Sentinel 入口为 `127.0.0.1:26379`，master name 为 `openclaw4j-master`；另外两个 Sentinel 发布在 `26380` 和 `26381`。
 
-Each MySQL container imports `src/main/resources/sql/MySQL/V0.0.1__init.sql`
-only when its `deploy/data/mysql-*` directory is first created. Spring Boot
-startup keeps `spring.sql.init.mode=never` so the dump is not executed again on
-every application restart. Runtime data stays under ignored `deploy/data/`
-directories.
+MySQL 容器只会在 `deploy/data/mysql` 第一次创建时导入 `src/main/resources/sql/MySQL/V0.0.1__init.sql`。Spring Boot 启动保持 `spring.sql.init.mode=never`，避免每次应用重启都重复执行初始化 SQL。运行时数据保存在已忽略的 `deploy/data/` 目录下。
 
-The backend default `cache.type=REDIS` stores access and refresh token mappings
-in Redis, so restarting only the backend process does not immediately log users
-out. The message queue remains `mq.type=JVM` for local development.
+后端默认 `cache.type=REDIS`，access token 和 refresh token 映射会写入 Redis，所以只重启后端进程不会立即让用户退出登录。本地开发的消息队列仍保持 `mq.type=JVM`。
 
-To recreate a clean local database:
+重建干净的本地数据库：
 
 ```powershell
 docker compose -f ../deploy/docker-compose.middleware.yml down
-Remove-Item -Recurse -Force ..\deploy\data\mysql-0,..\deploy\data\mysql-1
+Remove-Item -Recurse -Force ..\deploy\data\mysql
 docker compose -f ../deploy/docker-compose.middleware.yml up -d --build
 ```
 
-Override the backend connection if needed:
+如需覆盖后端连接配置：
 
 ```powershell
 $env:OPENCLAW_MYSQL_URL='jdbc:mysql://127.0.0.1:3306/openclaw4j?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true'
 $env:OPENCLAW_MYSQL_USERNAME='openclaw'
 $env:OPENCLAW_MYSQL_PASSWORD='openclaw123'
-$env:OPENCLAW_REDIS_HOST='127.0.0.1'
-$env:OPENCLAW_REDIS_PORT='6379'
+$env:OPENCLAW_REDIS_SENTINEL_MASTER='openclaw4j-master'
+$env:OPENCLAW_REDIS_SENTINEL_NODES='127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381'
 $env:OPENCLAW_REDIS_DATABASE='0'
 ```
 

@@ -1,13 +1,13 @@
 services:
-  mysql-0-primary:
+  mysql:
     image: mysql:9.7.1
-    container_name: openclaw4j-mysql-0-primary
+    container_name: openclaw4j-mysql
     restart: unless-stopped
     ports:
-      - "33061:3306"
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root123456
-      MYSQL_DATABASE: openclaw4j_ds_0
+      MYSQL_DATABASE: openclaw4j
       MYSQL_USER: openclaw
       MYSQL_PASSWORD: openclaw123
       TZ: Asia/Shanghai
@@ -15,156 +15,11 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_0900_ai_ci
       - --default-time-zone=+08:00
-      - --server-id=100
-      - --log-bin=mysql-bin
-      - --binlog-format=ROW
-      - --gtid-mode=ON
-      - --enforce-gtid-consistency=ON
-      - --log-replica-updates=ON
     volumes:
-      - ./data/mysql-0-primary:/var/lib/mysql
+      - ./data/mysql:/var/lib/mysql
       - ../OpenClaw4j-Bankend/src/main/resources/sql/MySQL/V0.0.1__init.sql:/docker-entrypoint-initdb.d/01-openclaw4j-init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uopenclaw -p$${MYSQL_PASSWORD} --silent"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 30s
-
-  mysql-0-replica:
-    image: mysql:9.7.1
-    container_name: openclaw4j-mysql-0-replica
-    restart: unless-stopped
-    ports:
-      - "33063:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: root123456
-      MYSQL_DATABASE: openclaw4j_ds_0
-      MYSQL_USER: openclaw
-      MYSQL_PASSWORD: openclaw123
-      TZ: Asia/Shanghai
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_0900_ai_ci
-      - --default-time-zone=+08:00
-      - --server-id=110
-      - --log-bin=mysql-bin
-      - --binlog-format=ROW
-      - --gtid-mode=ON
-      - --enforce-gtid-consistency=ON
-      - --log-replica-updates=ON
-    volumes:
-      - ./data/mysql-0-replica:/var/lib/mysql
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uopenclaw -p$${MYSQL_PASSWORD} --silent"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 30s
-
-  mysql-1-primary:
-    image: mysql:9.7.1
-    container_name: openclaw4j-mysql-1-primary
-    restart: unless-stopped
-    ports:
-      - "33062:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: root123456
-      MYSQL_DATABASE: openclaw4j_ds_1
-      MYSQL_USER: openclaw
-      MYSQL_PASSWORD: openclaw123
-      TZ: Asia/Shanghai
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_0900_ai_ci
-      - --default-time-zone=+08:00
-      - --server-id=101
-      - --log-bin=mysql-bin
-      - --binlog-format=ROW
-      - --gtid-mode=ON
-      - --enforce-gtid-consistency=ON
-      - --log-replica-updates=ON
-    volumes:
-      - ./data/mysql-1-primary:/var/lib/mysql
-      - ../OpenClaw4j-Bankend/src/main/resources/sql/MySQL/V0.0.1__init.sql:/docker-entrypoint-initdb.d/01-openclaw4j-init.sql:ro
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uopenclaw -p$${MYSQL_PASSWORD} --silent"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 30s
-
-  mysql-1-replica:
-    image: mysql:9.7.1
-    container_name: openclaw4j-mysql-1-replica
-    restart: unless-stopped
-    ports:
-      - "33064:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: root123456
-      MYSQL_DATABASE: openclaw4j_ds_1
-      MYSQL_USER: openclaw
-      MYSQL_PASSWORD: openclaw123
-      TZ: Asia/Shanghai
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_0900_ai_ci
-      - --default-time-zone=+08:00
-      - --server-id=111
-      - --log-bin=mysql-bin
-      - --binlog-format=ROW
-      - --gtid-mode=ON
-      - --enforce-gtid-consistency=ON
-      - --log-replica-updates=ON
-    volumes:
-      - ./data/mysql-1-replica:/var/lib/mysql
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uopenclaw -p$${MYSQL_PASSWORD} --silent"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 30s
-
-  mysql-replication-init:
-    image: mysql:9.7.1
-    container_name: openclaw4j-mysql-replication-init
-    restart: "no"
-    depends_on:
-      mysql-0-primary:
-        condition: service_healthy
-      mysql-0-replica:
-        condition: service_healthy
-      mysql-1-primary:
-        condition: service_healthy
-      mysql-1-replica:
-        condition: service_healthy
-    environment:
-      MYSQL_ROOT_PASSWORD: root123456
-      MYSQL_REPLICATION_USER: openclaw_repl
-      MYSQL_REPLICATION_PASSWORD: openclaw_repl123
-    volumes:
-      - ./mysql/setup-replication.sh:/usr/local/bin/setup-replication.sh:ro
-    command: ["sh", "/usr/local/bin/setup-replication.sh"]
-
-  shardingsphere-proxy:
-    build:
-      context: ./shardingsphere
-    image: openclaw4j-shardingsphere-proxy:5.5.2
-    container_name: openclaw4j-shardingsphere-proxy
-    restart: unless-stopped
-    depends_on:
-      mysql-replication-init:
-        condition: service_completed_successfully
-    ports:
-      - "3306:3307"
-    environment:
-      PORT: 3307
-      JVM_OPTS: "-Xms256m -Xmx512m"
-    volumes:
-      - ./shardingsphere/conf:/opt/shardingsphere-proxy/conf:ro
-      - ./data/shardingsphere/logs:/opt/shardingsphere-proxy/logs
-    healthcheck:
-      test: ["CMD-SHELL", "timeout 3 bash -c '</dev/tcp/127.0.0.1/3307'"]
       interval: 10s
       timeout: 5s
       retries: 12
