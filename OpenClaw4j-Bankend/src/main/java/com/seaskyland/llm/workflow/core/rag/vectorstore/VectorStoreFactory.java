@@ -42,22 +42,19 @@ public class VectorStoreFactory {
 	}
 
 	/**
-	 * Retrieves the configured vector store service. Supports Elasticsearch, Simple, and
-	 * SQLite implementations.
+	 * Retrieves the configured vector store service. Supports Simple and pgvector
+	 * implementations.
 	 * @return The configured vector store service
 	 * @throws IllegalArgumentException if the configured vector store type is not
 	 * supported
 	 */
 	public VectorStoreService getVectorStoreService() {
 		VectorStoreType type = VectorStoreType.of(studioProperties.getVectorStoreType());
-		if (type == VectorStoreType.ELASTICSEARCH) {
-			return vdbServiceMap.get("elasticSearchVectorStoreService");
-		}
 		if (type == VectorStoreType.SIMPLE) {
 			return vdbServiceMap.get("simpleVectorStoreService");
 		}
-		if (type == VectorStoreType.SQLITE) {
-			return vdbServiceMap.get("sqliteVectorStoreService");
+		if (type == VectorStoreType.PGVECTOR) {
+			return vdbServiceMap.get("pgvectorVectorStoreService");
 		}
 		throw new IllegalArgumentException("Unsupported vector store type: " + type);
 	}

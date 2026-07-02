@@ -19,8 +19,10 @@ spring:
     allow-circular-references: true
     allow-bean-definition-overriding: true
   datasource:
-    url: jdbc:sqlite:./data/openclaw.db
-    driver-class-name: org.sqlite.JDBC
+    url: ${OPENCLAW_DB_URL:jdbc:postgresql://localhost:5432/openclaw4j}
+    username: ${OPENCLAW_DB_USERNAME:openclaw}
+    password: ${OPENCLAW_DB_PASSWORD:openclaw}
+    driver-class-name: org.postgresql.Driver
     hikari:
       # 虚拟线程环境下，适当提高连接数
       # 但不要无限拉高——数据库端连接是有限的
@@ -29,27 +31,36 @@ spring:
       connection-timeout: 3000
       # 连接最大生命周期，防止数据库侧超时
       max-lifetime: 1800000
-      connection-init-sql: PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;
     connection-fetch: lazy
+  data:
+    redis:
+      database: ${OPENCLAW_REDIS_DATABASE:0}
+      password: ${OPENCLAW_REDIS_PASSWORD:}
+      timeout: 3s
+      connect-timeout: 3s
+      sentinel:
+        master: ${OPENCLAW_REDIS_SENTINEL_MASTER:openclaw4j-master}
+        nodes:
+          - ${OPENCLAW_REDIS_SENTINEL_1:localhost:26379}
+          - ${OPENCLAW_REDIS_SENTINEL_2:localhost:26380}
+          - ${OPENCLAW_REDIS_SENTINEL_3:localhost:26381}
   sql:
     init:
-      mode: always
-      schema-locations: classpath:sql/Sqlite/V0.0.1__init.sql
+      mode: never
       continue-on-error: false
   ai:
     alibaba:
       studio:
         login-method: third_party
         upload-method: file       # file or oss
-        # Vector store backend: simple | sqlite | elasticsearch
-        # vector-store-type: sqlite
-        #
-        # sqlite-vec extension loading (only needed when vector-store-type=sqlite):
-        #   The bundled extension under src/main/resources/sqlite/
-        #   (vec0.dll / vec0.so / vec0.dylib) is extracted automatically at startup.
-        #   Override only if you want to use a custom build of the extension:
-        # sqlite-vec-extension-path: C:/custom-path/vec0.dll
-        vector-store-type: sqlite
+        # Vector store backend: simple | pgvector
+        vector-store-type: pgvector
+    vectorstore:
+      pgvector:
+        schema-name: openclaw_rag
+        initialize-schema: true
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
     chat:
       observations:
         log-prompt: true # Include prompt content in tracing (disabled by default for privacy)
@@ -71,17 +82,17 @@ jwt:
   refresh-token-expiration: 2592000
 
 # Cache backend type: REDIS (default, requires Redis) or JVM (in-memory, no Redis needed).
-# When set to JVM, the RedissonClient bean is only created if mq.type=REDISSON.
 cache:
-  type: JVM
+  type: REDIS
 
 # Message queue backend type:
 #   REDISSON  – Redis-backed pub/sub via Redisson (requires Redis, default)
 #   ROCKET_MQ – Apache RocketMQ
 #   JVM       – In-process pub/sub, no external broker required (single-node only)
 mq:
-  type: JVM
-  endpoints: 127.0.0.1:6380
+  type: REDISSON
+  # REDISSON uses spring.data.redis.sentinel.* above; this is kept for MQ implementations that read endpoints.
+  endpoints: ${OPENCLAW_REDIS_SENTINEL_NODES:localhost:26379,localhost:26380,localhost:26381}
   document-index-topic: topic_saa_studio_document_index
   document_index_group: group_saa_studio_document_index
 
@@ -94,7 +105,7 @@ mq:
 mybatis-plus:
   global-config:
     db-config:
-      db-type: sqlite
+      db-type: postgre_sql
   type-handlers-package: com.seaskyland.llm.workflow.core.config
   configuration:
     default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler

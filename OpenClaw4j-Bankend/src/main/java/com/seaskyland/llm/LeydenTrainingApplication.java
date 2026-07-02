@@ -25,7 +25,7 @@ public final class LeydenTrainingApplication {
 				"org.springframework.boot.web.server.servlet.context.AnnotationConfigServletWebServerApplicationContext",
 				"com.baomidou.mybatisplus.core.MybatisConfiguration",
 				"org.apache.ibatis.session.SqlSessionFactory",
-				"org.sqlite.JDBC",
+				"org.postgresql.Driver",
 				"com.fasterxml.jackson.databind.ObjectMapper",
 				"com.seaskyland.llm.workflow.runtime.domain.Result",
 				"com.seaskyland.llm.workflow.core.base.mq.jvm.JvmMessageBus",

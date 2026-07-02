@@ -1,0 +1,199 @@
+services:
+  pgvector:
+    image: pgvector/pgvector:pg18
+    container_name: openclaw4j-pgvector
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-openclaw4j}
+      POSTGRES_USER: ${POSTGRES_USER:-openclaw}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-openclaw}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - ./data/pgvector:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-openclaw} -d ${POSTGRES_DB:-openclaw4j}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-master:
+    image: redis:7
+    container_name: openclaw4j-redis-master
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_MASTER_PORT:-6379}:6379"
+    volumes:
+      - ./data/redis-master:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-replica-1:
+    image: redis:7
+    container_name: openclaw4j-redis-replica-1
+    restart: unless-stopped
+    command:
+      [
+        "redis-server",
+        "--replicaof",
+        "redis-master",
+        "6379",
+        "--appendonly",
+        "no",
+        "--save",
+        "",
+        "--dir",
+        "/tmp",
+        "--dbfilename",
+        "redis-replica-1.rdb",
+        "--repl-diskless-load",
+        "on-empty-db"
+      ]
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    ports:
+      - "${REDIS_REPLICA_1_PORT:-6380}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-replica-2:
+    image: redis:7
+    container_name: openclaw4j-redis-replica-2
+    restart: unless-stopped
+    command:
+      [
+        "redis-server",
+        "--replicaof",
+        "redis-master",
+        "6379",
+        "--appendonly",
+        "no",
+        "--save",
+        "",
+        "--dir",
+        "/tmp",
+        "--dbfilename",
+        "redis-replica-2.rdb",
+        "--repl-diskless-load",
+        "on-empty-db"
+      ]
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    ports:
+      - "${REDIS_REPLICA_2_PORT:-6381}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-sentinel-1:
+    image: redis:7
+    container_name: openclaw4j-redis-sentinel-1
+    restart: unless-stopped
+    command:
+      - sh
+      - -c
+      - |
+        cat > /tmp/sentinel.conf <<'EOF'
+        port 26379
+        dir /tmp
+        sentinel resolve-hostnames yes
+        sentinel announce-hostnames yes
+        sentinel monitor openclaw4j-master redis-master 6379 2
+        sentinel down-after-milliseconds openclaw4j-master 5000
+        sentinel failover-timeout openclaw4j-master 10000
+        sentinel parallel-syncs openclaw4j-master 1
+        EOF
+        redis-sentinel /tmp/sentinel.conf
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      redis-replica-1:
+        condition: service_healthy
+      redis-replica-2:
+        condition: service_healthy
+    ports:
+      - "${REDIS_SENTINEL_1_PORT:-26379}:26379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-sentinel-2:
+    image: redis:7
+    container_name: openclaw4j-redis-sentinel-2
+    restart: unless-stopped
+    command:
+      - sh
+      - -c
+      - |
+        cat > /tmp/sentinel.conf <<'EOF'
+        port 26379
+        dir /tmp
+        sentinel resolve-hostnames yes
+        sentinel announce-hostnames yes
+        sentinel monitor openclaw4j-master redis-master 6379 2
+        sentinel down-after-milliseconds openclaw4j-master 5000
+        sentinel failover-timeout openclaw4j-master 10000
+        sentinel parallel-syncs openclaw4j-master 1
+        EOF
+        redis-sentinel /tmp/sentinel.conf
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      redis-replica-1:
+        condition: service_healthy
+      redis-replica-2:
+        condition: service_healthy
+    ports:
+      - "${REDIS_SENTINEL_2_PORT:-26380}:26379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-sentinel-3:
+    image: redis:7
+    container_name: openclaw4j-redis-sentinel-3
+    restart: unless-stopped
+    command:
+      - sh
+      - -c
+      - |
+        cat > /tmp/sentinel.conf <<'EOF'
+        port 26379
+        dir /tmp
+        sentinel resolve-hostnames yes
+        sentinel announce-hostnames yes
+        sentinel monitor openclaw4j-master redis-master 6379 2
+        sentinel down-after-milliseconds openclaw4j-master 5000
+        sentinel failover-timeout openclaw4j-master 10000
+        sentinel parallel-syncs openclaw4j-master 1
+        EOF
+        redis-sentinel /tmp/sentinel.conf
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      redis-replica-1:
+        condition: service_healthy
+      redis-replica-2:
+        condition: service_healthy
+    ports:
+      - "${REDIS_SENTINEL_3_PORT:-26381}:26379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

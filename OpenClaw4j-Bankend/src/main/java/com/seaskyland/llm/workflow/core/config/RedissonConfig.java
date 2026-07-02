@@ -23,9 +23,12 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.config.Config;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -48,42 +51,69 @@ import static com.seaskyland.llm.workflow.core.config.MqConfigProperties.REDISSO
  * @since 1.0.0.3
  */
 @Configuration
+@EnableConfigurationProperties(DataRedisProperties.class)
 @ConditionalOnExpression(
 		"'${" + "cache.type" + ":" + REDIS + "}'.equals('" + REDIS + "') "
 		+ "or '${" + "mq.type" + ":" + REDISSON + "}'.equalsIgnoreCase('" + REDISSON + "')"
 )
 public class RedissonConfig {
 
-	@Value("${spring.data.redis.host}")
-	private String host;
+	private final DataRedisProperties redisProperties;
 
-	@Value("${spring.data.redis.port:6379}")
-	private Integer port;
-
-	@Value("${spring.data.redis.password:}")
-	private String password;
-
-	@Value("${spring.data.redis.database:0}")
-	private Integer database;
+	public RedissonConfig(DataRedisProperties redisProperties) {
+		this.redisProperties = redisProperties;
+	}
 
 	/**
 	 * Creates and configures a {@link RedissonClient} bean.
 	 */
 	@Bean
 	public RedissonClient redissonClient() {
+		return Redisson.create(buildConfig());
+	}
+
+	Config buildConfig() {
 		Config config = new Config();
 
 		// Use custom Jackson codec shared with the rest of the application
 		var codec = new JsonJacksonCodec(JsonUtils.getObjectMapper());
 		config.setCodec(codec);
-
-		config.useSingleServer().setAddress("redis://" + host + ":" + port).setDatabase(database);
-
-		if (password != null && !password.isEmpty()) {
-			config.useSingleServer().setPassword(password);
+		if (StringUtils.hasText(redisProperties.getUsername())) {
+			config.setUsername(redisProperties.getUsername());
+		}
+		if (StringUtils.hasText(redisProperties.getPassword())) {
+			config.setPassword(redisProperties.getPassword());
 		}
 
-		return Redisson.create(config);
+		DataRedisProperties.Sentinel sentinel = redisProperties.getSentinel();
+		if (sentinel != null && StringUtils.hasText(sentinel.getMaster())
+				&& !CollectionUtils.isEmpty(sentinel.getNodes())) {
+			var sentinelConfig = config.useSentinelServers()
+				.setMasterName(sentinel.getMaster())
+				.setDatabase(redisProperties.getDatabase());
+			sentinel.getNodes().stream().map(this::toRedisAddress).forEach(sentinelConfig::addSentinelAddress);
+
+			if (StringUtils.hasText(sentinel.getUsername())) {
+				sentinelConfig.setSentinelUsername(sentinel.getUsername());
+			}
+			if (StringUtils.hasText(sentinel.getPassword())) {
+				sentinelConfig.setSentinelPassword(sentinel.getPassword());
+			}
+			return config;
+		}
+
+		var singleServerConfig = config.useSingleServer()
+			.setAddress(toRedisAddress(redisProperties.getHost() + ":" + redisProperties.getPort()))
+			.setDatabase(redisProperties.getDatabase());
+
+		return config;
+	}
+
+	private String toRedisAddress(String address) {
+		if (address.startsWith("redis://") || address.startsWith("rediss://")) {
+			return address;
+		}
+		return "redis://" + address;
 	}
 
 	/**

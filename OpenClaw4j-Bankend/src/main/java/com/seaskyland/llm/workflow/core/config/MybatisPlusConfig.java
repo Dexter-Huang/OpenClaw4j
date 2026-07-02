@@ -20,13 +20,16 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
 
 import javax.sql.DataSource;
+import java.util.Locale;
 
 /**
  * Configuration class for MyBatis-Plus integration. Provides pagination support and
@@ -41,25 +44,53 @@ import javax.sql.DataSource;
 public class MybatisPlusConfig {
 
 	/**
-	 * Configures MyBatis-Plus interceptor with MySQL pagination support.
+	 * Configures MyBatis-Plus interceptor with the active database dialect.
 	 * @return MybatisPlusInterceptor instance
 	 */
 	@Bean
-	public MybatisPlusInterceptor mybatisPlusInterceptor() {
+	public MybatisPlusInterceptor mybatisPlusInterceptor(
+			@Value("${spring.datasource.url:}") String datasourceUrl,
+			@Value("${mybatis-plus.global-config.db-config.db-type:sqlite}") String configuredDbType) {
 		MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-		interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.SQLITE));
+		interceptor.addInnerInterceptor(new PaginationInnerInterceptor(resolveDbType(datasourceUrl, configuredDbType)));
 		return interceptor;
 	}
 
 	@Bean
-	public SqlSessionFactory sqlSessionFactory(DataSource dataSource, MybatisPlusInterceptor interceptor)
+	public SqlSessionFactory sqlSessionFactory(DataSource dataSource, MybatisPlusInterceptor interceptor,
+			@Value("${spring.datasource.url:}") String datasourceUrl,
+			@Value("${mybatis-plus.global-config.db-config.db-type:sqlite}") String configuredDbType)
 			throws Exception {
 		MybatisSqlSessionFactoryBean factoryBean = new MybatisSqlSessionFactoryBean();
 		factoryBean.setDataSource(dataSource);
 		factoryBean.setPlugins(interceptor);
 		factoryBean.setTypeHandlersPackage("com.seaskyland.llm.workflow.core.config");
-		factoryBean.setTypeHandlers(new SQLiteDateTypeHandler());
+		if (resolveDbType(datasourceUrl, configuredDbType) == DbType.SQLITE) {
+			factoryBean.setTypeHandlers(new SQLiteDateTypeHandler());
+		}
 		return factoryBean.getObject();
+	}
+
+	private static DbType resolveDbType(String datasourceUrl, String configuredDbType) {
+		String url = StringUtils.defaultString(datasourceUrl).toLowerCase(Locale.ROOT);
+		if (url.startsWith("jdbc:sqlite:")) {
+			return DbType.SQLITE;
+		}
+		if (url.startsWith("jdbc:postgresql:")) {
+			return DbType.POSTGRE_SQL;
+		}
+
+		String value = StringUtils.defaultIfBlank(configuredDbType, "sqlite")
+			.trim()
+			.toLowerCase(Locale.ROOT);
+		if ("postgres".equals(value) || "postgresql".equals(value) || "pgvector".equals(value)) {
+			return DbType.POSTGRE_SQL;
+		}
+		DbType dbType = DbType.getDbType(value);
+		if (dbType != DbType.OTHER) {
+			return dbType;
+		}
+		return DbType.valueOf(value.toUpperCase(Locale.ROOT).replace('-', '_'));
 	}
 
 }

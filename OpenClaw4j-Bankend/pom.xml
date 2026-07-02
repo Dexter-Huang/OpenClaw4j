@@ -25,6 +25,10 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.46</version>
@@ -50,14 +54,25 @@
         
         <!--swagger相关-->
         <!--
-          knife4j 4.5.0 内置 springdoc-openapi 2.3.0，其 HateoasHalProvider 会调用
-          HateoasProperties.getUseHalAsDefaultJsonMediaType()，该方法在 Spring Boot 3.5.x
-          中已被移除，导致启动失败。排除 spring-hateoas 可阻止该自动配置被激活。
+          knife4j 4.5.0 内置 springdoc-openapi 2.3.0。Spring Boot 4.1/Spring Data 4.1
+          将 TypeInformation 从 org.springframework.data.util 迁移到 org.springframework.data.core，
+          因此需要排除旧 springdoc 并显式使用 springdoc-openapi 3.x。
         -->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
             <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
             <version>4.5.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springdoc</groupId>
+                    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>3.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -93,6 +108,10 @@
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-vector-store</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-pgvector-store</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.ai</groupId>
@@ -208,13 +227,7 @@
             <artifactId>commons-io</artifactId>
             <version>2.20.0</version>
         </dependency>
-        <!-- SQLite Database -->
-        <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.53.2.0</version>
-            <scope>compile</scope>
-        </dependency>
+
 
 
 
