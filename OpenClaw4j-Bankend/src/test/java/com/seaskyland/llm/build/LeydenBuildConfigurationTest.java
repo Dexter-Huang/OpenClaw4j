@@ -209,14 +209,9 @@ class LeydenBuildConfigurationTest {
   }
 
   @Test
-  void deployMiddlewareComposeIncludesLocalElkLogStack() throws IOException {
+  void deployMiddlewareComposeIncludesElasticsearchOnly() throws IOException {
     String compose =
         Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
-    String kibanaCompose =
-        Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.kibana.yml"));
-    String logstashPipeline =
-        Files.readString(
-            PROJECT_DIR.getParent().resolve("deploy/logstash/pipeline/openclaw4j-logs.conf"));
     String logback = read("src/main/resources/logback-spring.xml");
 
     assertTrue(compose.contains("image: docker.elastic.co/elasticsearch/elasticsearch:9.4.3"));
@@ -225,29 +220,17 @@ class LeydenBuildConfigurationTest {
     assertTrue(compose.contains("ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:"));
     assertTrue(compose.contains("xpack.security.enabled: \"true\""));
     assertTrue(compose.contains("xpack.security.http.ssl.enabled: \"false\""));
-    assertTrue(compose.contains("elasticsearch-security-init"));
     assertTrue(compose.contains("-XX:+UnlockExperimentalVMOptions"));
     assertTrue(compose.contains("-XX:+UseCompactObjectHeaders"));
     assertTrue(compose.contains("\"39200:9200\""));
     assertTrue(compose.contains("./data/elasticsearch:/usr/share/elasticsearch/data"));
     assertFalse(compose.contains("container_name: openclaw4j-kibana"));
-    assertTrue(kibanaCompose.contains("image: docker.elastic.co/kibana/kibana:9.4.3"));
-    assertTrue(kibanaCompose.contains("ELASTICSEARCH_HOSTS: ${KIBANA_ELASTICSEARCH_HOSTS:"));
-    assertTrue(kibanaCompose.contains("ELASTICSEARCH_USERNAME: kibana_system"));
-    assertTrue(
-        kibanaCompose.contains(
-            "XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: ${KIBANA_ENCRYPTION_KEY:"));
-    assertTrue(kibanaCompose.contains("\"35601:5601\""));
-    assertTrue(compose.contains("image: docker.elastic.co/logstash/logstash:9.4.3"));
-    assertTrue(compose.contains("ELASTICSEARCH_USERNAME: logstash_internal"));
-    assertTrue(compose.contains("./logstash/pipeline:/usr/share/logstash/pipeline:ro"));
-    assertTrue(compose.contains("./data/logs/openclaw4j:/var/log/openclaw4j:ro"));
-    assertTrue(logstashPipeline.contains("id => \"openclaw4j-backend-logs\""));
-    assertTrue(logstashPipeline.contains("codec => multiline"));
-    assertTrue(logstashPipeline.contains("[service][name]"));
-    assertTrue(logstashPipeline.contains("user => \"${ELASTICSEARCH_USERNAME}\""));
-    assertTrue(logstashPipeline.contains("password => \"${ELASTICSEARCH_PASSWORD}\""));
-    assertTrue(logstashPipeline.contains("openclaw4j-logs-%{+YYYY.MM.dd}"));
+    assertFalse(compose.contains("container_name: openclaw4j-logstash"));
+    assertFalse(compose.contains("elasticsearch-security-init"));
+    assertFalse(compose.contains("docker.elastic.co/kibana"));
+    assertFalse(compose.contains("docker.elastic.co/logstash"));
+    assertFalse(compose.contains("KIBANA_"));
+    assertFalse(compose.contains("LOGSTASH_"));
     assertTrue(logback.contains("${APP_NAME:-OpenClaw4j-Bankend}"));
     assertTrue(logback.contains("${OPENCLAW_LOG_PATH:-${openclaw.logging.path:-"));
   }
