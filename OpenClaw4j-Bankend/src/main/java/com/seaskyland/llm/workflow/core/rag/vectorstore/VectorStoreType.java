@@ -20,15 +20,15 @@ import lombok.Getter;
 
 /**
  * Enum representing different types of vector stores supported by the system. Currently supports
- * Elasticsearch and Simple vector store implementations.
+ * pgvector and Simple vector store implementations.
  *
  * @since 1.0.0.3
  */
 @Getter
 public enum VectorStoreType {
 
-  /** Elasticsearch vector store implementation */
-  ELASTICSEARCH("elasticsearch"),
+  /** PostgreSQL pgvector store implementation */
+  PGVECTOR("pgvector"),
 
   /** Simple in-memory/file based vector store implementation */
   SIMPLE("simple");

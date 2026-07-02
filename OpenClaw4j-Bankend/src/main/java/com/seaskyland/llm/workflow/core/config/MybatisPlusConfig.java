@@ -42,7 +42,7 @@ import org.springframework.core.env.Environment;
 public class MybatisPlusConfig {
 
   /**
-   * Configures MyBatis-Plus interceptor with MySQL pagination support.
+   * Configures MyBatis-Plus interceptor with PostgreSQL pagination support.
    *
    * @return MybatisPlusInterceptor instance
    */
@@ -64,6 +64,6 @@ public class MybatisPlusConfig {
   }
 
   private DbType resolveDbType(Environment environment) {
-    return DbType.MYSQL;
+    return DbType.POSTGRE_SQL;
   }
 }

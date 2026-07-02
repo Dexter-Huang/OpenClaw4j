@@ -50,8 +50,7 @@ public class StudioProperties {
   private Integer maxConnectionsPerRoute = 100;
 
   /** Type of vector store to use */
-  //    private String vectorStoreType = "elasticsearch";
-  private String vectorStoreType = "simple";
+  private String vectorStoreType = "pgvector";
 
   /** login method, like github oauth2 login */
   private String loginMethod = "third_party";

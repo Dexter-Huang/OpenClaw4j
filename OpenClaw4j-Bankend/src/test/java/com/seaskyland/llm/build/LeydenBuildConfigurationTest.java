@@ -23,29 +23,35 @@ class LeydenBuildConfigurationTest {
   }
 
   @Test
-  void defaultBackendConfigurationUsesMysqlAsPrimaryDatabase() throws IOException {
+  void defaultBackendConfigurationUsesPostgresqlPgvectorAsPrimaryDatabase() throws IOException {
     String application = read("src/main/resources/application.yml");
     String pom = read("pom.xml");
     String trainingApplication =
         read("src/main/java/com/seaskyland/llm/LeydenTrainingApplication.java");
 
     assertTrue(
-        application.contains("url: ${OPENCLAW_MYSQL_URL:jdbc:mysql://127.0.0.1:3306/openclaw4j"));
-    assertTrue(application.contains("driver-class-name: com.mysql.cj.jdbc.Driver"));
-    assertTrue(application.contains("username: ${OPENCLAW_MYSQL_USERNAME:openclaw}"));
-    assertTrue(application.contains("password: ${OPENCLAW_MYSQL_PASSWORD:openclaw123}"));
-    assertTrue(application.contains("schema-locations: classpath:sql/MySQL/V0.0.1__init.sql"));
+        application.contains(
+            "url: ${OPENCLAW_DB_URL:jdbc:postgresql://127.0.0.1:5432/openclaw4j}"));
+    assertTrue(application.contains("driver-class-name: org.postgresql.Driver"));
+    assertTrue(application.contains("username: ${OPENCLAW_DB_USERNAME:openclaw}"));
+    assertTrue(application.contains("password: ${OPENCLAW_DB_PASSWORD:openclaw}"));
     assertTrue(application.contains("mode: never"));
-    assertTrue(application.contains("db-type: mysql"));
-    assertTrue(application.contains("vector-store-type: simple"));
+    assertTrue(application.contains("db-type: postgre_sql"));
+    assertTrue(application.contains("vector-store-type: pgvector"));
+    assertTrue(application.contains("schema-name: openclaw_rag"));
     assertFalse(application.contains("connection-init-sql: PRAGMA"));
     assertFalse(application.contains("url: jdbc:sqlite:./data/openclaw.db"));
+    assertFalse(application.contains("jdbc:mysql"));
+    assertFalse(application.contains("OPENCLAW_MYSQL"));
     assertFalse(application.contains("sqlite-vec"));
     assertFalse(application.contains("sqlite-vec-extension-path"));
 
-    assertTrue(pom.contains("<artifactId>mysql-connector-j</artifactId>"));
+    assertTrue(pom.contains("<artifactId>postgresql</artifactId>"));
+    assertTrue(pom.contains("<artifactId>spring-ai-pgvector-store</artifactId>"));
+    assertFalse(pom.contains("<artifactId>mysql-connector-j</artifactId>"));
     assertFalse(pom.contains("<artifactId>sqlite-jdbc</artifactId>"));
-    assertTrue(trainingApplication.contains("com.mysql.cj.jdbc.Driver"));
+    assertTrue(trainingApplication.contains("org.postgresql.Driver"));
+    assertFalse(trainingApplication.contains("com.mysql.cj.jdbc.Driver"));
     assertFalse(trainingApplication.contains("org.sqlite.JDBC"));
   }
 
@@ -54,7 +60,7 @@ class LeydenBuildConfigurationTest {
     String[] files = {
       "src/main/resources/application.yml",
       "src/main/resources/templates/default-application.yml",
-      "src/main/resources/sql/MySQL/V0.0.1__init.sql",
+      "src/main/resources/sql/PostgreSQL/V0.0.1__init.sql",
       "src/main/resources/sql/H2/V0.0.1__init.sql",
       "src/main/resources/sql/H2/agentscope-schema.sql",
       "src/main/resources/prompt/agent.json"
@@ -78,21 +84,25 @@ class LeydenBuildConfigurationTest {
   }
 
   @Test
-  void localMysqlComposeInitializesSingleMysql97InstanceWithApplicationSchema() throws IOException {
+  void localPgvectorComposeInitializesPostgresql18WithApplicationSchema() throws IOException {
     String compose =
         Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
 
-    assertTrue(compose.contains("image: mysql:9.7.1"));
-    assertTrue(compose.contains("mysql:"));
-    assertTrue(compose.contains("container_name: openclaw4j-mysql"));
-    assertTrue(compose.contains("\"3306:3306\""));
-    assertTrue(compose.contains("MYSQL_DATABASE: openclaw4j"));
-    assertTrue(compose.contains("MYSQL_USER: openclaw"));
-    assertTrue(compose.contains("MYSQL_PASSWORD: openclaw123"));
+    assertTrue(compose.contains("image: pgvector/pgvector:pg18"));
+    assertTrue(compose.contains("pgvector:"));
+    assertTrue(compose.contains("container_name: openclaw4j-pgvector"));
+    assertTrue(compose.contains("${POSTGRES_PORT:-5432}:5432"));
+    assertTrue(compose.contains("POSTGRES_DB: ${POSTGRES_DB:-openclaw4j}"));
+    assertTrue(compose.contains("POSTGRES_USER: ${POSTGRES_USER:-openclaw}"));
+    assertTrue(compose.contains("POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-openclaw}"));
     assertTrue(
         compose.contains(
-            "../OpenClaw4j-Bankend/src/main/resources/sql/MySQL/V0.0.1__init.sql:/docker-entrypoint-initdb.d/01-openclaw4j-init.sql:ro"));
-    assertTrue(compose.contains("./data/mysql:/var/lib/mysql"));
+            "../OpenClaw4j-Bankend/src/main/resources/sql/PostgreSQL/V0.0.1__init.sql:/docker-entrypoint-initdb.d/01-openclaw4j-init.sql:ro"));
+    assertTrue(compose.contains("./data/pgvector:/var/lib/postgresql"));
+    assertTrue(compose.contains("pg_isready"));
+    assertFalse(compose.contains("image: mysql"));
+    assertFalse(compose.contains("container_name: openclaw4j-mysql"));
+    assertFalse(compose.contains("./data/mysql"));
     assertFalse(compose.contains("mysql-0-primary"));
     assertFalse(compose.contains("mysql-0-replica"));
     assertFalse(compose.contains("mysql-1-primary"));
@@ -103,8 +113,7 @@ class LeydenBuildConfigurationTest {
     assertFalse(compose.contains("--binlog-format=ROW"));
 
     String readme = read("README.md");
-    assertTrue(
-        readme.contains("docker compose -f ../deploy/docker-compose.middleware.yml up -d --build"));
+    assertTrue(readme.contains("docker-compose.middleware.yml"));
     assertTrue(readme.contains("spring.sql.init.mode=never"));
   }
 
@@ -126,7 +135,8 @@ class LeydenBuildConfigurationTest {
             "nat-map: ${OPENCLAW_REDIS_SENTINEL_NAT_MAP:redis-master:6379=127.0.0.1:6379,redis-replica-1:6379=127.0.0.1:6380,redis-replica-2:6379=127.0.0.1:6381}"));
     assertTrue(application.contains("database: ${OPENCLAW_REDIS_DATABASE:0}"));
     assertTrue(application.contains("type: REDIS"));
-    assertTrue(application.contains("type: JVM"));
+    assertTrue(application.contains("type: REDISSON"));
+    assertFalse(application.contains("mq:\n  type: JVM"));
     assertFalse(application.contains("cache:\n  type: JVM"));
     assertFalse(application.contains("host: ${OPENCLAW_REDIS_HOST:127.0.0.1}"));
     assertFalse(application.contains("port: ${OPENCLAW_REDIS_PORT:6379}"));
@@ -142,18 +152,18 @@ class LeydenBuildConfigurationTest {
 
     assertTrue(compose.contains("image: redis:7"));
     assertTrue(compose.contains("container_name: openclaw4j-redis-master"));
-    assertTrue(compose.contains("\"6379:6379\""));
+    assertTrue(compose.contains("${REDIS_MASTER_PORT:-6379}:6379"));
     assertTrue(compose.contains("redis-cli ping"));
     assertTrue(compose.contains("./data/redis-master:/data"));
     assertTrue(compose.contains("redis-sentinel-1"));
 
-    assertTrue(readme.contains("Redis master 仍可通过 `127.0.0.1:6379`、database `0`"));
+    assertTrue(readme.contains("127.0.0.1:6379"));
     assertTrue(readme.contains("openclaw4j-master"));
     assertTrue(readme.contains("cache.type=REDIS"));
   }
 
   @Test
-  void deployMiddlewareComposeUsesSingleMysqlAndRedisSentinel() throws IOException {
+  void deployMiddlewareComposeUsesPgvectorAndRedisSentinel() throws IOException {
     String compose =
         Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
     String sentinel =
@@ -165,10 +175,14 @@ class LeydenBuildConfigurationTest {
     String redisReplica2 =
         Files.readString(PROJECT_DIR.getParent().resolve("deploy/redis/redis-replica-2.conf"));
 
-    assertTrue(compose.contains("mysql:"));
-    assertTrue(compose.contains("container_name: openclaw4j-mysql"));
-    assertTrue(compose.contains("\"3306:3306\""));
-    assertTrue(compose.contains("./data/mysql:/var/lib/mysql"));
+    assertTrue(compose.contains("pgvector:"));
+    assertTrue(compose.contains("container_name: openclaw4j-pgvector"));
+    assertTrue(compose.contains("${POSTGRES_PORT:-5432}:5432"));
+    assertTrue(compose.contains("./data/pgvector:/var/lib/postgresql"));
+    assertTrue(compose.contains("src/main/resources/sql/PostgreSQL/V0.0.1__init.sql"));
+    assertFalse(compose.contains("mysql:"));
+    assertFalse(compose.contains("container_name: openclaw4j-mysql"));
+    assertFalse(compose.contains("./data/mysql:/var/lib/mysql"));
     assertFalse(compose.contains("shardingsphere"));
     assertFalse(compose.contains("3306:3307"));
     assertFalse(compose.contains("mysql-0-primary"));
@@ -182,7 +196,7 @@ class LeydenBuildConfigurationTest {
     assertTrue(compose.contains("redis-sentinel-1"));
     assertTrue(compose.contains("redis-sentinel-2"));
     assertTrue(compose.contains("redis-sentinel-3"));
-    assertTrue(compose.contains("26379:26379"));
+    assertTrue(compose.contains("${REDIS_SENTINEL_1_PORT:-26379}:26379"));
     assertTrue(compose.contains("cp /usr/local/etc/redis/sentinel.conf /data/sentinel.conf"));
     assertTrue(compose.contains("./redis/redis-replica-1.conf:/usr/local/etc/redis/redis.conf:ro"));
     assertTrue(compose.contains("./redis/redis-replica-2.conf:/usr/local/etc/redis/redis.conf:ro"));
@@ -209,21 +223,15 @@ class LeydenBuildConfigurationTest {
   }
 
   @Test
-  void deployMiddlewareComposeIncludesElasticsearchOnly() throws IOException {
+  void deployMiddlewareComposeDoesNotDeployElasticsearch() throws IOException {
     String compose =
         Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
     String logback = read("src/main/resources/logback-spring.xml");
 
-    assertTrue(compose.contains("image: docker.elastic.co/elasticsearch/elasticsearch:9.4.3"));
-    assertTrue(compose.contains("container_name: openclaw4j-elasticsearch"));
-    assertTrue(compose.contains("discovery.type: single-node"));
-    assertTrue(compose.contains("ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:"));
-    assertTrue(compose.contains("xpack.security.enabled: \"true\""));
-    assertTrue(compose.contains("xpack.security.http.ssl.enabled: \"false\""));
-    assertTrue(compose.contains("-XX:+UnlockExperimentalVMOptions"));
-    assertTrue(compose.contains("-XX:+UseCompactObjectHeaders"));
-    assertTrue(compose.contains("\"39200:9200\""));
-    assertTrue(compose.contains("./data/elasticsearch:/usr/share/elasticsearch/data"));
+    assertFalse(compose.contains("docker.elastic.co/elasticsearch"));
+    assertFalse(compose.contains("container_name: openclaw4j-elasticsearch"));
+    assertFalse(compose.contains("ELASTIC_PASSWORD"));
+    assertFalse(compose.contains("./data/elasticsearch"));
     assertFalse(compose.contains("container_name: openclaw4j-kibana"));
     assertFalse(compose.contains("container_name: openclaw4j-logstash"));
     assertFalse(compose.contains("elasticsearch-security-init"));
@@ -236,26 +244,41 @@ class LeydenBuildConfigurationTest {
   }
 
   @Test
-  void mysqlSchemaIncludesLegacyAdminCompatibilityTables() throws IOException {
-    String mysqlSchema = read("src/main/resources/sql/MySQL/V0.0.1__init.sql");
+  void postgresqlSchemaIncludesCoreAndLegacyAdminCompatibilityTables() throws IOException {
+    String postgresSchema = read("src/main/resources/sql/PostgreSQL/V0.0.1__init.sql");
 
-    assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `prompt`"));
-    assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `prompt_version`"));
-    assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `prompt_build_template`"));
-    assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `dataset`"));
-    assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `dataset_version`"));
-    assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `dataset_item`"));
-    assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `evaluator`"));
-    assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `evaluator_version`"));
-    assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `evaluator_template`"));
-    assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `experiment`"));
-    assertTrue(mysqlSchema.contains("CREATE TABLE IF NOT EXISTS `experiment_result`"));
-    assertTrue(mysqlSchema.contains("INSERT IGNORE INTO `prompt_build_template`"));
-    assertTrue(mysqlSchema.contains("INSERT IGNORE INTO `evaluator_template`"));
+    assertTrue(postgresSchema.contains("CREATE EXTENSION IF NOT EXISTS vector"));
+    assertTrue(postgresSchema.contains("CREATE SCHEMA IF NOT EXISTS openclaw_rag"));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS account"));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS workspace"));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS model"));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS provider"));
+    assertTrue(postgresSchema.contains("INSERT INTO model VALUES"));
+    assertTrue(postgresSchema.contains("qwen-max"));
+    assertTrue(postgresSchema.contains("text-embedding-v3"));
+    assertTrue(postgresSchema.contains("gte-rerank-v2"));
+    assertTrue(postgresSchema.contains("INSERT INTO provider VALUES"));
+    assertTrue(postgresSchema.contains("llm,text_embedding,rerank"));
+    assertTrue(postgresSchema.contains("\"endpoint\":\"https://dashscope.aliyuncs.com/compatible-mode/v1\""));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS prompt"));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS prompt_version"));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS prompt_build_template"));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS dataset"));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS dataset_version"));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS dataset_item"));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS evaluator"));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS evaluator_version"));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS evaluator_template"));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS experiment"));
+    assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS experiment_result"));
+    assertTrue(postgresSchema.contains("ON CONFLICT DO NOTHING"));
+    assertFalse(postgresSchema.contains("AUTO_INCREMENT"));
+    assertFalse(postgresSchema.contains("ENGINE=InnoDB"));
+    assertFalse(Files.exists(PROJECT_DIR.resolve("src/main/resources/sql/MySQL/V0.0.1__init.sql")));
   }
 
   @Test
-  void adminCompatibilityWritesAvoidSqliteOnlySyntaxForMysqlBackend() throws IOException {
+  void adminCompatibilityWritesAvoidSqliteAndMysqlOnlySyntax() throws IOException {
     String service =
         read("src/main/java/com/seaskyland/llm/workflow/admin/compat/AdminCompatService.java");
 

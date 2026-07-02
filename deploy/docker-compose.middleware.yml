@@ -1,25 +1,20 @@
 services:
-  mysql:
-    image: mysql:9.7.1
-    container_name: openclaw4j-mysql
+  pgvector:
+    image: pgvector/pgvector:pg18
+    container_name: openclaw4j-pgvector
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "${POSTGRES_PORT:-5432}:5432"
     environment:
-      MYSQL_ROOT_PASSWORD: root123456
-      MYSQL_DATABASE: openclaw4j
-      MYSQL_USER: openclaw
-      MYSQL_PASSWORD: openclaw123
+      POSTGRES_DB: ${POSTGRES_DB:-openclaw4j}
+      POSTGRES_USER: ${POSTGRES_USER:-openclaw}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-openclaw}
       TZ: Asia/Shanghai
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_0900_ai_ci
-      - --default-time-zone=+08:00
     volumes:
-      - ./data/mysql:/var/lib/mysql
-      - ../OpenClaw4j-Bankend/src/main/resources/sql/MySQL/V0.0.1__init.sql:/docker-entrypoint-initdb.d/01-openclaw4j-init.sql:ro
+      - ./data/pgvector:/var/lib/postgresql
+      - ../OpenClaw4j-Bankend/src/main/resources/sql/PostgreSQL/V0.0.1__init.sql:/docker-entrypoint-initdb.d/01-openclaw4j-init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uopenclaw -p$${MYSQL_PASSWORD} --silent"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -30,7 +25,7 @@ services:
     container_name: openclaw4j-redis-master
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "${REDIS_MASTER_PORT:-6379}:6379"
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     volumes:
       - ./redis/redis-master.conf:/usr/local/etc/redis/redis.conf:ro
@@ -50,7 +45,7 @@ services:
       redis-master:
         condition: service_healthy
     ports:
-      - "6380:6379"
+      - "${REDIS_REPLICA_1_PORT:-6380}:6379"
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     volumes:
       - ./redis/redis-replica-1.conf:/usr/local/etc/redis/redis.conf:ro
@@ -70,7 +65,7 @@ services:
       redis-master:
         condition: service_healthy
     ports:
-      - "6381:6379"
+      - "${REDIS_REPLICA_2_PORT:-6381}:6379"
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     volumes:
       - ./redis/redis-replica-2.conf:/usr/local/etc/redis/redis.conf:ro
@@ -94,7 +89,7 @@ services:
       redis-replica-2:
         condition: service_healthy
     ports:
-      - "26379:26379"
+      - "${REDIS_SENTINEL_1_PORT:-26379}:26379"
     command:
       - sh
       - -c
@@ -115,7 +110,7 @@ services:
       redis-replica-2:
         condition: service_healthy
     ports:
-      - "26380:26379"
+      - "${REDIS_SENTINEL_2_PORT:-26380}:26379"
     command:
       - sh
       - -c
@@ -136,7 +131,7 @@ services:
       redis-replica-2:
         condition: service_healthy
     ports:
-      - "26381:26379"
+      - "${REDIS_SENTINEL_3_PORT:-26381}:26379"
     command:
       - sh
       - -c
@@ -144,26 +139,3 @@ services:
     volumes:
       - ./redis/sentinel-3.conf:/usr/local/etc/redis/sentinel.conf:ro
       - ./data/redis-sentinel-3:/data
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.3
-    container_name: openclaw4j-elasticsearch
-    restart: unless-stopped
-    ports:
-      - "39200:9200"
-    environment:
-      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:?Set ELASTIC_PASSWORD in deploy/.env}
-      discovery.type: single-node
-      xpack.security.enabled: "true"
-      xpack.security.http.ssl.enabled: "false"
-      xpack.security.enrollment.enabled: "false"
-      ES_JAVA_OPTS: "-Xms512m -Xmx512m -XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders"
-      TZ: Asia/Shanghai
-    volumes:
-      - ./data/elasticsearch:/usr/share/elasticsearch/data
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS -u elastic:$${ELASTIC_PASSWORD} http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=3s >/dev/null"]
-      interval: 10s
-      timeout: 5s
-      retries: 18
-      start_period: 40s

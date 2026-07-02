@@ -42,16 +42,15 @@ public class VectorStoreFactory {
   }
 
   /**
-   * Retrieves the configured vector store service. Supports Elasticsearch and Simple
-   * implementations.
+   * Retrieves the configured vector store service. Supports pgvector and Simple implementations.
    *
    * @return The configured vector store service
    * @throws IllegalArgumentException if the configured vector store type is not supported
    */
   public VectorStoreService getVectorStoreService() {
     VectorStoreType type = VectorStoreType.of(studioProperties.getVectorStoreType());
-    if (type == VectorStoreType.ELASTICSEARCH) {
-      return vdbServiceMap.get("elasticSearchVectorStoreService");
+    if (type == VectorStoreType.PGVECTOR) {
+      return vdbServiceMap.get("pgVectorStoreService");
     }
     if (type == VectorStoreType.SIMPLE) {
       return vdbServiceMap.get("simpleVectorStoreService");

@@ -19,10 +19,10 @@ spring:
     allow-circular-references: true
     allow-bean-definition-overriding: true
   datasource:
-    url: ${OPENCLAW_MYSQL_URL:jdbc:mysql://127.0.0.1:3306/openclaw4j?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
-    username: ${OPENCLAW_MYSQL_USERNAME:openclaw}
-    password: ${OPENCLAW_MYSQL_PASSWORD:openclaw123}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${OPENCLAW_DB_URL:jdbc:postgresql://127.0.0.1:5432/openclaw4j}
+    username: ${OPENCLAW_DB_USERNAME:openclaw}
+    password: ${OPENCLAW_DB_PASSWORD:openclaw}
+    driver-class-name: org.postgresql.Driver
     hikari:
       # 虚拟线程环境下，适当提高连接数
       # 但不要无限拉高——数据库端连接是有限的
@@ -45,15 +45,20 @@ spring:
   sql:
     init:
       mode: never
-      schema-locations: classpath:sql/MySQL/V0.0.1__init.sql
       continue-on-error: false
   ai:
     alibaba:
       studio:
         login-method: third_party
         upload-method: file       # file or oss
-        # Vector store backend: simple | elasticsearch
-        vector-store-type: simple
+        # Vector store backend: simple | pgvector
+        vector-store-type: pgvector
+    vectorstore:
+      pgvector:
+        schema-name: openclaw_rag
+        initialize-schema: true
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
     chat:
       observations:
         log-prompt: true # Include prompt content in tracing (disabled by default for privacy)
@@ -83,8 +88,8 @@ cache:
 #   ROCKET_MQ – Apache RocketMQ
 #   JVM       – In-process pub/sub, no external broker required (single-node only)
 mq:
-  type: JVM
-  endpoints: 127.0.0.1:6380
+  type: REDISSON
+  endpoints: ${OPENCLAW_REDIS_SENTINEL_NODES:127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381}
   document-index-topic: topic_saa_studio_document_index
   document_index_group: group_saa_studio_document_index
 
@@ -97,7 +102,7 @@ mq:
 mybatis-plus:
   global-config:
     db-config:
-      db-type: mysql
+      db-type: postgre_sql
   configuration:
     default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
 
