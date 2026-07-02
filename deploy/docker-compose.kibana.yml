@@ -1,0 +1,22 @@
+name: openclaw4j-kibana
+
+services:
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.4.3
+    container_name: openclaw4j-kibana
+    restart: unless-stopped
+    ports:
+      - "35601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: ${KIBANA_ELASTICSEARCH_HOSTS:?Set KIBANA_ELASTICSEARCH_HOSTS in deploy/.env}
+      ELASTICSEARCH_USERNAME: kibana_system
+      ELASTICSEARCH_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:?Set KIBANA_SYSTEM_PASSWORD in deploy/.env}
+      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: ${KIBANA_ENCRYPTION_KEY:?Set KIBANA_ENCRYPTION_KEY in deploy/.env}
+      SERVER_HOST: 0.0.0.0
+      TZ: Asia/Shanghai
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:5601/api/status >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 40s

@@ -78,21 +78,31 @@ class LeydenBuildConfigurationTest {
   }
 
   @Test
-  void localMysqlComposeInitializesMysql8WithApplicationSchema() throws IOException {
+  void localMysqlComposeInitializesMysql97PrimaryReplicaShardsWithApplicationSchema()
+      throws IOException {
     String compose =
         Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
     String readme = read("README.md");
 
-    assertTrue(compose.contains("image: mysql:8.0"));
+    assertTrue(compose.contains("image: mysql:9.7.1"));
+    assertTrue(compose.contains("mysql-0-primary"));
+    assertTrue(compose.contains("mysql-0-replica"));
+    assertTrue(compose.contains("mysql-1-primary"));
+    assertTrue(compose.contains("mysql-1-replica"));
+    assertTrue(compose.contains("mysql-replication-init"));
     assertTrue(compose.contains("MYSQL_DATABASE: openclaw4j_ds_0"));
     assertTrue(compose.contains("MYSQL_DATABASE: openclaw4j_ds_1"));
     assertTrue(compose.contains("MYSQL_USER: openclaw"));
     assertTrue(compose.contains("MYSQL_PASSWORD: openclaw123"));
+    assertTrue(compose.contains("--gtid-mode=ON"));
+    assertTrue(compose.contains("--binlog-format=ROW"));
     assertTrue(
         compose.contains(
             "../OpenClaw4j-Bankend/src/main/resources/sql/MySQL/V0.0.1__init.sql:/docker-entrypoint-initdb.d/01-openclaw4j-init.sql:ro"));
-    assertTrue(compose.contains("./data/mysql-0:/var/lib/mysql"));
-    assertTrue(compose.contains("./data/mysql-1:/var/lib/mysql"));
+    assertTrue(compose.contains("./data/mysql-0-primary:/var/lib/mysql"));
+    assertTrue(compose.contains("./data/mysql-0-replica:/var/lib/mysql"));
+    assertTrue(compose.contains("./data/mysql-1-primary:/var/lib/mysql"));
+    assertTrue(compose.contains("./data/mysql-1-replica:/var/lib/mysql"));
     assertTrue(
         readme.contains("docker compose -f ../deploy/docker-compose.middleware.yml up -d --build"));
     assertTrue(readme.contains("spring.sql.init.mode=never"));
@@ -157,10 +167,14 @@ class LeydenBuildConfigurationTest {
 
     assertTrue(compose.contains("shardingsphere-proxy"));
     assertTrue(compose.contains("3306:3307"));
-    assertTrue(compose.contains("mysql-0"));
-    assertTrue(compose.contains("mysql-1"));
-    assertTrue(compose.contains("./data/mysql-0:/var/lib/mysql"));
-    assertTrue(compose.contains("./data/mysql-1:/var/lib/mysql"));
+    assertTrue(compose.contains("mysql-0-primary"));
+    assertTrue(compose.contains("mysql-0-replica"));
+    assertTrue(compose.contains("mysql-1-primary"));
+    assertTrue(compose.contains("mysql-1-replica"));
+    assertTrue(compose.contains("./data/mysql-0-primary:/var/lib/mysql"));
+    assertTrue(compose.contains("./data/mysql-0-replica:/var/lib/mysql"));
+    assertTrue(compose.contains("./data/mysql-1-primary:/var/lib/mysql"));
+    assertTrue(compose.contains("./data/mysql-1-replica:/var/lib/mysql"));
     assertTrue(compose.contains("./shardingsphere/conf:/opt/shardingsphere-proxy/conf"));
     assertTrue(compose.contains("redis-master"));
     assertTrue(compose.contains("redis-replica-1"));
@@ -178,6 +192,13 @@ class LeydenBuildConfigurationTest {
     assertTrue(redisMaster.contains("replica-announce-ip redis-master"));
     assertTrue(redisReplica1.contains("replica-announce-ip redis-replica-1"));
     assertTrue(redisReplica2.contains("replica-announce-ip redis-replica-2"));
+    assertTrue(redisReplica1.contains("appendonly no"));
+    assertTrue(redisReplica2.contains("appendonly no"));
+    assertTrue(redisReplica1.contains("repl-diskless-load on-empty-db"));
+    assertTrue(redisReplica2.contains("repl-diskless-load on-empty-db"));
+    assertFalse(redisReplica1.contains("appendonly yes"));
+    assertFalse(redisReplica2.contains("appendonly yes"));
+    assertTrue(compose.contains("master_link_status:up"));
     assertFalse(
         Files.readString(
                 PROJECT_DIR
@@ -186,6 +207,50 @@ class LeydenBuildConfigurationTest {
             .contains("defaultDataSourceName"));
     assertFalse(compose.contains("openclaw4j-mysql-data:"));
     assertFalse(compose.contains("openclaw4j-redis-data:"));
+  }
+
+  @Test
+  void deployMiddlewareComposeIncludesLocalElkLogStack() throws IOException {
+    String compose =
+        Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
+    String kibanaCompose =
+        Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.kibana.yml"));
+    String logstashPipeline =
+        Files.readString(
+            PROJECT_DIR.getParent().resolve("deploy/logstash/pipeline/openclaw4j-logs.conf"));
+    String logback = read("src/main/resources/logback-spring.xml");
+
+    assertTrue(compose.contains("image: docker.elastic.co/elasticsearch/elasticsearch:9.4.3"));
+    assertTrue(compose.contains("container_name: openclaw4j-elasticsearch"));
+    assertTrue(compose.contains("discovery.type: single-node"));
+    assertTrue(compose.contains("ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:"));
+    assertTrue(compose.contains("xpack.security.enabled: \"true\""));
+    assertTrue(compose.contains("xpack.security.http.ssl.enabled: \"false\""));
+    assertTrue(compose.contains("elasticsearch-security-init"));
+    assertTrue(compose.contains("-XX:+UnlockExperimentalVMOptions"));
+    assertTrue(compose.contains("-XX:+UseCompactObjectHeaders"));
+    assertTrue(compose.contains("\"39200:9200\""));
+    assertTrue(compose.contains("./data/elasticsearch:/usr/share/elasticsearch/data"));
+    assertFalse(compose.contains("container_name: openclaw4j-kibana"));
+    assertTrue(kibanaCompose.contains("image: docker.elastic.co/kibana/kibana:9.4.3"));
+    assertTrue(kibanaCompose.contains("ELASTICSEARCH_HOSTS: ${KIBANA_ELASTICSEARCH_HOSTS:"));
+    assertTrue(kibanaCompose.contains("ELASTICSEARCH_USERNAME: kibana_system"));
+    assertTrue(
+        kibanaCompose.contains(
+            "XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: ${KIBANA_ENCRYPTION_KEY:"));
+    assertTrue(kibanaCompose.contains("\"35601:5601\""));
+    assertTrue(compose.contains("image: docker.elastic.co/logstash/logstash:9.4.3"));
+    assertTrue(compose.contains("ELASTICSEARCH_USERNAME: logstash_internal"));
+    assertTrue(compose.contains("./logstash/pipeline:/usr/share/logstash/pipeline:ro"));
+    assertTrue(compose.contains("./data/logs/openclaw4j:/var/log/openclaw4j:ro"));
+    assertTrue(logstashPipeline.contains("id => \"openclaw4j-backend-logs\""));
+    assertTrue(logstashPipeline.contains("codec => multiline"));
+    assertTrue(logstashPipeline.contains("[service][name]"));
+    assertTrue(logstashPipeline.contains("user => \"${ELASTICSEARCH_USERNAME}\""));
+    assertTrue(logstashPipeline.contains("password => \"${ELASTICSEARCH_PASSWORD}\""));
+    assertTrue(logstashPipeline.contains("openclaw4j-logs-%{+YYYY.MM.dd}"));
+    assertTrue(logback.contains("${APP_NAME:-OpenClaw4j-Bankend}"));
+    assertTrue(logback.contains("${OPENCLAW_LOG_PATH:-${openclaw.logging.path:-"));
   }
 
   @Test

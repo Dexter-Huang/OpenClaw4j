@@ -1,7 +1,7 @@
 services:
-  mysql-0:
-    image: mysql:8.0
-    container_name: openclaw4j-mysql-0
+  mysql-0-primary:
+    image: mysql:9.7.1
+    container_name: openclaw4j-mysql-0-primary
     restart: unless-stopped
     ports:
       - "33061:3306"
@@ -16,8 +16,13 @@ services:
       - --collation-server=utf8mb4_0900_ai_ci
       - --default-time-zone=+08:00
       - --server-id=100
+      - --log-bin=mysql-bin
+      - --binlog-format=ROW
+      - --gtid-mode=ON
+      - --enforce-gtid-consistency=ON
+      - --log-replica-updates=ON
     volumes:
-      - ./data/mysql-0:/var/lib/mysql
+      - ./data/mysql-0-primary:/var/lib/mysql
       - ../OpenClaw4j-Bankend/src/main/resources/sql/MySQL/V0.0.1__init.sql:/docker-entrypoint-initdb.d/01-openclaw4j-init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uopenclaw -p$${MYSQL_PASSWORD} --silent"]
@@ -26,9 +31,40 @@ services:
       retries: 12
       start_period: 30s
 
-  mysql-1:
-    image: mysql:8.0
-    container_name: openclaw4j-mysql-1
+  mysql-0-replica:
+    image: mysql:9.7.1
+    container_name: openclaw4j-mysql-0-replica
+    restart: unless-stopped
+    ports:
+      - "33063:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: openclaw4j_ds_0
+      MYSQL_USER: openclaw
+      MYSQL_PASSWORD: openclaw123
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --default-time-zone=+08:00
+      - --server-id=110
+      - --log-bin=mysql-bin
+      - --binlog-format=ROW
+      - --gtid-mode=ON
+      - --enforce-gtid-consistency=ON
+      - --log-replica-updates=ON
+    volumes:
+      - ./data/mysql-0-replica:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uopenclaw -p$${MYSQL_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  mysql-1-primary:
+    image: mysql:9.7.1
+    container_name: openclaw4j-mysql-1-primary
     restart: unless-stopped
     ports:
       - "33062:3306"
@@ -43,8 +79,13 @@ services:
       - --collation-server=utf8mb4_0900_ai_ci
       - --default-time-zone=+08:00
       - --server-id=101
+      - --log-bin=mysql-bin
+      - --binlog-format=ROW
+      - --gtid-mode=ON
+      - --enforce-gtid-consistency=ON
+      - --log-replica-updates=ON
     volumes:
-      - ./data/mysql-1:/var/lib/mysql
+      - ./data/mysql-1-primary:/var/lib/mysql
       - ../OpenClaw4j-Bankend/src/main/resources/sql/MySQL/V0.0.1__init.sql:/docker-entrypoint-initdb.d/01-openclaw4j-init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uopenclaw -p$${MYSQL_PASSWORD} --silent"]
@@ -53,6 +94,58 @@ services:
       retries: 12
       start_period: 30s
 
+  mysql-1-replica:
+    image: mysql:9.7.1
+    container_name: openclaw4j-mysql-1-replica
+    restart: unless-stopped
+    ports:
+      - "33064:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: openclaw4j_ds_1
+      MYSQL_USER: openclaw
+      MYSQL_PASSWORD: openclaw123
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --default-time-zone=+08:00
+      - --server-id=111
+      - --log-bin=mysql-bin
+      - --binlog-format=ROW
+      - --gtid-mode=ON
+      - --enforce-gtid-consistency=ON
+      - --log-replica-updates=ON
+    volumes:
+      - ./data/mysql-1-replica:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uopenclaw -p$${MYSQL_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  mysql-replication-init:
+    image: mysql:9.7.1
+    container_name: openclaw4j-mysql-replication-init
+    restart: "no"
+    depends_on:
+      mysql-0-primary:
+        condition: service_healthy
+      mysql-0-replica:
+        condition: service_healthy
+      mysql-1-primary:
+        condition: service_healthy
+      mysql-1-replica:
+        condition: service_healthy
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_REPLICATION_USER: openclaw_repl
+      MYSQL_REPLICATION_PASSWORD: openclaw_repl123
+    volumes:
+      - ./mysql/setup-replication.sh:/usr/local/bin/setup-replication.sh:ro
+    command: ["sh", "/usr/local/bin/setup-replication.sh"]
+
   shardingsphere-proxy:
     build:
       context: ./shardingsphere
@@ -60,10 +153,8 @@ services:
     container_name: openclaw4j-shardingsphere-proxy
     restart: unless-stopped
     depends_on:
-      mysql-0:
-        condition: service_healthy
-      mysql-1:
-        condition: service_healthy
+      mysql-replication-init:
+        condition: service_completed_successfully
     ports:
       - "3306:3307"
     environment:
@@ -110,7 +201,7 @@ services:
       - ./redis/redis-replica-1.conf:/usr/local/etc/redis/redis.conf:ro
       - ./data/redis-replica-1:/data
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      test: ["CMD-SHELL", "redis-cli INFO replication | grep -q 'role:slave' && redis-cli INFO replication | grep -q 'master_link_status:up'"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -130,7 +221,7 @@ services:
       - ./redis/redis-replica-2.conf:/usr/local/etc/redis/redis.conf:ro
       - ./data/redis-replica-2:/data
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      test: ["CMD-SHELL", "redis-cli INFO replication | grep -q 'role:slave' && redis-cli INFO replication | grep -q 'master_link_status:up'"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -198,3 +289,65 @@ services:
     volumes:
       - ./redis/sentinel-3.conf:/usr/local/etc/redis/sentinel.conf:ro
       - ./data/redis-sentinel-3:/data
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.3
+    container_name: openclaw4j-elasticsearch
+    restart: unless-stopped
+    ports:
+      - "39200:9200"
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:?Set ELASTIC_PASSWORD in deploy/.env}
+      discovery.type: single-node
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "false"
+      xpack.security.enrollment.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m -XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders"
+      TZ: Asia/Shanghai
+    volumes:
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -u elastic:$${ELASTIC_PASSWORD} http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=3s >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 40s
+
+  elasticsearch-security-init:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.3
+    container_name: openclaw4j-elasticsearch-security-init
+    restart: "no"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:?Set ELASTIC_PASSWORD in deploy/.env}
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:?Set KIBANA_SYSTEM_PASSWORD in deploy/.env}
+      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:?Set LOGSTASH_INTERNAL_PASSWORD in deploy/.env}
+      ES_URL: http://elasticsearch:9200
+    volumes:
+      - ./elasticsearch/setup-security.sh:/usr/local/bin/setup-security.sh:ro
+    command: ["bash", "/usr/local/bin/setup-security.sh"]
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:9.4.3
+    container_name: openclaw4j-logstash
+    restart: unless-stopped
+    depends_on:
+      elasticsearch-security-init:
+        condition: service_completed_successfully
+    environment:
+      ELASTICSEARCH_USERNAME: logstash_internal
+      ELASTICSEARCH_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:?Set LOGSTASH_INTERNAL_PASSWORD in deploy/.env}
+      LS_JAVA_OPTS: "-Xms256m -Xmx256m"
+      TZ: Asia/Shanghai
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./data/logs/openclaw4j:/var/log/openclaw4j:ro
+      - ./data/logstash:/usr/share/logstash/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9600/_node/pipelines >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 40s

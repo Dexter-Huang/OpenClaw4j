@@ -5,8 +5,9 @@
 
     <property name="FILE_LOG_PATTERN"
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-4relative [%thread]  %-5level %logger{35} - %msg%n"/>
-    <property name="APP_NAME" value="${APP_NAME}"/>
-    <property name="APP_LOG_PATH" value="${user.home}/${APP_NAME}/logs"/>
+    <property name="APP_NAME" value="${APP_NAME:-OpenClaw4j-Bankend}"/>
+    <property name="APP_LOG_PATH"
+              value="${OPENCLAW_LOG_PATH:-${openclaw.logging.path:-${user.home}/${APP_NAME}/logs}}"/>
     <property name="APPLICATION_LOG_FILE" value="${APP_LOG_PATH}/agentApplication.log"/>
     <property name="MONITOR_LOG_FILE" value="${APP_LOG_PATH}/monitor.log"/>
     <property name="TRACE_LOG_FILE" value="${APP_LOG_PATH}/trace/trace.log"/>

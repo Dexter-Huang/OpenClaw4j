@@ -1,8 +1,8 @@
 databaseName: openclaw4j
 
 dataSources:
-  ds_0:
-    url: jdbc:mysql://mysql-0:3306/openclaw4j_ds_0?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+  ds_0_primary:
+    url: jdbc:mysql://mysql-0-primary:3306/openclaw4j_ds_0?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: openclaw
     password: openclaw123
     connectionTimeoutMilliseconds: 3000
@@ -10,8 +10,26 @@ dataSources:
     maxLifetimeMilliseconds: 1800000
     maxPoolSize: 50
     minPoolSize: 1
-  ds_1:
-    url: jdbc:mysql://mysql-1:3306/openclaw4j_ds_1?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+  ds_0_replica:
+    url: jdbc:mysql://mysql-0-replica:3306/openclaw4j_ds_0?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: openclaw
+    password: openclaw123
+    connectionTimeoutMilliseconds: 3000
+    idleTimeoutMilliseconds: 60000
+    maxLifetimeMilliseconds: 1800000
+    maxPoolSize: 50
+    minPoolSize: 1
+  ds_1_primary:
+    url: jdbc:mysql://mysql-1-primary:3306/openclaw4j_ds_1?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: openclaw
+    password: openclaw123
+    connectionTimeoutMilliseconds: 3000
+    idleTimeoutMilliseconds: 60000
+    maxLifetimeMilliseconds: 1800000
+    maxPoolSize: 50
+    minPoolSize: 1
+  ds_1_replica:
+    url: jdbc:mysql://mysql-1-replica:3306/openclaw4j_ds_1?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: openclaw
     password: openclaw123
     connectionTimeoutMilliseconds: 3000
@@ -21,6 +39,21 @@ dataSources:
     minPoolSize: 1
 
 rules:
+  - !READWRITE_SPLITTING
+    dataSourceGroups:
+      ds_0:
+        writeDataSourceName: ds_0_primary
+        readDataSourceNames:
+          - ds_0_replica
+        loadBalancerName: round_robin
+      ds_1:
+        writeDataSourceName: ds_1_primary
+        readDataSourceNames:
+          - ds_1_replica
+        loadBalancerName: round_robin
+    loadBalancers:
+      round_robin:
+        type: ROUND_ROBIN
   - !SHARDING
     tables:
       workspace:
