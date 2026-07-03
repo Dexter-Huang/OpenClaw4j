@@ -2,7 +2,6 @@
   "name": "main",
   "version": "0.0.1",
   "scripts": {
-    "tailwind:build": "tailwindcss -c ./tailwind.config.js -i ./tailwind.css -o ./src/.tailwind/tailwind.css",
     "prebuild": "npm run tailwind:build",
     "build": "cross-env DID_YOU_KNOW=none umi build",
     "predev": "npm run tailwind:build",
@@ -11,7 +10,8 @@
     "dev:flow": "cross-env FLOW_DEV=true DID_YOU_KNOW=none CHECK_TIMEOUT=30 umi dev",
     "postinstall": "umi setup",
     "setup": "umi setup",
-    "start": "npm run dev"
+    "start": "npm run dev",
+    "tailwind:build": "tailwindcss -c ./tailwind.config.js -i ./tailwind.css -o ./src/.tailwind/tailwind.css"
   },
   "dependencies": {
     "@ant-design/icons": "^5",
@@ -30,12 +30,12 @@
     "react-json-view": "^1.21.3",
     "react-resizable-panels": "^0.0.63",
     "react-router-dom": "^6",
-    "umi": "^4.3.8"
+    "umi": "^4.6.70"
   },
   "devDependencies": {
     "@types/react": "^18.0.33",
     "@types/react-dom": "^18.0.11",
-    "@umijs/plugins": "^4.4.6",
+    "@umijs/plugins": "^4.6.70",
     "tailwindcss": "^3",
     "typescript": "^5.0.3"
   }

@@ -237,10 +237,11 @@ export default defineConfig({
   clickToComponent: {},
   esbuildMinifyIIFE: true,
   srcTranspiler: 'esbuild',
+  utoopack: {
+    persistentCaching: false,
+  },
   mfsu: false,
-  plugins: [
-    './plugins/dev-no-cache',
-  ],
+  plugins: ['./plugins/dev-no-cache'],
   proxy: {
     '/api': withNoStoreProxy(backendTarget),
     '/console': withNoStoreProxy(backendTarget),

@@ -1,4 +1,4 @@
-import I18N from '../../../spark-i18n/src/index';
+import I18N from '../../../spark-i18n/src/runtime';
 import enLangMap from './locales/en-us.json';
 import jaLangMap from './locales/ja-jp.json';
 import cnLangMap from './locales/zh-cn.json';
