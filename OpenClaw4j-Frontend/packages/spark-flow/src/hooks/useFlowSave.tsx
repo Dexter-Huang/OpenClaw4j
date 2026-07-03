@@ -1,5 +1,5 @@
-import { useStore } from '@/flow/context';
-import { IWorkFlowNode } from '@/types/work-flow';
+import { useStore } from '@spark-flow/flow/context';
+import { IWorkFlowNode } from '@spark-flow/types/work-flow';
 import { useStoreApi } from '@xyflow/react';
 import { debounce } from 'lodash-es';
 import { useCallback } from 'react';

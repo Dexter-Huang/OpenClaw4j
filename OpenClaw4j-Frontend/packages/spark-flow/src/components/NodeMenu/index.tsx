@@ -1,9 +1,9 @@
-import { useStore } from '@/flow/context';
-import { useNodesReadOnly } from '@/hooks';
-import { useNodesInteraction } from '@/hooks/useNodesInteraction';
-import $i18n from '@/i18n';
-import { INodeSchema, IPointItem } from '@/types/work-flow';
 import { Empty, Input, Popover } from '@spark-ai/design';
+import { useStore } from '@spark-flow/flow/context';
+import { useNodesReadOnly } from '@spark-flow/hooks';
+import { useNodesInteraction } from '@spark-flow/hooks/useNodesInteraction';
+import $i18n from '@spark-flow/i18n';
+import { INodeSchema, IPointItem } from '@spark-flow/types/work-flow';
 import { useNodes } from '@xyflow/react';
 import { TooltipPlacement } from 'antd/es/tooltip';
 import { debounce, groupBy } from 'lodash-es';

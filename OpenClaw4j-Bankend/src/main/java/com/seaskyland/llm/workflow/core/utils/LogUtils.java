@@ -272,20 +272,21 @@ public class LogUtils {
       StringBuilder builder = new StringBuilder();
 
       Throwable throwable = null;
-      for (Object obj : objects) {
+      Object[] logObjects = objects;
+      if (objects[0] instanceof String template && template.contains("{}")) {
+        FormatResult formatResult = formatTemplate(template, objects);
+        builder.append(SIMPLE_LOG_SPLIT).append(formatResult.message);
+        logObjects = formatResult.remainingObjects;
+        throwable = formatResult.throwable;
+      }
+
+      for (Object obj : logObjects) {
         if (obj instanceof Throwable) {
           throwable = (Throwable) obj;
           continue;
         }
 
-        String value;
-        if (obj instanceof String) {
-          value = String.valueOf(obj);
-        } else {
-          value = JsonUtils.toJson(obj);
-        }
-
-        builder.append(SIMPLE_LOG_SPLIT).append(value);
+        builder.append(SIMPLE_LOG_SPLIT).append(toLogValue(obj));
       }
 
       LogContent logContent = new LogContent();
@@ -299,6 +300,46 @@ public class LogUtils {
     }
   }
 
+  private static FormatResult formatTemplate(String template, Object[] objects) {
+    StringBuilder message = new StringBuilder();
+    int objectIndex = 1;
+    int searchStart = 0;
+    Throwable throwable = null;
+
+    while (true) {
+      int placeholderIndex = template.indexOf("{}", searchStart);
+      if (placeholderIndex < 0) {
+        message.append(template.substring(searchStart));
+        break;
+      }
+
+      message.append(template, searchStart, placeholderIndex);
+      while (objectIndex < objects.length && objects[objectIndex] instanceof Throwable) {
+        throwable = (Throwable) objects[objectIndex];
+        objectIndex++;
+      }
+
+      if (objectIndex >= objects.length) {
+        message.append("{}");
+      } else {
+        message.append(toLogValue(objects[objectIndex]));
+        objectIndex++;
+      }
+      searchStart = placeholderIndex + 2;
+    }
+
+    Object[] remainingObjects = new Object[objects.length - objectIndex];
+    System.arraycopy(objects, objectIndex, remainingObjects, 0, remainingObjects.length);
+    return new FormatResult(message.toString(), remainingObjects, throwable);
+  }
+
+  private static String toLogValue(Object obj) {
+    if (obj instanceof String) {
+      return String.valueOf(obj);
+    }
+    return JsonUtils.toJson(obj);
+  }
+
   /** Internal class to hold log content and throwable */
   @Data
   static class LogContent {
@@ -307,6 +348,8 @@ public class LogUtils {
 
     Throwable throwable;
   }
+
+  private record FormatResult(String message, Object[] remainingObjects, Throwable throwable) {}
 
   /** Generates a unique trace ID */
   private static String getTraceId() {

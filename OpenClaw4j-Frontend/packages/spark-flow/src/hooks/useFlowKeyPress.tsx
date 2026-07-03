@@ -1,4 +1,4 @@
-import { isEventInInput, transformToMacKey } from '@/utils';
+import { isEventInInput, transformToMacKey } from '@spark-flow/utils';
 import { useReactFlow } from '@xyflow/react';
 import { useKeyPress } from 'ahooks';
 import { useNodesReadOnly } from './useWorkFlow';

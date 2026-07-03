@@ -21,6 +21,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.seaskyland.llm.workflow.core.base.typehandler.BooleanSmallintTypeHandler;
 import com.seaskyland.llm.workflow.runtime.enums.agent.AgentStatus;
 import com.seaskyland.llm.workflow.runtime.enums.agent.AgentType;
 import java.util.Date;
@@ -32,7 +33,7 @@ import lombok.Data;
  * @since 1.0.0.3
  */
 @Data
-@TableName("agent_schema")
+@TableName(value = "agent_schema", autoResultMap = true)
 public class AgentSchemaEntity {
 
   /** Primary key */
@@ -87,6 +88,7 @@ public class AgentSchemaEntity {
   private AgentStatus status;
 
   /** Whether the agent is enabled */
+  @TableField(value = "enabled", typeHandler = BooleanSmallintTypeHandler.class)
   private Boolean enabled;
 
   /** Creation timestamp */

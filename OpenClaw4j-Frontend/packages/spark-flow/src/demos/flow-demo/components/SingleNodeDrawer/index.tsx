@@ -1,9 +1,9 @@
-import { VariableBaseInput } from '@/components/VariableInput';
-import { useStore } from '@/flow/context';
-import $i18n from '@/i18n';
-import { IWorkFlowNode } from '@/types/work-flow';
-import { defaultValueMap } from '@/utils/defaultValues';
 import { Button, Drawer, IconFont } from '@spark-ai/design';
+import { VariableBaseInput } from '@spark-flow/components/VariableInput';
+import { useStore } from '@spark-flow/flow/context';
+import $i18n from '@spark-flow/i18n';
+import { IWorkFlowNode } from '@spark-flow/types/work-flow';
+import { defaultValueMap } from '@spark-flow/utils/defaultValues';
 import React, { memo, useMemo } from 'react';
 import './index.less';
 

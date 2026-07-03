@@ -1,4 +1,4 @@
-import { IValueType } from '@/types/work-flow';
+import { IValueType } from '@spark-flow/types/work-flow';
 
 export const defaultValueMap: Record<IValueType, string> = {
   String: '',

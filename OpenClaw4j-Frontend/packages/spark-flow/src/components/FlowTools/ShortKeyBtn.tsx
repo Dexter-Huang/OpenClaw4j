@@ -1,4 +1,4 @@
-import $i18n from '@/i18n';
+import $i18n from '@spark-flow/i18n';
 import { Popover, Tooltip } from 'antd';
 import React, { memo, useState } from 'react';
 import CustomIcon from '../CustomIcon';

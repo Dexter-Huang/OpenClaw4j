@@ -1,6 +1,6 @@
-import $i18n from '@/i18n';
-import { IValueType } from '@/types/work-flow';
-import { defaultValueMap } from '@/utils/defaultValues';
+import $i18n from '@spark-flow/i18n';
+import { IValueType } from '@spark-flow/types/work-flow';
+import { defaultValueMap } from '@spark-flow/utils/defaultValues';
 import { Input, InputNumber, Select, Space } from 'antd';
 import React, { memo, useMemo } from 'react';
 import CodeInput from '../CodeInput';

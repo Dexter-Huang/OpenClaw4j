@@ -1,5 +1,5 @@
-import $i18n from '@/i18n';
 import { IconFont, SliderSelector } from '@spark-ai/design';
+import $i18n from '@spark-flow/i18n';
 import { Switch } from 'antd';
 import React from 'react';
 import { IRetryConfig } from '../../types/flow';

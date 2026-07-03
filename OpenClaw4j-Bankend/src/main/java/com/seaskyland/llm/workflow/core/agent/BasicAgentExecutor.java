@@ -358,6 +358,12 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
           }
         }
         case ASSISTANT -> message = new AssistantMessage(String.valueOf(chatMessage.getContent()));
+        case TOOL ->
+            throw new BizException(
+                ErrorCode.INVALID_PARAMS.toError("role", "tool message role is not supported"));
+        default ->
+            throw new BizException(
+                ErrorCode.INVALID_PARAMS.toError("role", "message role is not supported"));
       }
 
       messages.add(message);
@@ -472,6 +478,10 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
                       "content", "image content must be url or path or data"));
             }
           }
+          default ->
+              throw new BizException(
+                  ErrorCode.INVALID_PARAMS.toError(
+                      "content_type", "content type is not supported"));
         }
       }
     } catch (MalformedURLException e) {

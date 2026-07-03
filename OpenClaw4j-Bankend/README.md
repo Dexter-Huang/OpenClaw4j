@@ -1,8 +1,8 @@
 ﻿# cbes-llm
 
-## 本地 PostgreSQL/pgvector 与 Redis Sentinel
+## 本地 PostgreSQL/pgvector 与单 Redis 实例
 
-后端使用 PostgreSQL 作为主数据库，并使用同一个 PostgreSQL 实例里的 pgvector 承载项目 RAG 向量数据。中间件栈在仓库根目录的 `deploy/` 目录中，只启动一个 `pgvector/pgvector:pg18` 实例，不使用 ShardingSphere、分库分表或读写分离；Redis 使用 Sentinel 拓扑。
+后端使用 PostgreSQL 作为主数据库，并使用同一个 PostgreSQL 实例里的 pgvector 承载项目 RAG 向量数据。中间件栈在仓库根目录的 `deploy/` 目录中，只启动一个 `pgvector/pgvector:pg18` 实例，不使用 ShardingSphere、分库分表或读写分离；Redis 默认使用单 Redis 实例。
 
 ```powershell
 docker compose --env-file ../deploy/.env -f ../deploy/docker-compose.middleware.yml up -d --build
@@ -18,11 +18,11 @@ password = openclaw
 
 `127.0.0.1:5432` 直接连接 pgvector 容器，数据库名为 `openclaw4j`。这是从 0 开始的 PostgreSQL 开发库，不做 MySQL 数据迁移。
 
-Redis master 可通过 `127.0.0.1:6379`、database `0` 供简单本地客户端访问。Sentinel 入口为 `127.0.0.1:26379`，master name 为 `openclaw4j-master`；另外两个 Sentinel 发布在 `26380` 和 `26381`。
+Redis 可通过 `127.0.0.1:6379`、database `0` 供本地客户端访问。Redis Sentinel 与副本相关配置已保留为注释，默认不启动。
 
 Spring Boot 启动保持 `spring.sql.init.mode=never`，避免应用重启时重复执行初始化 SQL。pgvector 容器第一次创建 `deploy/data/pgvector` 时会自动执行 `src/main/resources/sql/PostgreSQL/V0.0.1__init.sql`。运行时数据保存在已忽略的 `deploy/data/` 目录下。
 
-后端默认 `cache.type=REDIS`，消息队列默认 `mq.type=REDISSON`，两者都通过 Redis Sentinel 访问 Redis。
+后端默认 `cache.type=REDIS`，缓存通过单 Redis 实例访问 Redis；消息队列默认 `mq.type=REDISSON`，文档索引消息也通过 Redis/Redisson 投递。
 
 重建干净的本地 PostgreSQL/pgvector 数据库：
 
@@ -38,8 +38,8 @@ docker compose --env-file ../deploy/.env -f ../deploy/docker-compose.middleware.
 $env:OPENCLAW_DB_URL='jdbc:postgresql://127.0.0.1:5432/openclaw4j'
 $env:OPENCLAW_DB_USERNAME='openclaw'
 $env:OPENCLAW_DB_PASSWORD='openclaw'
-$env:OPENCLAW_REDIS_SENTINEL_MASTER='openclaw4j-master'
-$env:OPENCLAW_REDIS_SENTINEL_NODES='127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381'
+$env:OPENCLAW_REDIS_HOST='127.0.0.1'
+$env:OPENCLAW_REDIS_PORT='6379'
 $env:OPENCLAW_REDIS_DATABASE='0'
 ```
 ## Leyden / HotSpot AOT cache

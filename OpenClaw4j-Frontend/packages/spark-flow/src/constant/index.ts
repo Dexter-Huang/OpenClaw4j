@@ -1,5 +1,8 @@
-import $i18n from '@/i18n';
-import { INodeDataOutputParamItem, IValueTypeOption } from '@/types/work-flow';
+import $i18n from '@spark-flow/i18n';
+import {
+  INodeDataOutputParamItem,
+  IValueTypeOption,
+} from '@spark-flow/types/work-flow';
 
 export const WorkflowRunningStatus = {
   Running: 'executing',

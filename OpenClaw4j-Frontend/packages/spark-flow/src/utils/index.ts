@@ -1,7 +1,7 @@
-import { IVarItem } from '@/components/VariableTreeSelect';
-import { ITERATION_PADDING, NEW_NODE_PADDING } from '@/constant';
-import i18n from '@/i18n';
-import { IValueType, IWorkFlowNode } from '@/types/work-flow';
+import { IVarItem } from '@spark-flow/components/VariableTreeSelect';
+import { ITERATION_PADDING, NEW_NODE_PADDING } from '@spark-flow/constant';
+import i18n from '@spark-flow/i18n';
+import { IValueType, IWorkFlowNode } from '@spark-flow/types/work-flow';
 import { Connection, Edge, Node } from '@xyflow/react';
 import ELK from 'elkjs/lib/elk.bundled.js';
 import { cloneDeep } from 'lodash-es';

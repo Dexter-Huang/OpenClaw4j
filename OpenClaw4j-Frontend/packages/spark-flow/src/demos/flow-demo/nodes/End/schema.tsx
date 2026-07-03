@@ -1,5 +1,5 @@
-import $i18n from '@/i18n';
-import { INodeSchema } from '@/types/work-flow';
+import $i18n from '@spark-flow/i18n';
+import { INodeSchema } from '@spark-flow/types/work-flow';
 import { END_NODE_OUTPUT_PARAMS_DEFAULT } from '../../constant';
 import { IEndNodeParam } from '../../types/flow';
 

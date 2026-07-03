@@ -1,7 +1,10 @@
-import { useStore } from '@/flow/context';
-import $i18n from '@/i18n';
-import { IWorkFlowStatus, IWorkFlowTaskProcess } from '@/types/work-flow';
 import { Button, copy, Popover, Tag } from '@spark-ai/design';
+import { useStore } from '@spark-flow/flow/context';
+import $i18n from '@spark-flow/i18n';
+import {
+  IWorkFlowStatus,
+  IWorkFlowTaskProcess,
+} from '@spark-flow/types/work-flow';
 import { Flex, message, Table, Typography } from 'antd';
 import { ColumnType } from 'antd/es/table';
 import classNames from 'classnames';

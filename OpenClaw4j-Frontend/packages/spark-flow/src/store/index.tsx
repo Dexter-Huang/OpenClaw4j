@@ -1,4 +1,4 @@
-import { IVarTreeItem } from '@/components/VariableTreeSelect';
+import { IVarTreeItem } from '@spark-flow/components/VariableTreeSelect';
 import { Edge, Node } from '@xyflow/react';
 import { debounce } from 'lodash-es';
 import { createStore } from 'zustand/vanilla';

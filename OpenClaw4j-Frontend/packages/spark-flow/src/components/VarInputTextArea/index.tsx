@@ -1,7 +1,7 @@
-import { useStore } from '@/flow/context';
-import $i18n from '@/i18n';
 import { SlateEditor } from '@spark-ai/design';
 import { EditorRefProps } from '@spark-ai/design/dist/components/commonComponents/SlateEditor';
+import { useStore } from '@spark-flow/flow/context';
+import $i18n from '@spark-flow/i18n';
 import { useSetState } from 'ahooks';
 import { message, Typography } from 'antd';
 import classNames from 'classnames';

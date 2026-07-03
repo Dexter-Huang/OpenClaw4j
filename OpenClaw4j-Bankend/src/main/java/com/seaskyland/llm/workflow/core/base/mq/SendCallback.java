@@ -29,12 +29,12 @@ public interface SendCallback {
    *
    * @param sendResult Result of the send operation
    */
-  void onSuccess(final SendResult sendResult);
+  void onSuccess(SendResult sendResult);
 
   /**
    * Called when an error occurs during message sending.
    *
    * @param e The exception that occurred
    */
-  void onError(final Throwable e);
+  void onError(Throwable e);
 }

@@ -431,8 +431,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         if (atomicInteger == null) {
           atomicInteger = new AtomicInteger(0);
         }
-        boolean nodeCompleted =
-            nodeResult.getNodeStatus().equals(NodeStatusEnum.SUCCESS.getCode()) ? true : false;
+        boolean nodeCompleted = nodeResult.getNodeStatus().equals(NodeStatusEnum.SUCCESS.getCode());
         if (StringUtils.isNotBlank(incrementalContent) || nodeCompleted) {
           sendNodeMessage(
               sink,
@@ -452,14 +451,12 @@ public class WorkflowServiceImpl implements WorkflowService {
       for (NodeResult nodeResult : thisNodeResult) {
         List<NodeResult> lastNodeResultList = listMap.get(nodeResult.getNodeId());
         boolean nodeCompleted =
-            ((CollectionUtils.isEmpty(lastNodeResultList)
-                        || !lastNodeResultList
-                            .get(0)
-                            .getNodeStatus()
-                            .equals(NodeStatusEnum.SUCCESS.getCode()))
-                    && nodeResult.getNodeStatus().equals(NodeStatusEnum.SUCCESS.getCode()))
-                ? true
-                : false;
+            (CollectionUtils.isEmpty(lastNodeResultList)
+                    || !lastNodeResultList
+                        .get(0)
+                        .getNodeStatus()
+                        .equals(NodeStatusEnum.SUCCESS.getCode()))
+                && nodeResult.getNodeStatus().equals(NodeStatusEnum.SUCCESS.getCode());
         String incrementalContent;
         if (CollectionUtils.isEmpty(lastNodeResultList)) {
           incrementalContent = calculateIncrementalContent(nodeResult.getOutput(), "");

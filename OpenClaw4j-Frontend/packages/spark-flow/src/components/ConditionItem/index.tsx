@@ -1,5 +1,5 @@
-import { filterVarItemsByType } from '@/hooks';
-import { IConditionItem, IValueType } from '@/types/work-flow';
+import { filterVarItemsByType } from '@spark-flow/hooks';
+import { IConditionItem, IValueType } from '@spark-flow/types/work-flow';
 import { Divider, Flex, Select } from 'antd';
 import React, { useMemo } from 'react';
 import { OPERATOR_OPTS_MAP } from '../../constant';

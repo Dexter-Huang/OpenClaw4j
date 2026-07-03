@@ -3,7 +3,4 @@
     <Match>
         <Package name="~com\.seaskyland\.llm\.workflow\.admin\.generator(\..*)?"/>
     </Match>
-    <Match>
-        <Class name="com.seaskyland.llm.workflow.admin.utils.ContributorFileUtil"/>
-    </Match>
 </FindBugsFilter>

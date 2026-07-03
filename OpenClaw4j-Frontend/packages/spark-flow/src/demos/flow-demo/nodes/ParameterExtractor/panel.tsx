@@ -1,4 +1,3 @@
-import $i18n from '@/i18n';
 import { Button, IconFont, Select } from '@spark-ai/design';
 import {
   OutputParamsTree,
@@ -7,6 +6,7 @@ import {
   useNodeDataUpdate,
   useStore,
 } from '@spark-ai/flow';
+import $i18n from '@spark-flow/i18n';
 import { useSetState } from 'ahooks';
 import React, { memo, useCallback } from 'react';
 import ExtractParamEditModal from '../../components/ExtractParamEditModal';

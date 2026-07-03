@@ -1,4 +1,4 @@
-import { IWorkFlowTaskProcess } from '@/types/work-flow';
+import { IWorkFlowTaskProcess } from '@spark-flow/types/work-flow';
 import { useCallback } from 'react';
 import { useStore } from '../flow/context';
 import { useEdgesInteraction } from './useEdgesInteraction';

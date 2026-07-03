@@ -1,8 +1,8 @@
-import $i18n from '@/i18n';
-import { IBranchItem, IConditionItem } from '@/types/work-flow';
-import { generateUniqueName } from '@/utils';
-import uniqueId from '@/utils/uniqueId';
 import { Button, IconFont } from '@spark-ai/design';
+import $i18n from '@spark-flow/i18n';
+import { IBranchItem, IConditionItem } from '@spark-flow/types/work-flow';
+import { generateUniqueName } from '@spark-flow/utils';
+import uniqueId from '@spark-flow/utils/uniqueId';
 import { Flex } from 'antd';
 import classNames from 'classnames';
 import React, { memo, useCallback } from 'react';

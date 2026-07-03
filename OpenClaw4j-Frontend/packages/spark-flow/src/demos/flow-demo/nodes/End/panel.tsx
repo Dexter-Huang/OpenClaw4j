@@ -1,4 +1,3 @@
-import $i18n from '@/i18n';
 import { Select } from '@spark-ai/design';
 import {
   CustomInputsControl,
@@ -8,6 +7,7 @@ import {
   useReactFlowStore,
   VarInputTextArea,
 } from '@spark-ai/flow';
+import $i18n from '@spark-flow/i18n';
 import { Switch } from 'antd';
 import React, { memo, useCallback, useMemo } from 'react';
 import InfoIcon from '../../components/InfoIcon';

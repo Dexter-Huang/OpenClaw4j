@@ -1,8 +1,8 @@
-import $i18n from '@/i18n';
 import {
   INodeDataInputParamItem,
   INodeDataOutputParamItem,
 } from '@spark-ai/flow';
+import $i18n from '@spark-flow/i18n';
 import {
   IRetryConfig,
   ISelectedModelParams,

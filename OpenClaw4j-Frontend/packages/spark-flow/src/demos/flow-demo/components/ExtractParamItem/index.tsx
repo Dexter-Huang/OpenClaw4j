@@ -1,5 +1,5 @@
-import $i18n from '@/i18n';
 import { IconFont } from '@spark-ai/design';
+import $i18n from '@spark-flow/i18n';
 import { Typography } from 'antd';
 import React, { memo } from 'react';
 import { IParameterExtractorNodeParam } from '../../types/flow';

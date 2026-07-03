@@ -1,4 +1,4 @@
-import { IWorkFlowNodeData } from '@/types/work-flow';
+import { IWorkFlowNodeData } from '@spark-flow/types/work-flow';
 import { useStoreApi } from '@xyflow/react';
 import { useCallback } from 'react';
 import { useFlowSave } from './useFlowSave';

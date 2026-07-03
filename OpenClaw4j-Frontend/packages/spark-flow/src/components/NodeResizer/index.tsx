@@ -1,5 +1,5 @@
-import { useNodesInteraction } from '@/hooks';
 import { getCommonConfig } from '@spark-ai/design';
+import { useNodesInteraction } from '@spark-flow/hooks';
 import { NodeResizeControl } from '@xyflow/react';
 import React, { memo } from 'react';
 import './index.less';

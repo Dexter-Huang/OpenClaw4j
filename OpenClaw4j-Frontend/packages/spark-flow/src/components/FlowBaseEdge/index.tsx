@@ -1,7 +1,7 @@
-import { useNodesReadOnly } from '@/hooks';
-import { IEdgeData } from '@/types/work-flow';
-import { getTypeFromId } from '@/utils';
 import { getCommonConfig } from '@spark-ai/design';
+import { useNodesReadOnly } from '@spark-flow/hooks';
+import { IEdgeData } from '@spark-flow/types/work-flow';
+import { getTypeFromId } from '@spark-flow/utils';
 import {
   BaseEdge,
   EdgeLabelRenderer,

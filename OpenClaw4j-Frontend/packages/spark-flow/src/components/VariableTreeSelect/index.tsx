@@ -1,6 +1,6 @@
-import $i18n from '@/i18n';
-import { IValueType } from '@/types/work-flow';
 import { Empty, Tag } from '@spark-ai/design';
+import $i18n from '@spark-flow/i18n';
+import { IValueType } from '@spark-flow/types/work-flow';
 import { Popover, Typography } from 'antd';
 import classNames from 'classnames';
 import React, { memo, useMemo, useState } from 'react';

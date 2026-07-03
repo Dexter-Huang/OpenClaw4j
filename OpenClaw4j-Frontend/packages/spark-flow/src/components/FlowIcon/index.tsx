@@ -1,4 +1,4 @@
-import { useStore } from '@/flow/context';
+import { useStore } from '@spark-flow/flow/context';
 import classNames from 'classnames';
 import React, { memo } from 'react';
 import CustomIcon from '../CustomIcon';

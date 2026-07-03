@@ -16,6 +16,10 @@ const withNoStoreProxy = (target: string) => ({
 });
 
 const backendTarget = process.env.WEB_SERVER || 'http://localhost:8080';
+const flowDev = process.env.FLOW_DEV === 'true';
+const flowAlias = flowDev
+  ? path.resolve(__dirname, '../spark-flow/src')
+  : path.resolve(__dirname, '../spark-flow/dist');
 
 export default defineConfig({
   title: 'SAA',
@@ -25,12 +29,16 @@ export default defineConfig({
     'process.env.BACK_END': process.env.BACK_END,
     'process.env.DEFAULT_USERNAME': process.env.DEFAULT_USERNAME,
     'process.env.DEFAULT_PASSWORD': process.env.DEFAULT_PASSWORD,
+    'process.env.FLOW_DEV': process.env.FLOW_DEV,
     BUILD_ID: new Date().toString(),
   },
   alias: {
     '@src': path.resolve(__dirname, './src'),
     '@': path.resolve(__dirname, './src'),
-    '@spark-ai/flow': path.resolve(__dirname, '../spark-flow/dist'),
+    ...(flowDev
+      ? { '@spark-flow': path.resolve(__dirname, '../spark-flow/src') }
+      : {}),
+    '@spark-ai/flow': flowAlias,
   },
   routes: [
     {
@@ -227,12 +235,11 @@ export default defineConfig({
     },
   ],
   clickToComponent: {},
-  // tailwindcss: {},
   esbuildMinifyIIFE: true,
+  srcTranspiler: 'esbuild',
   mfsu: false,
   plugins: [
     './plugins/dev-no-cache',
-    // '@umijs/plugins/dist/tailwindcss'
   ],
   proxy: {
     '/api': withNoStoreProxy(backendTarget),

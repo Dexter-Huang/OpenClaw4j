@@ -1,5 +1,5 @@
-import { useFlowInteraction, useNodesReadOnly } from '@/hooks';
-import $i18n from '@/i18n';
+import { useFlowInteraction, useNodesReadOnly } from '@spark-flow/hooks';
+import $i18n from '@spark-flow/i18n';
 import { Tooltip } from 'antd';
 import classNames from 'classnames';
 import React, { memo } from 'react';

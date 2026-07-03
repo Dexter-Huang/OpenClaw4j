@@ -1,18 +1,16 @@
-import $i18n from '@/i18n';
+import { Modal } from '@spark-ai/design';
+import $i18n from '@spark-flow/i18n';
 import {
   INodeDataInputParamItem,
   INodeDataOutputParamItem,
-} from '@/types/work-flow';
-import { Modal } from '@spark-ai/design';
+} from '@spark-flow/types/work-flow';
 import { useSetState } from 'ahooks';
 import { Segmented } from 'antd';
 import React from 'react';
 import ScriptCodeMirror from '../ScriptCodeMirror';
 import './index.less';
 
-export const SCRIPT_TYPE_OPTIONS = [
-  { label: 'Java', value: 'java' },
-];
+export const SCRIPT_TYPE_OPTIONS = [{ label: 'Java', value: 'java' }];
 
 export const CODE_DEMO_MAP = {
   python: `def main():

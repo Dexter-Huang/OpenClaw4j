@@ -1,5 +1,5 @@
-import { useStore } from '@/flow/context';
-import $i18n from '@/i18n';
+import { useStore } from '@spark-flow/flow/context';
+import $i18n from '@spark-flow/i18n';
 import { Tooltip } from 'antd';
 import classNames from 'classnames';
 import React, { memo } from 'react';

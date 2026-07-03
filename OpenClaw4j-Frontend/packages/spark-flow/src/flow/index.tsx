@@ -1,15 +1,15 @@
-import CustomConnectionLine from '@/components/CustomConnectionLine';
-import FlowBaseEdge from '@/components/FlowBaseEdge';
-import FlowMiniMap from '@/components/FlowMiniMap';
-import { useNodesReadOnly } from '@/hooks';
-import { useEdgesInteraction } from '@/hooks/useEdgesInteraction';
-import { useFlowInteraction } from '@/hooks/useFlowInteraction';
-import useFlowKeyPress from '@/hooks/useFlowKeyPress';
-import { useHistory } from '@/hooks/useHistory';
-import { useNodesInteraction } from '@/hooks/useNodesInteraction';
-import $i18n from '@/i18n';
-import { IWorkFlowNode } from '@/types/work-flow';
 import { getCommonConfig } from '@spark-ai/design';
+import CustomConnectionLine from '@spark-flow/components/CustomConnectionLine';
+import FlowBaseEdge from '@spark-flow/components/FlowBaseEdge';
+import FlowMiniMap from '@spark-flow/components/FlowMiniMap';
+import { useNodesReadOnly } from '@spark-flow/hooks';
+import { useEdgesInteraction } from '@spark-flow/hooks/useEdgesInteraction';
+import { useFlowInteraction } from '@spark-flow/hooks/useFlowInteraction';
+import useFlowKeyPress from '@spark-flow/hooks/useFlowKeyPress';
+import { useHistory } from '@spark-flow/hooks/useHistory';
+import { useNodesInteraction } from '@spark-flow/hooks/useNodesInteraction';
+import $i18n from '@spark-flow/i18n';
+import { IWorkFlowNode } from '@spark-flow/types/work-flow';
 import {
   Background,
   Edge,

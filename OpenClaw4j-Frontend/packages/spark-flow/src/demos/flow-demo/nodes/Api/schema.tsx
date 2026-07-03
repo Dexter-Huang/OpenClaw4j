@@ -1,5 +1,5 @@
-import $i18n from '@/i18n';
 import { type INodeSchema } from '@spark-ai/flow';
+import $i18n from '@spark-flow/i18n';
 import { RETRY_CONFIG_DEFAULT, TRY_CATCH_CONFIG_DEFAULT } from '../../constant';
 import { IApiNodeParam } from '../../types/flow';
 

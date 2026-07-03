@@ -1,11 +1,3 @@
-import { useStore } from '@/flow/context';
-import {
-  useNodeDataUpdate,
-  useNodesInteraction,
-  useNodesReadOnly,
-} from '@/hooks';
-import $i18n from '@/i18n';
-import { IWorkFlowNode } from '@/types/work-flow';
 import {
   copy,
   Dropdown,
@@ -15,6 +7,14 @@ import {
   Input,
   Tag,
 } from '@spark-ai/design';
+import { useStore } from '@spark-flow/flow/context';
+import {
+  useNodeDataUpdate,
+  useNodesInteraction,
+  useNodesReadOnly,
+} from '@spark-flow/hooks';
+import $i18n from '@spark-flow/i18n';
+import { IWorkFlowNode } from '@spark-flow/types/work-flow';
 import { useNodes } from '@xyflow/react';
 import { useSetState } from 'ahooks';
 import { Divider, Flex, message, Tooltip, Typography } from 'antd';

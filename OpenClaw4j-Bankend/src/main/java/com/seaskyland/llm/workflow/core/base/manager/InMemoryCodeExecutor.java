@@ -130,7 +130,7 @@ public class InMemoryCodeExecutor {
   static class MemoryJavaFileObject extends SimpleJavaFileObject {
     private final String code;
 
-    public MemoryJavaFileObject(String name, String code) {
+    MemoryJavaFileObject(String name, String code) {
       super(URI.create("string:///" + name.replace('.', '/') + Kind.SOURCE.extension), Kind.SOURCE);
       this.code = code;
     }
@@ -145,7 +145,7 @@ public class InMemoryCodeExecutor {
   static class MemoryJavaClassFileObject extends SimpleJavaFileObject {
     private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-    public MemoryJavaClassFileObject(String name) throws URISyntaxException {
+    MemoryJavaClassFileObject(String name) throws URISyntaxException {
       super(URI.create("byte:///" + name.replace('.', '/') + Kind.CLASS.extension), Kind.CLASS);
     }
 
@@ -164,7 +164,7 @@ public class InMemoryCodeExecutor {
     private final Map<String, MemoryJavaClassFileObject> compiledClasses =
         new java.util.HashMap<>();
 
-    public MemoryJavaFileManager(JavaFileManager fileManager) {
+    MemoryJavaFileManager(JavaFileManager fileManager) {
       super(fileManager);
     }
 
@@ -190,7 +190,7 @@ public class InMemoryCodeExecutor {
   static class MemoryClassLoader extends URLClassLoader {
     private final Map<String, MemoryJavaClassFileObject> compiledClasses;
 
-    public MemoryClassLoader(Map<String, MemoryJavaClassFileObject> compiledClasses, URL[] urls) {
+    MemoryClassLoader(Map<String, MemoryJavaClassFileObject> compiledClasses, URL[] urls) {
       super(urls);
       this.compiledClasses = compiledClasses;
     }

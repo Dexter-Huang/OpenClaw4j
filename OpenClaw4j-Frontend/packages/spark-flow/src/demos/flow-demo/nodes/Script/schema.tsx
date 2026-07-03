@@ -1,5 +1,5 @@
-import $i18n from '@/i18n';
-import { INodeSchema } from '@/types/work-flow';
+import $i18n from '@spark-flow/i18n';
+import { INodeSchema } from '@spark-flow/types/work-flow';
 import {
   RETRY_CONFIG_DEFAULT,
   SCRIPT_NODE_INPUT_PARAMS_DEFAULT,

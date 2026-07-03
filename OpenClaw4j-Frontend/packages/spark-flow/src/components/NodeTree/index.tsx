@@ -1,7 +1,7 @@
-import { useStore } from '@/flow/context';
-import { useNodesInteraction } from '@/hooks';
-import $i18n from '@/i18n';
 import { Input } from '@spark-ai/design';
+import { useStore } from '@spark-flow/flow/context';
+import { useNodesInteraction } from '@spark-flow/hooks';
+import $i18n from '@spark-flow/i18n';
 import { useStore as useReactFlowStore } from '@xyflow/react';
 import { Tree } from 'antd';
 import { debounce } from 'lodash-es';

@@ -1,6 +1,6 @@
-import { useStore } from '@/flow/context';
-import $i18n from '@/i18n';
 import { Tabs } from '@spark-ai/design';
+import { useStore } from '@spark-flow/flow/context';
+import $i18n from '@spark-flow/i18n';
 import classNames from 'classnames';
 import React, { memo } from 'react';
 import CustomIcon from '../CustomIcon';

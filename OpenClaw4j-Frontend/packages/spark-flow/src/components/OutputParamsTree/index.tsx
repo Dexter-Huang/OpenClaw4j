@@ -1,4 +1,4 @@
-import { INodeDataOutputParamItem } from '@/types/work-flow';
+import { INodeDataOutputParamItem } from '@spark-flow/types/work-flow';
 import { Typography } from 'antd';
 import React, { memo } from 'react';
 import './index.less';

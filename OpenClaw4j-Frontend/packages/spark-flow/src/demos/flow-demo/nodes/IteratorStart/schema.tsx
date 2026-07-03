@@ -1,5 +1,5 @@
-import $i18n from '@/i18n';
 import { INodeSchema } from '@spark-ai/flow';
+import $i18n from '@spark-flow/i18n';
 
 export const IteratorStartSchema: INodeSchema = {
   type: 'IteratorStart',

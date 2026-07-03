@@ -194,12 +194,6 @@
             <version>15.4</version>
         </dependency>
 
-        <!-- rocketmq -->
-        <dependency>
-            <groupId>org.apache.rocketmq</groupId>
-            <artifactId>rocketmq-client-java</artifactId>
-            <version>5.0.7</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
@@ -278,13 +272,14 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>${maven.checkstyle.plugin.version}</version>
                 <configuration>
-                    <configLocation>google_checks.xml</configLocation>
+                    <configLocation>${project.basedir}/config/checkstyle.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <violationSeverity>warning</violationSeverity>
                     <excludes>
                         com/seaskyland/llm/workflow/admin/generator/**,
-                        com/seaskyland/llm/workflow/admin/utils/ContributorFileUtil.java
+                        com/seaskyland/llm/workflow/admin/utils/ContributorFileUtil.java,
+                        org/springframework/**
                     </excludes>
                 </configuration>
             </plugin>

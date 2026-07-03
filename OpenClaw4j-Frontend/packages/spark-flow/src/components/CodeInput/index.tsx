@@ -1,9 +1,9 @@
-import $i18n from '@/i18n';
-import { IValueType } from '@/types/work-flow';
 import { javascript } from '@codemirror/lang-javascript';
 import { Diagnostic, linter } from '@codemirror/lint';
 import { EditorView } from '@codemirror/view';
 import { getCommonConfig, Modal } from '@spark-ai/design';
+import $i18n from '@spark-flow/i18n';
+import { IValueType } from '@spark-flow/types/work-flow';
 import { vscodeDark, vscodeLight } from '@uiw/codemirror-theme-vscode';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import classNames from 'classnames';

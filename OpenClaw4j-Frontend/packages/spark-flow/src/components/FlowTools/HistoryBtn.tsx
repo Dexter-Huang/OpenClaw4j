@@ -1,7 +1,7 @@
-import { useNodesReadOnly } from '@/hooks';
-import { useHistory } from '@/hooks/useHistory';
-import $i18n from '@/i18n';
-import { isEventInInput, transformToMacKey } from '@/utils';
+import { useNodesReadOnly } from '@spark-flow/hooks';
+import { useHistory } from '@spark-flow/hooks/useHistory';
+import $i18n from '@spark-flow/i18n';
+import { isEventInInput, transformToMacKey } from '@spark-flow/utils';
 import { useKeyPress } from 'ahooks';
 import { Tooltip } from 'antd';
 import classNames from 'classnames';

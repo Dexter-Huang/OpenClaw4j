@@ -1,5 +1,5 @@
-import $i18n from '@/i18n';
-import { INodeSchema } from '@/types/work-flow';
+import $i18n from '@spark-flow/i18n';
+import { INodeSchema } from '@spark-flow/types/work-flow';
 import { IIteratorNodeParam } from '../../types/flow';
 
 export const IteratorSchema: INodeSchema = {

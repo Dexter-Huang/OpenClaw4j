@@ -1,4 +1,3 @@
-import $i18n from '@/i18n';
 import { IconFont } from '@spark-ai/design';
 import {
   OutputParamsTree,
@@ -7,6 +6,7 @@ import {
   useNodesOutputParams,
   useReactFlowStore,
 } from '@spark-ai/flow';
+import $i18n from '@spark-flow/i18n';
 import React, { memo, useCallback, useMemo } from 'react';
 import ErrorCatchForm from '../../components/ErrorCatchForm';
 import ModelConfigForm from '../../components/ModelConfigForm';

@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Manages RocketMQ producers and provides message sending capabilities.
+ * Manages message queue producers and provides message sending capabilities.
  *
  * @since 1.0.0.3
  */

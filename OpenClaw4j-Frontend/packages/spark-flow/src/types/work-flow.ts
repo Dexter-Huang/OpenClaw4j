@@ -1,4 +1,4 @@
-import { IVarTreeItem } from '@/components/VariableTreeSelect';
+import { IVarTreeItem } from '@spark-flow/components/VariableTreeSelect';
 import { Node } from '@xyflow/react';
 
 export type INodeProps = {

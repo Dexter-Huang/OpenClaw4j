@@ -1,7 +1,10 @@
-import $i18n from '@/i18n';
-import { INodeDataInputParamItem, IValueType } from '@/types/work-flow';
-import { extractVariables } from '@/utils';
 import { Button, Input, Select, SelectProps } from '@spark-ai/design';
+import $i18n from '@spark-flow/i18n';
+import {
+  INodeDataInputParamItem,
+  IValueType,
+} from '@spark-flow/types/work-flow';
+import { extractVariables } from '@spark-flow/utils';
 import { Typography } from 'antd';
 import React, { memo, useCallback, useMemo } from 'react';
 import CustomIcon from '../CustomIcon';

@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Configuration;
  * Spring configuration for the JVM in-process message queue.
  *
  * <p>Activated when {@code mq.type=JVM} is set in {@code application.yml}. No external broker
- * (Redis, RocketMQ, …) is required.
+ * (Redis or another external broker) is required.
  *
  * <p><strong>Limitations:</strong>
  *

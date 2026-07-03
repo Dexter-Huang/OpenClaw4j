@@ -1,4 +1,3 @@
-import $i18n from '@/i18n';
 import { Button, IconFont, Select } from '@spark-ai/design';
 import {
   VariableInput,
@@ -6,6 +5,7 @@ import {
   uniqueId,
   useNodeDataUpdate,
 } from '@spark-ai/flow';
+import $i18n from '@spark-flow/i18n';
 import React, { memo, useCallback } from 'react';
 import {
   IVariableAssignNodeData,

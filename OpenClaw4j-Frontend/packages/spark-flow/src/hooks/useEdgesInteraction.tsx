@@ -1,4 +1,4 @@
-import { IWorkFlowNodeResultItem } from '@/types/work-flow';
+import { IWorkFlowNodeResultItem } from '@spark-flow/types/work-flow';
 import {
   applyEdgeChanges,
   Edge,

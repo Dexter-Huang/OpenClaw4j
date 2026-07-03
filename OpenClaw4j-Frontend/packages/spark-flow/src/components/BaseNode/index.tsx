@@ -1,8 +1,8 @@
-import { useStore } from '@/flow/context';
-import { useNodesInteraction, useNodesReadOnly } from '@/hooks';
-import $i18n from '@/i18n';
-import { IWorkFlowNode, IWorkFlowStatus } from '@/types/work-flow';
 import { copy, Dropdown, Tag, Tooltip } from '@spark-ai/design';
+import { useStore } from '@spark-flow/flow/context';
+import { useNodesInteraction, useNodesReadOnly } from '@spark-flow/hooks';
+import $i18n from '@spark-flow/i18n';
+import { IWorkFlowNode, IWorkFlowStatus } from '@spark-flow/types/work-flow';
 import { Background, NodeProps } from '@xyflow/react';
 import { ConfigProvider, message, Typography } from 'antd';
 import { ItemType } from 'antd/es/menu/interface';

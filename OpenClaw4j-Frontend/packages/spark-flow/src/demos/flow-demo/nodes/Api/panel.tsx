@@ -1,4 +1,3 @@
-import $i18n from '@/i18n';
 import { Button, IconFont, Radio, Select } from '@spark-ai/design';
 import type { INodeDataInputParamItem } from '@spark-ai/flow';
 import {
@@ -9,6 +8,7 @@ import {
   useNodeDataUpdate,
   VarInputTextArea,
 } from '@spark-ai/flow';
+import $i18n from '@spark-flow/i18n';
 import React, { memo, useCallback } from 'react';
 import ErrorCatchForm from '../../components/ErrorCatchForm';
 import RetryForm from '../../components/RetryForm';

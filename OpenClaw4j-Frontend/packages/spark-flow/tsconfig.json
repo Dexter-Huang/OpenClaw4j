@@ -11,6 +11,7 @@
     "paths": {
       "@@/*": [".dumi/tmp/*"],
       "@/*": ["src/*"],
+      "@spark-flow/*": ["src/*"],
       "@spark-ai/flow": ["src"],
       "@spark-ai/flow/*": ["src/*", "*"]
     }

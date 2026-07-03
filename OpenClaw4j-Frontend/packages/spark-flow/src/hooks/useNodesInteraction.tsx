@@ -1,19 +1,19 @@
-import { ITERATION_PADDING, NEW_NODE_PADDING } from '@/constant';
-import { useStore } from '@/flow/context';
-import $i18n from '@/i18n';
+import { ITERATION_PADDING, NEW_NODE_PADDING } from '@spark-flow/constant';
+import { useStore } from '@spark-flow/flow/context';
+import $i18n from '@spark-flow/i18n';
 import {
   IPointItem,
   IWorkFlowNode,
   IWorkFlowNodeData,
-} from '@/types/work-flow';
+} from '@spark-flow/types/work-flow';
 import {
   copyNodeConfig,
   copySubFlowNodeConfig,
   generateEdge,
   generateUniqueName,
   getIteratorNodeSize,
-} from '@/utils';
-import uniqueId from '@/utils/uniqueId';
+} from '@spark-flow/utils';
+import uniqueId from '@spark-flow/utils/uniqueId';
 import type {
   Connection,
   Edge,

@@ -21,11 +21,7 @@ import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * RocketMQ configuration properties for multiple producers and consumers
- *
- * @since 1.0.0.3
- */
+/** Message queue configuration properties for producers and consumers. */
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "mq")
@@ -33,16 +29,14 @@ public class MqConfigProperties {
 
   public static final String MQ_TYPE_PREFIX = "mq.type";
 
-  public static final String ROCKET_MQ = "ROCKET_MQ";
-
   public static final String REDISSON = "REDISSON";
 
   /** JVM in-process message bus – no external broker required. */
   public static final String JVM = "JVM";
 
-  private MqType type = MqType.ROCKET_MQ;
+  private MqType type = MqType.REDISSON;
 
-  /** RocketMQ server endpoints */
+  /** Message queue server endpoints */
   private String endpoints;
 
   /** Maximum number of retry attempts for sending messages */
@@ -68,7 +62,6 @@ public class MqConfigProperties {
 
   @Getter
   public enum MqType {
-    ROCKET_MQ(MqConfigProperties.ROCKET_MQ),
     REDISSON(MqConfigProperties.REDISSON),
     /** JVM in-process message bus – no external broker required. */
     JVM(MqConfigProperties.JVM),

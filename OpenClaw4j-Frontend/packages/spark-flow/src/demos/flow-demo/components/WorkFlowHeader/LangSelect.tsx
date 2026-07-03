@@ -1,5 +1,5 @@
-import $i18n from '@/i18n';
 import { Dropdown, IconButton, IconFont } from '@spark-ai/design';
+import $i18n from '@spark-flow/i18n';
 import { MenuProps } from 'antd';
 import React from 'react';
 

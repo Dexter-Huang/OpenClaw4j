@@ -1,5 +1,3 @@
-import CustomInputsControl from '@/components/CustomInputsControl';
-import $i18n from '@/i18n';
 import { Button, IconFont, Input } from '@spark-ai/design';
 import type {
   INodeDataInputParamItem,
@@ -12,6 +10,8 @@ import {
   uniqueId,
   useNodeDataUpdate,
 } from '@spark-ai/flow';
+import CustomInputsControl from '@spark-flow/components/CustomInputsControl';
+import $i18n from '@spark-flow/i18n';
 import React, { memo, useCallback } from 'react';
 import GroupVariableForm from '../../components/GroupVariableForm';
 import {

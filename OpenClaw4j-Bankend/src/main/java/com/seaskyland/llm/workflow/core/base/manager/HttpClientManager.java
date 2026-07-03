@@ -384,12 +384,7 @@ public class HttpClientManager implements InitializingBean {
         continue;
       }
       String val = "" + value;
-      try {
-        sb.append(key)
-            .append("=")
-            .append(URLEncoder.encode(val, StandardCharsets.UTF_8.toString()));
-      } catch (UnsupportedEncodingException e) {
-      }
+      sb.append(key).append("=").append(URLEncoder.encode(val, StandardCharsets.UTF_8));
       sb.append("&");
     }
     String encodedContent = sb.toString();

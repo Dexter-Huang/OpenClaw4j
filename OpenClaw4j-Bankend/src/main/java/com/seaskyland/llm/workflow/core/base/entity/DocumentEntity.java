@@ -20,6 +20,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.seaskyland.llm.workflow.core.base.typehandler.BooleanSmallintTypeHandler;
 import com.seaskyland.llm.workflow.runtime.enums.CommonStatus;
 import com.seaskyland.llm.workflow.runtime.enums.DocumentIndexStatus;
 import com.seaskyland.llm.workflow.runtime.enums.DocumentType;
@@ -32,7 +33,7 @@ import lombok.Data;
  * @since 1.0.0.3
  */
 @Data
-@TableName("document")
+@TableName(value = "document", autoResultMap = true)
 public class DocumentEntity {
 
   /** Primary key */
@@ -58,6 +59,7 @@ public class DocumentEntity {
   private DocumentType type;
 
   /** Whether the document is enabled */
+  @TableField(value = "enabled", typeHandler = BooleanSmallintTypeHandler.class)
   private Boolean enabled;
 
   /** Document name */

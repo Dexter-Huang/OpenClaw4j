@@ -324,19 +324,7 @@ public class ToolExecutionServiceImpl implements ToolExecutionService {
       }
 
       switch (type) {
-        case STRING:
-          {
-            targetObj.put(key, sourceObject.get(key));
-            break;
-          }
-
-        case NUMBER:
-          {
-            targetObj.put(key, sourceObject.get(key));
-            break;
-          }
-
-        case BOOLEAN:
+        case STRING, NUMBER, BOOLEAN, FILE:
           {
             targetObj.put(key, sourceObject.get(key));
             break;
@@ -360,7 +348,7 @@ public class ToolExecutionServiceImpl implements ToolExecutionService {
 
         case ARRAY_STRING, ARRAY_NUMBER, ARRAY_BOOLEAN:
           {
-            targetObj.put(key, targetObj.get(key));
+            targetObj.put(key, sourceObject.get(key));
             break;
           }
 
@@ -386,6 +374,10 @@ public class ToolExecutionServiceImpl implements ToolExecutionService {
             targetObj.put(key, jsonArray);
             break;
           }
+
+        default:
+          throw new BizException(
+              ErrorCode.TOOL_PARAMS_INVALID.toError(key, "param type not supported"));
       }
     }
   }

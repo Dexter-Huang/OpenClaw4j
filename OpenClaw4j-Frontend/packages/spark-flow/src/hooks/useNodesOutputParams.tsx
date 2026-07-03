@@ -1,13 +1,16 @@
-import { IVarItem, IVarTreeItem } from '@/components/VariableTreeSelect';
-import { useStore } from '@/flow/context';
-import $i18n from '@/i18n';
+import {
+  IVarItem,
+  IVarTreeItem,
+} from '@spark-flow/components/VariableTreeSelect';
+import { useStore } from '@spark-flow/flow/context';
+import $i18n from '@spark-flow/i18n';
 import {
   INodeDataOutputParamItem,
   IValueType,
   IWorkFlowNode,
-} from '@/types/work-flow';
-// import { getParentNodeVariableList } from '@/utils';
-import { getNeighborNodes } from '@/utils/workFlow';
+} from '@spark-flow/types/work-flow';
+// import { getParentNodeVariableList } from '@spark-flow/utils';
+import { getNeighborNodes } from '@spark-flow/utils/workFlow';
 import { useStoreApi } from '@xyflow/react';
 import { useCallback } from 'react';
 

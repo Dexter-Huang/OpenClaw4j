@@ -158,7 +158,7 @@ public class KnowledgeBaseIndexPipeline implements IndexPipeline {
               1,
               10000,
               false,
-              List.of());
+              List.of('.', '?', '!', ';', '。', '？', '！', '；'));
     }
     List<Document> transformedDocs = splitter.apply(documents);
 

@@ -1,4 +1,4 @@
-import $i18n from '@/i18n';
+import $i18n from '@spark-flow/i18n';
 import { IModelParamsSchema, IModelSelectorItem } from '../types/model';
 
 export const mockModelList: IModelSelectorItem[] = [

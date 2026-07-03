@@ -19,11 +19,12 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.seaskyland.llm.workflow.core.base.typehandler.BooleanSmallintTypeHandler;
 import java.util.Date;
 import lombok.Data;
 
 @Data
-@TableName("model")
+@TableName(value = "model", autoResultMap = true)
 public class ModelEntity {
 
   @TableId(value = "id", type = IdType.AUTO)
@@ -43,6 +44,7 @@ public class ModelEntity {
 
   private String type;
 
+  @TableField(value = "enable", typeHandler = BooleanSmallintTypeHandler.class)
   private Boolean enable;
 
   private String tags;

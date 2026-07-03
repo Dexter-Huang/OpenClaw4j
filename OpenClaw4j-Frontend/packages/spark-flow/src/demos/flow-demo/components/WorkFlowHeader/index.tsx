@@ -1,8 +1,8 @@
-import CustomIcon from '@/components/CustomIcon';
-import { useFlowDebugInteraction } from '@/hooks/useFlowDebugInteraction';
-import $i18n from '@/i18n';
 import { Button, IconButton } from '@spark-ai/design';
 import { CheckListBtn, useStore } from '@spark-ai/flow';
+import CustomIcon from '@spark-flow/components/CustomIcon';
+import { useFlowDebugInteraction } from '@spark-flow/hooks/useFlowDebugInteraction';
+import $i18n from '@spark-flow/i18n';
 import { Segmented, Tooltip } from 'antd';
 import React, { memo } from 'react';
 import './index.less';

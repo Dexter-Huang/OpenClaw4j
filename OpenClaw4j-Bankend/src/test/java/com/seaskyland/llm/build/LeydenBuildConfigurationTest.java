@@ -124,23 +124,17 @@ class LeydenBuildConfigurationTest {
         read("src/main/java/com/seaskyland/llm/workflow/core/config/RedissonConfig.java");
     String compose =
         Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
-    String readme = read("README.md");
 
-    assertTrue(application.contains("master: ${OPENCLAW_REDIS_SENTINEL_MASTER:openclaw4j-master}"));
-    assertTrue(
-        application.contains(
-            "nodes: ${OPENCLAW_REDIS_SENTINEL_NODES:127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381}"));
-    assertTrue(
-        application.contains(
-            "nat-map: ${OPENCLAW_REDIS_SENTINEL_NAT_MAP:redis-master:6379=127.0.0.1:6379,redis-replica-1:6379=127.0.0.1:6380,redis-replica-2:6379=127.0.0.1:6381}"));
+    assertTrue(application.contains("host: ${OPENCLAW_REDIS_HOST:127.0.0.1}"));
+    assertTrue(application.contains("port: ${OPENCLAW_REDIS_PORT:6379}"));
+    assertTrue(application.contains("# sentinel:"));
+    assertFalse(application.contains("\n      sentinel:\n"));
     assertTrue(application.contains("database: ${OPENCLAW_REDIS_DATABASE:0}"));
     assertTrue(application.contains("type: REDIS"));
-    assertTrue(application.contains("type: REDISSON"));
     assertFalse(application.contains("mq:\n  type: JVM"));
     assertFalse(application.contains("cache:\n  type: JVM"));
-    assertFalse(application.contains("host: ${OPENCLAW_REDIS_HOST:127.0.0.1}"));
-    assertFalse(application.contains("port: ${OPENCLAW_REDIS_PORT:6379}"));
 
+    assertTrue(redissonConfig.contains("useSingleServer()"));
     assertTrue(redissonConfig.contains("useSentinelServers()"));
     assertTrue(redissonConfig.contains("setMasterName(sentinelMaster)"));
     assertTrue(redissonConfig.contains("addSentinelAddress(sentinelAddresses)"));
@@ -151,19 +145,52 @@ class LeydenBuildConfigurationTest {
     assertTrue(redissonConfig.contains("setNatMapper"));
 
     assertTrue(compose.contains("image: redis:7"));
-    assertTrue(compose.contains("container_name: openclaw4j-redis-master"));
-    assertTrue(compose.contains("${REDIS_MASTER_PORT:-6379}:6379"));
+    assertTrue(compose.contains("\n  redis:\n"));
+    assertTrue(compose.contains("container_name: openclaw4j-redis"));
+    assertTrue(compose.contains("${REDIS_PORT:-6379}:6379"));
     assertTrue(compose.contains("redis-cli ping"));
-    assertTrue(compose.contains("./data/redis-master:/data"));
-    assertTrue(compose.contains("redis-sentinel-1"));
+    assertTrue(compose.contains("./data/redis:/data"));
+    assertTrue(compose.contains("# redis-sentinel-1:"));
+    assertFalse(compose.contains("\n  redis-master:\n"));
+    assertFalse(compose.contains("\n  redis-sentinel-1:\n"));
 
+    String readme = read("README.md");
     assertTrue(readme.contains("127.0.0.1:6379"));
-    assertTrue(readme.contains("openclaw4j-master"));
+    assertTrue(readme.contains("单 Redis 实例"));
     assertTrue(readme.contains("cache.type=REDIS"));
   }
 
   @Test
-  void deployMiddlewareComposeUsesPgvectorAndRedisSentinel() throws IOException {
+  void defaultBackendConfigurationUsesRedisForDocumentIndexingQueue() throws IOException {
+    String application = read("src/main/resources/application.yml");
+    String mqProperties =
+        read("src/main/java/com/seaskyland/llm/workflow/core/config/MqConfigProperties.java");
+    String compose =
+        Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
+    String envExample = Files.readString(PROJECT_DIR.getParent().resolve("deploy/.env.example"));
+    String pom = read("pom.xml");
+
+    assertTrue(application.contains("mq:\n  type: REDISSON"));
+    assertTrue(
+        application.contains(
+            "endpoints: ${OPENCLAW_REDIS_HOST:127.0.0.1}:${OPENCLAW_REDIS_PORT:6379}"));
+    assertTrue(application.contains("document-index-topic: topic_saa_studio_document_index"));
+    assertTrue(application.contains("document-index-group: group_saa_studio_document_index"));
+    assertFalse(application.contains("ROCKET_MQ"));
+    assertFalse(application.contains("OPENCLAW_ROCKETMQ_ENDPOINTS"));
+    assertFalse(mqProperties.contains("ROCKET_MQ"));
+    assertFalse(pom.contains("rocketmq-client-java"));
+    assertFalse(compose.toLowerCase().contains("rocketmq"));
+    assertFalse(envExample.contains("ROCKETMQ_"));
+
+    String readme = read("README.md");
+    assertTrue(readme.contains("mq.type=REDISSON"));
+    assertFalse(readme.contains("RocketMQ"));
+    assertFalse(readme.contains("OPENCLAW_ROCKETMQ_ENDPOINTS"));
+  }
+
+  @Test
+  void deployMiddlewareComposeUsesPgvectorAndSingleRedisInstance() throws IOException {
     String compose =
         Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
     String sentinel =
@@ -190,20 +217,30 @@ class LeydenBuildConfigurationTest {
     assertFalse(compose.contains("mysql-1-primary"));
     assertFalse(compose.contains("mysql-1-replica"));
     assertFalse(compose.contains("./shardingsphere/conf:/opt/shardingsphere-proxy/conf"));
-    assertTrue(compose.contains("redis-master"));
-    assertTrue(compose.contains("redis-replica-1"));
-    assertTrue(compose.contains("redis-replica-2"));
-    assertTrue(compose.contains("redis-sentinel-1"));
-    assertTrue(compose.contains("redis-sentinel-2"));
-    assertTrue(compose.contains("redis-sentinel-3"));
-    assertTrue(compose.contains("${REDIS_SENTINEL_1_PORT:-26379}:26379"));
-    assertTrue(compose.contains("cp /usr/local/etc/redis/sentinel.conf /data/sentinel.conf"));
-    assertTrue(compose.contains("./redis/redis-replica-1.conf:/usr/local/etc/redis/redis.conf:ro"));
-    assertTrue(compose.contains("./redis/redis-replica-2.conf:/usr/local/etc/redis/redis.conf:ro"));
+    assertTrue(compose.contains("\n  redis:\n"));
+    assertTrue(compose.contains("container_name: openclaw4j-redis"));
+    assertTrue(compose.contains("${REDIS_PORT:-6379}:6379"));
+    assertTrue(compose.contains("./redis/redis-master.conf:/usr/local/etc/redis/redis.conf:ro"));
+    assertTrue(compose.contains("./data/redis:/data"));
+    assertTrue(compose.contains("# redis-replica-1:"));
+    assertTrue(compose.contains("# redis-replica-2:"));
+    assertTrue(compose.contains("# redis-sentinel-1:"));
+    assertTrue(compose.contains("# redis-sentinel-2:"));
+    assertTrue(compose.contains("# redis-sentinel-3:"));
+    assertFalse(compose.contains("\n  redis-master:\n"));
+    assertFalse(compose.contains("\n  redis-replica-1:\n"));
+    assertFalse(compose.contains("\n  redis-replica-2:\n"));
+    assertFalse(compose.contains("\n  redis-sentinel-1:\n"));
+    assertFalse(compose.contains("\n  redis-sentinel-2:\n"));
+    assertFalse(compose.contains("\n  redis-sentinel-3:\n"));
+    assertFalse(compose.contains("\n      - \"${REDIS_SENTINEL_1_PORT:-26379}:26379\""));
+    assertFalse(
+        compose.contains(
+            "\n      - cp /usr/local/etc/redis/sentinel.conf /data/sentinel.conf && redis-sentinel /data/sentinel.conf"));
     assertTrue(sentinel.contains("sentinel resolve-hostnames yes"));
     assertTrue(sentinel.contains("sentinel announce-hostnames yes"));
     assertTrue(sentinel.contains("sentinel monitor openclaw4j-master redis-master 6379 2"));
-    assertTrue(redisMaster.contains("replica-announce-ip redis-master"));
+    assertTrue(redisMaster.contains("# replica-announce-ip redis-master"));
     assertTrue(redisReplica1.contains("replica-announce-ip redis-replica-1"));
     assertTrue(redisReplica2.contains("replica-announce-ip redis-replica-2"));
     assertTrue(redisReplica1.contains("appendonly no"));
@@ -212,7 +249,7 @@ class LeydenBuildConfigurationTest {
     assertTrue(redisReplica2.contains("repl-diskless-load on-empty-db"));
     assertFalse(redisReplica1.contains("appendonly yes"));
     assertFalse(redisReplica2.contains("appendonly yes"));
-    assertTrue(compose.contains("master_link_status:up"));
+    assertFalse(compose.contains("\n      test: [\"CMD-SHELL\", \"redis-cli INFO replication"));
     assertFalse(
         Files.exists(
             PROJECT_DIR
@@ -259,7 +296,9 @@ class LeydenBuildConfigurationTest {
     assertTrue(postgresSchema.contains("gte-rerank-v2"));
     assertTrue(postgresSchema.contains("INSERT INTO provider VALUES"));
     assertTrue(postgresSchema.contains("llm,text_embedding,rerank"));
-    assertTrue(postgresSchema.contains("\"endpoint\":\"https://dashscope.aliyuncs.com/compatible-mode/v1\""));
+    assertTrue(
+        postgresSchema.contains(
+            "\"endpoint\":\"https://dashscope.aliyuncs.com/compatible-mode/v1\""));
     assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS prompt"));
     assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS prompt_version"));
     assertTrue(postgresSchema.contains("CREATE TABLE IF NOT EXISTS prompt_build_template"));

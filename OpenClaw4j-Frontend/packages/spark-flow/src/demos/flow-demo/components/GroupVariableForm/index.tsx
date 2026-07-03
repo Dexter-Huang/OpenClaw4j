@@ -1,4 +1,3 @@
-import $i18n from '@/i18n';
 import { IconFont, Input, Select } from '@spark-ai/design';
 import {
   DraggableWithHandle,
@@ -6,6 +5,7 @@ import {
   VALUE_FROM_OPTIONS,
   VariableTreeSelect,
 } from '@spark-ai/flow';
+import $i18n from '@spark-flow/i18n';
 import { useSetState } from 'ahooks';
 import { message } from 'antd';
 import React, { memo, useCallback, useRef } from 'react';

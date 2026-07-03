@@ -20,6 +20,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.seaskyland.llm.workflow.core.base.typehandler.BooleanSmallintTypeHandler;
 import com.seaskyland.llm.workflow.runtime.enums.ToolStatus;
 import com.seaskyland.llm.workflow.runtime.enums.ToolTestStatus;
 import java.util.Date;
@@ -31,7 +32,7 @@ import lombok.Data;
  * @since 1.0.0.3
  */
 @Data
-@TableName("tool")
+@TableName(value = "tool", autoResultMap = true)
 public class ToolEntity {
 
   /** Primary key */
@@ -54,6 +55,7 @@ public class ToolEntity {
   private ToolStatus status;
 
   /** Whether the tool is enabled */
+  @TableField(value = "enabled", typeHandler = BooleanSmallintTypeHandler.class)
   private Boolean enabled;
 
   /** Test status of the tool */

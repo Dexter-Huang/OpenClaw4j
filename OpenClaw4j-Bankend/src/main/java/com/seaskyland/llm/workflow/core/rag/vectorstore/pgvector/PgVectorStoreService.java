@@ -81,7 +81,8 @@ public class PgVectorStoreService implements VectorStoreService {
       @Value("${spring.ai.vectorstore.pgvector.schema-name:openclaw_rag}") String schemaName,
       @Value("${spring.ai.vectorstore.pgvector.initialize-schema:true}") boolean initializeSchema,
       @Value("${spring.ai.vectorstore.pgvector.index-type:HNSW}") String indexType,
-      @Value("${spring.ai.vectorstore.pgvector.distance-type:COSINE_DISTANCE}") String distanceType) {
+      @Value("${spring.ai.vectorstore.pgvector.distance-type:COSINE_DISTANCE}")
+          String distanceType) {
     this.modelFactory = modelFactory;
     this.jdbcTemplate = jdbcTemplate;
     this.schemaName = requireIdentifier(schemaName);

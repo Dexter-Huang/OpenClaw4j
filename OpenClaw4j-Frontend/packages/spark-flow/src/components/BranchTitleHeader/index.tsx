@@ -1,6 +1,6 @@
-import $i18n from '@/i18n';
-import { IBranchItem } from '@/types/work-flow';
 import { IconFont, Select } from '@spark-ai/design';
+import $i18n from '@spark-flow/i18n';
+import { IBranchItem } from '@spark-flow/types/work-flow';
 import { useSetState } from 'ahooks';
 import { Flex, Input, message, Typography } from 'antd';
 import React, { memo, useCallback, useRef } from 'react';

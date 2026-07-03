@@ -1,11 +1,11 @@
-import { FILE_PROPERTIES, VALUE_TYPE_OPTIONS } from '@/constant';
-import $i18n from '@/i18n';
+import { Button, Input } from '@spark-ai/design';
+import { FILE_PROPERTIES, VALUE_TYPE_OPTIONS } from '@spark-flow/constant';
+import $i18n from '@spark-flow/i18n';
 import {
   INodeDataOutputParamItem,
   IValueType,
   IValueTypeOption,
-} from '@/types/work-flow';
-import { Button, Input } from '@spark-ai/design';
+} from '@spark-flow/types/work-flow';
 import { Cascader } from 'antd';
 import classNames from 'classnames';
 import React, { memo, useMemo, useState } from 'react';

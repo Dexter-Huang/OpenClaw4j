@@ -1,5 +1,8 @@
-import $i18n from '@/i18n';
-import { IWorkFlowNodeResultItem, IWorkFlowStatus } from '@/types/work-flow';
+import $i18n from '@spark-flow/i18n';
+import {
+  IWorkFlowNodeResultItem,
+  IWorkFlowStatus,
+} from '@spark-flow/types/work-flow';
 import { Typography } from 'antd';
 import classNames from 'classnames';
 import React, { memo, useState } from 'react';

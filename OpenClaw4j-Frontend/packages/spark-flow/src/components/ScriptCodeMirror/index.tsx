@@ -1,8 +1,4 @@
 import {
-  INodeDataInputParamItem,
-  INodeDataOutputParamItem,
-} from '@/types/work-flow';
-import {
   autocompletion,
   CompletionContext,
   CompletionResult,
@@ -12,6 +8,10 @@ import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
 import { Extension } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
+import {
+  INodeDataInputParamItem,
+  INodeDataOutputParamItem,
+} from '@spark-flow/types/work-flow';
 import { vscodeDark, vscodeLight } from '@uiw/codemirror-theme-vscode';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import React, { memo, useMemo } from 'react';

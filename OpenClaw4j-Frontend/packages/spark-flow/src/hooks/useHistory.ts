@@ -1,4 +1,4 @@
-import { useStore } from '@/flow/context';
+import { useStore } from '@spark-flow/flow/context';
 import { Edge, useStoreApi } from '@xyflow/react';
 import { useCallback } from 'react';
 import { IWorkFlowNode } from '../types/work-flow';

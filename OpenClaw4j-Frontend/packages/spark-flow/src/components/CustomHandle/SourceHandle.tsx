@@ -1,4 +1,4 @@
-import { useNodesInteraction } from '@/hooks';
+import { useNodesInteraction } from '@spark-flow/hooks';
 import { Handle, Position } from '@xyflow/react';
 import React, { useState } from 'react';
 import CustomIcon from '../CustomIcon';

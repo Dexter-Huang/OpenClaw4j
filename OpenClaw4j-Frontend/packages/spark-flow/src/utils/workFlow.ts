@@ -1,4 +1,4 @@
-import { IWorkFlowNode } from '@/types/work-flow';
+import { IWorkFlowNode } from '@spark-flow/types/work-flow';
 import { Edge } from '@xyflow/react';
 
 /**

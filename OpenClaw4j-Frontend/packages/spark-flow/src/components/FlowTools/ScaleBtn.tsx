@@ -1,7 +1,7 @@
-import { useFlowInteraction } from '@/hooks';
-import { useFlowViewPort } from '@/hooks/useFlowViewPort';
-import $i18n from '@/i18n';
-import { transformToMacKey } from '@/utils';
+import { useFlowInteraction } from '@spark-flow/hooks';
+import { useFlowViewPort } from '@spark-flow/hooks/useFlowViewPort';
+import $i18n from '@spark-flow/i18n';
+import { transformToMacKey } from '@spark-flow/utils';
 import { useKeyPress } from 'ahooks';
 import { Divider, Dropdown, Tooltip } from 'antd';
 import React, { memo } from 'react';

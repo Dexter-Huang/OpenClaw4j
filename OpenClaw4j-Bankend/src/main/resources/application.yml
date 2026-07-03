@@ -34,14 +34,17 @@ spring:
     connection-fetch: lazy
   data:
     redis:
-      sentinel:
-        master: ${OPENCLAW_REDIS_SENTINEL_MASTER:openclaw4j-master}
-        nodes: ${OPENCLAW_REDIS_SENTINEL_NODES:127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381}
-        nat-map: ${OPENCLAW_REDIS_SENTINEL_NAT_MAP:redis-master:6379=127.0.0.1:6379,redis-replica-1:6379=127.0.0.1:6380,redis-replica-2:6379=127.0.0.1:6381}
-        username: ${OPENCLAW_REDIS_SENTINEL_USERNAME:}
-        password: ${OPENCLAW_REDIS_SENTINEL_PASSWORD:}
+      host: ${OPENCLAW_REDIS_HOST:127.0.0.1}
+      port: ${OPENCLAW_REDIS_PORT:6379}
       password: ${OPENCLAW_REDIS_PASSWORD:}
       database: ${OPENCLAW_REDIS_DATABASE:0}
+      # Redis Sentinel 配置已默认关闭；如需恢复哨兵拓扑，再取消下面配置的注释。
+      # sentinel:
+      #   master: ${OPENCLAW_REDIS_SENTINEL_MASTER:openclaw4j-master}
+      #   nodes: ${OPENCLAW_REDIS_SENTINEL_NODES:127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381}
+      #   nat-map: ${OPENCLAW_REDIS_SENTINEL_NAT_MAP:redis-master:6379=127.0.0.1:6379,redis-replica-1:6379=127.0.0.1:6380,redis-replica-2:6379=127.0.0.1:6381}
+      #   username: ${OPENCLAW_REDIS_SENTINEL_USERNAME:}
+      #   password: ${OPENCLAW_REDIS_SENTINEL_PASSWORD:}
   sql:
     init:
       mode: never
@@ -85,13 +88,12 @@ cache:
 
 # Message queue backend type:
 #   REDISSON  – Redis-backed pub/sub via Redisson (requires Redis, default)
-#   ROCKET_MQ – Apache RocketMQ
 #   JVM       – In-process pub/sub, no external broker required (single-node only)
 mq:
   type: REDISSON
-  endpoints: ${OPENCLAW_REDIS_SENTINEL_NODES:127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381}
+  endpoints: ${OPENCLAW_REDIS_HOST:127.0.0.1}:${OPENCLAW_REDIS_PORT:6379}
   document-index-topic: topic_saa_studio_document_index
-  document_index_group: group_saa_studio_document_index
+  document-index-group: group_saa_studio_document_index
 
 #oauth2:
 #  github:

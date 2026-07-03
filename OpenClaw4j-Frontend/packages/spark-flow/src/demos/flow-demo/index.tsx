@@ -1,4 +1,3 @@
-import $i18n from '@/i18n';
 import { bailianTheme, ConfigProvider } from '@spark-ai/design';
 import {
   ConfigPanel,
@@ -10,6 +9,7 @@ import {
   TaskStatus,
   WorkflowContextProvider,
 } from '@spark-ai/flow';
+import $i18n from '@spark-flow/i18n';
 import { useMount } from 'ahooks';
 import { Modal } from 'antd';
 import enUS from 'antd/locale/en_US';

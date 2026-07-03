@@ -19,11 +19,12 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.seaskyland.llm.workflow.core.base.typehandler.BooleanSmallintTypeHandler;
 import java.util.Date;
 import lombok.Data;
 
 @Data
-@TableName("provider")
+@TableName(value = "provider", autoResultMap = true)
 public class ProviderEntity {
 
   @TableId(value = "id", type = IdType.AUTO)
@@ -40,6 +41,7 @@ public class ProviderEntity {
 
   private String provider;
 
+  @TableField(value = "enable", typeHandler = BooleanSmallintTypeHandler.class)
   private Boolean enable;
 
   /** 协议，默认openai协议 */

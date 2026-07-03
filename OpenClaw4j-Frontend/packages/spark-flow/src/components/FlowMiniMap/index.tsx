@@ -1,4 +1,4 @@
-import { useStore } from '@/flow/context';
+import { useStore } from '@spark-flow/flow/context';
 import { MiniMap } from '@xyflow/react';
 import React, { memo } from 'react';
 import './index.less';

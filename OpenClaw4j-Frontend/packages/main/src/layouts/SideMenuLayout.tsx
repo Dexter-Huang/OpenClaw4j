@@ -177,14 +177,14 @@ export default function SideMenuLayout({ children }: { children: React.ReactNode
             }),
             icon: <DatabaseOutlined />,
           },
-          {
-            key: '/dify',
-            label: $i18n.get({
-              id: 'main.layouts.SideMenu.dify',
-              dm: 'Dify To Graph',
-            }),
-            icon: <SwapOutlined />,
-          },
+          // {
+          //   key: '/dify',
+          //   label: $i18n.get({
+          //     id: 'main.layouts.SideMenu.dify',
+          //     dm: 'Dify To Graph',
+          //   }),
+          //   icon: <SwapOutlined />,
+          // },
         ],
       },
       {
@@ -299,7 +299,7 @@ export default function SideMenuLayout({ children }: { children: React.ReactNode
               <div className="p-6 border-b border-gray-200">
                 <h1 className="text-xl font-bold text-gray-800 flex items-center whitespace-nowrap overflow-hidden">
                   <SettingOutlined className="mr-1 text-blue-500" />
-                  {!collapsed && 'SAA Admin'}
+                  {!collapsed && 'Agent Admin'}
                 </h1>
               </div>
 

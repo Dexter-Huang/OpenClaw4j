@@ -718,8 +718,7 @@ public class WorkflowController {
         if (atomicInteger == null) {
           atomicInteger = new AtomicInteger(0);
         }
-        boolean nodeCompleted =
-            nodeResult.getNodeStatus().equals(NodeStatusEnum.SUCCESS.getCode()) ? true : false;
+        boolean nodeCompleted = nodeResult.getNodeStatus().equals(NodeStatusEnum.SUCCESS.getCode());
         if (StringUtils.isNotBlank(incrementalContent) || nodeCompleted) {
           sendNodeMessage(
               emitter,
@@ -738,10 +737,8 @@ public class WorkflowController {
       for (NodeResult nodeResult : thisNodeResult) {
         List<NodeResult> lastNodeResultList = listMap.get(nodeResult.getNodeId());
         boolean nodeCompleted =
-            (!lastNodeResultList.get(0).getNodeStatus().equals(NodeStatusEnum.SUCCESS.getCode())
-                    && nodeResult.getNodeStatus().equals(NodeStatusEnum.SUCCESS.getCode()))
-                ? true
-                : false;
+            !lastNodeResultList.get(0).getNodeStatus().equals(NodeStatusEnum.SUCCESS.getCode())
+                && nodeResult.getNodeStatus().equals(NodeStatusEnum.SUCCESS.getCode());
         String incrementalContent;
         if (CollectionUtils.isEmpty(lastNodeResultList)) {
           incrementalContent = calculateIncrementalContent(nodeResult.getOutput(), "");

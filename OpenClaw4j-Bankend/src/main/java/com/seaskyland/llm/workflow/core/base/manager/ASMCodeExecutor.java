@@ -205,7 +205,7 @@ public class ASMCodeExecutor {
 
   /** ASM类加载器 */
   static class ASMClassLoader extends URLClassLoader {
-    public ASMClassLoader(URL[] urls) {
+    ASMClassLoader(URL[] urls) {
       super(urls);
     }
 
