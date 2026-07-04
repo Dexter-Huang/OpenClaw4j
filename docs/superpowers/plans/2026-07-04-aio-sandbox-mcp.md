@@ -16,7 +16,7 @@
 - 前端根目录为 `OpenClaw4j-Frontend/`，主应用在 `OpenClaw4j-Frontend/packages/main`。
 - 项目文档默认使用中文；代码标识、API path、配置 key 保持原始拼写。
 - 保持现有 SSE MCP Server 行为不变。
-- 不引入 AIO Sandbox Java SDK，不自动部署 AIO Sandbox 容器。
+- 不引入 AIO Sandbox Java SDK；将 AIO Sandbox 作为可选 profile 集成进 `deploy/docker-compose.middleware.yml`，默认不随基础中间件自动启动。
 - 不修改数据库表结构。
 - 不提交已有的 `OpenClaw4j-Frontend/packages/main/src/layouts/Header.tsx` 和 `OpenClaw4j-Frontend/packages/main/src/layouts/SideMenuLayout.tsx` 改动。
 

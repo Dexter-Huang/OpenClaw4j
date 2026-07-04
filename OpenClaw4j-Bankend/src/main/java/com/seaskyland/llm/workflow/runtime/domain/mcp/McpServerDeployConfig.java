@@ -56,6 +56,7 @@ public class McpServerDeployConfig implements Serializable {
   @JsonProperty("remote_endpoint")
   private String remoteEndpoint;
 
-  /** Headers for SSE (Server-Sent Events) connection */
+  /** Headers for remote MCP connection */
+  @JsonProperty("remote_header")
   private HashMap<String, String> remoteHeader;
 }

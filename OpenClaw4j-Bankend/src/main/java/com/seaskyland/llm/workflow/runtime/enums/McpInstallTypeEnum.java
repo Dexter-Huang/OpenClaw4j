@@ -31,7 +31,10 @@ public enum McpInstallTypeEnum {
   UVX,
 
   /** SSE installation type */
-  SSE;
+  SSE,
+
+  /** Streamable HTTP installation type */
+  STREAMABLE_HTTP;
 
   /**
    * Converts a string to the corresponding McpInstallTypeEnum value.

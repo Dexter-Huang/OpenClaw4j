@@ -16,7 +16,7 @@ AIO Sandbox 官方 MCP Hub 入口是 `http://<host>:8080/mcp`，文档描述为�
 ## 非目标
 
 - 不在本轮实现 AIO Sandbox REST SDK 或 REST 工具适配器。
-- 不自动部署 AIO Sandbox 容器。
+- 将 AIO Sandbox 作为可选 profile 集成进 `deploy/docker-compose.middleware.yml`，默认不随基础中间件自动启动。
 - 不改造现有 MCP 数据库表结构，优先复用 `install_type`、`deploy_config`、`host` 字段。
 - 不改变已有 SSE 配置格式。
 

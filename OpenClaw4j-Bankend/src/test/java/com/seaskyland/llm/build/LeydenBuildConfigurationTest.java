@@ -252,6 +252,38 @@ class LeydenBuildConfigurationTest {
   }
 
   @Test
+  void deployMiddlewareComposeIncludesOptionalAioSandboxService() throws IOException {
+    String compose = readRoot("deploy/docker-compose.middleware.yml");
+    String envExample = readRoot("deploy/.env.example");
+    String readme = read("README.md");
+
+    assertTrue(compose.contains("\n  aio-sandbox:\n"));
+    assertTrue(
+        compose.contains(
+            "image: ${AIO_SANDBOX_IMAGE:-enterprise-public-cn-beijing.cr.volces.com/vefaas-public/all-in-one-sandbox:latest}"));
+    assertTrue(compose.contains("container_name: openclaw4j-aio-sandbox"));
+    assertTrue(compose.contains("profiles: [\"aio-sandbox\"]"));
+    assertTrue(compose.contains("seccomp:unconfined"));
+    assertTrue(compose.contains("\"127.0.0.1:${AIO_SANDBOX_PORT:-8080}:8080\""));
+    assertTrue(compose.contains("./data/aio-sandbox:${AIO_SANDBOX_WORKSPACE:-/home/gem}"));
+    assertTrue(compose.contains("SANDBOX_API_KEY: ${AIO_SANDBOX_API_KEY:-}"));
+    assertTrue(compose.contains("WORKSPACE: ${AIO_SANDBOX_WORKSPACE:-/home/gem}"));
+    assertTrue(compose.contains("TZ: ${AIO_SANDBOX_TZ:-Asia/Shanghai}"));
+
+    assertTrue(
+        envExample.contains(
+            "AIO_SANDBOX_IMAGE=enterprise-public-cn-beijing.cr.volces.com/vefaas-public/all-in-one-sandbox:latest"));
+    assertTrue(envExample.contains("AIO_SANDBOX_PORT=8080"));
+    assertTrue(envExample.contains("AIO_SANDBOX_WORKSPACE=/home/gem"));
+    assertTrue(envExample.contains("AIO_SANDBOX_TZ=Asia/Shanghai"));
+
+    assertTrue(readme.contains("docker compose --env-file ../deploy/.env"));
+    assertTrue(readme.contains("up -d aio-sandbox"));
+    assertTrue(readme.contains("http://127.0.0.1:8080/mcp"));
+    assertTrue(readme.contains("STREAMABLE_HTTP"));
+  }
+
+  @Test
   void deployMiddlewareComposeDoesNotDeployElasticsearch() throws IOException {
     String compose = readRoot("deploy/docker-compose.middleware.yml");
     String logback = read("src/main/resources/logback-spring.xml");

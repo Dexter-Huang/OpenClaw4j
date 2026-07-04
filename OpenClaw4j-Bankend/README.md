@@ -24,6 +24,29 @@ Spring Boot 启动保持 `spring.sql.init.mode=never`，避免应用重启时重
 
 后端默认 `cache.type=REDIS`，缓存通过单 Redis 实例访问 Redis；消息队列默认 `mq.type=REDISSON`，文档索引消息也通过 Redis/Redisson 投递。
 
+## AIO Sandbox MCP 中间件
+
+如需本地启动 AIO Sandbox，可以复用中间件 compose。该服务默认放在 `aio-sandbox` profile 中，不会随普通中间件启动自动拉起：
+
+```powershell
+docker compose --env-file ../deploy/.env -f ../deploy/docker-compose.middleware.yml up -d aio-sandbox
+```
+
+默认镜像为 `enterprise-public-cn-beijing.cr.volces.com/vefaas-public/all-in-one-sandbox:latest`，端口只绑定到 `127.0.0.1:${AIO_SANDBOX_PORT:-8080}`，并沿用单容器启动所需的 `seccomp:unconfined`。本机后端在 MCP 页面注册时，安装类型选择 `STREAMABLE_HTTP`，配置示例：
+
+```json
+{
+  "mcpServers": {
+    "aio-sandbox": {
+      "url": "http://127.0.0.1:8080/mcp",
+      "headers": {}
+    }
+  }
+}
+```
+
+如果后端也运行在同一个 compose 网络中，URL 可以改为 `http://aio-sandbox:8080/mcp`。
+
 重建干净的本地 PostgreSQL/pgvector 数据库：
 
 ```powershell

@@ -242,7 +242,7 @@ public class MCPManager {
    * transformation based on installation type.
    *
    * @param originDeployConfig Original deployment configuration string
-   * @param installType Installation type (e.g., SSE)
+   * @param installType Installation type (e.g., SSE or STREAMABLE_HTTP)
    * @return Result containing processed configuration or error
    */
   public Result<String> processInstallConfig(String originDeployConfig, String installType) {
@@ -259,7 +259,8 @@ public class MCPManager {
         return Result.error(MCP_PARSE_CONFIG_ERROR);
       }
       targetDeployConfig.put("install_config", originDeployConfig);
-      if (installTypeEnum == McpInstallTypeEnum.SSE) {
+      if (installTypeEnum == McpInstallTypeEnum.SSE
+          || installTypeEnum == McpInstallTypeEnum.STREAMABLE_HTTP) {
         // check request header and host address
         for (String singleServer : mcpServers.keySet()) {
           Map<String, Object> singleServerConfig =
@@ -267,7 +268,11 @@ public class MCPManager {
           String url = (String) singleServerConfig.get("url");
           try {
             URL urlObj = new URL(url);
-            if (!urlObj.getPath().endsWith("/sse")) {
+            if (installTypeEnum == McpInstallTypeEnum.SSE && !urlObj.getPath().endsWith("/sse")) {
+              return Result.error(MCP_PARSE_URL_ERROR);
+            }
+            if (installTypeEnum == McpInstallTypeEnum.STREAMABLE_HTTP
+                && StringUtils.isBlank(urlObj.getPath())) {
               return Result.error(MCP_PARSE_URL_ERROR);
             }
 
@@ -281,8 +286,9 @@ public class MCPManager {
             if (StringUtils.isNotBlank(query)) {
               targetDeployConfig.put("remote_endpoint", urlObj.getPath() + "?" + query);
             }
-            Map<Object, Object> headers =
-                JsonUtils.fromJsonToMap(JsonUtils.toJson(singleServerConfig.get("headers")));
+            HashMap<String, String> headers =
+                toStringHeaderMap(
+                    JsonUtils.fromJsonToMap(JsonUtils.toJson(singleServerConfig.get("headers"))));
             targetDeployConfig.put("remote_header", headers);
           } catch (Exception urlCheckEx) {
             LogUtils.error("processInstallConfig", url, urlCheckEx);
@@ -296,5 +302,19 @@ public class MCPManager {
       LogUtils.error("processInstallConfig exception", ex, originDeployConfig);
       throw ex;
     }
+  }
+
+  private HashMap<String, String> toStringHeaderMap(Map<String, Object> headers) {
+    HashMap<String, String> result = new HashMap<>();
+    if (headers == null) {
+      return result;
+    }
+    headers.forEach(
+        (key, value) -> {
+          if (StringUtils.isNotBlank(key) && value != null) {
+            result.put(key, String.valueOf(value));
+          }
+        });
+    return result;
   }
 }

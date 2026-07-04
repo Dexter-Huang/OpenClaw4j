@@ -37,6 +37,23 @@ services:
       retries: 12
       start_period: 5s
 
+  aio-sandbox:
+    image: ${AIO_SANDBOX_IMAGE:-enterprise-public-cn-beijing.cr.volces.com/vefaas-public/all-in-one-sandbox:latest}
+    container_name: openclaw4j-aio-sandbox
+    profiles: ["aio-sandbox"]
+    restart: unless-stopped
+    security_opt:
+      - seccomp:unconfined
+    shm_size: ${AIO_SANDBOX_SHM_SIZE:-2gb}
+    ports:
+      - "127.0.0.1:${AIO_SANDBOX_PORT:-8080}:8080"
+    environment:
+      SANDBOX_API_KEY: ${AIO_SANDBOX_API_KEY:-}
+      WORKSPACE: ${AIO_SANDBOX_WORKSPACE:-/home/gem}
+      TZ: ${AIO_SANDBOX_TZ:-Asia/Shanghai}
+    volumes:
+      - ./data/aio-sandbox:${AIO_SANDBOX_WORKSPACE:-/home/gem}
+
   # Redis Sentinel 拓扑已默认关闭；如需恢复哨兵机制，先将上面的 redis 服务名和
   # container_name 改回 redis-master/openclaw4j-redis-master，再取消下面服务块的注释。
   # redis-replica-1:
