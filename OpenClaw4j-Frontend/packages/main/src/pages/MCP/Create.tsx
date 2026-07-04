@@ -45,6 +45,7 @@ export default function McpCreate() {
           if (res && res.data) {
             const mcpData = res.data;
             setDeployStatus(mcpData.status);
+            setInstallType(mcpData.install_type || installTypeOptions[0].value);
             setInitialData(mcpData);
 
             // Set form values
@@ -52,6 +53,7 @@ export default function McpCreate() {
               serverName: mcpData.name,
               description: mcpData.description,
               deployConfig: mcpData.deploy_config,
+              installType: mcpData.install_type || installTypeOptions[0].value,
             });
           }
         })
@@ -175,7 +177,8 @@ export default function McpCreate() {
         return (
           currentValues.serverName !== initialData.name ||
           currentValues.description !== initialData.description ||
-          currentValues.deployConfig !== initialData.deploy_config
+          currentValues.deployConfig !== initialData.deploy_config ||
+          installType !== initialData.install_type
         );
       }
 
@@ -341,7 +344,7 @@ export default function McpCreate() {
                     className={styles['mcp-install-type-item']}
                     onSelect={() => setInstallType(item.value)}
                     isActive={installType === item.value}
-                    disabled={true}
+                    disabled={!!server_code && deployStatus === McpStatus.ENABLED}
                     {...item}
                     key={item.value}
                   />

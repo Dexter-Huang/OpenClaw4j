@@ -7,6 +7,15 @@ export const installTypeOptions: IRadioItemProps[] = [
     value: 'SSE',
     logo: 'spark-internet-line',
   },
+  {
+    label: 'Streamable HTTP / AIO Sandbox',
+    value: 'STREAMABLE_HTTP',
+    logo: 'spark-internet-line',
+    desc: $i18n.get({
+      id: 'main.pages.MCP.Create.streamableHttpDescription',
+      dm: '注册 AIO Sandbox 或其他 Streamable HTTP MCP endpoint，例如 /mcp。',
+    }),
+  },
 ];
 
 export const MCP_TIP_SECTIONS = [
@@ -23,6 +32,19 @@ export const MCP_TIP_SECTIONS = [
     description: $i18n.get({
       id: 'main.pages.MCP.Create.mcpMarketDescription',
       dm: '在ModelScope MCP、MCP.so、Simthery等主流的MCP市场获取服务，将Sever地址配置在下方，即可完成自定义MCP服务的注册！',
+    }),
+  },
+  {
+    title: 'AIO Sandbox',
+    linkButtons: [
+      {
+        text: 'AIO Sandbox',
+        url: 'https://sandbox.agent-infra.com/zh/guide/start/quick-start',
+      },
+    ],
+    description: $i18n.get({
+      id: 'main.pages.MCP.Create.aioSandboxDescription',
+      dm: '使用 Streamable HTTP 安装类型注册本地 AIO Sandbox endpoint，例如 http://127.0.0.1:8080/mcp。',
     }),
   },
   {
