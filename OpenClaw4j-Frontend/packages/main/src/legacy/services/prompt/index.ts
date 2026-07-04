@@ -1,5 +1,23 @@
+import type { IModel } from '@/types/modelService';
 import { request } from '../../utils/request';
 import { API_PATH, DIRECT_API_PATH } from '../const';
+
+type LegacyApiResponse<T> = {
+  code: number;
+  message: string;
+  data: T;
+};
+
+export type LegacyModelItem = Omit<
+  PromptAPI.GetModelsResult['pageItems'][number],
+  'id'
+> & {
+  id: string | number;
+};
+
+type LegacyGetModelsResult = Omit<PromptAPI.GetModelsResult, 'pageItems'> & {
+  pageItems: LegacyModelItem[];
+};
 
 // prompt 列表查询
 export async function getPrompts(params: PromptAPI.GetPromptsParams) {
@@ -149,23 +167,43 @@ export async function getPromptTemplate(params: { promptTemplateKey: string }) {
 // 获取模型配置列表
 // 获取模型列表，已替换废弃的 getModelList 接口
 // 返回分页数据格式，支持搜索和过滤功能
-export async function getModels(params?: PromptAPI.GetModelsParams) {
+function toLegacyModel(model: IModel): LegacyModelItem {
+  return {
+    id: model.model_id,
+    name: model.name,
+    provider: model.provider,
+    modelName: model.model_id,
+    baseUrl: '',
+    defaultParameters: {},
+    supportedParameters: [],
+    status: model.enable === false ? 0 : 1,
+    createTime: '',
+    updateTime: '',
+  };
+}
+
+export async function getModels(
+  params?: PromptAPI.GetModelsParams,
+): Promise<LegacyApiResponse<LegacyGetModelsResult>> {
   // Use new ModelService API for enabled models
   const { getEnabledModels } = await import('@/services/modelService');
   try {
     const response = await getEnabledModels();
     if (response?.data) {
+      const pageItems = response.data.map(toLegacyModel);
+
       // Convert to legacy format
       return {
         code: 200,
+        message: 'success',
         data: {
-          totalCount: response.data.length,
+          totalCount: pageItems.length,
           totalPage: 1,
           pageNumber: 1,
-          pageSize: response.data.length,
-          pageItems: response.data,
+          pageSize: pageItems.length,
+          pageItems,
         },
-      } as PromptAPI.GetModelsResult;
+      };
     }
   } catch (error) {
     console.error(

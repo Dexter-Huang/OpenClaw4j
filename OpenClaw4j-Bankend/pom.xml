@@ -34,6 +34,7 @@
             <artifactId>lombok</artifactId>
             <version>1.18.46</version>
             <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
@@ -313,6 +314,12 @@
                             <!-- 指定主类以解决多主类冲突问题 -->
                             <mainClass>com.seaskyland.llm.LLMApplication</mainClass>
                             <jvmArguments>${mybatis.final.field.mutation.jvmArg}</jvmArguments>
+                            <excludes>
+                                <exclude>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                </exclude>
+                            </excludes>
                             <!-- 可选：启用内嵌依赖 -->
                             <!-- 如果希望将依赖库打包到最终生成的jar内部而不是外部分离，无需特殊配置 -->
                         </configuration>
@@ -378,6 +385,12 @@
                             <!-- 指定主类以解决多主类冲突问题 -->
                             <mainClass>com.seaskyland.llm.LLMApplication</mainClass>
                             <jvmArguments>${mybatis.final.field.mutation.jvmArg}</jvmArguments>
+                            <excludes>
+                                <exclude>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                </exclude>
+                            </excludes>
                             <!--这里是填写需要包含进去的jar，
                                  必须项目中的某些模块，会经常变动，那么就应该将其坐标写进来
                                  如果没有则nothing ，表示不打包依赖 -->
@@ -432,6 +445,12 @@
                             <mainClass>com.seaskyland.llm.LLMApplication</mainClass>
                             <includeTools>true</includeTools>
                             <jvmArguments>${mybatis.final.field.mutation.jvmArg}</jvmArguments>
+                            <excludes>
+                                <exclude>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                </exclude>
+                            </excludes>
                         </configuration>
                         <executions>
                             <execution>
@@ -479,6 +498,12 @@
                         <configuration>
                             <mainClass>com.seaskyland.llm.LLMApplication</mainClass>
                             <jvmArguments>${mybatis.final.field.mutation.jvmArg}</jvmArguments>
+                            <excludes>
+                                <exclude>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                </exclude>
+                            </excludes>
                         </configuration>
                         <executions>
                             <execution>

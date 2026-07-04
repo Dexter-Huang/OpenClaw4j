@@ -4,8 +4,7 @@ import { Button, Form, IconFont, Tag } from '@spark-ai/design';
 import { Divider, Flex, Input } from 'antd';
 import classNames from 'classnames';
 import { useContext, useEffect, useState } from 'react';
-// @ts-ignore
-import uuid from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { AssistantAppContext } from '../../../AssistantAppContext';
 import styles from './index.module.less';
 
@@ -52,7 +51,7 @@ export default (props: IProps) => {
       setTempVariables(
         prompt_variables.map((variable) => ({
           ...variable,
-          key: uuid(8),
+          key: uuid(),
         })),
       );
       setValidateInfo(
@@ -186,7 +185,7 @@ export default (props: IProps) => {
                     description: '',
                     name: '',
                     default_value: '',
-                    key: uuid(8),
+                    key: uuid(),
                     type: 'string',
                   },
                 ]);

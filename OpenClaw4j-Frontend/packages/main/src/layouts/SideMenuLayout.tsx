@@ -1,34 +1,34 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { useLocation, useNavigate } from 'umi';
-import { Layout as AntLayout, Menu } from 'antd';
+import UserAccountModal from '@/components/UserAccountModal';
+import $i18n from '@/i18n';
+import { ModelsContext } from '@/legacy/context/models';
+import PromptAPI from '@/legacy/services';
+import type { LegacyModelItem } from '@/legacy/services/prompt';
 import {
+  ApiOutlined,
   AppstoreOutlined,
+  BarChartOutlined,
   BulbOutlined,
+  DatabaseOutlined,
   ExperimentOutlined,
   LineChartOutlined,
-  UnorderedListOutlined,
-  PlayCircleOutlined,
-  BarChartOutlined,
-  NodeIndexOutlined,
-  SettingOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  ApiOutlined,
-  DatabaseOutlined,
+  NodeIndexOutlined,
+  PlayCircleOutlined,
+  SettingOutlined,
   ToolOutlined,
-  SwapOutlined,
+  UnorderedListOutlined,
 } from '@ant-design/icons';
-import $i18n from '@/i18n';
+import { Layout as AntLayout, Menu } from 'antd';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'umi';
 import Header from './Header';
 import styles from './index.module.less';
 import LangSelect from './LangSelect';
 import LoginProvider from './LoginProvider';
+import PureLayout from './Pure';
 import SettingDropdown from './SettingDropdown';
 import ThemeSelect from './ThemeSelect';
-import UserAccountModal from '@/components/UserAccountModal';
-import PureLayout from './Pure';
-import { ModelsContext } from '@/legacy/context/models';
-import PromptAPI from '@/legacy/services';
 
 const { Sider, Content } = AntLayout;
 
@@ -80,7 +80,10 @@ const getSelectedMenuKey = (pathname: string): string => {
   }
 
   // 评估器相关页面
-  if (pathname.startsWith('/admin/evaluation/evaluator') || pathname === '/admin/evaluation/debug') {
+  if (
+    pathname.startsWith('/admin/evaluation/evaluator') ||
+    pathname === '/admin/evaluation/debug'
+  ) {
     return '/admin/evaluation/evaluator';
   }
 
@@ -111,21 +114,28 @@ const getSelectedMenuKey = (pathname: string): string => {
   return pathname;
 };
 
-export default function SideMenuLayout({ children }: { children: React.ReactNode }) {
+export default function SideMenuLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const location = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
-  const [models, setModels] = useState<any[]>([]);
-  const [modelNameMap, setModelNameMap] = useState<Record<number, string>>({});
+  const [models, setModels] = useState<LegacyModelItem[]>([]);
+  const [modelNameMap, setModelNameMap] = useState<Record<string, string>>({});
 
   // 加载模型列表（用于 legacy 页面）
   useEffect(() => {
     PromptAPI.getModels()
       .then((res) => {
-        const nameMap = res.data.pageItems.reduce((acc: Record<number, string>, item: any) => {
-          acc[item.id] = item.name;
-          return acc;
-        }, {});
+        const nameMap = res.data.pageItems.reduce(
+          (acc: Record<string, string>, item) => {
+            acc[item.id] = item.name;
+            return acc;
+          },
+          {},
+        );
         setModelNameMap(nameMap);
         setModels(res.data.pageItems);
       })
@@ -135,7 +145,10 @@ export default function SideMenuLayout({ children }: { children: React.ReactNode
   }, []);
 
   // 获取应该高亮的菜单项 key
-  const selectedKey = useMemo(() => getSelectedMenuKey(location.pathname), [location.pathname]);
+  const selectedKey = useMemo(
+    () => getSelectedMenuKey(location.pathname),
+    [location.pathname],
+  );
 
   // 构建菜单项
   const menuItems = useMemo(
@@ -255,7 +268,9 @@ export default function SideMenuLayout({ children }: { children: React.ReactNode
   };
 
   // 判断是否应该隐藏侧边栏（登录页、首页等）
-  const shouldHideSidebar = ['/login', '/', '/home'].includes(location.pathname);
+  const shouldHideSidebar = ['/login', '/', '/home'].includes(
+    location.pathname,
+  );
 
   if (shouldHideSidebar) {
     return (
@@ -294,7 +309,13 @@ export default function SideMenuLayout({ children }: { children: React.ReactNode
               collapsed={collapsed}
               theme="light"
               className="shadow-lg border-r border-gray-200"
-              style={{ height: '100vh', position: 'fixed', left: 0, top: 0, bottom: 0 }}
+              style={{
+                height: '100vh',
+                position: 'fixed',
+                left: 0,
+                top: 0,
+                bottom: 0,
+              }}
             >
               <div className="p-6 border-b border-gray-200">
                 <h1 className="text-xl font-bold text-gray-800 flex items-center whitespace-nowrap overflow-hidden">
@@ -323,24 +344,36 @@ export default function SideMenuLayout({ children }: { children: React.ReactNode
                   ) : (
                     <MenuFoldOutlined className="text-gray-600 text-lg" />
                   )}
-                  {!collapsed && <span className="ml-2 text-gray-600">收起菜单</span>}
+                  {!collapsed && (
+                    <span className="ml-2 text-gray-600">收起菜单</span>
+                  )}
                 </div>
               </div>
             </Sider>
 
-            <AntLayout style={{ marginLeft: collapsed ? 80 : 256, transition: 'margin-left 0.2s' }}>
+            <AntLayout
+              style={{
+                marginLeft: collapsed ? 80 : 256,
+                transition: 'margin-left 0.2s',
+              }}
+            >
               <Header
                 right={
                   <>
                     <ThemeSelect />
                     <LangSelect />
                     <SettingDropdown />
-                    <UserAccountModal avatarProps={{ className: styles.avatar }} />
+                    <UserAccountModal
+                      avatarProps={{ className: styles.avatar }}
+                    />
                   </>
                 }
               />
               <Content className="overflow-hidden">
-                <div className="h-full overflow-y-auto bg-gray-50" style={{ minHeight: 'calc(100vh - 56px)' }}>
+                <div
+                  className="h-full overflow-y-auto bg-gray-50"
+                  style={{ minHeight: 'calc(100vh - 56px)' }}
+                >
                   {children}
                 </div>
               </Content>
@@ -351,4 +384,3 @@ export default function SideMenuLayout({ children }: { children: React.ReactNode
     </PureLayout>
   );
 }
-

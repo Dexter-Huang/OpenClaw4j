@@ -386,6 +386,19 @@ class LeydenBuildConfigurationTest {
   }
 
   @Test
+  void executableJarBuildExcludesCompileOnlyLombokFromRuntimePackage() throws IOException {
+    String pom = read("pom.xml");
+
+    assertTrue(pom.contains("<artifactId>lombok</artifactId>"));
+    assertTrue(pom.contains("<optional>true</optional>"));
+
+    assertSpringBootPluginExcludesLombok(profileBlock(pom, "dev"));
+    assertSpringBootPluginExcludesLombok(profileBlock(pom, "prod"));
+    assertSpringBootPluginExcludesLombok(profileBlock(pom, "leyden"));
+    assertSpringBootPluginExcludesLombok(profileBlock(pom, "native-experiment"));
+  }
+
+  @Test
   void localLeydenScriptsUseSameCompactObjectHeaderOptionsAsDockerRuntime() throws IOException {
     String trainScript = read("scripts/train-leyden-aot.ps1");
     String runScript = read("scripts/run-leyden-aot.ps1");
@@ -433,6 +446,14 @@ class LeydenBuildConfigurationTest {
     assertTrue(nativeProfile.contains("maven-compiler-plugin"));
     assertTrue(nativeProfile.contains("annotationProcessorPaths"));
     assertTrue(nativeProfile.contains("org.projectlombok"));
+  }
+
+  private void assertSpringBootPluginExcludesLombok(String profile) {
+    String springBootPlugin = pluginBlock(profile, "spring-boot-maven-plugin");
+
+    assertTrue(springBootPlugin.contains("<excludes>"));
+    assertTrue(springBootPlugin.contains("<groupId>org.projectlombok</groupId>"));
+    assertTrue(springBootPlugin.contains("<artifactId>lombok</artifactId>"));
   }
 
   @Test
@@ -541,5 +562,17 @@ class LeydenBuildConfigurationTest {
     int end = pom.indexOf("</profile>", idIndex);
     assertTrue(start >= 0 && end > idIndex, "Invalid Maven profile block: " + profileId);
     return pom.substring(start, end + "</profile>".length());
+  }
+
+  private String pluginBlock(String profile, String pluginArtifactId) {
+    String marker = "<artifactId>" + pluginArtifactId + "</artifactId>";
+    int artifactIndex = profile.indexOf(marker);
+    assertTrue(artifactIndex >= 0, "Missing Maven plugin: " + pluginArtifactId);
+
+    int start = profile.lastIndexOf("<plugin>", artifactIndex);
+    int end = profile.indexOf("</plugin>", artifactIndex);
+    assertTrue(
+        start >= 0 && end > artifactIndex, "Invalid Maven plugin block: " + pluginArtifactId);
+    return profile.substring(start, end + "</plugin>".length());
   }
 }

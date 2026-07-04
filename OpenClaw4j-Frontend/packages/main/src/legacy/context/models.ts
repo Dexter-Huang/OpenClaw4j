@@ -1,11 +1,12 @@
-import { createContext } from "react";
+import { createContext } from 'react';
+import type { LegacyModelItem } from '../services/prompt';
 
 export const ModelsContext = createContext<{
-  modelNameMap: Record<number, string>;
-  models: PromptAPI.GetModelsResult["pageItems"];
-  setModels: (models: PromptAPI.GetModelsResult["pageItems"]) => void;
+  modelNameMap: Record<string, string>;
+  models: LegacyModelItem[];
+  setModels: (models: LegacyModelItem[]) => void;
 }>({
   modelNameMap: {},
   models: [],
-  setModels: (models: PromptAPI.GetModelsResult["pageItems"]) => {}
+  setModels: (models: LegacyModelItem[]) => {},
 });
