@@ -29,10 +29,14 @@ import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
 import com.seaskyland.llm.workflow.runtime.enums.McpInstallTypeEnum;
 import com.seaskyland.llm.workflow.runtime.enums.McpServerStatusEnum;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpServer;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -254,26 +258,28 @@ class MCPManagerTest {
 
   private static final class TestMcpHttpServer implements AutoCloseable {
 
-    private final HttpServer server;
+    private final ServerSocket serverSocket;
+    private final Thread serverThread;
     private volatile String responseBody;
     private volatile String lastRequestBody;
     private volatile Map<String, String> lastRequestHeaders = new HashMap<>();
 
-    private TestMcpHttpServer(HttpServer server, String responseBody) {
-      this.server = server;
+    private TestMcpHttpServer(ServerSocket serverSocket, String responseBody) {
+      this.serverSocket = serverSocket;
       this.responseBody = responseBody;
+      this.serverThread = new Thread(this::handleNextRequest, "test-mcp-http-server");
     }
 
     static TestMcpHttpServer start(String responseBody) throws IOException {
-      HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-      TestMcpHttpServer testServer = new TestMcpHttpServer(server, responseBody);
-      server.createContext("/mcp", testServer::handle);
-      server.start();
+      ServerSocket serverSocket = new ServerSocket(0, 1, InetAddress.getByName("127.0.0.1"));
+      TestMcpHttpServer testServer = new TestMcpHttpServer(serverSocket, responseBody);
+      testServer.serverThread.setDaemon(true);
+      testServer.serverThread.start();
       return testServer;
     }
 
     String url(String path) {
-      return "http://127.0.0.1:" + server.getAddress().getPort() + path;
+      return "http://127.0.0.1:" + serverSocket.getLocalPort() + path;
     }
 
     String lastRequestBody() {
@@ -284,29 +290,69 @@ class MCPManagerTest {
       return lastRequestHeaders;
     }
 
-    private void handle(HttpExchange exchange) throws IOException {
-      lastRequestBody =
-          new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+    private void handleNextRequest() {
+      try (Socket socket = serverSocket.accept()) {
+        socket.setSoTimeout(5000);
+        BufferedReader reader =
+            new BufferedReader(
+                new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+        reader.readLine();
+        Map<String, String> headers = readHeaders(reader);
+        lastRequestHeaders = headers;
+        lastRequestBody = readBody(reader, headers);
+        writeResponse(socket.getOutputStream());
+      } catch (SocketException ex) {
+        if (!serverSocket.isClosed()) {
+          throw new IllegalStateException(ex);
+        }
+      } catch (IOException ex) {
+        throw new IllegalStateException(ex);
+      }
+    }
+
+    private Map<String, String> readHeaders(BufferedReader reader) throws IOException {
       Map<String, String> headers = new HashMap<>();
-      exchange
-          .getRequestHeaders()
-          .forEach(
-              (name, values) -> {
-                if (!values.isEmpty()) {
-                  headers.put(name, values.getFirst());
-                }
-              });
-      lastRequestHeaders = headers;
+      String line;
+      while ((line = reader.readLine()) != null && !line.isEmpty()) {
+        int separator = line.indexOf(':');
+        if (separator > 0) {
+          headers.put(line.substring(0, separator), line.substring(separator + 1).trim());
+        }
+      }
+      return headers;
+    }
+
+    private String readBody(BufferedReader reader, Map<String, String> headers) throws IOException {
+      int length = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+      char[] body = new char[length];
+      int offset = 0;
+      while (offset < length) {
+        int count = reader.read(body, offset, length - offset);
+        if (count < 0) {
+          break;
+        }
+        offset += count;
+      }
+      return new String(body, 0, offset);
+    }
+
+    private void writeResponse(OutputStream outputStream) throws IOException {
       byte[] bytes = responseBody.getBytes(StandardCharsets.UTF_8);
-      exchange.getResponseHeaders().add("Content-Type", "application/json");
-      exchange.sendResponseHeaders(200, bytes.length);
-      exchange.getResponseBody().write(bytes);
-      exchange.close();
+      String headers =
+          "HTTP/1.1 200 OK\r\n"
+              + "Content-Type: application/json\r\n"
+              + "Content-Length: "
+              + bytes.length
+              + "\r\n"
+              + "Connection: close\r\n\r\n";
+      outputStream.write(headers.getBytes(StandardCharsets.UTF_8));
+      outputStream.write(bytes);
+      outputStream.flush();
     }
 
     @Override
-    public void close() {
-      server.stop(0);
+    public void close() throws IOException {
+      serverSocket.close();
     }
   }
 }
