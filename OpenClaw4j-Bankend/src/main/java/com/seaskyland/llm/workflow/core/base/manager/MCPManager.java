@@ -41,8 +41,11 @@ import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
 import io.modelcontextprotocol.spec.McpClientTransport;
 import io.modelcontextprotocol.spec.McpSchema;
+import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -118,7 +121,7 @@ public class MCPManager {
     }
     String cacheKey = "mcp_tools_cache_" + entity.getServerCode();
     boolean needCache = !"SSE".equals(entity.getInstallType());
-    if (needCache) {
+    if (needCache && cacheManager != null) {
       List<McpTool> toolList = cacheManager.get(cacheKey);
       if (toolList != null) {
         return toolList;
@@ -129,6 +132,9 @@ public class MCPManager {
             new Callable<Object>() {
               @Override
               public Object call() throws Exception {
+                if (isStreamableHttp(entity)) {
+                  return getStreamableHttpTools(entity);
+                }
                 McpSyncClient client = getMcpSyncClient(entity);
                 try {
                   client.initialize();
@@ -171,7 +177,7 @@ public class MCPManager {
             });
     try {
       List<McpTool> result = (List<McpTool>) future.get(3, TimeUnit.SECONDS);
-      if (result != null && !result.isEmpty() && needCache) {
+      if (result != null && !result.isEmpty() && needCache && cacheManager != null) {
         cacheManager.put(cacheKey, result, CacheConstants.CACHE_EMPTY_TTL);
       }
       LogUtils.error(
@@ -203,6 +209,9 @@ public class MCPManager {
   public McpServerCallToolResponse callTool(
       McpServerCallToolRequest request, McpServerEntity entity) {
     Long start = System.currentTimeMillis();
+    if (isStreamableHttp(entity)) {
+      return callStreamableHttpTool(request, entity, start);
+    }
     McpSyncClient client = getMcpSyncClient(entity);
     McpServerCallToolResponse response = new McpServerCallToolResponse();
     try {
@@ -235,6 +244,191 @@ public class MCPManager {
     }
     LogUtils.monitor("McpService", "callTool", start, SUCCESS, request, response);
     return response;
+  }
+
+  private boolean isStreamableHttp(McpServerEntity entity) {
+    return entity != null
+        && McpInstallTypeEnum.STREAMABLE_HTTP.name().equals(entity.getInstallType());
+  }
+
+  private List<McpTool> getStreamableHttpTools(McpServerEntity entity) {
+    try {
+      Map<String, Object> response =
+          sendStreamableHttpRequest(entity, "tools/list", new HashMap<>());
+      if (response.containsKey("error")) {
+        LogUtils.error("streamableHttpToolsError", entity.getServerCode(), response.get("error"));
+        return new ArrayList<>();
+      }
+      Map<String, Object> result = toObjectMap(response.get("result"));
+      List<Object> toolValues = result == null ? null : toRawList(result.get("tools"));
+      List<McpTool> tools = new ArrayList<>();
+      if (toolValues == null) {
+        return tools;
+      }
+      toolValues.forEach(
+          toolValue -> {
+            Map<String, Object> toolMap = toObjectMap(toolValue);
+            if (toolMap == null) {
+              return;
+            }
+            McpTool tool = new McpTool();
+            tool.setName((String) toolMap.get("name"));
+            tool.setDescription((String) toolMap.get("description"));
+            Object schema = toolMap.get("inputSchema");
+            if (schema == null) {
+              schema = toolMap.get("input_schema");
+            }
+            tool.setInputSchema(toInputSchema(schema));
+            tools.add(tool);
+          });
+      return tools;
+    } catch (Exception ex) {
+      LogUtils.error("getStreamableHttpTools error", ex, entity.getServerCode(), entity.getHost());
+      return new ArrayList<>();
+    }
+  }
+
+  private McpServerCallToolResponse callStreamableHttpTool(
+      McpServerCallToolRequest request, McpServerEntity entity, Long start) {
+    try {
+      HashMap<String, Object> params = new HashMap<>();
+      params.put("name", request.getToolName());
+      params.put(
+          "arguments", request.getToolParams() == null ? new HashMap<>() : request.getToolParams());
+      Map<String, Object> jsonRpcResponse = sendStreamableHttpRequest(entity, "tools/call", params);
+      McpServerCallToolResponse response = toCallToolResponse(jsonRpcResponse);
+      LogUtils.monitor("McpService", "callTool", start, SUCCESS, request, response);
+      return response;
+    } catch (Exception ex) {
+      LogUtils.monitor("McpService", "callTool", start, FAIL, request, ex.getMessage(), ex);
+      LogUtils.error("McpServerManager callStreamableHttpTool exception", ex);
+      throw ex;
+    }
+  }
+
+  private Map<String, Object> sendStreamableHttpRequest(
+      McpServerEntity entity, String method, Map<String, Object> params) {
+    try {
+      McpServerDeployConfig deployConfig =
+          JsonUtils.fromJson(entity.getDeployConfig(), McpServerDeployConfig.class);
+      String remoteEndpoint = StringUtils.defaultIfBlank(deployConfig.getRemoteEndpoint(), "/mcp");
+      HttpRequest.Builder requestBuilder =
+          HttpRequest.newBuilder()
+              .uri(URI.create(entity.getHost() + remoteEndpoint))
+              .timeout(Duration.ofSeconds(60))
+              .header("Content-Type", "application/json")
+              .header("Accept", "application/json");
+      if (deployConfig.getRemoteHeader() != null) {
+        deployConfig
+            .getRemoteHeader()
+            .forEach(
+                (name, value) -> {
+                  if (StringUtils.isNotBlank(name) && value != null) {
+                    requestBuilder.header(name, value);
+                  }
+                });
+      }
+
+      HashMap<String, Object> payload = new HashMap<>();
+      payload.put("jsonrpc", "2.0");
+      payload.put("id", System.currentTimeMillis());
+      payload.put("method", method);
+      payload.put("params", params == null ? new HashMap<>() : params);
+
+      HttpRequest httpRequest =
+          requestBuilder
+              .POST(HttpRequest.BodyPublishers.ofString(JsonUtils.toJson(payload)))
+              .build();
+      HttpResponse<String> response =
+          HttpClient.newBuilder()
+              .version(HttpClient.Version.HTTP_1_1)
+              .connectTimeout(Duration.ofSeconds(60))
+              .build()
+              .send(httpRequest, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() < 200 || response.statusCode() >= 300) {
+        throw new IllegalStateException(
+            "Streamable HTTP MCP request failed with status " + response.statusCode());
+      }
+      return JsonUtils.fromJsonToMap(response.body());
+    } catch (InterruptedException ex) {
+      Thread.currentThread().interrupt();
+      throw new IllegalStateException("Streamable HTTP MCP request interrupted", ex);
+    } catch (Exception ex) {
+      throw new IllegalStateException("Streamable HTTP MCP request failed", ex);
+    }
+  }
+
+  private McpServerCallToolResponse toCallToolResponse(Map<String, Object> jsonRpcResponse) {
+    McpServerCallToolResponse response = new McpServerCallToolResponse();
+    Map<String, Object> error = toObjectMap(jsonRpcResponse.get("error"));
+    if (error != null) {
+      response.setIsError(true);
+      response.setContent(List.of(textContent(String.valueOf(error.get("message")))));
+      return response;
+    }
+    Map<String, Object> result = toObjectMap(jsonRpcResponse.get("result"));
+    if (result == null) {
+      response.setIsError(true);
+      response.setContent(List.of(textContent("Empty MCP response")));
+      return response;
+    }
+    Object isError = result.get("isError");
+    if (isError == null) {
+      isError = result.get("is_error");
+    }
+    response.setIsError(isError instanceof Boolean ? (Boolean) isError : false);
+    response.setContent(toContentList(result.get("content")));
+    return response;
+  }
+
+  private InputSchema toInputSchema(Object schema) {
+    Map<String, Object> schemaMap = toObjectMap(schema);
+    if (schemaMap == null) {
+      return null;
+    }
+    InputSchema inputSchema = new InputSchema();
+    inputSchema.setType((String) schemaMap.get("type"));
+    inputSchema.setProperties(toObjectMap(schemaMap.get("properties")));
+    inputSchema.setRequired(toStringList(schemaMap.get("required")));
+    Object additionalProperties = schemaMap.get("additionalProperties");
+    if (additionalProperties == null) {
+      additionalProperties = schemaMap.get("additional_properties");
+    }
+    inputSchema.setAdditionalProperties(
+        additionalProperties instanceof Boolean ? (Boolean) additionalProperties : null);
+    return inputSchema;
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<Object> toRawList(Object value) {
+    return value instanceof List<?> ? (List<Object>) value : null;
+  }
+
+  private List<Content> toContentList(Object value) {
+    List<Object> values = toRawList(value);
+    List<Content> contents = new ArrayList<>();
+    if (values == null) {
+      return contents;
+    }
+    values.forEach(
+        item -> {
+          Map<String, Object> contentMap = toObjectMap(item);
+          if (contentMap == null) {
+            return;
+          }
+          String type = (String) contentMap.get("type");
+          if ("text".equals(type)) {
+            contents.add(textContent((String) contentMap.get("text")));
+          }
+        });
+    return contents;
+  }
+
+  private TextContent textContent(String text) {
+    TextContent textContent = new TextContent();
+    textContent.setType("text");
+    textContent.setText(text);
+    return textContent;
   }
 
   /**
