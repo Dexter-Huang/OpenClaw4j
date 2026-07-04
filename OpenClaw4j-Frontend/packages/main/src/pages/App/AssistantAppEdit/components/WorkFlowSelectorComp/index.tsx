@@ -39,7 +39,7 @@ export default function WorkFlowSelectorComp() {
   };
 
   return (
-    <Flex vertical gap={6} className="mb-[20px]">
+    <Flex vertical className="assistantSkillSelectorSection">
       <Flex justify="space-between">
         <Flex
           gap={8}

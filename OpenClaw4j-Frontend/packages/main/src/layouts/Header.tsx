@@ -13,11 +13,11 @@ export default function (props: {
 
   return (
     <div className={styles['header']}>
-      <img
+      {/* <img
         className={styles['header-logo']}
         onClick={() => history.push('/')}
         src={darkMode ? '/images/logoBlack.png' : '/images/logoWhite.png'}
-      />
+      /> */}
       {props.children}
       <div className={styles['header-right']}>{props.right}</div>
     </div>

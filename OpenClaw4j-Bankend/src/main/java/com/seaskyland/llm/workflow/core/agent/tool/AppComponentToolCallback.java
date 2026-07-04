@@ -83,21 +83,28 @@ public class AppComponentToolCallback implements AgentToolCallback {
 
     if (componentType == AppComponentTypeEnum.Agent) {
       AgentResponse response = appComponentManager.executeAgentComponent(request);
-      if (!response.isSuccess()) {
-        return JsonUtils.toJson(response.getError());
-      }
-
-      return String.valueOf(response.getMessage().getContent());
+      String output =
+          response.isSuccess()
+              ? String.valueOf(response.getMessage().getContent())
+              : JsonUtils.toJson(response.getError());
+      recordToolCall(arguments, output);
+      return output;
     } else if (componentType == AppComponentTypeEnum.Workflow) {
       WorkflowResponse response = appComponentManager.executeWorkflowComponent(request);
-      if (!response.isSuccess()) {
-        return JsonUtils.toJson(response.getError());
-      }
-
-      return String.valueOf(response.getMessage().getContent());
+      String output =
+          response.isSuccess()
+              ? String.valueOf(response.getMessage().getContent())
+              : JsonUtils.toJson(response.getError());
+      recordToolCall(arguments, output);
+      return output;
     } else {
       throw new IllegalArgumentException("unknown component type: " + componentType.getValue());
     }
+  }
+
+  private void recordToolCall(Map<String, Object> arguments, String output) {
+    AgentToolCallRecorder.record(
+        getToolCallType(), getToolDefinition().name(), JsonUtils.toJson(arguments), output);
   }
 
   /** Returns tool metadata indicating direct return behavior. */

@@ -85,11 +85,11 @@ public class McpToolCallback implements AgentToolCallback {
 
     Result<McpServerCallToolResponse> result = mcpServerService.callTool(request);
 
-    if (!result.isSuccess()) {
-      return JsonUtils.toJson(result);
-    }
-
-    return JsonUtils.toJson(result.getData());
+    String output =
+        result.isSuccess() ? JsonUtils.toJson(result.getData()) : JsonUtils.toJson(result);
+    AgentToolCallRecorder.record(
+        getToolCallType(), this.tool.getName(), JsonUtils.toJson(arguments), output);
+    return output;
   }
 
   /** Gets the tool metadata configuration */

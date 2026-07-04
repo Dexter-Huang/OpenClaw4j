@@ -66,7 +66,7 @@ export default function PluginSelectorComp() {
   };
 
   return (
-    <Flex vertical gap={6} className="mb-[20px]">
+    <Flex vertical className="assistantSkillSelectorSection">
       <Flex justify="space-between" align="center">
         <Flex
           gap={8}

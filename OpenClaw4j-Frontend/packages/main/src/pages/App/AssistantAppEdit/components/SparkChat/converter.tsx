@@ -1,5 +1,6 @@
 import { IReceiveMessage, IUsage } from '@/types/chat';
 import { TMessage } from '@spark-ai/chat';
+import { normalizeAssistantContentForDisplay } from './utils/messageContent';
 
 export const convertAgentMsgToSparkChat = (
   agentMsg: IReceiveMessage,
@@ -24,7 +25,9 @@ export const convertAgentMsgToSparkChat = (
       {
         code: 'Text',
         data: {
-          content: agentMsg.message?.content,
+          content: normalizeAssistantContentForDisplay(
+            agentMsg.message?.content,
+          ),
           msgStatus: 'generating',
         },
       },

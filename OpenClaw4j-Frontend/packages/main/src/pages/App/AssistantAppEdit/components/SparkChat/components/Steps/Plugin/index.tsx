@@ -8,6 +8,7 @@ import {
   parseJsonSafely,
 } from '@spark-ai/design';
 import styles from './index.module.less';
+import { getToolPanelExpandedHeight } from './panelLayout';
 
 export default (props: {
   params: {
@@ -51,7 +52,7 @@ export default (props: {
             dm: '输入参数',
           })}
           collapsedHeight={64}
-          expandedHeight={200}
+          expandedHeight={getToolPanelExpandedHeight(params.arguments)}
           expandOnPanelClick={true}
           extra={
             <IconFont
@@ -77,7 +78,7 @@ export default (props: {
             dm: '输出参数',
           })}
           collapsedHeight={64}
-          expandedHeight={200}
+          expandedHeight={getToolPanelExpandedHeight(params.output)}
           expandOnPanelClick={true}
           extra={
             <IconFont

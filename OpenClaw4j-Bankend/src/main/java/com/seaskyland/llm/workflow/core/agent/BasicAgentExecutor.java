@@ -20,6 +20,7 @@ import static com.seaskyland.llm.workflow.core.rag.RagConstants.FILE_SEARCH_CALL
 import static com.seaskyland.llm.workflow.core.rag.RagConstants.FILE_SEARCH_RESULT;
 import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
 
+import com.seaskyland.llm.workflow.core.agent.tool.AgentToolCallRecorder;
 import com.seaskyland.llm.workflow.core.agent.tool.AgentToolCallback;
 import com.seaskyland.llm.workflow.core.agent.tool.CompositeToolCallbackProvider;
 import com.seaskyland.llm.workflow.core.agent.tool.ToolArgumentsHelper;
@@ -61,6 +62,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.ChatClientAttributes;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
@@ -90,6 +92,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * Basic agent executor implementation that handles agent interactions and tool executions. Provides
@@ -145,6 +148,23 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
     AgentConfig config = context.getConfig();
     CompositeToolCallbackProvider toolCallbackProvider =
         buildToolCallbackProvider(config, request.getExtraPrams());
+
+    if (!ArrayUtils.isEmpty(toolCallbackProvider.getToolCallbacks())) {
+      return Mono.fromCallable(
+              () -> {
+                try {
+                  return RequestContextHolder.callWithRequestContext(
+                      requestContext, () -> execute(context, request));
+                } catch (RuntimeException | Error ex) {
+                  throw ex;
+                } catch (Exception ex) {
+                  throw new RuntimeException(ex);
+                }
+              })
+          .subscribeOn(Schedulers.boundedElastic())
+          .flux();
+    }
+
     ToolCallingChatOptions chatOptions = buildChatOptions(config, toolCallbackProvider);
 
     // build tool callback provider
@@ -198,38 +218,41 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
         buildChatClient(context, chatOptions, toolCallbackProvider);
 
     Prompt prompt = new Prompt(messages, chatOptions);
-    ChatResponse response = chatClientBuilder.build().prompt(prompt).call().chatResponse();
+    List<ToolCall> toolCalls = new ArrayList<>();
+    while (true) {
+      AgentToolCallRecorder.clear();
+      ChatResponse response;
+      try {
+        response = chatClientBuilder.build().prompt(prompt).call().chatResponse();
+      } catch (RuntimeException | Error ex) {
+        AgentToolCallRecorder.clear();
+        throw ex;
+      }
+      List<ToolCall> directToolCalls = AgentToolCallRecorder.drain();
 
-    Assert.notNull(response, "response can not be null");
-    if (response.hasToolCalls()) {
-      ToolExecutionResult toolExecutionResult =
-          toolCallingManager.executeToolCalls(prompt, response);
-
-      Prompt newPrompt = new Prompt(toolExecutionResult.conversationHistory(), chatOptions);
-      ChatResponse chatResponse = chatClientBuilder.build().prompt(newPrompt).call().chatResponse();
-
-      Assert.notNull(chatResponse, "chat response can not be null");
-      AgentResponse agentResponse = convertResponse(chatResponse, toolCallbackProvider).block();
-
-      Assert.notNull(agentResponse, "agent response can not be null");
-
-      // handle tool results
-      Generation generation = response.getResults().get(0);
-      List<AssistantMessage.ToolCall> assistantToolCalls = generation.getOutput().getToolCalls();
-      List<ToolCall> toolCalls =
-          new ArrayList<>(convertToolCall(assistantToolCalls, toolCallbackProvider));
-
-      List<ToolCall> toolCallResults = convertToolResult(toolExecutionResult, toolCallbackProvider);
-      toolCalls.addAll(toolCallResults);
-
-      if (!CollectionUtils.isEmpty(toolCalls)) {
-        agentResponse.getMessage().setToolCalls(toolCalls);
+      Assert.notNull(response, "response can not be null");
+      if (!response.hasToolCalls()) {
+        AgentResponse agentResponse = convertResponse(response, toolCallbackProvider).block();
+        if (agentResponse != null) {
+          toolCalls.addAll(directToolCalls);
+          if (!CollectionUtils.isEmpty(toolCalls)) {
+            agentResponse.getMessage().setToolCalls(toolCalls);
+          }
+        }
+        return agentResponse;
       }
 
-      return agentResponse;
-    }
+      Generation generation = response.getResults().get(0);
+      List<AssistantMessage.ToolCall> assistantToolCalls = generation.getOutput().getToolCalls();
+      toolCalls.addAll(convertToolCall(assistantToolCalls, toolCallbackProvider));
 
-    return convertResponse(response, toolCallbackProvider).block();
+      ToolExecutionResult toolExecutionResult =
+          toolCallingManager.executeToolCalls(prompt, response);
+      AgentToolCallRecorder.clear();
+      toolCalls.addAll(convertToolResult(toolExecutionResult, toolCallbackProvider));
+
+      prompt = new Prompt(toolExecutionResult.conversationHistory(), chatOptions);
+    }
   }
 
   /**
@@ -290,6 +313,9 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
 
     // Add chat memory advisor
     ChatClient.Builder chatClientBuilder = chatClient.mutate();
+    chatClientBuilder.defaultAdvisors(
+        advisor ->
+            advisor.param(ChatClientAttributes.TOOL_CALLING_ADVISOR_AUTO_REGISTER.getKey(), false));
     if (context.isMemoryEnabled()) {
       MessageChatMemoryAdvisor advisor = MessageChatMemoryAdvisor.builder(chatMemory).build();
       int dialogRound = config.getMemory().getDialogRound();
@@ -767,6 +793,7 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
                         () -> {
                           ToolExecutionResult result =
                               toolCallingManager.executeToolCalls(originalPrompt, response);
+                          AgentToolCallRecorder.clear();
                           return new Object[] {
                             result, convertToolResult(response, result, toolCallbackProvider)
                           };

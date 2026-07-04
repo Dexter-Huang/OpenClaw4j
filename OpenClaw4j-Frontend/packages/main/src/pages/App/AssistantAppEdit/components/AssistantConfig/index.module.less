@@ -140,6 +140,32 @@
   }
 }
 
+.configPanel {
+  container-type: inline-size;
+  height: 100%;
+  --assistant-config-header-padding-inline: 24px;
+  --assistant-skill-section-gap: 14px;
+  --assistant-skill-item-gap: 10px;
+}
+
+.configHeader {
+  padding: 8px var(--assistant-config-header-padding-inline);
+  padding-inline: clamp(20px, 4cqi, 32px);
+}
+
+.skillSelectorList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--assistant-skill-section-gap);
+  gap: clamp(12px, 2cqi, 16px);
+
+  :global(.assistantSkillSelectorSection) {
+    gap: var(--assistant-skill-item-gap);
+    gap: clamp(8px, 1.4cqi, 12px);
+    margin-bottom: 0;
+  }
+}
+
 .testWindow {
   position: relative;
   height: 100%;

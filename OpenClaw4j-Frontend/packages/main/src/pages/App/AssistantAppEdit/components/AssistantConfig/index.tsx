@@ -92,100 +92,104 @@ export default function AssistantConfig() {
           order={1}
           style={{ overflowY: 'auto' }}
         >
-          <ConfigProvider componentDisabled={appState.readonly}>
-            <div className="p-[8px_20px]">
-              <Flex
-                justify="space-between"
-                className={classNames(styles.title, 'w-full')}
-              >
-                {$i18n.get({
-                  id: 'main.pages.App.AssistantAppEdit.components.AssistantConfig.index.apiConfiguration',
-                  dm: 'API配置',
-                })}
+          <div className={styles.configPanel}>
+            <ConfigProvider componentDisabled={appState.readonly}>
+              <div className={styles.configHeader}>
+                <Flex
+                  justify="space-between"
+                  className={classNames(styles.title, 'w-full')}
+                >
+                  {$i18n.get({
+                    id: 'main.pages.App.AssistantAppEdit.components.AssistantConfig.index.apiConfiguration',
+                    dm: 'API配置',
+                  })}
 
-                <ModelConfig></ModelConfig>
-              </Flex>
-            </div>
-            <div className={styles.configTimelineContainer}>
-              <Timeline
-                className={styles.configTimeline}
-                style={{ padding: '0 20px', marginTop: 8 }}
-                items={compact([
-                {
-                  children: (
-                    <div>
-                      <div
-                        className="text-[14px] font-medium leading-[24px] mb-[10px]"
-                        style={{ color: 'var(--ag-ant-color-text)' }}
-                      >
-                        {$i18n.get({
-                          id: 'main.pages.App.AssistantAppEdit.components.AssistantConfig.index.instruction',
-                          dm: '指令',
-                        })}
-                      </div>
-                      <AssistantPromptEditorWrap
-                        maxTokenContext={
-                          defaultSettings.agentSystemPromptMaxLength
-                        }
-                        appBasicConfig={appBasicConfig}
-                        changePrompt={(val) =>
-                          onAppConfigChange({ instructions: val })
-                        }
-                        prompt={prompt || ''}
-                      />
-                    </div>
-                  ),
+                  <ModelConfig></ModelConfig>
+                </Flex>
+              </div>
+              <div className={styles.configTimelineContainer}>
+                <Timeline
+                  className={styles.configTimeline}
+                  style={{ padding: '0 20px', marginTop: 8 }}
+                  items={compact([
+                    {
+                      children: (
+                        <div>
+                          <div
+                            className="text-[14px] font-medium leading-[24px] mb-[10px]"
+                            style={{ color: 'var(--ag-ant-color-text)' }}
+                          >
+                            {$i18n.get({
+                              id: 'main.pages.App.AssistantAppEdit.components.AssistantConfig.index.instruction',
+                              dm: '指令',
+                            })}
+                          </div>
+                          <AssistantPromptEditorWrap
+                            maxTokenContext={
+                              defaultSettings.agentSystemPromptMaxLength
+                            }
+                            appBasicConfig={appBasicConfig}
+                            changePrompt={(val) =>
+                              onAppConfigChange({ instructions: val })
+                            }
+                            prompt={prompt || ''}
+                          />
+                        </div>
+                      ),
 
-                  dot: (
-                    <IconFont
-                      className="width-[20px] height-[20px] rounded-[50%]"
-                      type="spark-code02-line"
-                    ></IconFont>
-                  ),
-                },
-                {
-                  children: (
-                    <div>
-                      <div
-                        className="text-[14px] font-medium leading-[24px] mb-[10px]"
-                        style={{ color: 'var(--ag-ant-color-text)' }}
-                      >
-                        {$i18n.get({
-                          id: 'main.pages.App.AssistantAppEdit.components.AssistantConfig.index.knowledge',
-                          dm: '知识',
-                        })}
-                      </div>
-                      <KnowledgeBaseSelectorComp></KnowledgeBaseSelectorComp>
-                    </div>
-                  ),
+                      dot: (
+                        <IconFont
+                          className="width-[20px] height-[20px] rounded-[50%]"
+                          type="spark-code02-line"
+                        ></IconFont>
+                      ),
+                    },
+                    {
+                      children: (
+                        <div>
+                          <div
+                            className="text-[14px] font-medium leading-[24px] mb-[10px]"
+                            style={{ color: 'var(--ag-ant-color-text)' }}
+                          >
+                            {$i18n.get({
+                              id: 'main.pages.App.AssistantAppEdit.components.AssistantConfig.index.knowledge',
+                              dm: '知识',
+                            })}
+                          </div>
+                          <KnowledgeBaseSelectorComp></KnowledgeBaseSelectorComp>
+                        </div>
+                      ),
 
-                  dot: <IconFont type="spark-paper-line"></IconFont>,
-                },
-                {
-                  children: (
-                    <div>
-                      <div
-                        className="text-[14px] font-medium leading-[24px] mb-[10px]"
-                        style={{ color: 'var(--ag-ant-color-text)' }}
-                      >
-                        {$i18n.get({
-                          id: 'main.pages.App.AssistantAppEdit.components.AssistantConfig.index.skill',
-                          dm: '技能',
-                        })}
-                      </div>
-                      <MCPSelectorComp />
-                      <PluginSelectorComp />
-                      <AgentSelectorComp />
-                      <WorkFlowSelectorComp />
-                    </div>
-                  ),
+                      dot: <IconFont type="spark-paper-line"></IconFont>,
+                    },
+                    {
+                      children: (
+                        <div>
+                          <div
+                            className="text-[14px] font-medium leading-[24px] mb-[10px]"
+                            style={{ color: 'var(--ag-ant-color-text)' }}
+                          >
+                            {$i18n.get({
+                              id: 'main.pages.App.AssistantAppEdit.components.AssistantConfig.index.skill',
+                              dm: '技能',
+                            })}
+                          </div>
+                          <div className={styles.skillSelectorList}>
+                            <MCPSelectorComp />
+                            <PluginSelectorComp />
+                            <AgentSelectorComp />
+                            <WorkFlowSelectorComp />
+                          </div>
+                        </div>
+                      ),
 
-                  dot: <IconFont type="spark-toolbox-line"></IconFont>,
-                },
-              ])}
-            ></Timeline>
-            </div>
-          </ConfigProvider>
+                      dot: <IconFont type="spark-toolbox-line"></IconFont>,
+                    },
+                  ])}
+                ></Timeline>
+              </div>
+            </ConfigProvider>
+          </div>
         </Panel>
         <PanelResizeHandle className={styles.resizeHandle}>
           <div className={styles.divider1}>

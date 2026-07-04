@@ -1,7 +1,18 @@
 .container {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   height: 100%;
+  --assistant-test-header-padding-inline: 24px;
+
+  .testHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px var(--assistant-test-header-padding-inline);
+    padding-inline: clamp(20px, 3cqi, 32px);
+  }
+
   .actions {
     display: flex;
     gap: 4px;

@@ -62,7 +62,7 @@ export default function PluginSelectorComp() {
   };
 
   return (
-    <Flex vertical gap={6} className="mb-[20px]">
+    <Flex vertical className="assistantSkillSelectorSection">
       <div className={styles.titleWrap}>
         <Flex
           gap={8}

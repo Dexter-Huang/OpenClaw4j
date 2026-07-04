@@ -32,6 +32,11 @@ import ThemeSelect from './ThemeSelect';
 
 const { Sider, Content } = AntLayout;
 
+const SIDER_WIDTH = 256;
+const SIDER_COLLAPSED_WIDTH = 80;
+const HEADER_HEIGHT = 56;
+const BOTTOM_BAR_HEIGHT = 65;
+
 // 获取应该高亮的菜单项 key
 const getSelectedMenuKey = (pathname: string): string => {
   // 应用相关页面
@@ -124,6 +129,7 @@ export default function SideMenuLayout({
   const [collapsed, setCollapsed] = useState(false);
   const [models, setModels] = useState<LegacyModelItem[]>([]);
   const [modelNameMap, setModelNameMap] = useState<Record<string, string>>({});
+  const siderWidth = collapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH;
 
   // 加载模型列表（用于 legacy 页面）
   useEffect(() => {
@@ -304,21 +310,28 @@ export default function SideMenuLayout({
         >
           <AntLayout className="h-screen">
             <Sider
-              width={256}
-              collapsedWidth={80}
+              width={SIDER_WIDTH}
+              collapsedWidth={SIDER_COLLAPSED_WIDTH}
               collapsed={collapsed}
               theme="light"
-              className="shadow-lg border-r border-gray-200"
+              className="border-r border-gray-200"
               style={{
                 height: '100vh',
                 position: 'fixed',
                 left: 0,
                 top: 0,
                 bottom: 0,
+                width: siderWidth,
+                minWidth: siderWidth,
+                maxWidth: siderWidth,
+                flex: `0 0 ${siderWidth}px`,
               }}
             >
-              <div className="p-6 border-b border-gray-200">
-                <h1 className="text-xl font-bold text-gray-800 flex items-center whitespace-nowrap overflow-hidden">
+              <div
+                className={`${styles.siderBrand} border-b border-gray-200`}
+                style={{ height: HEADER_HEIGHT }}
+              >
+                <h1 className="m-0 text-xl font-bold text-gray-800 flex items-center whitespace-nowrap overflow-hidden">
                   <SettingOutlined className="mr-1 text-blue-500" />
                   {!collapsed && 'Agent Admin'}
                 </h1>
@@ -334,9 +347,12 @@ export default function SideMenuLayout({
                 inlineCollapsed={collapsed}
               />
 
-              <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white">
+              <div
+                className="absolute bottom-0 left-0 right-0 border-t border-gray-200 bg-white"
+                style={{ height: BOTTOM_BAR_HEIGHT }}
+              >
                 <div
-                  className="flex items-center justify-center p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="flex h-full items-center justify-center px-4 cursor-pointer hover:bg-gray-50 transition-colors"
                   onClick={() => setCollapsed(!collapsed)}
                 >
                   {collapsed ? (
@@ -353,8 +369,9 @@ export default function SideMenuLayout({
 
             <AntLayout
               style={{
-                marginLeft: collapsed ? 80 : 256,
+                marginLeft: siderWidth,
                 transition: 'margin-left 0.2s',
+                minHeight: '100vh',
               }}
             >
               <Header
@@ -372,7 +389,7 @@ export default function SideMenuLayout({
               <Content className="overflow-hidden">
                 <div
                   className="h-full overflow-y-auto bg-gray-50"
-                  style={{ minHeight: 'calc(100vh - 56px)' }}
+                  style={{ minHeight: `calc(100vh - ${HEADER_HEIGHT}px)` }}
                 >
                   {children}
                 </div>

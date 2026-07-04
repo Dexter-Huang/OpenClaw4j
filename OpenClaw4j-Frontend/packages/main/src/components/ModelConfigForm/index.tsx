@@ -23,6 +23,10 @@ import {
 } from 'antd';
 import { memo, useEffect, useMemo, useState } from 'react';
 import styles from './index.module.less';
+import {
+  MODEL_SELECTOR_DROPDOWN_WIDTH,
+  MODEL_SELECTOR_WIDTH,
+} from './modelSelectorLayout';
 
 // Get slider step value based on precision
 const getStepFromPrecision = (precision?: number): number => {
@@ -236,7 +240,9 @@ const ModelSelector = memo(
             id: 'main.pages.App.Workflow.nodes.ParameterExtractor.schema.selectModel',
             dm: '请选择模型',
           })}
-          className="flex-1 w-[240px]"
+          className={styles['model-selector']}
+          style={{ width: MODEL_SELECTOR_WIDTH }}
+          popupMatchSelectWidth={MODEL_SELECTOR_DROPDOWN_WIDTH}
           value={!value.model_id ? void 0 : value.model_id}
           options={modelOptions}
           onChange={(value, option: any) => {

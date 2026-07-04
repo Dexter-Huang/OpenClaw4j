@@ -88,11 +88,11 @@ public class PluginToolCallback implements AgentToolCallback {
         this.toolExecutionService.callOpenApi(
             ToolExecutionRequest.builder().tool(this.tool).arguments(arguments).build());
 
-    if (!response.isSuccess()) {
-      return JsonUtils.toJson(response.getError());
-    }
-
-    return response.getOutput();
+    String output =
+        response.isSuccess() ? response.getOutput() : JsonUtils.toJson(response.getError());
+    AgentToolCallRecorder.record(
+        getToolCallType(), getToolDefinition().name(), JsonUtils.toJson(arguments), output);
+    return output;
   }
 
   /**

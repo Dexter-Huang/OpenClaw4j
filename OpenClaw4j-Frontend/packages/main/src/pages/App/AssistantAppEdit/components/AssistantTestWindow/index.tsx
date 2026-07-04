@@ -71,7 +71,7 @@ export default function AssistantTestWindow(props: IProps) {
   return (
     <div className={styles.container} ref={panelGroupRef}>
       <div
-        className="py-[12px] px-[20px] flex items-center justify-between"
+        className={styles.testHeader}
         style={{
           background: 'var(--ag-ant-color-fill-tertiary)',
           height: '48px',

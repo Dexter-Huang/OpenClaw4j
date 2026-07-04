@@ -34,6 +34,10 @@ import Steps from './components/Steps';
 import Welcome from './components/Welcome';
 import { convertAgentMsgToSparkChat } from './converter';
 import Chat from './libs/chat';
+import {
+  createUserTextCard,
+  getUserMessageContent,
+} from './utils/userMessageCard';
 
 interface IProps {
   maxTokenContext?: number;
@@ -134,8 +138,8 @@ export default forwardRef<ISparkChatRef, IProps>((props, ref) => {
         // set the new query
         currentQA.current.query = {
           id: uuid(),
-          cards: [],
-          content: data.query,
+          cards: [createUserTextCard(data.query)],
+          content: '',
           role: 'user',
           msgStatus: 'finished',
         };
@@ -253,7 +257,7 @@ export default forwardRef<ISparkChatRef, IProps>((props, ref) => {
       currentQA.current.answer = undefined;
       onInput(
         {
-          query: messages[messages.length - 1]?.content!,
+          query: getUserMessageContent(messages[messages.length - 1]),
           fileList: [fileList, imageList],
         },
         true,
