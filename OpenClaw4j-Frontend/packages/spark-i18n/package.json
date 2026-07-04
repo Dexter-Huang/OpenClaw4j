@@ -13,15 +13,15 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "translate:spark-flow": "node ./src/must/run.js -t patch -c spark-flow",
-    "translate:spark-flow:check": "node ./src/must/run.js -t check -c spark-flow",
-    "translate:spark-flow:init": "node ./src/must/run.js -t init -c spark-flow",
     "translate:main": "node ./src/must/run.js -t patch -c main",
     "translate:main:check": "node ./src/must/run.js -t check -c main",
-    "translate:main:init": "node ./src/must/run.js -t init -c main"
+    "translate:main:init": "node ./src/must/run.js -t init -c main",
+    "translate:spark-flow": "node ./src/must/run.js -t patch -c spark-flow",
+    "translate:spark-flow:check": "node ./src/must/run.js -t check -c spark-flow",
+    "translate:spark-flow:init": "node ./src/must/run.js -t init -c spark-flow"
   },
   "devDependencies": {
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.6.1",
     "find": "^0.2.9",
     "fs-extra": "^6.0.1"
   }

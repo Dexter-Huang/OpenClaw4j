@@ -58,6 +58,22 @@ mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' checkstyle:check
 mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' spotbugs:check
 ```
 
+日常迭代时可以先运行后端快速质量检查，减少 Checkstyle / SpotBugs 的等待时间：
+
+```powershell
+cd OpenClaw4j-Bankend
+.\scripts\check-backend-quality-fast.ps1
+```
+
+该脚本会：
+
+- 固定使用 JDK 26 和 `D:\apache-maven-3.9.1\m2\repository`。
+- 始终运行 `spotless:check`。
+- 只对相对 `HEAD` 有变更的后端 Java 文件运行 Checkstyle。
+- 只有 `src/main/java` 有变更时，才用 `-Dspotbugs.effort=Default` 运行 SpotBugs 快检；仅测试代码变更时跳过 SpotBugs。
+
+快速质量检查只用于本地迭代提速，不能替代最终门禁。声明后端代码完成前，仍按本节后面的要求运行全量 `spotless:check`、`checkstyle:check`、`spotbugs:check`。
+
 Use `spotless:apply` only when formatting the touched Java files is intended. For broad legacy cleanup, make a dedicated formatting commit.
 
 Generated and legacy-problematic backend sources should stay excluded from quality checks until they are intentionally cleaned up:

@@ -85,8 +85,7 @@ class LeydenBuildConfigurationTest {
 
   @Test
   void localPgvectorComposeInitializesPostgresql18WithApplicationSchema() throws IOException {
-    String compose =
-        Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
+    String compose = readRoot("deploy/docker-compose.middleware.yml");
 
     assertTrue(compose.contains("image: pgvector/pgvector:pg18"));
     assertTrue(compose.contains("pgvector:"));
@@ -122,8 +121,7 @@ class LeydenBuildConfigurationTest {
     String application = read("src/main/resources/application.yml");
     String redissonConfig =
         read("src/main/java/com/seaskyland/llm/workflow/core/config/RedissonConfig.java");
-    String compose =
-        Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
+    String compose = readRoot("deploy/docker-compose.middleware.yml");
 
     assertTrue(application.contains("host: ${OPENCLAW_REDIS_HOST:127.0.0.1}"));
     assertTrue(application.contains("port: ${OPENCLAW_REDIS_PORT:6379}"));
@@ -165,9 +163,8 @@ class LeydenBuildConfigurationTest {
     String application = read("src/main/resources/application.yml");
     String mqProperties =
         read("src/main/java/com/seaskyland/llm/workflow/core/config/MqConfigProperties.java");
-    String compose =
-        Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
-    String envExample = Files.readString(PROJECT_DIR.getParent().resolve("deploy/.env.example"));
+    String compose = readRoot("deploy/docker-compose.middleware.yml");
+    String envExample = readRoot("deploy/.env.example");
     String pom = read("pom.xml");
 
     assertTrue(application.contains("mq:\n  type: REDISSON"));
@@ -191,16 +188,11 @@ class LeydenBuildConfigurationTest {
 
   @Test
   void deployMiddlewareComposeUsesPgvectorAndSingleRedisInstance() throws IOException {
-    String compose =
-        Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
-    String sentinel =
-        Files.readString(PROJECT_DIR.getParent().resolve("deploy/redis/sentinel-1.conf"));
-    String redisMaster =
-        Files.readString(PROJECT_DIR.getParent().resolve("deploy/redis/redis-master.conf"));
-    String redisReplica1 =
-        Files.readString(PROJECT_DIR.getParent().resolve("deploy/redis/redis-replica-1.conf"));
-    String redisReplica2 =
-        Files.readString(PROJECT_DIR.getParent().resolve("deploy/redis/redis-replica-2.conf"));
+    String compose = readRoot("deploy/docker-compose.middleware.yml");
+    String sentinel = readRoot("deploy/redis/sentinel-1.conf");
+    String redisMaster = readRoot("deploy/redis/redis-master.conf");
+    String redisReplica1 = readRoot("deploy/redis/redis-replica-1.conf");
+    String redisReplica2 = readRoot("deploy/redis/redis-replica-2.conf");
 
     assertTrue(compose.contains("pgvector:"));
     assertTrue(compose.contains("container_name: openclaw4j-pgvector"));
@@ -261,8 +253,7 @@ class LeydenBuildConfigurationTest {
 
   @Test
   void deployMiddlewareComposeDoesNotDeployElasticsearch() throws IOException {
-    String compose =
-        Files.readString(PROJECT_DIR.getParent().resolve("deploy/docker-compose.middleware.yml"));
+    String compose = readRoot("deploy/docker-compose.middleware.yml");
     String logback = read("src/main/resources/logback-spring.xml");
 
     assertFalse(compose.contains("docker.elastic.co/elasticsearch"));
@@ -533,8 +524,7 @@ class LeydenBuildConfigurationTest {
 
   @Test
   void githubActionsBuildsAndPublishesOptimizedLeydenDockerImageOnPush() throws IOException {
-    String workflow =
-        Files.readString(PROJECT_DIR.getParent().resolve(".github/workflows/backend-native.yml"));
+    String workflow = readRoot(".github/workflows/backend-native.yml");
 
     assertTrue(workflow.contains("packages: write"));
     assertTrue(workflow.contains("docker/login-action@v3"));
@@ -550,7 +540,15 @@ class LeydenBuildConfigurationTest {
   }
 
   private String read(String relativePath) throws IOException {
-    return Files.readString(PROJECT_DIR.resolve(relativePath));
+    return normalizeLineEndings(Files.readString(PROJECT_DIR.resolve(relativePath)));
+  }
+
+  private String readRoot(String relativePath) throws IOException {
+    return normalizeLineEndings(Files.readString(PROJECT_DIR.getParent().resolve(relativePath)));
+  }
+
+  private String normalizeLineEndings(String value) {
+    return value.replace("\r\n", "\n").replace('\r', '\n');
   }
 
   private String profileBlock(String pom, String profileId) {

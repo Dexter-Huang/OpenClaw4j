@@ -15,6 +15,7 @@ Run the smallest command that proves the current change first. Before claiming c
 | --- | --- | --- |
 | Backend controller/service/test | `mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' '-Dtest=<TestClass>' test` | `mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' test` |
 | Backend POM/shared config | Targeted compile/test that covers the touched behavior | Full `mvn ... test` |
+| Backend Java quality checks during iteration | `.\scripts\check-backend-quality-fast.ps1` from `OpenClaw4j-Bankend/` | Full `spotless:check`, `checkstyle:check`, and `spotbugs:check` |
 | Backend Leyden/JDK AOT cache config | `mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' '-Dtest=LeydenBuildConfigurationTest' test` | `mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' -Pleyden -DskipTests package`; when JDK 25/26 is available, also run `./scripts/train-leyden-aot.ps1 -WarmupProfile representative -WarmupRequestTimeoutSeconds 10`, `./scripts/run-leyden-aot.ps1 -ServerPort 0`, and for performance-sensitive changes `./scripts/benchmark-leyden-startup.ps1` |
 | Backend GraalVM native experiment config | `mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' '-Dtest=LeydenBuildConfigurationTest' test` | `mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' -Pnative-experiment -DskipNativeBuild=true -DskipTests package`; do not run `native:compile` unless the user explicitly wants the long GraalVM experiment |
 | Frontend TypeScript app code | If there is no smaller test/lint script, run `npm run build:app` | Run `npm run build:app` again at the end |
@@ -24,6 +25,7 @@ Run the smallest command that proves the current change first. Before claiming c
 
 - Backend-only changes do not require frontend builds.
 - Iterate with targeted Maven tests before the full suite.
+- During backend Java iteration, use `.\scripts\check-backend-quality-fast.ps1` to run Spotless, changed-file Checkstyle, and fast SpotBugs only when main classes changed. Do not report final quality as passed from the fast script alone.
 - If a hook auto-formats files, check `git diff --stat`; rerun builds only when runtime or build-related files changed.
 
 ## Leyden/JDK AOT Benchmark Guardrails
