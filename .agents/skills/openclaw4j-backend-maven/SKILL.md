@@ -37,13 +37,15 @@ mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' test
 
 ## 质量检查
 
-后端 Java 改动的本地迭代阶段，可以先运行快速质量检查：
+后端 Java 改动的本地迭代阶段，默认先运行能证明当前行为的定向测试或最小构建。不要在每一次小改后反复运行完整质量工具。
+
+如果需要提前发现格式或明显静态分析问题，可以运行快速质量检查：
 
 ```powershell
 .\scripts\check-backend-quality-fast.ps1
 ```
 
-该脚本会运行 Spotless、仅针对变更 Java 文件的 Checkstyle，并且只在 main Java class 有变更时运行快速 SpotBugs。它不是最终质量门禁；声明后端代码完成前，按 `openclaw4j-code-quality-gate` 的要求运行完整 `spotless:check`、`checkstyle:check` 和 `spotbugs:check`。
+该脚本会运行 Spotless、仅针对变更 Java 文件的 Checkstyle，并且只在 main Java class 有变更时运行快速 SpotBugs。它不是最终质量门禁，也不要求每次小改后都运行；本轮代码稳定、声明后端代码完成前，按 `openclaw4j-code-quality-gate` 的要求运行完整 `spotless:check`、`checkstyle:check` 和 `spotbugs:check`。
 
 ## 预期警告
 

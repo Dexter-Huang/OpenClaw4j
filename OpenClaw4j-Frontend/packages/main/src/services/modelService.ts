@@ -5,7 +5,9 @@ import type {
   ICreateProviderParams,
   IListProvidersParams,
   IModel,
+  IModelConfigInfo,
   IModelParameterRule,
+  IModelSelectorItem,
   IProvider,
   IProviderConfigInfo,
   IUpdateModelParams,
@@ -213,12 +215,50 @@ export async function getModelDetail(
  */
 export async function getModelSelector(
   modelType: string,
-): Promise<IApiResponse<{ provider: IProvider; models: IModel[] }[]>> {
+): Promise<IApiResponse<IModelSelectorItem[]>> {
   const response = await request({
     url: `/console/v1/models/${modelType}/selector`,
     method: 'GET',
   });
   return response.data;
+}
+
+function toModel(
+  model: IModelConfigInfo,
+  provider: IProviderConfigInfo,
+): IModel {
+  return {
+    enable: model.enable,
+    icon: model.icon,
+    mode: model.mode,
+    model_id: model.model_id,
+    name: model.name || model.model_id,
+    provider: model.provider || provider.provider,
+    source: provider.source,
+    tags: model.tags,
+    type: model.type,
+  };
+}
+
+/**
+ * Get enabled LLM models for legacy prompt model selectors.
+ *
+ * The backend exposes enabled model data through the model selector endpoint,
+ * grouped by provider. This helper keeps the legacy prompt API adapter simple
+ * while filtering disabled providers/models on the frontend boundary.
+ */
+export async function getEnabledModels(): Promise<IApiResponse<IModel[]>> {
+  const response = await getModelSelector('llm');
+  return {
+    ...response,
+    data: (response.data || [])
+      .filter((item) => item.provider?.enable !== false)
+      .flatMap((item) =>
+        (item.models || [])
+          .filter((model) => model.enable !== false)
+          .map((model) => toModel(model, item.provider)),
+      ),
+  };
 }
 
 /**

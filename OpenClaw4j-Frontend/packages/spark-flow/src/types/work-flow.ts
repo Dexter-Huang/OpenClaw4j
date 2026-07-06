@@ -155,12 +155,7 @@ export type IValueTypeOption = {
 };
 
 export type IWorkFlowStatus =
-  | 'pause'
-  | 'success'
-  | 'fail'
-  | 'skip'
-  | 'executing'
-  | 'stop';
+  'pause' | 'success' | 'fail' | 'skip' | 'executing' | 'stop';
 
 export interface IUserInputItem {
   key: string;
@@ -186,17 +181,21 @@ export interface IWorkFlowNodeResultItem {
   };
   input?: string;
   output?: string;
-  usages?: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  }[];
+  usages?:
+    | {
+        prompt_tokens: number;
+        completion_tokens: number;
+        total_tokens: number;
+      }[]
+    | null;
   batches: IWorkFlowNodeResultItem[];
   is_multi_branch: boolean;
-  multi_branch_results?: {
-    condition_id: string;
-    target_ids: string[];
-  }[];
+  multi_branch_results?:
+    | {
+        condition_id: string;
+        target_ids: string[];
+      }[]
+    | null;
   node_id: string;
   node_name: string;
   node_type: string;

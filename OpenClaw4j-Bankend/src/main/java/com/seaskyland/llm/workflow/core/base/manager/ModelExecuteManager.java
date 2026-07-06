@@ -105,7 +105,7 @@ public class ModelExecuteManager {
     ChatClient chatClient =
         ChatClient.builder(chatModel).defaultAdvisors(new SimpleLoggerAdvisor()).build();
     ChatClient.Builder chatClientBuilder = chatClient.mutate();
-    Prompt prompt = new Prompt(messages);
+    Prompt prompt = new Prompt(messages, chatOptions);
     return chatClientBuilder.build().prompt(prompt).stream()
         .chatResponse()
         .concatMap(response -> convertResponse(response).flux());
@@ -122,17 +122,14 @@ public class ModelExecuteManager {
       return Mono.empty();
     }
 
-    org.springframework.ai.chat.metadata.Usage usage = chatResponse.getMetadata().getUsage();
+    org.springframework.ai.chat.metadata.Usage usage =
+        chatResponse.getMetadata() == null ? null : chatResponse.getMetadata().getUsage();
 
     AgentResponse.AgentResponseBuilder responseBuilder =
         AgentResponse.builder()
-            .model(chatResponse.getMetadata().getModel())
-            .usage(
-                Usage.builder()
-                    .promptTokens(usage.getPromptTokens())
-                    .completionTokens(usage.getCompletionTokens())
-                    .totalTokens(usage.getTotalTokens())
-                    .build());
+            .model(
+                chatResponse.getMetadata() == null ? null : chatResponse.getMetadata().getModel())
+            .usage(toUsage(usage));
 
     if (!CollectionUtils.isEmpty(chatResponse.getResults())) {
       Generation generation = chatResponse.getResults().get(0);
@@ -151,10 +148,40 @@ public class ModelExecuteManager {
               .reasoningContent(reasoningContent);
 
       responseBuilder.status(status).message(messageBuilder.build());
+    } else if (hasUsageTokens(usage)) {
+      // OpenAI 兼容流式接口开启 streamUsage 后，真实 token 统计常在最后一个
+      // metadata-only chunk 中返回。这个 chunk 没有文本内容，但必须继续向后游传递，
+      // 否则工作流最终只能拿到前面内容 chunk 上的 0 token usage。
+      responseBuilder
+          .status(AgentStatus.COMPLETED)
+          .message(ChatMessage.builder().role(MessageRole.ASSISTANT).content("").build());
     } else {
       return Mono.empty();
     }
 
     return Mono.just(responseBuilder.build());
+  }
+
+  private Usage toUsage(org.springframework.ai.chat.metadata.Usage usage) {
+    if (usage == null) {
+      return null;
+    }
+
+    return Usage.builder()
+        .promptTokens(usage.getPromptTokens())
+        .completionTokens(usage.getCompletionTokens())
+        .totalTokens(usage.getTotalTokens())
+        .build();
+  }
+
+  private boolean hasUsageTokens(org.springframework.ai.chat.metadata.Usage usage) {
+    return usage != null
+        && (positive(usage.getPromptTokens())
+            || positive(usage.getCompletionTokens())
+            || positive(usage.getTotalTokens()));
+  }
+
+  private boolean positive(Integer value) {
+    return value != null && value > 0;
   }
 }

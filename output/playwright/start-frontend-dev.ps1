@@ -1,0 +1,5 @@
+$ErrorActionPreference = 'Stop'
+$env:WEB_SERVER = 'http://127.0.0.1:9004'
+$env:DID_YOU_KNOW = 'none'
+Set-Location 'D:\IDEA_project\OpenClaw4j\OpenClaw4j-Frontend\packages\main'
+npm run dev *> 'D:\IDEA_project\OpenClaw4j\output\playwright\frontend-dev.combined.log'

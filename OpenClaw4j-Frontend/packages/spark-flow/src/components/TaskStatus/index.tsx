@@ -13,6 +13,7 @@ import { NodeStatusIcon } from '../BaseNode';
 import CustomIcon from '../CustomIcon';
 import FlowIcon from '../FlowIcon';
 import './index.less';
+import { getTaskTokenDetails, ITokenDetail } from './tokenDetails';
 
 const statusNameMap: Record<IWorkFlowStatus, string> = {
   success: $i18n.get({
@@ -41,14 +42,6 @@ const statusNameMap: Record<IWorkFlowStatus, string> = {
   }),
 };
 
-interface ITokenDetail {
-  id: string;
-  name: string;
-  type: string;
-  input: number;
-  output: number;
-}
-
 function TaskStatus() {
   const taskStore = useStore(
     (state) => state.taskStore,
@@ -68,29 +61,7 @@ function TaskStatus() {
   }, [taskStore?.request_id]);
 
   const dataSource = useMemo(() => {
-    const list: ITokenDetail[] = [];
-
-    taskStore.node_results.forEach((item) => {
-      if (item.usages) {
-        const tokenMap = item.usages.reduce(
-          (acc, cur) => {
-            acc.input += cur.prompt_tokens;
-            acc.output += cur.completion_tokens;
-            return acc;
-          },
-          { input: 0, output: 0 },
-        );
-
-        list.push({
-          id: item.node_id,
-          name: item.node_name,
-          type: item.node_type,
-          ...tokenMap,
-        });
-      }
-    });
-
-    return list;
+    return getTaskTokenDetails(taskStore.node_results);
   }, [taskStore.node_results]);
 
   const columns = useMemo(() => {

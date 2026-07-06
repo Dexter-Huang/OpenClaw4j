@@ -3,6 +3,7 @@ import type { IWorkFlowNodeResultItem, IWorkFlowStatus } from '@spark-ai/flow';
 import classNames from 'classnames';
 import { memo, useMemo } from 'react';
 import styles from './index.module.less';
+import { getUsageSummary } from './usageSummary';
 
 export interface IResultStatusProps {
   status: IWorkFlowStatus;
@@ -14,16 +15,7 @@ export default memo(function ResultStatus(props: IResultStatusProps) {
   const { status, usages = [], execTime } = props;
 
   const totalTokens = useMemo(() => {
-    return usages.reduce(
-      (acc, usage) => {
-        return {
-          input: acc.input + usage.prompt_tokens,
-          output: acc.output + usage.completion_tokens,
-          total: acc.total + usage.total_tokens,
-        };
-      },
-      { input: 0, output: 0, total: 0 },
-    );
+    return getUsageSummary(usages);
   }, [usages]);
 
   const memoStatusIcon = useMemo(() => {

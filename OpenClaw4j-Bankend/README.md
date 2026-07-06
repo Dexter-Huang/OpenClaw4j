@@ -32,7 +32,28 @@ Spring Boot 启动保持 `spring.sql.init.mode=never`，避免应用重启时重
 docker compose --env-file ../deploy/.env -f ../deploy/docker-compose.middleware.yml up -d aio-sandbox
 ```
 
-默认镜像为 `enterprise-public-cn-beijing.cr.volces.com/vefaas-public/all-in-one-sandbox:latest`，端口只绑定到 `127.0.0.1:${AIO_SANDBOX_PORT:-8080}`，并沿用单容器启动所需的 `seccomp:unconfined`。本机后端在 MCP 页面注册时，安装类型选择 `STREAMABLE_HTTP`，配置示例：
+默认镜像为 `enterprise-public-cn-beijing.cr.volces.com/vefaas-public/all-in-one-sandbox:latest`，端口只绑定到 `127.0.0.1:${AIO_SANDBOX_PORT:-8080}`，并沿用单容器启动所需的 `seccomp:unconfined`。容器默认限制为 `AIO_SANDBOX_MEMORY_LIMIT=2g`、`AIO_SANDBOX_MEMORY_SWAP_LIMIT=2g`、`AIO_SANDBOX_PIDS_LIMIT=512`，避免浏览器页面长期运行时无限占用宿主资源。
+
+如果 AIO Sandbox 内置 Chrome 因实时页面或 worker 导致内存持续上涨，可以使用 `deploy/scripts/cleanup-aio-sandbox-browser.ps1` 查看页面和 cgroup 工作集：
+
+```powershell
+..\deploy\scripts\cleanup-aio-sandbox-browser.ps1 -Action Report
+```
+
+确认不需要保留当前浏览器页面后，可以关闭所有 CDP page target；如工作集仍超过阈值，再重启 `browser` 与 `mcp-server-browser`：
+
+```powershell
+..\deploy\scripts\cleanup-aio-sandbox-browser.ps1 -Action ClosePages
+..\deploy\scripts\cleanup-aio-sandbox-browser.ps1 -Action RestartBrowser
+```
+
+也可以让脚本在页面数超过 `-MaxPageCount` 或工作集超过 `-WorkingSetThresholdMiB` 时自动处理：
+
+```powershell
+..\deploy\scripts\cleanup-aio-sandbox-browser.ps1 -Action Auto -MaxPageCount 5 -WorkingSetThresholdMiB 1536
+```
+
+本机后端在 MCP 页面注册时，安装类型选择 `STREAMABLE_HTTP`，配置示例：
 
 ```json
 {

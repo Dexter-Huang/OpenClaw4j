@@ -264,6 +264,9 @@ class LeydenBuildConfigurationTest {
     assertTrue(compose.contains("container_name: openclaw4j-aio-sandbox"));
     assertTrue(compose.contains("profiles: [\"aio-sandbox\"]"));
     assertTrue(compose.contains("seccomp:unconfined"));
+    assertTrue(compose.contains("mem_limit: ${AIO_SANDBOX_MEMORY_LIMIT:-2g}"));
+    assertTrue(compose.contains("memswap_limit: ${AIO_SANDBOX_MEMORY_SWAP_LIMIT:-2g}"));
+    assertTrue(compose.contains("pids_limit: ${AIO_SANDBOX_PIDS_LIMIT:-512}"));
     assertTrue(compose.contains("\"127.0.0.1:${AIO_SANDBOX_PORT:-8080}:8080\""));
     assertTrue(compose.contains("./data/aio-sandbox:${AIO_SANDBOX_WORKSPACE:-/home/gem}"));
     assertTrue(compose.contains("SANDBOX_API_KEY: ${AIO_SANDBOX_API_KEY:-}"));
@@ -276,11 +279,18 @@ class LeydenBuildConfigurationTest {
     assertTrue(envExample.contains("AIO_SANDBOX_PORT=8080"));
     assertTrue(envExample.contains("AIO_SANDBOX_WORKSPACE=/home/gem"));
     assertTrue(envExample.contains("AIO_SANDBOX_TZ=Asia/Shanghai"));
+    assertTrue(envExample.contains("AIO_SANDBOX_MEMORY_LIMIT=2g"));
+    assertTrue(envExample.contains("AIO_SANDBOX_MEMORY_SWAP_LIMIT=2g"));
+    assertTrue(envExample.contains("AIO_SANDBOX_PIDS_LIMIT=512"));
 
     assertTrue(readme.contains("docker compose --env-file ../deploy/.env"));
     assertTrue(readme.contains("up -d aio-sandbox"));
     assertTrue(readme.contains("http://127.0.0.1:8080/mcp"));
     assertTrue(readme.contains("STREAMABLE_HTTP"));
+    assertTrue(readme.contains("scripts/cleanup-aio-sandbox-browser.ps1"));
+    assertTrue(
+        Files.exists(
+            PROJECT_DIR.getParent().resolve("deploy/scripts/cleanup-aio-sandbox-browser.ps1")));
   }
 
   @Test

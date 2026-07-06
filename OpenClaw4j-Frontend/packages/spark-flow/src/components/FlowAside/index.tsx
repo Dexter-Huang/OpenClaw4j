@@ -32,7 +32,7 @@ export default memo(function FlowAside() {
           />
         </div>
         <Tabs
-          className="spark-flow-aside-tabs flex-1 h-[1px]"
+          className="spark-flow-aside-tabs flex-1 h-[1px] min-h-0"
           items={[
             {
               label: $i18n.get({

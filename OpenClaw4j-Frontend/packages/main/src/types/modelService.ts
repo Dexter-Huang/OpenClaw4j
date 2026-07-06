@@ -65,6 +65,7 @@ export interface IModelConfigInfo {
   icon?: string;
   type: string;
   mode?: string;
+  enable?: boolean;
 }
 
 // Parameters for creating a model

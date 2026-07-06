@@ -132,7 +132,7 @@ export const FlowBase = memo((props: IFlowBaseProps) => {
         <div className="flex-shrink-0">
           <TaskStatus />
         </div>
-        <div className="flex flex-1 h-1 relative">
+        <div className="flex flex-1 h-1 min-h-0 relative">
           <FlowAside />
           <div className="relative flex-1">
             <Flow nodeTypes={NODE_COMPONENT_MAP} />
@@ -194,12 +194,12 @@ export const FlowBase = memo((props: IFlowBaseProps) => {
                 <CheckListBtn />
               </Space.Compact>
               {/* 新增“导出SAA工程代码”按钮 */}
-              <Button
+              {/* <Button
                 disabled={actionLoading}
                 onClick={handleExportSAA}
               >
                 导出SAA工程代码
-              </Button>
+              </Button> */}
               <Button
                 disabled={actionLoading}
                 onClick={() => {

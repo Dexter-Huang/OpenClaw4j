@@ -63,7 +63,7 @@ export default (props: {
           }
         >
           {inputIsJson ? (
-            <CodeBlock language={'json'} value={params.arguments} />
+            <CodeBlock language={'json'} readOnly value={params.arguments} />
           ) : (
             <div className="p-[12px]">
               <Markdown content={params.arguments || ''} baseFontSize={12} />
@@ -89,7 +89,7 @@ export default (props: {
           }
         >
           {outputIsJson ? (
-            <CodeBlock language={'json'} value={params.output} />
+            <CodeBlock language={'json'} readOnly value={params.output} />
           ) : (
             <div className="p-[12px]">
               <Markdown content={params.output || ''} baseFontSize={12} />

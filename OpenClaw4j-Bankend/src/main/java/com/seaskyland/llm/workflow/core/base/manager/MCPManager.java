@@ -67,6 +67,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class MCPManager {
 
+  private static final String STREAMABLE_HTTP_ACCEPT = "application/json, text/event-stream";
+  private static final String SSE_EVENT_PREFIX = "event:";
+  private static final String SSE_DATA_PREFIX = "data:";
+
   /** Redis manager for caching operations */
   private final CacheManager cacheManager;
 
@@ -317,7 +321,7 @@ public class MCPManager {
               .uri(URI.create(entity.getHost() + remoteEndpoint))
               .timeout(Duration.ofSeconds(60))
               .header("Content-Type", "application/json")
-              .header("Accept", "application/json");
+              .header("Accept", STREAMABLE_HTTP_ACCEPT);
       if (deployConfig.getRemoteHeader() != null) {
         deployConfig
             .getRemoteHeader()
@@ -349,13 +353,57 @@ public class MCPManager {
         throw new IllegalStateException(
             "Streamable HTTP MCP request failed with status " + response.statusCode());
       }
-      return JsonUtils.fromJsonToMap(response.body());
+      return parseJsonRpcResponseBody(response.body());
     } catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
       throw new IllegalStateException("Streamable HTTP MCP request interrupted", ex);
     } catch (Exception ex) {
       throw new IllegalStateException("Streamable HTTP MCP request failed", ex);
     }
+  }
+
+  private Map<String, Object> parseJsonRpcResponseBody(String body) {
+    if (StringUtils.isBlank(body)) {
+      return new HashMap<>();
+    }
+    String responseBody = body.stripLeading();
+    if (!isSseEnvelope(responseBody)) {
+      return JsonUtils.fromJsonToMap(responseBody);
+    }
+    String eventData = extractFirstSseData(responseBody);
+    if (StringUtils.isBlank(eventData)) {
+      return new HashMap<>();
+    }
+    return JsonUtils.fromJsonToMap(eventData);
+  }
+
+  private boolean isSseEnvelope(String body) {
+    return body.startsWith(SSE_EVENT_PREFIX) || body.startsWith(SSE_DATA_PREFIX);
+  }
+
+  private String extractFirstSseData(String body) {
+    StringBuilder data = new StringBuilder();
+    for (String line : body.split("\\R", -1)) {
+      if (line.isEmpty()) {
+        if (!data.isEmpty()) {
+          break;
+        }
+        continue;
+      }
+      if (!line.startsWith(SSE_DATA_PREFIX)) {
+        continue;
+      }
+      if (!data.isEmpty()) {
+        data.append('\n');
+      }
+      data.append(parseSseFieldValue(line));
+    }
+    return data.toString();
+  }
+
+  private String parseSseFieldValue(String line) {
+    String value = line.substring(SSE_DATA_PREFIX.length());
+    return value.startsWith(" ") ? value.substring(1) : value;
   }
 
   private McpServerCallToolResponse toCallToolResponse(Map<String, Object> jsonRpcResponse) {

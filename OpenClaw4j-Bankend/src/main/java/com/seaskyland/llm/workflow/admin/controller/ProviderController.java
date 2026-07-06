@@ -302,13 +302,7 @@ public class ProviderController {
           .forEach(
               providerConfigInfo -> {
                 providerConfigInfo.setCredential(null);
-                List<ModelConfigInfo> modelConfigInfos =
-                    modelManager.queryModels(providerConfigInfo.getProvider());
-                if (CollectionUtils.isNotEmpty(modelConfigInfos)) {
-                  providerConfigInfo.setModelCount(modelConfigInfos.size());
-                } else {
-                  providerConfigInfo.setModelCount(0);
-                }
+                fillModelCount(providerConfigInfo);
               });
     }
     cacheManager.put(
@@ -342,7 +336,15 @@ public class ProviderController {
     } else {
       providerDetail.setCredentialSpecs(providerInstance.getCredentialSpecs());
     }
+    fillModelCount(providerDetail);
     return Result.success(providerDetail);
+  }
+
+  private void fillModelCount(ProviderConfigInfo providerConfigInfo) {
+    List<ModelConfigInfo> modelConfigInfos =
+        modelManager.queryModels(providerConfigInfo.getProvider());
+    providerConfigInfo.setModelCount(
+        CollectionUtils.isNotEmpty(modelConfigInfos) ? modelConfigInfos.size() : 0);
   }
 
   /**

@@ -26,6 +26,7 @@ Thumbs.db
 
 # Frontend dependencies and build output
 node_modules/
+camofox-browser/
 OpenClaw4j-Frontend/**/node_modules/
 OpenClaw4j-Frontend/**/dist/
 OpenClaw4j-Frontend/**/docs-dist/

@@ -59,6 +59,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.ai.chat.client.ChatClient;
@@ -103,6 +104,7 @@ import reactor.core.scheduler.Schedulers;
 @Service()
 @Qualifier("basicAgentExecutor")
 @RequiredArgsConstructor
+@Slf4j
 public class BasicAgentExecutor extends AbstractAgentExecutor {
 
   /** Service for executing tools */
@@ -247,7 +249,7 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
       toolCalls.addAll(convertToolCall(assistantToolCalls, toolCallbackProvider));
 
       ToolExecutionResult toolExecutionResult =
-          toolCallingManager.executeToolCalls(prompt, response);
+          executeToolCallsSafely(prompt, response, toolCallingManager);
       AgentToolCallRecorder.clear();
       toolCalls.addAll(convertToolResult(toolExecutionResult, toolCallbackProvider));
 
@@ -264,7 +266,12 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
   private OpenAiChatOptions buildChatOptions(
       AgentConfig config, ToolCallbackProvider toolCallbackProvider) {
     OpenAiChatOptions.Builder builder =
-        OpenAiChatOptions.builder().model(config.getModel()).streamUsage(true);
+        OpenAiChatOptions.builder()
+            .model(config.getModel())
+            .streamUsage(true)
+            // 浏览器类 MCP 工具通常存在“先建 tab、再用 tabId”的顺序依赖。
+            // 关闭并行工具调用，避免模型同一轮编造 result_0 等占位 tabId。
+            .parallelToolCalls(false);
 
     if (config.getParameter() != null) {
       builder
@@ -792,7 +799,7 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
                         requestContext,
                         () -> {
                           ToolExecutionResult result =
-                              toolCallingManager.executeToolCalls(originalPrompt, response);
+                              executeToolCallsSafely(originalPrompt, response, toolCallingManager);
                           AgentToolCallRecorder.clear();
                           return new Object[] {
                             result, convertToolResult(response, result, toolCallbackProvider)
@@ -855,5 +862,62 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
     }
 
     return agentToolCallbackMap;
+  }
+
+  private ToolExecutionResult executeToolCallsSafely(
+      Prompt prompt, ChatResponse response, ToolCallingManager toolCallingManager) {
+    try {
+      return toolCallingManager.executeToolCalls(prompt, response);
+    } catch (RuntimeException ex) {
+      AssistantMessage assistantMessage = findToolCallAssistantMessage(response);
+      List<String> toolNames =
+          assistantMessage.getToolCalls().stream().map(AssistantMessage.ToolCall::name).toList();
+      log.warn(
+          "Tool call execution failed, continuing conversation with error result: {}, error: {}",
+          toolNames,
+          ex.getMessage());
+      log.debug("Tool call execution failure detail", ex);
+      return buildFailedToolExecutionResult(prompt, assistantMessage, ex);
+    }
+  }
+
+  private AssistantMessage findToolCallAssistantMessage(ChatResponse response) {
+    return response.getResults().stream()
+        .map(Generation::getOutput)
+        .filter(output -> !CollectionUtils.isEmpty(output.getToolCalls()))
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("No tool call requested by the chat model"));
+  }
+
+  private ToolExecutionResult buildFailedToolExecutionResult(
+      Prompt prompt, AssistantMessage assistantMessage, RuntimeException ex) {
+    List<ToolResponseMessage.ToolResponse> toolResponses =
+        assistantMessage.getToolCalls().stream()
+            .map(
+                toolCall ->
+                    new ToolResponseMessage.ToolResponse(
+                        toolCall.id(),
+                        toolCall.name(),
+                        buildToolErrorResponse(toolCall.name(), ex)))
+            .toList();
+
+    List<Message> conversationHistory = new ArrayList<>(prompt.getInstructions());
+    conversationHistory.add(assistantMessage);
+    conversationHistory.add(ToolResponseMessage.builder().responses(toolResponses).build());
+
+    return ToolExecutionResult.builder()
+        .conversationHistory(conversationHistory)
+        .returnDirect(false)
+        .build();
+  }
+
+  private String buildToolErrorResponse(String toolName, RuntimeException ex) {
+    Map<String, Object> error = new LinkedHashMap<>();
+    error.put("success", false);
+    error.put("tool_name", toolName);
+    error.put("error_type", ex.getClass().getSimpleName());
+    error.put("message", ex.getMessage());
+    error.put("hint", "工具调用失败，请不要继续调用不存在或失败的工具，可基于已有信息回复用户或选择其他可用工具。");
+    return JsonUtils.toJson(error);
   }
 }

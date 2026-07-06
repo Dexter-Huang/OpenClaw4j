@@ -40,12 +40,14 @@ import com.seaskyland.llm.workflow.runtime.domain.chat.ToolCall;
 import com.seaskyland.llm.workflow.runtime.domain.chat.ToolCallType;
 import com.seaskyland.llm.workflow.runtime.domain.tool.InputSchema;
 import com.seaskyland.llm.workflow.runtime.domain.tool.ToolCallSchema;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
 import org.springframework.ai.chat.model.ChatModel;
@@ -53,6 +55,9 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import reactor.core.publisher.Flux;
 
 class BasicAgentExecutorTest {
@@ -88,6 +93,37 @@ class BasicAgentExecutorTest {
     assertThat(responses).hasSize(1);
     assertThat(responses.getFirst().getStatus()).isEqualTo(AgentStatus.COMPLETED);
     assertThat(responses.getFirst().getMessage().getContent()).isEqualTo("call response");
+  }
+
+  @Test
+  void buildChatOptionsDisablesParallelToolCalls() throws Exception {
+    BasicAgentExecutor executor =
+        new BasicAgentExecutor(
+            mock(ToolExecutionService.class),
+            mock(PluginService.class),
+            mock(McpServerService.class),
+            mock(AppComponentManager.class),
+            mock(DocumentRetrieverManager.class),
+            mock(ChatMemory.class),
+            mock(CommonConfig.class),
+            mock(ModelFactory.class),
+            mock(FileManager.class));
+
+    AgentConfig config = new AgentConfig();
+    config.setModel("test-model");
+
+    ToolCallbackProvider toolCallbackProvider = mock(ToolCallbackProvider.class);
+    when(toolCallbackProvider.getToolCallbacks()).thenReturn(new ToolCallback[0]);
+
+    Method method =
+        BasicAgentExecutor.class.getDeclaredMethod(
+            "buildChatOptions", AgentConfig.class, ToolCallbackProvider.class);
+    method.setAccessible(true);
+
+    OpenAiChatOptions options =
+        (OpenAiChatOptions) method.invoke(executor, config, toolCallbackProvider);
+
+    assertThat(options.getParallelToolCalls()).isFalse();
   }
 
   @Test
@@ -198,6 +234,40 @@ class BasicAgentExecutorTest {
         .containsExactly("python_execute", "python_execute");
     assertThat(response.getMessage().getToolCalls().get(1).getFunction().getOutput())
         .isEqualTo("component output");
+  }
+
+  @Test
+  void executeContinuesWhenModelRequestsUnknownToolName() {
+    UnknownToolNameChatModel chatModel = new UnknownToolNameChatModel();
+    ModelFactory modelFactory = mock(ModelFactory.class);
+    when(modelFactory.getChatModel("test-provider")).thenReturn(chatModel);
+
+    AppComponentManager appComponentManager = mock(AppComponentManager.class);
+    HashMap<String, ToolCallSchema> toolSchemas = new HashMap<>();
+    toolSchemas.put("component-1", toolCallSchema());
+    when(appComponentManager.getToolCallSchema(List.of("component-1"))).thenReturn(toolSchemas);
+
+    BasicAgentExecutor executor =
+        new BasicAgentExecutor(
+            mock(ToolExecutionService.class),
+            mock(PluginService.class),
+            mock(McpServerService.class),
+            appComponentManager,
+            mock(DocumentRetrieverManager.class),
+            mock(ChatMemory.class),
+            mock(CommonConfig.class),
+            modelFactory,
+            mock(FileManager.class));
+
+    AgentResponse response = executor.execute(agentContext(), agentRequest());
+
+    assertThat(chatModel.callCount).isEqualTo(2);
+    assertThat(response.getStatus()).isEqualTo(AgentStatus.COMPLETED);
+    assertThat(response.getMessage().getContent()).isEqualTo("final response after tool error");
+    assertThat(chatModel.toolResponseData).contains("No ToolCallback found for tool name");
+    assertThat(response.getMessage().getToolCalls())
+        .extracting(ToolCall::getType)
+        .containsExactly(ToolCallType.FUNCTION, ToolCallType.TOOL_RESULT);
   }
 
   private static AgentContext agentContext() {
@@ -377,6 +447,58 @@ class BasicAgentExecutorTest {
               List.of(
                   new Generation(
                       new AssistantMessage(output),
+                      ChatGenerationMetadata.builder().finishReason("stop").build())))
+          .build();
+    }
+
+    @Override
+    public Flux<ChatResponse> stream(Prompt prompt) {
+      return Flux.error(new AssertionError("stream should not be called"));
+    }
+
+    @Override
+    public ChatOptions getOptions() {
+      return ChatOptions.builder().build();
+    }
+  }
+
+  private static final class UnknownToolNameChatModel implements ChatModel {
+
+    private int callCount;
+
+    private String toolResponseData;
+
+    @Override
+    public ChatResponse call(Prompt prompt) {
+      callCount++;
+      if (callCount == 1) {
+        return ChatResponse.builder()
+            .metadata(ChatResponseMetadata.builder().model("test-model").build())
+            .generations(
+                List.of(
+                    new Generation(
+                        AssistantMessage.builder()
+                            .content("")
+                            .toolCalls(
+                                List.of(
+                                    new AssistantMessage.ToolCall(
+                                        "tool-call-unknown", "function", "函数名", "{}")))
+                            .build(),
+                        ChatGenerationMetadata.builder().finishReason("tool_calls").build())))
+            .build();
+      }
+
+      assertThat(prompt.getInstructions().getLast()).isInstanceOf(ToolResponseMessage.class);
+      ToolResponseMessage toolResponseMessage =
+          (ToolResponseMessage) prompt.getInstructions().getLast();
+      toolResponseData = toolResponseMessage.getResponses().getFirst().responseData();
+
+      return ChatResponse.builder()
+          .metadata(ChatResponseMetadata.builder().model("test-model").build())
+          .generations(
+              List.of(
+                  new Generation(
+                      new AssistantMessage("final response after tool error"),
                       ChatGenerationMetadata.builder().finishReason("stop").build())))
           .build();
     }

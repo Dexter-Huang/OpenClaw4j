@@ -162,6 +162,29 @@ class MCPManagerTest {
   }
 
   @Test
+  void getToolsReadsToolsFromStreamableHttpSseEnvelope() throws Exception {
+    try (TestMcpHttpServer server =
+        TestMcpHttpServer.start(
+            """
+            event: message
+            data: {"jsonrpc":"2.0","id":1,"result":{"tools":[{"name":"camofox_create_tab","description":"Create a new Camofox browser tab.","inputSchema":{"type":"object","properties":{"url":{"type":"string"}},"required":["url"]}}]}}
+
+            """,
+            "text/event-stream")) {
+      McpServerEntity entity = streamableHttpEntity(server.url("/mcp"));
+
+      List<McpTool> tools = manager.getTools(entity);
+
+      assertThat(server.lastRequestHeaders().get("Accept"))
+          .contains("application/json")
+          .contains("text/event-stream");
+      assertThat(tools).hasSize(1);
+      assertThat(tools.getFirst().getName()).isEqualTo("camofox_create_tab");
+      assertThat(tools.getFirst().getInputSchema().getRequired()).containsExactly("url");
+    }
+  }
+
+  @Test
   void callToolReadsTextContentFromStreamableHttpEndpoint() throws Exception {
     try (TestMcpHttpServer server =
         TestMcpHttpServer.start(
@@ -261,18 +284,24 @@ class MCPManagerTest {
     private final ServerSocket serverSocket;
     private final Thread serverThread;
     private volatile String responseBody;
+    private volatile String contentType;
     private volatile String lastRequestBody;
     private volatile Map<String, String> lastRequestHeaders = new HashMap<>();
 
-    private TestMcpHttpServer(ServerSocket serverSocket, String responseBody) {
+    private TestMcpHttpServer(ServerSocket serverSocket, String responseBody, String contentType) {
       this.serverSocket = serverSocket;
       this.responseBody = responseBody;
+      this.contentType = contentType;
       this.serverThread = new Thread(this::handleNextRequest, "test-mcp-http-server");
     }
 
     static TestMcpHttpServer start(String responseBody) throws IOException {
+      return start(responseBody, "application/json");
+    }
+
+    static TestMcpHttpServer start(String responseBody, String contentType) throws IOException {
       ServerSocket serverSocket = new ServerSocket(0, 1, InetAddress.getByName("127.0.0.1"));
-      TestMcpHttpServer testServer = new TestMcpHttpServer(serverSocket, responseBody);
+      TestMcpHttpServer testServer = new TestMcpHttpServer(serverSocket, responseBody, contentType);
       testServer.serverThread.setDaemon(true);
       testServer.serverThread.start();
       return testServer;
@@ -340,7 +369,9 @@ class MCPManagerTest {
       byte[] bytes = responseBody.getBytes(StandardCharsets.UTF_8);
       String headers =
           "HTTP/1.1 200 OK\r\n"
-              + "Content-Type: application/json\r\n"
+              + "Content-Type: "
+              + contentType
+              + "\r\n"
               + "Content-Length: "
               + bytes.length
               + "\r\n"

@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.seaskyland.llm.workflow.core.base.manager.TokenManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,6 +15,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -32,6 +34,8 @@ class AdminCompatApiTest {
 
   @Autowired private ObjectMapper objectMapper;
 
+  @Autowired private TokenManager tokenManager;
+
   @Test
   void adminListApisReturnLegacyPageEnvelope() throws Exception {
     assertLegacyPage("/api/prompts?pageNo=1&pageSize=10");
@@ -39,6 +43,16 @@ class AdminCompatApiTest {
     assertLegacyPage("/api/evaluator/evaluators?pageNumber=1&pageSize=10");
     assertLegacyPage("/api/experiments?pageNumber=1&pageSize=10");
     assertLegacyPage("/api/models");
+  }
+
+  @Test
+  void providerDetailReturnsModelCountConsistentWithModelList() throws Exception {
+    JsonNode models = getConsoleJson("/console/v1/providers/Tongyi/models");
+    JsonNode provider = getConsoleJson("/console/v1/providers/Tongyi");
+
+    JsonNode modelCount = provider.path("data").path("model_count");
+    assertThat(modelCount.isNumber()).isTrue();
+    assertThat(modelCount.asInt()).isEqualTo(models.path("data").size());
   }
 
   @Test
@@ -148,9 +162,18 @@ class AdminCompatApiTest {
   }
 
   private JsonNode getJson(String url) throws Exception {
+    return getJson(get(url));
+  }
+
+  private JsonNode getConsoleJson(String url) throws Exception {
+    String accessToken = tokenManager.generateAccessToken("10000");
+    return getJson(get(url).header("X-SAA-TOKEN", "Bearer " + accessToken));
+  }
+
+  private JsonNode getJson(MockHttpServletRequestBuilder requestBuilder) throws Exception {
     String content =
         mockMvc
-            .perform(get(url))
+            .perform(requestBuilder)
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()

@@ -35,6 +35,10 @@ export default defineConfig({
   alias: {
     '@src': path.resolve(__dirname, './src'),
     '@': path.resolve(__dirname, './src'),
+    '@spark-ai/design$': path.resolve(
+      __dirname,
+      './src/libs/sparkDesignCompat',
+    ),
     ...(flowDev
       ? { '@spark-flow': path.resolve(__dirname, '../spark-flow/src') }
       : {}),
