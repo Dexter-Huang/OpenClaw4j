@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.seaskyland.llm.workflow.core.base.manager.CacheManager;
 import com.seaskyland.llm.workflow.core.base.manager.ModelManager;
+import com.seaskyland.llm.workflow.core.base.manager.OpenAIModelDiscoveryManager;
 import com.seaskyland.llm.workflow.core.base.manager.ProviderManager;
 import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
 import com.seaskyland.llm.workflow.core.model.llm.ModelProvider;
@@ -87,15 +88,19 @@ public class ProviderController {
 
   private final CacheManager cacheManager;
 
+  private final OpenAIModelDiscoveryManager openAIModelDiscoveryManager;
+
   public ProviderController(
       ProviderManager providerManager,
       Map<String, ModelProvider> providerMap,
       ModelManager modelManager,
-      CacheManager cacheManager) {
+      CacheManager cacheManager,
+      OpenAIModelDiscoveryManager openAIModelDiscoveryManager) {
     this.providerManager = providerManager;
     this.providerMap = providerMap;
     this.modelManager = modelManager;
     this.cacheManager = cacheManager;
+    this.openAIModelDiscoveryManager = openAIModelDiscoveryManager;
   }
 
   /**
@@ -142,17 +147,23 @@ public class ProviderController {
     }
 
     // Handle credential information
+    List<ModelConfigInfo> discoveredModels = Lists.newArrayList();
     if (request.getCredentialConfig() != null) {
       Map<String, Object> credentialConfig = request.getCredentialConfig();
       ModelCredential credential = null;
       // For OpenAI protocol, handle API key encryption
-      if (StringUtils.isBlank(request.getProtocol())
-          || "openai".equals(request.getProtocol().toLowerCase())) {
-        credential = buildOpenaiCredentialConfig(credentialConfig);
+      if (isOpenaiProtocol(request.getProtocol())) {
+        ModelCredential plainCredential = buildOpenaiCredentialConfig(credentialConfig, false);
+        discoveredModels =
+            openAIModelDiscoveryManager.fetchRemoteModels(providerCode, plainCredential);
+        credential = buildOpenaiCredentialConfig(credentialConfig, true);
       }
       providerConfigInfo.setCredential(credential);
     }
     boolean b = providerManager.addProvider(providerConfigInfo);
+    if (b && CollectionUtils.isNotEmpty(discoveredModels)) {
+      modelManager.syncDiscoveredModels(providerCode, discoveredModels);
+    }
     RequestContext requestContext = RequestContextHolder.getRequestContext();
     cacheManager.delete(CACHE_PROVIDER_LIST_CACHE_PREFIX + requestContext.getWorkspaceId());
     return Result.success(b);
@@ -176,6 +187,7 @@ public class ProviderController {
     if (request == null || provider == null) {
       throw new BizException(ErrorCode.INVALID_PARAMS.toError("input_params", "request is valid"));
     }
+    providerManager.getProviderDetail(provider, false);
     // Create provider configuration information
     ProviderConfigInfo providerConfigInfo = new ProviderConfigInfo();
     providerConfigInfo.setProvider(provider);
@@ -198,13 +210,15 @@ public class ProviderController {
     }
 
     // Handle credential information
+    List<ModelConfigInfo> discoveredModels = Lists.newArrayList();
     if (request.getCredentialConfig() != null) {
       Map<String, Object> credentialConfig = request.getCredentialConfig();
       // For OpenAI protocol, handle API key encryption
       ModelCredential credential = null;
-      if (StringUtils.isBlank(request.getProtocol())
-          || "openai".equals(request.getProtocol().toLowerCase())) {
-        credential = buildOpenaiCredentialConfig(credentialConfig);
+      if (isOpenaiProtocol(request.getProtocol())) {
+        ModelCredential plainCredential = buildOpenaiCredentialConfig(credentialConfig, false);
+        discoveredModels = openAIModelDiscoveryManager.fetchRemoteModels(provider, plainCredential);
+        credential = buildOpenaiCredentialConfig(credentialConfig, true);
       } else {
         List<CredentialSpec> credentialSpecs =
             providerMap.get(provider + "Provider").getCredentialSpecs();
@@ -231,12 +245,20 @@ public class ProviderController {
       providerConfigInfo.setCredential(credential);
     }
     boolean b = providerManager.updateProvider(providerConfigInfo);
+    if (b && CollectionUtils.isNotEmpty(discoveredModels)) {
+      modelManager.syncDiscoveredModels(provider, discoveredModels);
+    }
     RequestContext requestContext = RequestContextHolder.getRequestContext();
     cacheManager.delete(CACHE_PROVIDER_LIST_CACHE_PREFIX + requestContext.getWorkspaceId());
     return Result.success(b);
   }
 
   private ModelCredential buildOpenaiCredentialConfig(Map<String, Object> credentialConfig) {
+    return buildOpenaiCredentialConfig(credentialConfig, true);
+  }
+
+  private ModelCredential buildOpenaiCredentialConfig(
+      Map<String, Object> credentialConfig, boolean encryptApiKey) {
     String endpoint = MapUtils.getString(credentialConfig, "endpoint");
     String apikey = MapUtils.getString(credentialConfig, "api_key");
     String completionsPath = MapUtils.getString(credentialConfig, "completions_path");
@@ -244,11 +266,15 @@ public class ProviderController {
 
     ModelCredential credential = new ModelCredential();
     credential.setEndpoint(endpoint);
-    credential.setApiKey(RSACryptUtils.encrypt(apikey));
+    credential.setApiKey(encryptApiKey ? RSACryptUtils.encrypt(apikey) : apikey);
     credential.setCompletionsPath(completionsPath);
     credential.setEmbeddingsPath(embeddingsPath);
 
     return credential;
+  }
+
+  private boolean isOpenaiProtocol(String protocol) {
+    return StringUtils.isBlank(protocol) || "openai".equals(protocol.toLowerCase());
   }
 
   /**

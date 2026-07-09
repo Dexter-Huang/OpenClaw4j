@@ -14,6 +14,8 @@ import com.seaskyland.llm.workflow.core.base.entity.ModelEntity;
 import com.seaskyland.llm.workflow.core.base.entity.PluginEntity;
 import com.seaskyland.llm.workflow.core.base.entity.ProviderEntity;
 import com.seaskyland.llm.workflow.core.base.entity.ReferEntity;
+import com.seaskyland.llm.workflow.core.base.entity.SkillEntity;
+import com.seaskyland.llm.workflow.core.base.entity.SkillVersionEntity;
 import com.seaskyland.llm.workflow.core.base.entity.ToolEntity;
 import com.seaskyland.llm.workflow.core.base.entity.WorkspaceEntity;
 import com.seaskyland.llm.workflow.core.base.mapper.AccountMapper;
@@ -29,6 +31,8 @@ import com.seaskyland.llm.workflow.core.base.mapper.ModelMapper;
 import com.seaskyland.llm.workflow.core.base.mapper.PluginMapper;
 import com.seaskyland.llm.workflow.core.base.mapper.ProviderMapper;
 import com.seaskyland.llm.workflow.core.base.mapper.ReferMapper;
+import com.seaskyland.llm.workflow.core.base.mapper.SkillMapper;
+import com.seaskyland.llm.workflow.core.base.mapper.SkillVersionMapper;
 import com.seaskyland.llm.workflow.core.base.mapper.ToolMapper;
 import com.seaskyland.llm.workflow.core.base.mapper.WorkspaceMapper;
 import java.util.List;
@@ -55,6 +59,8 @@ public class MybatisPlusRuntimeHints implements RuntimeHintsRegistrar {
           PluginEntity.class,
           ProviderEntity.class,
           ReferEntity.class,
+          SkillEntity.class,
+          SkillVersionEntity.class,
           ToolEntity.class,
           WorkspaceEntity.class);
 
@@ -73,6 +79,8 @@ public class MybatisPlusRuntimeHints implements RuntimeHintsRegistrar {
           PluginMapper.class,
           ProviderMapper.class,
           ReferMapper.class,
+          SkillMapper.class,
+          SkillVersionMapper.class,
           ToolMapper.class,
           WorkspaceMapper.class);
 

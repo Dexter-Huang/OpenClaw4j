@@ -1,4 +1,5 @@
-import { IconFont, Popover, renderTooltip } from '@spark-ai/design';
+import { renderTooltip } from '@/libs/sparkDesignCompat';
+import { IconFont, Popover } from '@spark-ai/design';
 import { Flex, Typography } from 'antd';
 import React from 'react';
 

@@ -155,6 +155,22 @@ export default defineConfig({
       component: 'MCP/Detail',
     },
     {
+      path: '/skill',
+      component: 'Skill/index',
+    },
+    {
+      path: '/skill/create',
+      component: 'Skill/Create',
+    },
+    {
+      path: '/skill/edit/:id',
+      component: 'Skill/Create',
+    },
+    {
+      path: '/skill/detail/:id',
+      component: 'Skill/Detail',
+    },
+    {
       path: '/component/:tab',
       component: 'Component/index',
     },

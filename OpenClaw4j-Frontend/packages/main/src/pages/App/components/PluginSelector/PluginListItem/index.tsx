@@ -1,7 +1,8 @@
 import $i18n from '@/i18n';
 import { getPluginToolList } from '@/services/plugin';
 import { Plugin, PluginTool } from '@/types/plugin';
-import { IconFont, renderTooltip } from '@spark-ai/design';
+import { renderTooltip } from '@/libs/sparkDesignCompat';
+import { IconFont } from '@spark-ai/design';
 import { Checkbox, Flex, Typography } from 'antd';
 import classNames from 'classnames';
 import { useEffect, useRef, useState } from 'react';

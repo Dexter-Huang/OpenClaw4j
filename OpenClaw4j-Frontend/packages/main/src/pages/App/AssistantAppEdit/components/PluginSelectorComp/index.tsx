@@ -1,8 +1,9 @@
 import defaultSettings from '@/defaultSettings';
 import $i18n from '@/i18n';
+import { HelpIcon } from '@/libs/sparkDesignCompat';
 import { ToolSelectorDrawer } from '@/pages/App/components/PluginSelector';
 import { PluginTool } from '@/types/plugin';
-import { Button, HelpIcon, IconFont } from '@spark-ai/design';
+import { Button, IconFont } from '@spark-ai/design';
 import { useSetState } from 'ahooks';
 import { Divider, Flex } from 'antd';
 import cls from 'classnames';

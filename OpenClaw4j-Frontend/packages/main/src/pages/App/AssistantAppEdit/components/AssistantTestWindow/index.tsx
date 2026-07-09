@@ -1,12 +1,7 @@
 import $i18n from '@/i18n';
+import { Tooltip } from '@/libs/sparkDesignCompat';
 import { IAppStatus, ModalityTypeTexts } from '@/types/appManage';
-import {
-  Badge,
-  Dropdown,
-  IconButton,
-  IconFont,
-  Tooltip,
-} from '@spark-ai/design';
+import { Badge, Dropdown, IconButton, IconFont } from '@spark-ai/design';
 import { useSetState } from 'ahooks';
 import { ConfigProvider, Flex } from 'antd';
 import { useContext, useEffect, useRef } from 'react';
@@ -54,6 +49,7 @@ export default function AssistantTestWindow(props: IProps) {
     if (
       !!appBasicConfig?.config?.tools?.length ||
       !!appBasicConfig?.config?.prompt_variables ||
+      !!appBasicConfig?.config?.skills?.length ||
       !!appBasicConfig?.config?.agent_components?.length ||
       !!appBasicConfig?.config?.workflow_components?.length
     ) {
@@ -63,6 +59,7 @@ export default function AssistantTestWindow(props: IProps) {
     }
   }, [
     appBasicConfig?.config?.tools?.length,
+    appBasicConfig?.config?.skills?.length,
     appBasicConfig?.config?.agent_components?.length,
     appBasicConfig?.config?.workflow_components?.length,
     appBasicConfig?.config?.prompt_variables,

@@ -79,6 +79,7 @@
   "spark-flow.components.FlowTools.TouchModeBtn.twoFingersMoveDragTwoFingersOpenZoom": "双指同向移动进行拖动，双指开合进行缩放",
   "spark-flow.components.NodeMenu.index.ungrouped": "未分组",
   "spark-flow.components.NodeMenu.index.searchNodeName": "搜索节点名称",
+  "spark-flow.components.NodeMenu.index.readonlyReturnToDraft": "当前为历史版本，请回到当前版本后编辑",
   "spark-flow.components.NodeResultPanel.index.success": "成功",
   "spark-flow.components.NodeResultPanel.index.executing": "执行中",
   "spark-flow.components.NodeResultPanel.index.skipped": "跳过",

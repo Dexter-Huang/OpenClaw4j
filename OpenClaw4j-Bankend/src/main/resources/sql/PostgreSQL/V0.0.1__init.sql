@@ -307,6 +307,53 @@ CREATE TABLE IF NOT EXISTS tool (
 );
 CREATE INDEX IF NOT EXISTS tool_idx_workspace_plugin ON tool (workspace_id,plugin_id);
 
+CREATE TABLE IF NOT EXISTS skill (
+  id BIGSERIAL NOT NULL,
+  skill_code varchar(64) NOT NULL,
+  workspace_id varchar(64) NOT NULL,
+  account_id varchar(64) DEFAULT NULL,
+  name varchar(128) NOT NULL,
+  description varchar(4096) DEFAULT NULL,
+  source varchar(64) NOT NULL DEFAULT 'custom',
+  status smallint NOT NULL DEFAULT 1,
+  tags varchar(512) DEFAULT NULL,
+  gmt_create timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  gmt_modified timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  creator varchar(64) DEFAULT NULL,
+  modifier varchar(64) DEFAULT NULL,
+  tenant_id bigint DEFAULT 0,
+  PRIMARY KEY (id),
+  CONSTRAINT uk_skill_code UNIQUE (skill_code)
+);
+CREATE INDEX IF NOT EXISTS skill_idx_workspace_status_name ON skill (workspace_id,status,name);
+
+CREATE TABLE IF NOT EXISTS skill_version (
+  id BIGSERIAL NOT NULL,
+  skill_code varchar(64) NOT NULL,
+  workspace_id varchar(64) NOT NULL,
+  version varchar(32) NOT NULL,
+  description varchar(4096) DEFAULT NULL,
+  main_file_path varchar(512) NOT NULL DEFAULT 'SKILL.md',
+  manifest text DEFAULT NULL,
+  content_hash varchar(128) DEFAULT NULL,
+  storage_type varchar(32) NOT NULL DEFAULT 'file',
+  storage_bucket varchar(255) DEFAULT NULL,
+  storage_prefix varchar(1024) NOT NULL,
+  package_object_key varchar(1024) DEFAULT NULL,
+  file_count integer DEFAULT NULL,
+  total_size_bytes bigint DEFAULT NULL,
+  status smallint NOT NULL DEFAULT 1,
+  gmt_create timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  gmt_modified timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  creator varchar(64) DEFAULT NULL,
+  modifier varchar(64) DEFAULT NULL,
+  tenant_id bigint DEFAULT 0,
+  PRIMARY KEY (id),
+  CONSTRAINT uk_skill_version UNIQUE (skill_code,version)
+);
+CREATE INDEX IF NOT EXISTS skill_version_idx_skill_status ON skill_version (skill_code,status);
+CREATE INDEX IF NOT EXISTS skill_version_idx_workspace_skill_status ON skill_version (workspace_id,skill_code,status);
+
 CREATE TABLE IF NOT EXISTS workspace (
   id BIGSERIAL NOT NULL,
   workspace_id varchar(64) NOT NULL,

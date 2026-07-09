@@ -108,6 +108,15 @@ public enum ErrorCode {
   BUILD_TOOL_RESULT_ERROR(
       500, RESPONSE_ERROR, "BuildToolResultError", "Failed to build tool result."),
 
+  /** skill error code */
+  CREATE_SKILL_ERROR(500, RESPONSE_ERROR, "CreateSkillError", "Failed to create skill."),
+
+  UPDATE_SKILL_ERROR(500, RESPONSE_ERROR, "UpdateSkillError", "Failed to update skill."),
+
+  DELETE_SKILL_ERROR(500, RESPONSE_ERROR, "DeleteSkillError", "Failed to delete skill."),
+
+  SKILL_NOT_FOUND(404, RESPONSE_ERROR, "SkillNotFound", "Skill can not be found."),
+
   /** agent app error code */
   CREATE_APP_ERROR(500, RESPONSE_ERROR, "CreateAppError", "Failed to create app."),
 

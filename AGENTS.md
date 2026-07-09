@@ -57,7 +57,13 @@ The backend uses Maven quality plugins as the Java equivalent of a Python `ruff`
 
 These tools are intentionally not bound to the default Maven lifecycle yet. Run them explicitly while the existing codebase is being baselined.
 
-Common commands:
+### 文件行尾与编码
+
+- 修改已有文件前先确认该文件当前使用的行尾格式，并在编辑后保持一致。尤其是后端 Java 文件和测试文件，仓库中大量文件使用 CRLF；不要因为 `apply_patch`、脚本改写或编辑器默认值把局部改动混成 LF，避免 `spotless:check` 只因为行尾失败。
+- 在 Windows/PowerShell 下需要机械改写文件内容时，优先使用明确的 UTF-8 without BOM 写回，并显式保留或恢复原有行尾；不要用会默认改变编码或行尾的临时写法。
+- 如果 `spotless:check` 只报告本轮触碰文件的行尾差异，先只规范化本轮触碰文件的行尾再重跑检查；不要顺手格式化或改动其他已有脏文件。若剩余问题来自用户已有改动，按精确文件和命令结果报告。
+
+Common commands when the user explicitly asks to run Java quality tools:
 
 ```powershell
 cd OpenClaw4j-Bankend
@@ -67,10 +73,10 @@ mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' checkstyle:check
 mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' spotbugs:check
 ```
 
-日常迭代时优先运行能证明当前改动的最小测试或构建命令。不要在每一次小改后反复运行
-`spotless:check`、`checkstyle:check`、`spotbugs:check` 三件套；这些全量质量工具默认留到本轮代码改完、准备声明完成前再运行一次。
+日常迭代时优先运行能证明当前改动的最小测试或构建命令。不要主动运行
+`spotless:check`、`checkstyle:check`、`spotbugs:check` 三件套；这些命令很慢，严重影响反馈效率，只有在用户明确要求运行格式、Checkstyle、SpotBugs 或完整质量门禁时才运行。
 
-如果迭代中需要提前发现格式或明显质量问题，可以临时运行后端快速质量检查：
+如果用户明确要求提前发现格式或明显质量问题，可以临时运行后端快速质量检查：
 
 ```powershell
 cd OpenClaw4j-Bankend
@@ -84,7 +90,7 @@ cd OpenClaw4j-Bankend
 - 只对相对 `HEAD` 有变更的后端 Java 文件运行 Checkstyle。
 - 只有 `src/main/java` 有变更时，才用 `-Dspotbugs.effort=Default` 运行 SpotBugs 快检；仅测试代码变更时跳过 SpotBugs。
 
-快速质量检查只用于本地迭代提速，不能替代最终门禁。声明后端代码完成前，仍按本节后面的要求运行全量 `spotless:check`、`checkstyle:check`、`spotbugs:check`。
+快速质量检查只用于用户明确要求质量工具时的本地提速，不能替代用户要求的完整门禁。若用户没有明确要求，不要为了声明后端代码完成而主动运行全量 `spotless:check`、`checkstyle:check`、`spotbugs:check`。
 
 Use `spotless:apply` only when formatting the touched Java files is intended. For broad legacy cleanup, make a dedicated formatting commit.
 
@@ -96,9 +102,9 @@ Generated and legacy-problematic backend sources should stay excluded from quali
 ## 代码质量门禁
 
 - 代码编写、修改、格式化、重构或修复过程中，先用能证明当前行为的最小验证命令迭代。
-- 不要在每一次小改后都运行 `spotless:check`、`checkstyle:check`、`spotbugs:check`；本轮所有代码改完、准备声明完成前，再运行一次最终格式检查和代码质量检查。
-- 使用项目 skill `openclaw4j-code-quality-gate` 选择具体流程和命令。
-- 后端 Java 改动的最终门禁至少运行：
+- 不要默认运行 `spotless:check`、`checkstyle:check`、`spotbugs:check`，也不要在准备声明完成前自动补跑这些命令。只有用户明确要求运行格式检查、Checkstyle、SpotBugs 或完整质量门禁时才运行。
+- 如项目 skill `openclaw4j-code-quality-gate` 或其他流程建议最终运行上述三件套，以本文件为准：没有用户明确要求就不要运行。
+- 用户明确要求后端 Java 完整质量门禁时，运行：
 
 ```powershell
 cd OpenClaw4j-Bankend
@@ -109,9 +115,9 @@ mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' checkstyle:check
 mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' spotbugs:check
 ```
 
-- 如果明确需要格式化，可以在本轮代码改完后运行 `spotless:apply`，再重新运行 `spotless:check`。
+- 如果用户明确要求格式化，可以在本轮代码改完后运行 `spotless:apply`；是否重新运行 `spotless:check` 也以用户要求为准。
 - 前端改动从 `OpenClaw4j-Frontend/` 运行相关 formatter、linter 或 build 脚本；如果没有更窄的脚本，运行 `npm run build:app`。
-- 如果必要的质量检查因为已知历史基线问题无法通过，必须报告精确命令、退出码和剩余问题；不要把任务描述为 clean 或 fully passing。
+- 如果用户要求的质量检查因为已知历史基线问题无法通过，必须报告精确命令、退出码和剩余问题；不要把任务描述为 clean 或 fully passing。
 
 ## Playwright 本地调试
 

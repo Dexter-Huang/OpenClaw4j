@@ -1,4 +1,5 @@
 import { AssistantAppContext } from '@/pages/App/AssistantAppEdit/AssistantAppContext';
+import { Tooltip } from '@/libs/sparkDesignCompat';
 import {
   ChatAnywhere,
   ChatAnywhereRef,
@@ -10,11 +11,9 @@ import {
 import {
   Button,
   copy,
-  IconButton,
   IconFont,
   message,
   notification,
-  Tooltip,
 } from '@spark-ai/design';
 
 import $i18n from '@/i18n';
@@ -583,21 +582,28 @@ export default forwardRef<ISparkChatRef, IProps>((props, ref) => {
               multiple: true,
               icon: (
                 <Tooltip
+                  key="assistant-chat-image-upload"
                   title={$i18n.get({
                     id: 'main.pages.App.AssistantAppEdit.components.SparkChat.index.uploadImage',
                     dm: '上传图片进行视觉理解或图片搜索',
                   })}
                 >
-                  <IconButton
-                    icon={
-                      <IconFont type="spark-addPicture-line" size="small" />
-                    }
-                    bordered={false}
-                    size="small"
-                    disabled={
+                  <span
+                    aria-disabled={
                       !appBasicConfig?.config.model?.tags?.includes('vision')
                     }
-                  ></IconButton>
+                    style={{
+                      alignItems: 'center',
+                      display: 'inline-flex',
+                      opacity: appBasicConfig?.config.model?.tags?.includes(
+                        'vision',
+                      )
+                        ? 1
+                        : 0.45,
+                    }}
+                  >
+                    <IconFont type="spark-addPicture-line" size="small" />
+                  </span>
                 </Tooltip>
               ),
 

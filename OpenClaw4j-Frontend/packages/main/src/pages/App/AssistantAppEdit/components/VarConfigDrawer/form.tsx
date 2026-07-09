@@ -6,9 +6,9 @@ import {
   Form,
   Input,
   InputNumber,
-  renderTooltip,
   Select,
 } from '@spark-ai/design';
+import { renderTooltip } from '@/libs/sparkDesignCompat';
 import { BizVarItem } from '.';
 import styles from './form.module.less';
 

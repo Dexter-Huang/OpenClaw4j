@@ -8,6 +8,7 @@ import {
   AppstoreOutlined,
   BarChartOutlined,
   BulbOutlined,
+  CodeOutlined,
   DatabaseOutlined,
   ExperimentOutlined,
   LineChartOutlined,
@@ -47,6 +48,11 @@ const getSelectedMenuKey = (pathname: string): string => {
   // MCP 相关页面
   if (pathname.startsWith('/mcp')) {
     return '/mcp';
+  }
+
+  // Skill 相关页面
+  if (pathname.startsWith('/skill')) {
+    return '/skill';
   }
 
   // 组件相关页面
@@ -179,6 +185,11 @@ export default function SideMenuLayout({
             key: '/mcp',
             label: 'MCP',
             icon: <ApiOutlined />,
+          },
+          {
+            key: '/skill',
+            label: 'Skill',
+            icon: <CodeOutlined />,
           },
           {
             key: '/component',

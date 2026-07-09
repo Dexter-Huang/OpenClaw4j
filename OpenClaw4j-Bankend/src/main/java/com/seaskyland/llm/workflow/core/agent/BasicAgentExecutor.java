@@ -29,6 +29,7 @@ import com.seaskyland.llm.workflow.core.base.manager.DocumentRetrieverManager;
 import com.seaskyland.llm.workflow.core.base.manager.FileManager;
 import com.seaskyland.llm.workflow.core.base.service.McpServerService;
 import com.seaskyland.llm.workflow.core.base.service.PluginService;
+import com.seaskyland.llm.workflow.core.base.service.SkillService;
 import com.seaskyland.llm.workflow.core.base.service.ToolExecutionService;
 import com.seaskyland.llm.workflow.core.config.CommonConfig;
 import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
@@ -51,6 +52,7 @@ import com.seaskyland.llm.workflow.runtime.domain.chat.ToolCall;
 import com.seaskyland.llm.workflow.runtime.domain.chat.ToolCallType;
 import com.seaskyland.llm.workflow.runtime.domain.chat.Usage;
 import com.seaskyland.llm.workflow.runtime.domain.knowledgebase.DocumentChunk;
+import com.seaskyland.llm.workflow.runtime.domain.skill.SkillRuntimeInfo;
 import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
 import com.seaskyland.llm.workflow.runtime.exception.BizException;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
@@ -133,6 +135,9 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
 
   /** Manager for file operations */
   private final FileManager fileManager;
+
+  /** Service for loading selected Skill package instructions */
+  private final SkillService skillService;
 
   /**
    * Executes the agent request in streaming mode
@@ -368,17 +373,30 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
 
     List<Message> messages = new ArrayList<>();
     List<ChatMessage> chatMessages = request.getMessages();
-    if (StringUtils.isNotBlank(config.getInstructions())
+    List<SkillRuntimeInfo> skillRuntimeInfos = loadSkillRuntimeInfos(config);
+    boolean skillInstructionsAdded = false;
+    if ((StringUtils.isNotBlank(config.getInstructions())
+            || !CollectionUtils.isEmpty(skillRuntimeInfos))
         && !MessageRole.SYSTEM.getValue().equals(chatMessages.get(0).getRole().getValue())) {
-      Message message = buildInstructions(context, config.getInstructions());
+      Message message = buildInstructions(context, config.getInstructions(), skillRuntimeInfos);
       messages.add(message);
+      skillInstructionsAdded = true;
     }
 
     for (ChatMessage chatMessage : chatMessages) {
       Message message = null;
       switch (chatMessage.getRole()) {
         case SYSTEM ->
-            message = buildInstructions(context, String.valueOf(chatMessage.getContent()));
+            {
+              if (skillInstructionsAdded) {
+                message = buildInstructions(context, String.valueOf(chatMessage.getContent()));
+              } else {
+                message =
+                    buildInstructions(
+                        context, String.valueOf(chatMessage.getContent()), skillRuntimeInfos);
+                skillInstructionsAdded = true;
+              }
+            }
         case USER -> {
           if (chatMessage.getContentType() == ContentType.TEXT) {
             message = new UserMessage(String.valueOf(chatMessage.getContent()));
@@ -403,6 +421,70 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
     }
 
     return messages;
+  }
+
+  private List<SkillRuntimeInfo> loadSkillRuntimeInfos(AgentConfig config) {
+    if (config == null || CollectionUtils.isEmpty(config.getSkills())) {
+      return List.of();
+    }
+    List<String> skillCodes =
+        config.getSkills().stream()
+            .map(AgentConfig.Skill::getId)
+            .filter(StringUtils::isNotBlank)
+            .distinct()
+            .toList();
+    if (CollectionUtils.isEmpty(skillCodes)) {
+      return List.of();
+    }
+    return skillService.getSkillRuntimeInfos(skillCodes);
+  }
+
+  private boolean fileSearchEnabled(AgentConfig config) {
+    FileSearchOptions searchOptions = config.getFileSearch();
+    return searchOptions != null && searchOptions.getEnableSearch();
+  }
+
+  private Message buildInstructions(
+      AgentContext context, String instructions, List<SkillRuntimeInfo> skillRuntimeInfos) {
+    if (StringUtils.isBlank(instructions) && !fileSearchEnabled(context.getConfig())) {
+      return new SystemMessage(appendSkillInstructions("", skillRuntimeInfos));
+    }
+    Message message = buildInstructions(context, instructions);
+    if (CollectionUtils.isEmpty(skillRuntimeInfos)) {
+      return message;
+    }
+    return new SystemMessage(appendSkillInstructions(message.getText(), skillRuntimeInfos));
+  }
+
+  private String appendSkillInstructions(
+      String instructions, List<SkillRuntimeInfo> skillRuntimeInfos) {
+    if (CollectionUtils.isEmpty(skillRuntimeInfos)) {
+      return instructions;
+    }
+
+    String baseInstructions = StringUtils.trimToEmpty(instructions);
+    StringBuilder builder = new StringBuilder(baseInstructions);
+    if (builder.length() > 0) {
+      builder.append("\n\n");
+    }
+    builder
+        .append("以下是当前 Agent 已启用的 Skills 索引。不要根据索引臆测文件正文；")
+        .append("当用户问题可能与 Skill 相关时，先调用 read_skill_file 读取对应 Skill 的入口文件，")
+        .append("再依据文件内容回答。若入口文件引用其他相对路径文件，可继续调用 read_skill_file 按需读取。")
+        .append("\n\n");
+    for (SkillRuntimeInfo skillRuntimeInfo : skillRuntimeInfos) {
+      builder
+          .append("- skill_code: ")
+          .append(skillRuntimeInfo.getSkillCode())
+          .append("\n  name: ")
+          .append(StringUtils.defaultString(skillRuntimeInfo.getName()))
+          .append("\n  description: ")
+          .append(StringUtils.defaultString(skillRuntimeInfo.getDescription()))
+          .append("\n  main_file: ")
+          .append(StringUtils.defaultIfBlank(skillRuntimeInfo.getMainFilePath(), "SKILL.md"))
+          .append("\n");
+    }
+    return builder.toString();
   }
 
   /**
@@ -771,6 +853,7 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
         toolExecutionService,
         mcpServerService,
         appComponentManager,
+        skillService,
         extraParams);
   }
 

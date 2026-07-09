@@ -56,6 +56,9 @@ public class AgentConfig implements AppConfig, Serializable {
   @JsonProperty("mcp_servers")
   private List<McpServer> mcpServers;
 
+  /** List of Skills for the agent */
+  private List<Skill> skills;
+
   /** List of agent component identifiers */
   @JsonProperty("agent_components")
   private List<String> agentComponents;
@@ -124,6 +127,17 @@ public class AgentConfig implements AppConfig, Serializable {
     private String id;
 
     /** Type of the server */
+    private String type;
+  }
+
+  /** Configuration for agent Skills */
+  @Data
+  public static class Skill implements Serializable {
+
+    /** Unique identifier for the Skill */
+    private String id;
+
+    /** Type of the Skill */
     private String type;
   }
 

@@ -15,6 +15,7 @@
     "build:subtree:python": "npm run build:subtree && npm install && npm run build:flow && BACK_END=python npm run build:app",
     "clear": "rimraf node_modules packages/spark-flow/node_modules packages/main/node_modules packages/main/src/.umi",
     "lint": "umi lint {packages/main/src,packages/spark-flow/src}/**/*.{ts,tsx,less} --fix",
+    "postinstall": "node scripts/patch-spark-ai-chat.js",
     "prepare": "husky install",
     "re-install": "npm run clear && npm install && npm run build:flow",
     "re-install:flow": "npm run build:flow && rimraf packages/main/node_modules && npm install"

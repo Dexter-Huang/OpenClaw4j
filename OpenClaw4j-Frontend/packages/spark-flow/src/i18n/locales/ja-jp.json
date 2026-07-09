@@ -79,6 +79,7 @@
     "spark-flow.components.FlowTools.TouchModeBtn.twoFingersMoveDragTwoFingersOpenZoom": "二本指で同じ方向に移動してドラッグし、二本指で開閉して拡大縮小",
     "spark-flow.components.NodeMenu.index.ungrouped": "グループ未所属",
     "spark-flow.components.NodeMenu.index.searchNodeName": "ノード名を検索",
+    "spark-flow.components.NodeMenu.index.readonlyReturnToDraft": "履歴バージョンを表示中です。編集するには現在のバージョンに戻ってください。",
     "spark-flow.components.NodeResultPanel.index.success": "成功",
     "spark-flow.components.NodeResultPanel.index.executing": "実行中",
     "spark-flow.components.NodeResultPanel.index.skipped": "スキップ",

@@ -50,7 +50,8 @@ export default function () {
       }}
       trigger={['click']}
     >
-      {button}
+      {/* Dropdown 需要可稳定取 ref 的 DOM trigger，避免 rc-trigger 回退到 findDOMNode。 */}
+      <span style={{ display: 'inline-flex' }}>{button}</span>
     </Dropdown>
   );
 }

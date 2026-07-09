@@ -15,7 +15,7 @@
  */
 package com.seaskyland.llm.workflow.core.base.manager;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.seaskyland.llm.workflow.core.base.entity.ModelEntity;
 import com.seaskyland.llm.workflow.core.base.mapper.ModelMapper;
 import com.seaskyland.llm.workflow.core.context.RequestContextHolder;
@@ -61,10 +61,10 @@ public class ModelManager {
           ErrorCode.INVALID_PARAMS.toError("input_params", "provider is invalid"));
     }
 
-    QueryWrapper<ModelEntity> queryWrapper = new QueryWrapper<>();
-    queryWrapper.eq("model_id", modelConfigInfo.getModelId());
-    queryWrapper.eq("provider", modelConfigInfo.getProvider());
-    queryWrapper.eq("workspace_id", context.getWorkspaceId());
+    LambdaQueryWrapper<ModelEntity> queryWrapper = new LambdaQueryWrapper<>();
+    queryWrapper.eq(ModelEntity::getModelId, modelConfigInfo.getModelId());
+    queryWrapper.eq(ModelEntity::getProvider, modelConfigInfo.getProvider());
+    queryWrapper.eq(ModelEntity::getWorkspaceId, context.getWorkspaceId());
     ModelEntity existModelEntity = modelMapper.selectOne(queryWrapper);
     if (existModelEntity != null) {
       log.error("模型[{}]已存在", modelConfigInfo.getModelId());
@@ -87,6 +87,64 @@ public class ModelManager {
     return insert > 0;
   }
 
+  public int syncDiscoveredModels(String provider, List<ModelConfigInfo> modelConfigInfos) {
+    if (modelConfigInfos == null || modelConfigInfos.isEmpty()) {
+      return 0;
+    }
+
+    RequestContext context = RequestContextHolder.getRequestContext();
+    ProviderConfigInfo providerDetail = providerManager.getProviderDetail(provider, false);
+    if (providerDetail == null) {
+      log.error("提供商[{}]不存在", provider);
+      throw new BizException(
+          ErrorCode.INVALID_PARAMS.toError("input_params", "provider is invalid"));
+    }
+
+    int inserted = 0;
+    for (ModelConfigInfo modelConfigInfo : modelConfigInfos) {
+      if (modelConfigInfo == null || StringUtils.isBlank(modelConfigInfo.getModelId())) {
+        continue;
+      }
+      if (exists(provider, modelConfigInfo.getModelId(), context.getWorkspaceId())) {
+        continue;
+      }
+
+      ModelEntity modelEntity = new ModelEntity();
+      modelEntity.setWorkspaceId(context.getWorkspaceId());
+      modelEntity.setGmtCreate(new Date());
+      modelEntity.setGmtModified(new Date());
+      modelEntity.setIcon(modelConfigInfo.getIcon());
+      modelEntity.setName(
+          StringUtils.defaultIfBlank(modelConfigInfo.getName(), modelConfigInfo.getModelId()));
+      modelEntity.setProvider(provider);
+      modelEntity.setSource(DataSourceEnum.custom.name());
+      modelEntity.setEnable(
+          modelConfigInfo.getEnable() == null ? true : modelConfigInfo.getEnable());
+      modelEntity.setType(
+          StringUtils.defaultIfBlank(
+              modelConfigInfo.getType(), ModelConfigInfo.ModelTypeEnum.llm.name()));
+      modelEntity.setMode(
+          StringUtils.defaultIfBlank(
+              modelConfigInfo.getMode(), ModelConfigInfo.ModeEnum.chat.name()));
+      modelEntity.setModelId(modelConfigInfo.getModelId());
+      if (modelConfigInfo.getTags() != null && !modelConfigInfo.getTags().isEmpty()) {
+        modelEntity.setTags(modelConfigInfo.getTags().stream().collect(Collectors.joining(",")));
+      }
+      modelEntity.setCreator(context.getAccountId());
+      modelEntity.setModifier(context.getAccountId());
+      inserted += modelMapper.insert(modelEntity);
+    }
+    return inserted;
+  }
+
+  private boolean exists(String provider, String modelId, String workspaceId) {
+    LambdaQueryWrapper<ModelEntity> queryWrapper = new LambdaQueryWrapper<>();
+    queryWrapper.eq(ModelEntity::getModelId, modelId);
+    queryWrapper.eq(ModelEntity::getProvider, provider);
+    queryWrapper.eq(ModelEntity::getWorkspaceId, workspaceId);
+    return modelMapper.selectCount(queryWrapper) > 0;
+  }
+
   /**
    * Update an existing model
    *
@@ -105,11 +163,11 @@ public class ModelManager {
     }
 
     // 检查模型是否存在
-    QueryWrapper<ModelEntity> queryWrapper = new QueryWrapper<>();
-    queryWrapper.eq("provider", providerDetail.getProvider());
-    queryWrapper.eq("model_id", modelConfigInfo.getModelId());
+    LambdaQueryWrapper<ModelEntity> queryWrapper = new LambdaQueryWrapper<>();
+    queryWrapper.eq(ModelEntity::getProvider, providerDetail.getProvider());
+    queryWrapper.eq(ModelEntity::getModelId, modelConfigInfo.getModelId());
     if (StringUtils.isNotBlank(context.getWorkspaceId())) {
-      queryWrapper.eq("workspace_id", context.getWorkspaceId());
+      queryWrapper.eq(ModelEntity::getWorkspaceId, context.getWorkspaceId());
     }
     ModelEntity existingModel = modelMapper.selectOne(queryWrapper);
     if (existingModel == null) {
@@ -149,11 +207,11 @@ public class ModelManager {
   public boolean deleteModel(String provider, String modelId) {
     RequestContext context = RequestContextHolder.getRequestContext();
     // 检查模型是否存在
-    QueryWrapper<ModelEntity> queryWrapper = new QueryWrapper<>();
-    queryWrapper.eq("model_id", modelId);
-    queryWrapper.eq("provider", provider);
+    LambdaQueryWrapper<ModelEntity> queryWrapper = new LambdaQueryWrapper<>();
+    queryWrapper.eq(ModelEntity::getModelId, modelId);
+    queryWrapper.eq(ModelEntity::getProvider, provider);
     if (StringUtils.isNotBlank(context.getWorkspaceId())) {
-      queryWrapper.eq("workspace_id", context.getWorkspaceId());
+      queryWrapper.eq(ModelEntity::getWorkspaceId, context.getWorkspaceId());
     }
     ModelEntity existingModel = modelMapper.selectOne(queryWrapper);
     if (existingModel == null) {
@@ -174,10 +232,10 @@ public class ModelManager {
    */
   public List<ModelConfigInfo> queryModels(String provider) {
     RequestContext context = RequestContextHolder.getRequestContext();
-    QueryWrapper<ModelEntity> queryWrapper = new QueryWrapper<>();
-    queryWrapper.eq("workspace_id", context.getWorkspaceId());
+    LambdaQueryWrapper<ModelEntity> queryWrapper = new LambdaQueryWrapper<>();
+    queryWrapper.eq(ModelEntity::getWorkspaceId, context.getWorkspaceId());
     if (StringUtils.isNotBlank(provider)) {
-      queryWrapper.eq("provider", provider);
+      queryWrapper.eq(ModelEntity::getProvider, provider);
     }
 
     List<ModelEntity> modelEntities = modelMapper.selectList(queryWrapper);
@@ -194,10 +252,10 @@ public class ModelManager {
   public ModelConfigInfo getModelDetail(String provider, String modelId) {
     RequestContext context = RequestContextHolder.getRequestContext();
     try {
-      QueryWrapper<ModelEntity> queryWrapper = new QueryWrapper<>();
-      queryWrapper.eq("model_id", modelId);
-      queryWrapper.eq("provider", provider);
-      queryWrapper.eq("workspace_id", context.getWorkspaceId());
+      LambdaQueryWrapper<ModelEntity> queryWrapper = new LambdaQueryWrapper<>();
+      queryWrapper.eq(ModelEntity::getModelId, modelId);
+      queryWrapper.eq(ModelEntity::getProvider, provider);
+      queryWrapper.eq(ModelEntity::getWorkspaceId, context.getWorkspaceId());
 
       ModelEntity modelEntity = modelMapper.selectOne(queryWrapper);
       if (modelEntity == null) {

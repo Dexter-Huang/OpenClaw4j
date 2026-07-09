@@ -79,6 +79,7 @@
   "spark-flow.components.FlowTools.TouchModeBtn.twoFingersMoveDragTwoFingersOpenZoom": "Two fingers moving to drag, two fingers spreading to zoom",
   "spark-flow.components.NodeMenu.index.ungrouped": "Ungrouped",
   "spark-flow.components.NodeMenu.index.searchNodeName": "Search",
+  "spark-flow.components.NodeMenu.index.readonlyReturnToDraft": "You are viewing a historical version. Return to the current version to edit.",
   "spark-flow.components.NodeResultPanel.index.success": "Succeed",
   "spark-flow.components.NodeResultPanel.index.executing": "Executing",
   "spark-flow.components.NodeResultPanel.index.skipped": "Skipped",

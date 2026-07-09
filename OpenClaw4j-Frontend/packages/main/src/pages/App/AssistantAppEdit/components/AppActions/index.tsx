@@ -1,7 +1,8 @@
 import $i18n from '@/i18n';
+import { Tooltip } from '@/libs/sparkDesignCompat';
 import { channelConfigEventBus } from '@/pages/App/components/ChannelConfig/PublishComponentCard';
 import { publishApp } from '@/services/appManage';
-import { Button, IconFont, Popover, Tooltip } from '@spark-ai/design';
+import { Button, IconFont, Popover } from '@spark-ai/design';
 import { useSetState } from 'ahooks';
 import { Checkbox, Flex, message } from 'antd';
 import { useContext } from 'react';
@@ -170,7 +171,7 @@ export default function AppActions(props: {
               onOpenChange={(val) => {
                 if (!val) onClose();
               }}
-              overlayClassName={styles.confirmWrap}
+              classNames={{ root: styles.confirmWrap }}
               trigger={['click']}
               open={state.visible}
               content={
@@ -216,18 +217,21 @@ export default function AppActions(props: {
               }
               rootClassName={styles.confirmWrap111}
             >
-              <Button
-                iconType="spark-send-line"
-                onClick={() => {
-                  beforePublish();
-                }}
-                type="primary"
-              >
-                {$i18n.get({
-                  id: 'main.pages.App.Workflow.index.index.publish',
-                  dm: '发布',
-                })}
-              </Button>
+              {/* Popover trigger 需要原生 DOM ref，避免 design Button 触发 findDOMNode。 */}
+              <span style={{ display: 'inline-flex' }}>
+                <Button
+                  iconType="spark-send-line"
+                  onClick={() => {
+                    beforePublish();
+                  }}
+                  type="primary"
+                >
+                  {$i18n.get({
+                    id: 'main.pages.App.Workflow.index.index.publish',
+                    dm: '发布',
+                  })}
+                </Button>
+              </span>
             </Popover>
           ) : (
             <Button

@@ -26,6 +26,7 @@ import com.seaskyland.llm.workflow.core.base.manager.DocumentRetrieverManager;
 import com.seaskyland.llm.workflow.core.base.manager.FileManager;
 import com.seaskyland.llm.workflow.core.base.service.McpServerService;
 import com.seaskyland.llm.workflow.core.base.service.PluginService;
+import com.seaskyland.llm.workflow.core.base.service.SkillService;
 import com.seaskyland.llm.workflow.core.base.service.ToolExecutionService;
 import com.seaskyland.llm.workflow.core.config.CommonConfig;
 import com.seaskyland.llm.workflow.core.model.llm.ModelFactory;
@@ -38,6 +39,7 @@ import com.seaskyland.llm.workflow.runtime.domain.chat.ContentType;
 import com.seaskyland.llm.workflow.runtime.domain.chat.MessageRole;
 import com.seaskyland.llm.workflow.runtime.domain.chat.ToolCall;
 import com.seaskyland.llm.workflow.runtime.domain.chat.ToolCallType;
+import com.seaskyland.llm.workflow.runtime.domain.skill.SkillRuntimeInfo;
 import com.seaskyland.llm.workflow.runtime.domain.tool.InputSchema;
 import com.seaskyland.llm.workflow.runtime.domain.tool.ToolCallSchema;
 import java.lang.reflect.Method;
@@ -47,6 +49,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
@@ -83,7 +86,8 @@ class BasicAgentExecutorTest {
             mock(ChatMemory.class),
             mock(CommonConfig.class),
             modelFactory,
-            mock(FileManager.class));
+            mock(FileManager.class),
+            mock(SkillService.class));
 
     List<AgentResponse> responses =
         executor.streamExecute(agentContext(), agentRequest()).collectList().block();
@@ -107,7 +111,8 @@ class BasicAgentExecutorTest {
             mock(ChatMemory.class),
             mock(CommonConfig.class),
             mock(ModelFactory.class),
-            mock(FileManager.class));
+            mock(FileManager.class),
+            mock(SkillService.class));
 
     AgentConfig config = new AgentConfig();
     config.setModel("test-model");
@@ -152,7 +157,8 @@ class BasicAgentExecutorTest {
             mock(ChatMemory.class),
             mock(CommonConfig.class),
             modelFactory,
-            mock(FileManager.class));
+            mock(FileManager.class),
+            mock(SkillService.class));
 
     AgentResponse response = executor.execute(agentContext(), agentRequest());
 
@@ -190,7 +196,8 @@ class BasicAgentExecutorTest {
             mock(ChatMemory.class),
             mock(CommonConfig.class),
             modelFactory,
-            mock(FileManager.class));
+            mock(FileManager.class),
+            mock(SkillService.class));
 
     AgentResponse response = executor.execute(agentContext(), agentRequest());
 
@@ -221,7 +228,8 @@ class BasicAgentExecutorTest {
             mock(ChatMemory.class),
             mock(CommonConfig.class),
             modelFactory,
-            mock(FileManager.class));
+            mock(FileManager.class),
+            mock(SkillService.class));
 
     AgentResponse response = executor.execute(agentContext(), agentRequest());
 
@@ -257,7 +265,8 @@ class BasicAgentExecutorTest {
             mock(ChatMemory.class),
             mock(CommonConfig.class),
             modelFactory,
-            mock(FileManager.class));
+            mock(FileManager.class),
+            mock(SkillService.class));
 
     AgentResponse response = executor.execute(agentContext(), agentRequest());
 
@@ -268,6 +277,50 @@ class BasicAgentExecutorTest {
     assertThat(response.getMessage().getToolCalls())
         .extracting(ToolCall::getType)
         .containsExactly(ToolCallType.FUNCTION, ToolCallType.TOOL_RESULT);
+  }
+
+  @Test
+  void buildMessagesCreatesSkillIndexWithoutInjectingSkillFileContent() {
+    SkillService skillService = mock(SkillService.class);
+    SkillRuntimeInfo runtimeInfo = new SkillRuntimeInfo();
+    runtimeInfo.setSkillCode("skill-1");
+    runtimeInfo.setName("黄明朗本地信息");
+    runtimeInfo.setDescription("包含黄明朗基础信息、籍贯、地方背景");
+    runtimeInfo.setMainFilePath("SKILL.md");
+    when(skillService.getSkillRuntimeInfos(List.of("skill-1"))).thenReturn(List.of(runtimeInfo));
+
+    BasicAgentExecutor executor =
+        new BasicAgentExecutor(
+            mock(ToolExecutionService.class),
+            mock(PluginService.class),
+            mock(McpServerService.class),
+            mock(AppComponentManager.class),
+            mock(DocumentRetrieverManager.class),
+            mock(ChatMemory.class),
+            mock(CommonConfig.class),
+            mock(ModelFactory.class),
+            mock(FileManager.class),
+            skillService);
+
+    AgentConfig config = new AgentConfig();
+    config.setInstructions("");
+    AgentConfig.Skill skill = new AgentConfig.Skill();
+    skill.setId("skill-1");
+    skill.setType("skill");
+    config.setSkills(List.of(skill));
+
+    AgentContext context = new AgentContext();
+    context.setConfig(config);
+    context.setRequest(agentRequest());
+
+    List<Message> messages = executor.buildMessages(context);
+
+    assertThat(messages.getFirst().getText())
+        .contains("read_skill_file")
+        .contains("skill-1")
+        .contains("SKILL.md")
+        .contains("黄明朗本地信息")
+        .doesNotContain("籍贯：阳江");
   }
 
   private static AgentContext agentContext() {

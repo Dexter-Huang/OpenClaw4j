@@ -62,8 +62,10 @@ interface IVarConfigDrawerProps {
   onIsBizVarsCompleteChange?: (isComplete: boolean) => void; // whether the input parameters are filled
 }
 
-interface IUseVarConfigProps
-  extends Omit<IVarConfigDrawerProps, 'open' | 'onCancel'> {
+interface IUseVarConfigProps extends Omit<
+  IVarConfigDrawerProps,
+  'open' | 'onCancel'
+> {
   needLocalStorage?: boolean; // whether to cache the parameters in the localStorage or not
 }
 
@@ -120,9 +122,11 @@ export const useVarConfig = (props: IUseVarConfigProps) => {
     /**
      * refresh the form values based on the return result and the cached bizVars in the localStorage
      */
-    const bizVarsCache = parseJsonSafely(
-      localStorage.getItem(`${props.code}-bizVars`) || '',
-    ) as BizVars | null;
+    const cachedBizVarsString = localStorage.getItem(`${props.code}-bizVars`);
+    // 首次打开页面时本地缓存可能不存在，不应把空值当作 JSON 解析并污染控制台。
+    const bizVarsCache = cachedBizVarsString
+      ? (parseJsonSafely(cachedBizVarsString, false, true) as BizVars | null)
+      : null;
     let isBizVarsComplete = true;
 
     const user_defined_params: Record<string, Record<string, any>> = {}; // the plugin input parameters

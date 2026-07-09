@@ -49,21 +49,7 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
-            <version>4.3.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.aspectj/aspectjweaver -->
-
-        
-        <!--swagger相关-->
-        <!--
-          knife4j 4.5.0 内置 springdoc-openapi 2.3.0，其 HateoasHalProvider 会调用
-          HateoasProperties.getUseHalAsDefaultJsonMediaType()，该方法在 Spring Boot 3.5.x
-          中已被移除，导致启动失败。排除 spring-hateoas 可阻止该自动配置被激活。
-        -->
-        <dependency>
-            <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
-            <version>4.5.0</version>
+            <version>4.6.1</version>
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>

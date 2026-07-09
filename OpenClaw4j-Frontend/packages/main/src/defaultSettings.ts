@@ -5,6 +5,7 @@ export default {
   agentWorkflowComponentMaxLimit: 5, // Maximum number of workflow components per agent
   agentKnowledgeBaseMaxLimit: 10, // Maximum number of knowledge bases per agent
   agentMcpMaxLimit: 5, // Maximum number of MCPs per agent
+  agentSkillMaxLimit: 5, // Maximum number of Skills per agent
   agentToolMaxLimit: 10, // Maximum number of plugin tools per agent
   agentPresetQuestionMaxLimit: 5, // Maximum number of preset questions per agent
   agentWelcomeMessageMaxLength: 2000, // Maximum length for agent welcome message

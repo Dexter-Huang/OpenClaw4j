@@ -3,6 +3,7 @@ import { getCommonConfig } from '@spark-ai/design/dist/config';
 import { findClosestBySelector } from '@spark-ai/design/dist/libs/dom';
 import { Tooltip as AntTooltip, type TooltipProps } from 'antd';
 import classNames from 'classnames';
+import { isValidElement } from 'react';
 
 export type SparkTooltipProps = TooltipProps & {
   mode?: 'dark' | 'light';
@@ -13,6 +14,7 @@ const SparkTooltip = (props: SparkTooltipProps) => {
 
   const {
     arrow,
+    children,
     classNames: tooltipClassNames,
     getPopupContainer,
     mode = 'dark',
@@ -23,6 +25,13 @@ const SparkTooltip = (props: SparkTooltipProps) => {
     ...restProps
   } = props;
   const { antPrefix = 'ant', sparkPrefix = 'spark' } = getCommonConfig();
+  // 兼容 @spark-ai/design 的 Button/IconButton 等非 DOM trigger，避免 antd/rc-trigger 回退到 findDOMNode。
+  const triggerNode =
+    isValidElement(children) && typeof children.type === 'string' ? (
+      children
+    ) : (
+      <span style={{ display: 'inline-flex' }}>{children}</span>
+    );
 
   return (
     <AntTooltip
@@ -52,7 +61,9 @@ const SparkTooltip = (props: SparkTooltipProps) => {
           ...(overlayStyle ?? {}),
         },
       }}
-    />
+    >
+      {triggerNode}
+    </AntTooltip>
   );
 };
 

@@ -1,6 +1,7 @@
 import $i18n from '@/i18n';
 import { IMcpServer, IMCPTool, McpStatus } from '@/types/mcp';
-import { IconFont, renderTooltip } from '@spark-ai/design';
+import { renderTooltip } from '@/libs/sparkDesignCompat';
+import { IconFont } from '@spark-ai/design';
 import { Checkbox, Flex, Radio, Typography } from 'antd';
 import classNames from 'classnames';
 import { useEffect, useRef, useState } from 'react';

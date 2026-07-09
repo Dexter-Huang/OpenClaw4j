@@ -192,6 +192,48 @@ public class OssManager implements InitializingBean {
   }
 
   /**
+   * 上传本地文件到指定 OSS object key。Skill 包需要把原始 zip 和解压文件放在同一个包前缀下，
+   * 不能复用通用上传里的随机 object name 生成逻辑。
+   *
+   * @param objectKey OSS object key
+   * @param path local file path
+   * @return object key
+   */
+  public String uploadFileToObject(String objectKey, String path) {
+    long start = System.currentTimeMillis();
+
+    BufferedInputStream bis = null;
+    try {
+      File file = new File(path);
+      bis = new BufferedInputStream(new FileInputStream(file));
+      String bucketName = getBucket();
+      PutObjectRequest request = new PutObjectRequest(bucketName, objectKey, bis);
+      PutObjectResult putObjectResult = ossClientInternal.putObject(request);
+      LogUtils.monitor(
+          "ossManager", "uploadFileToObject", start, SUCCESS, objectKey, putObjectResult);
+      return objectKey;
+    } catch (OSSException e) {
+      LogUtils.monitor(
+          "ossManager",
+          "uploadFileToObject",
+          start,
+          SUCCESS,
+          objectKey,
+          e.getMessage(),
+          e.getRequestId(),
+          e);
+      throw new BizException(ErrorCode.OSS_UPLOAD_ERROR.toError(), e);
+    } catch (Exception e) {
+      LogUtils.monitor("ossManager", "uploadFileToObject", start, SUCCESS, objectKey, e);
+      throw new BizException(ErrorCode.OSS_UPLOAD_ERROR.toError(), e);
+    } finally {
+      if (bis != null) {
+        IOUtils.closeQuietly(bis);
+      }
+    }
+  }
+
+  /**
    * download file from oss
    *
    * @param objectName object name

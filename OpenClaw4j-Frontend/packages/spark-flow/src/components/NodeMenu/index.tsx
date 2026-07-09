@@ -5,12 +5,15 @@ import { useNodesInteraction } from '@spark-flow/hooks/useNodesInteraction';
 import $i18n from '@spark-flow/i18n';
 import { INodeSchema, IPointItem } from '@spark-flow/types/work-flow';
 import { useNodes } from '@xyflow/react';
+import { message } from 'antd';
 import { TooltipPlacement } from 'antd/es/tooltip';
+import classNames from 'classnames';
 import { debounce, groupBy } from 'lodash-es';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import CustomIcon from '../CustomIcon';
 import FlowIcon from '../FlowIcon';
 import './index.less';
+import { getNodeMenuItemInteraction } from './nodeMenuInteraction';
 
 interface INodeMenuItemProps {
   data: {
@@ -24,6 +27,7 @@ interface INodeMenuItemProps {
     nodeType: string,
   ) => void;
   draggable?: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }
 
@@ -32,10 +36,14 @@ export const NodeMenuItem = memo((props: INodeMenuItemProps) => {
   const [open, setOpen] = useState(false);
   const _dragStart = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
+      if (!props.draggable) {
+        event.preventDefault();
+        return;
+      }
       onDragStart(event, data.type);
       setOpen(false);
     },
-    [onDragStart, data.type],
+    [props.draggable, onDragStart, data.type],
   );
   return (
     <Popover
@@ -66,9 +74,13 @@ export const NodeMenuItem = memo((props: INodeMenuItemProps) => {
         draggable={props.draggable}
         onDragStart={_dragStart}
         onClick={props.onClick}
-        className={
-          'spark-flow-node-menu-item cursor-pointer flex items-center gap-[8px] h-9'
-        }
+        className={classNames(
+          'spark-flow-node-menu-item flex items-center gap-[8px] h-9',
+          {
+            'cursor-pointer': !props.disabled,
+            'spark-flow-node-menu-item-disabled': props.disabled,
+          },
+        )}
       >
         <FlowIcon nodeType={data.type} />
         <span>{data.title}</span>
@@ -194,6 +206,15 @@ export const NodeMenu = memo((props: IProps) => {
     return Object.entries(groups).map(([group, items]) => ({ group, items }));
   }, [menuList]);
 
+  const menuItemInteraction = useMemo(
+    () =>
+      getNodeMenuItemInteraction({
+        disableDrag: props.disableDrag,
+        nodesReadOnly,
+      }),
+    [props.disableDrag, nodesReadOnly],
+  );
+
   const onDragStart = useCallback(
     (event: React.DragEvent<HTMLDivElement>, nodeType: string) => {
       event.dataTransfer.setData('application/reactflow', nodeType);
@@ -205,7 +226,16 @@ export const NodeMenu = memo((props: IProps) => {
 
   const onMenuItemClick = useCallback(
     (data: INodeMenuItemProps['data']) => {
-      if (!props.source || nodesReadOnly) return;
+      if (menuItemInteraction.shouldWarnReadonly) {
+        message.warning(
+          $i18n.get({
+            id: 'spark-flow.components.NodeMenu.index.readonlyReturnToDraft',
+            dm: '当前为历史版本，请回到当前版本后编辑',
+          }),
+        );
+        return;
+      }
+      if (!props.source) return;
 
       const parentId =
         props.parentId ||
@@ -218,7 +248,15 @@ export const NodeMenu = memo((props: IProps) => {
       );
       props.onSelect?.();
     },
-    [props.parentId, props.source, props.target, props.onSelect, nodes],
+    [
+      menuItemInteraction.shouldWarnReadonly,
+      props.parentId,
+      props.source,
+      props.target,
+      props.onSelect,
+      nodes,
+      onAddNewNodeWithSource,
+    ],
   );
 
   return (
@@ -254,7 +292,8 @@ export const NodeMenu = memo((props: IProps) => {
               {groupItem.items.map((item) => (
                 <NodeMenuItem
                   onClick={() => onMenuItemClick(item)}
-                  draggable={!props.disableDrag && !nodesReadOnly}
+                  draggable={menuItemInteraction.draggable}
+                  disabled={menuItemInteraction.disabled}
                   onDragStart={onDragStart}
                   data={item}
                   key={item.type}

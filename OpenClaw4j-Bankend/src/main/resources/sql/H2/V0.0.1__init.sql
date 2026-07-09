@@ -370,6 +370,62 @@ CREATE TABLE tool
 );
 
 /******************************************/
+/*   table = skill                        */
+/******************************************/
+DROP TABLE IF EXISTS skill;
+CREATE TABLE skill
+(
+    id              BIGINT AUTO_INCREMENT NOT NULL COMMENT 'pk',
+    skill_code      VARCHAR(64)           NOT NULL COMMENT 'skill code',
+    workspace_id    VARCHAR(64)           NOT NULL COMMENT 'workspace id',
+    account_id      VARCHAR(64)           DEFAULT NULL COMMENT 'account id',
+    name            VARCHAR(128)          NOT NULL COMMENT 'skill name',
+    description     VARCHAR(4096)         DEFAULT NULL COMMENT 'skill description',
+    source          VARCHAR(64)           NOT NULL DEFAULT 'custom' COMMENT 'skill source',
+    status          TINYINT               NOT NULL DEFAULT 1 COMMENT 'status: 0-deleted, 1-draft, 2-published, 3-published editing',
+    tags            VARCHAR(512)          DEFAULT NULL COMMENT 'skill tags',
+    gmt_create      TIMESTAMP             NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    gmt_modified    TIMESTAMP             NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    creator         VARCHAR(64)           DEFAULT NULL COMMENT 'creator uid',
+    modifier        VARCHAR(64)           DEFAULT NULL COMMENT 'modifier uid',
+    tenant_id       BIGINT                DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_skill_code (skill_code),
+    KEY skill_idx_workspace_status_name (workspace_id, status, name)
+);
+
+/******************************************/
+/*   table = skill_version                */
+/******************************************/
+DROP TABLE IF EXISTS skill_version;
+CREATE TABLE skill_version
+(
+    id             BIGINT AUTO_INCREMENT NOT NULL COMMENT 'pk',
+    skill_code     VARCHAR(64)           NOT NULL COMMENT 'skill code',
+    workspace_id   VARCHAR(64)           NOT NULL COMMENT 'workspace id',
+    version        VARCHAR(32)           NOT NULL COMMENT 'skill version',
+    description    VARCHAR(4096)         DEFAULT NULL COMMENT 'skill version description',
+    main_file_path VARCHAR(512)          NOT NULL DEFAULT 'SKILL.md' COMMENT 'main skill file path',
+    manifest       LONGTEXT              DEFAULT NULL COMMENT 'skill package manifest',
+    content_hash   VARCHAR(128)          DEFAULT NULL COMMENT 'skill package content hash',
+    storage_type   VARCHAR(32)           NOT NULL DEFAULT 'file' COMMENT 'file package storage type: file/oss',
+    storage_bucket VARCHAR(255)          DEFAULT NULL COMMENT 'storage bucket when storage type is oss',
+    storage_prefix VARCHAR(1024)         NOT NULL COMMENT 'skill package storage prefix',
+    package_object_key VARCHAR(1024)     DEFAULT NULL COMMENT 'uploaded package object key or relative file path',
+    file_count     INT                   DEFAULT NULL COMMENT 'file count in skill package',
+    total_size_bytes BIGINT              DEFAULT NULL COMMENT 'skill package total size in bytes',
+    status         TINYINT               NOT NULL DEFAULT 1 COMMENT 'status: 0-deleted, 1-draft, 2-published, 3-published editing',
+    gmt_create     TIMESTAMP             NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    gmt_modified   TIMESTAMP             NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    creator        VARCHAR(64)           DEFAULT NULL COMMENT 'creator uid',
+    modifier       VARCHAR(64)           DEFAULT NULL COMMENT 'modifier uid',
+    tenant_id      BIGINT                DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_skill_version (skill_code, version),
+    KEY skill_version_idx_workspace_skill_status (workspace_id, skill_code, status)
+);
+
+/******************************************/
 /*   table = workspace                    */
 /******************************************/
 DROP TABLE IF EXISTS workspace;

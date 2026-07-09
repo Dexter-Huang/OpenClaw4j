@@ -1,8 +1,9 @@
 import defaultSettings from '@/defaultSettings';
 import $i18n from '@/i18n';
+import { HelpIcon } from '@/libs/sparkDesignCompat';
 import { MCPServerSelectDrawer } from '@/pages/App/components/MCPSelector';
 import { IMcpServer } from '@/types/mcp';
-import { Button, HelpIcon, IconFont } from '@spark-ai/design';
+import { Button, IconFont } from '@spark-ai/design';
 import { useSetState } from 'ahooks';
 import { Divider, Flex } from 'antd';
 import cls from 'classnames';

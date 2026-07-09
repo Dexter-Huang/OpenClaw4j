@@ -55,7 +55,8 @@ const SettingDropdown: React.FC = () => {
         menu={{ items: menuItems, onClick: handleMenuClick }}
         trigger={['click']}
       >
-        {settingButton}
+        {/* Dropdown 需要可稳定取 ref 的 DOM trigger，避免 rc-trigger 回退到 findDOMNode。 */}
+        <span style={{ display: 'inline-flex' }}>{settingButton}</span>
       </Dropdown>
     );
   } else {

@@ -41,6 +41,15 @@
     &:hover {
       background: e('var(--@{ant-prefix}-color-fill-secondary)');
     }
+
+    &-disabled {
+      cursor: not-allowed;
+      color: e('var(--@{ant-prefix}-color-text-disabled)');
+
+      &:hover {
+        background: transparent;
+      }
+    }
   }
 }
 

@@ -1,7 +1,7 @@
 import $i18n from '@/i18n';
 import { IFileSearchResult } from '@/types/chat';
 import { Accordion, Markdown } from '@spark-ai/chat';
-import { renderTooltip } from '@spark-ai/design';
+import { renderTooltip } from '@/libs/sparkDesignCompat';
 import { Typography } from 'antd';
 import cls from 'classnames';
 import styles from './index.module.less';

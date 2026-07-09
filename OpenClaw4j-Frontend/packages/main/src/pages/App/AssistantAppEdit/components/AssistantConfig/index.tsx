@@ -16,9 +16,13 @@ import HistoryPanelComp from '../HistoryPanel/HistoryPanelComp';
 import KnowledgeBaseSelectorComp from '../KnowledgeSelectorComp';
 import MCPSelectorComp from '../MCPSelectorComp';
 import PluginSelectorComp from '../PluginSelectorComp';
+import SkillSelectorComp from '../SkillSelectorComp';
 import WorkFlowSelectorComp from '../WorkFlowSelectorComp';
 import styles from './index.module.less';
 import ModelConfig from './modelConfig';
+
+const CONFIG_PANEL_MIN_SIZE_PERCENTAGE = 30;
+const TEST_PANEL_MIN_SIZE_PERCENTAGE = 30;
 
 export const RAG_PROMPT_TEMPLATE = $i18n.get({
   id: 'main.pages.App.AssistantAppEdit.components.AssistantConfig.index.knowledgeBaseTip',
@@ -50,13 +54,6 @@ export default function AssistantConfig() {
     return true;
   };
 
-  const getUniqueId = () => {
-    return {
-      left: `${appState.modalType}_${widthLayout.leftWidth.toString()}`,
-      right: `${appState.modalType}_${widthLayout.rightWidth.toString()}`,
-    };
-  };
-
   useLayoutEffect(() => {
     if (!isTextModal(appState.modalType)) {
       setWidthLayout({ leftWidth: 33.3, rightWidth: 66.7 });
@@ -86,9 +83,11 @@ export default function AssistantConfig() {
     >
       <PanelGroup direction="horizontal" id="group">
         <Panel
-          minSizePixels={340}
+          // 使用百分比约束避免窄容器下左右面板的 minSizePixels 总和超过容器宽度，
+          // react-resizable-panels 会把这种组合判定为非法配置并输出控制台 warning。
+          minSizePercentage={CONFIG_PANEL_MIN_SIZE_PERCENTAGE}
           defaultSizePercentage={widthLayout.leftWidth}
-          id={getUniqueId().left}
+          id="assistant-config-panel"
           order={1}
           style={{ overflowY: 'auto' }}
         >
@@ -176,6 +175,7 @@ export default function AssistantConfig() {
                           </div>
                           <div className={styles.skillSelectorList}>
                             <MCPSelectorComp />
+                            <SkillSelectorComp />
                             <PluginSelectorComp />
                             <AgentSelectorComp />
                             <WorkFlowSelectorComp />
@@ -197,10 +197,10 @@ export default function AssistantConfig() {
           </div>
         </PanelResizeHandle>
         <Panel
-          minSizePixels={600}
+          minSizePercentage={TEST_PANEL_MIN_SIZE_PERCENTAGE}
           defaultSizePercentage={widthLayout.rightWidth}
           order={2}
-          id={getUniqueId().right}
+          id="assistant-test-panel"
         >
           <ConfigProvider componentDisabled={!appState.canChat}>
             <div className={styles.testWindow}>

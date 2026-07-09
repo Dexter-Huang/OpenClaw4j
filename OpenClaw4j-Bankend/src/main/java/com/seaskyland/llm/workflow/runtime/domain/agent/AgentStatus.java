@@ -17,6 +17,7 @@
 package com.seaskyland.llm.workflow.runtime.domain.agent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Locale;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -56,14 +57,14 @@ public enum AgentStatus {
    * @return The corresponding AgentStatus
    */
   public static AgentStatus toAgentStatus(String finishReason) {
-    if (finishReason == null || finishReason.isEmpty()) {
+    if (finishReason == null || finishReason.trim().isEmpty()) {
       return AgentStatus.IN_PROGRESS;
     }
 
-    finishReason = finishReason.toLowerCase();
-    return switch (finishReason) {
+    String normalizedFinishReason = finishReason.trim().toLowerCase(Locale.ROOT);
+    return switch (normalizedFinishReason) {
       case "stop", "length" -> AgentStatus.COMPLETED;
-      case "tool_calls" -> AgentStatus.IN_PROGRESS;
+      case "tool_calls", "_unknown", "unknown" -> AgentStatus.IN_PROGRESS;
       default -> AgentStatus.FAILED;
     };
   }

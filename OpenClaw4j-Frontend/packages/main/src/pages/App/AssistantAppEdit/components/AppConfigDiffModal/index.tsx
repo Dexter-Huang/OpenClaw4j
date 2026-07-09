@@ -12,6 +12,7 @@ import {
   queryComponentsByCodes,
   queryKnowledgeListByCode,
   queryMCPsByCodes,
+  querySkillsByCodes,
   queryToolsByCode,
 } from '../..';
 import { AssistantAppContext } from '../../AssistantAppContext';
@@ -92,6 +93,13 @@ const needCheckCfgList = [
   },
   {
     label: $i18n.get({
+      id: 'main.pages.App.AssistantAppEdit.components.SkillSelectorComp.index.skill',
+      dm: 'Skill',
+    }),
+    code: 'skills',
+  },
+  {
+    label: $i18n.get({
       id: 'main.pages.Component.index.intelligentAgent',
       dm: '智能体',
     }),
@@ -130,6 +138,9 @@ export default function AppConfigDiffModal(props: IProps) {
     const mcp_servers = await queryMCPsByCodes(
       publishConfig?.mcp_servers?.map((item) => item.id) || [],
     );
+    const skills = await querySkillsByCodes(
+      publishConfig?.skills?.map((item) => item.id) || [],
+    );
     const agent_components = await queryComponentsByCodes(
       publishConfig?.agent_components,
     );
@@ -143,6 +154,7 @@ export default function AppConfigDiffModal(props: IProps) {
       ...publishConfig,
       tools,
       mcp_servers,
+      skills,
       agent_components,
       workflow_components,
       model,
@@ -272,6 +284,24 @@ export default function AppConfigDiffModal(props: IProps) {
             code: item.code,
             draftCfg: prevMCPServerNames?.join('，'),
             onlineCfg: nowMCPServerNames?.join('，'),
+          });
+          break;
+        }
+        case 'skills': {
+          const prevSkillCodes = prevJsonCfg.skills?.map(
+            (item) => item.skill_code,
+          );
+          const nowSkillCodes = nowJsonCfg.skills?.map(
+            (item) => item.skill_code,
+          );
+          if (compareArrays(prevSkillCodes, nowSkillCodes)) continue;
+          const prevSkillNames = prevJsonCfg.skills?.map((item) => item.name);
+          const nowSkillNames = nowJsonCfg.skills?.map((item) => item.name);
+          diffList.push({
+            title: item.label,
+            code: item.code,
+            draftCfg: prevSkillNames?.join('，'),
+            onlineCfg: nowSkillNames?.join('，'),
           });
           break;
         }

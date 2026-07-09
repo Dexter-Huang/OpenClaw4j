@@ -1,4 +1,5 @@
-import { Button, IconButton, IconFont, Tabs, TabsProps, Tooltip } from '@spark-ai/design';
+import { Tooltip } from '@/libs/sparkDesignCompat';
+import { Button, IconButton, IconFont, Tabs, TabsProps } from '@spark-ai/design';
 import { Breadcrumb, BreadcrumbProps, Flex, Spin } from 'antd';
 import classNames from 'classnames';
 import { omit } from 'lodash-es';

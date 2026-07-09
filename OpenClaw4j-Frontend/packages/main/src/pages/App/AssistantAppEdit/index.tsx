@@ -14,6 +14,7 @@ import { getKnowledgeListByCodes } from '@/services/knowledge';
 import { listMcpServersByCodes } from '@/services/mcp';
 import { getModelDetail } from '@/services/modelService';
 import { getPluginToolsByIds } from '@/services/plugin';
+import { listSkillsByCodes } from '@/services/skill';
 import { IAppComponentListItem } from '@/types/appComponent';
 import {
   IAppStatus,
@@ -27,7 +28,9 @@ import { IKnowledgeListItem } from '@/types/knowledge';
 import { IMcpServer } from '@/types/mcp';
 import { IModel } from '@/types/modelService';
 import { PluginTool } from '@/types/plugin';
-import { Empty, IconFont, renderTooltip } from '@spark-ai/design';
+import { ISkill } from '@/types/skill';
+import { renderTooltip } from '@/libs/sparkDesignCompat';
+import { Empty, IconFont } from '@spark-ai/design';
 import { useDebounceFn, useSetState } from 'ahooks';
 import { Flex, Spin, Typography } from 'antd';
 import dayjs from 'dayjs';
@@ -61,6 +64,16 @@ export const queryMCPsByCodes = (codes?: string[]): Promise<IMcpServer[]> => {
   });
 };
 
+export const querySkillsByCodes = (codes?: string[]): Promise<ISkill[]> => {
+  if (!codes?.length) return Promise.resolve([]);
+  return listSkillsByCodes({
+    skill_codes: codes,
+    need_files: false,
+  }).then((res) => {
+    return res.data.filter((item) => !!item) || [];
+  });
+};
+
 export const queryComponentsByCodes = (
   codes?: string[],
 ): Promise<IAppComponentListItem[]> => {
@@ -83,6 +96,7 @@ export const transformAppData = (
   const {
     tools,
     mcp_servers,
+    skills,
     file_search,
     agent_components,
     workflow_components,
@@ -93,6 +107,7 @@ export const transformAppData = (
     model: extraConfig.model?.model_id,
     tools: tools?.map((item) => ({ id: item.tool_id })) || [],
     mcp_servers: mcp_servers?.map((item) => ({ id: item.server_code })) || [],
+    skills: skills?.map((item) => ({ id: item.skill_code })) || [],
     agent_components: agent_components?.map((item) => item.code) || [],
     workflow_components: workflow_components?.map((item) => item.code) || [],
     file_search: {
@@ -186,6 +201,9 @@ export default function AssistantAppEdit() {
     const mcp_servers = await queryMCPsByCodes(
       appDetail.config.mcp_servers?.map((item) => item.id) || [],
     );
+    const skills = await querySkillsByCodes(
+      appDetail.config.skills?.map((item) => item.id) || [],
+    );
     const agent_components = await queryComponentsByCodes(
       appDetail.config.agent_components,
     );
@@ -201,6 +219,7 @@ export default function AssistantAppEdit() {
         ...appDetail.config,
         tools,
         mcp_servers,
+        skills,
         agent_components,
         workflow_components,
         model,

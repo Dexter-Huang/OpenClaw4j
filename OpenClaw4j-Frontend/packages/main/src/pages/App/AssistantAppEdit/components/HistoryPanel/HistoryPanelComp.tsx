@@ -11,8 +11,8 @@ import {
   IconFont,
   message,
   parseJsonSafely,
-  renderTooltip,
 } from '@spark-ai/design';
+import { renderTooltip } from '@/libs/sparkDesignCompat';
 import { useMount, useSetState } from 'ahooks';
 import { Flex, Timeline, Typography } from 'antd';
 import classNames from 'classnames';

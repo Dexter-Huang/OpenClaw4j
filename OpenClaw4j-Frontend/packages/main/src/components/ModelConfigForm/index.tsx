@@ -198,7 +198,10 @@ const ModelConfigBtn = memo(
 
     return (
       <Popover placement="bottomLeft" content={memoForm} trigger={['click']}>
-        <Button icon={<IconFont type="spark-modify-line" />} />
+        {/* Popover trigger 使用原生 DOM 包裹，避免 design Button 触发 findDOMNode。 */}
+        <span style={{ display: 'inline-flex' }}>
+          <Button icon={<IconFont type="spark-modify-line" />} />
+        </span>
       </Popover>
     );
   },

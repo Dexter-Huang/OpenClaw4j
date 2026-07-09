@@ -19,6 +19,7 @@ package com.seaskyland.llm.workflow.core.agent.tool;
 import com.seaskyland.llm.workflow.core.base.manager.AppComponentManager;
 import com.seaskyland.llm.workflow.core.base.service.McpServerService;
 import com.seaskyland.llm.workflow.core.base.service.PluginService;
+import com.seaskyland.llm.workflow.core.base.service.SkillService;
 import com.seaskyland.llm.workflow.core.base.service.ToolExecutionService;
 import com.seaskyland.llm.workflow.runtime.domain.app.AgentConfig;
 import com.seaskyland.llm.workflow.runtime.domain.mcp.McpQuery;
@@ -64,6 +65,9 @@ public class CompositeToolCallbackProvider implements ToolCallbackProvider {
   /** Manager for application components */
   private final AppComponentManager appComponentManager;
 
+  /** Skill 管理服务，用于构建 Agent 内置 Skill 文件读取工具 */
+  private final SkillService skillService;
+
   /** Additional parameters for tool execution */
   @Getter private final Map<String, Object> extraParams;
 
@@ -84,6 +88,13 @@ public class CompositeToolCallbackProvider implements ToolCallbackProvider {
     if (!CollectionUtils.isEmpty(pluginTools)) {
       List<ToolCallback> pluginToolCallbacks = buildPluginToolCallbacks(pluginTools);
       addToolCallbacks(toolCallbacks, pluginToolCallbacks);
+    }
+
+    // build built-in skill tools
+    List<AgentConfig.Skill> skills = agentConfig.getSkills();
+    if (!CollectionUtils.isEmpty(skills)) {
+      List<ToolCallback> skillToolCallbacks = buildSkillToolCallbacks(skills);
+      addToolCallbacks(toolCallbacks, skillToolCallbacks);
     }
 
     // build mcp tools
@@ -137,6 +148,7 @@ public class CompositeToolCallbackProvider implements ToolCallbackProvider {
       ToolExecutionService toolExecutionService,
       McpServerService mcpServerService,
       AppComponentManager appComponentManager,
+      SkillService skillService,
       Map<String, Object> extraParams) {
     CompositeToolCallbackProvider provider =
         new CompositeToolCallbackProvider(
@@ -145,6 +157,7 @@ public class CompositeToolCallbackProvider implements ToolCallbackProvider {
             toolExecutionService,
             mcpServerService,
             appComponentManager,
+            skillService,
             extraParams);
     ToolCallback[] toolCallbacks = provider.getToolCallbacks();
     if (ArrayUtils.isEmpty(toolCallbacks)) {
@@ -195,6 +208,16 @@ public class CompositeToolCallbackProvider implements ToolCallbackProvider {
         });
 
     return toolCallbacks;
+  }
+
+  /** 构建 Agent 内置 Skill 文件读取工具。 */
+  private List<ToolCallback> buildSkillToolCallbacks(List<AgentConfig.Skill> skills) {
+    List<String> skillCodes =
+        skills.stream().map(AgentConfig.Skill::getId).filter(Objects::nonNull).distinct().toList();
+    if (CollectionUtils.isEmpty(skillCodes)) {
+      return List.of();
+    }
+    return List.of(new SkillToolCallback(skillCodes, skillService));
   }
 
   /** Builds tool callbacks from MCP server tools. */
