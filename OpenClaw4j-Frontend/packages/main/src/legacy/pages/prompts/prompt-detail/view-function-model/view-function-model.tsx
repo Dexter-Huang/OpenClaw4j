@@ -114,7 +114,7 @@ function ViewFunctionModel(props: ViewFunctionModelProps) {
 
   return (
     <Modal
-      destroyOnHidden
+      destroyOnClose
       open={open}
       onCancel={handleCancel}
       onOk={handleOk}

@@ -326,7 +326,8 @@ export const FlowEditor = memo((props: IProps) => {
       message.success('转换成功！项目文件已开始下载');
     } catch (error) {
       console.error('转换失败:', error);
-      message.error(`转换失败：${error.message || '请重试'}`);
+      const errorMessage = error instanceof Error ? error.message : '请重试';
+      message.error(`转换失败：${errorMessage}`);
     } finally {
       setActionLoading(false); // 重置加载状态
     }

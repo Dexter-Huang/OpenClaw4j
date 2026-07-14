@@ -429,7 +429,9 @@ export default memo(function ChatTestPanel() {
             uiConfig={{
               background: 'transparent',
             }}
-            onInput={onInput}
+            onInput={{
+              onSubmit: onInput,
+            }}
             onStop={onStop}
             ref={chatRef}
           ></ChatAnywhere>

@@ -1,6 +1,6 @@
 import $i18n from '@/i18n';
 import { notification, Space } from 'antd';
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import styles from './index.module.less';
 import { session } from './session';
 export { session };
@@ -73,15 +73,27 @@ function notificationError(error: any) {
  * @param config Axios request configuration with optional autoMsg flag
  * @returns Promise with response data
  */
-export default async function fetch(
+export default async function fetch<T = any>(
   config: AxiosRequestConfig & { autoMsg?: boolean },
-) {
-  const { headers = {}, autoMsg = true } = config;
+): Promise<AxiosResponse<T>>;
+export default async function fetch<T = any>(
+  url: string,
+  config?: AxiosRequestConfig & { autoMsg?: boolean },
+): Promise<AxiosResponse<T>>;
+export default async function fetch<T = any>(
+  urlOrConfig: string | (AxiosRequestConfig & { autoMsg?: boolean }),
+  config: AxiosRequestConfig & { autoMsg?: boolean } = {},
+): Promise<AxiosResponse<T>> {
+  const requestConfig =
+    typeof urlOrConfig === 'string'
+      ? { ...config, url: urlOrConfig }
+      : urlOrConfig;
+  const { headers = {}, autoMsg = true } = requestConfig;
 
   // Internal request function with merged headers
   async function request() {
     return instance.request({
-      ...config,
+      ...requestConfig,
       headers: {
         ...headers,
         ...(await getBaseHeader()),

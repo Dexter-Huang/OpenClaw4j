@@ -15,7 +15,8 @@ export interface DifyConvertParams {
   packageName: string;
   packaging: string;
   javaVersion: string;
-  difyDsl: string;
+  dsl?: string;
+  difyDsl?: string;
 }
 
 export function convertDifyToSpringAI(data: DifyConvertParams) {

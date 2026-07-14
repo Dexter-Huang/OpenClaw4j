@@ -18,10 +18,11 @@ export class ToolService {
    * @returns Created tool
    */
   static async createTool(data: ICreateToolRequest): Promise<IToolResponse> {
-    return request<IToolResponse>('/console/v1/tools', {
+    const response = await request<IToolResponse>('/console/v1/tools', {
       method: 'POST',
       data,
     });
+    return response.data;
   }
 
   /**
@@ -31,10 +32,11 @@ export class ToolService {
    * @returns Updated tool
    */
   static async updateTool(id: number, data: IUpdateToolRequest): Promise<IToolResponse> {
-    return request<IToolResponse>(`/console/v1/tools/${id}`, {
+    const response = await request<IToolResponse>(`/console/v1/tools/${id}`, {
       method: 'PUT',
       data,
     });
+    return response.data;
   }
 
   /**
@@ -42,7 +44,7 @@ export class ToolService {
    * @param id Tool ID
    */
   static async deleteTool(id: number): Promise<void> {
-    return request<void>(`/console/v1/tools/${id}`, {
+    await request<void>(`/console/v1/tools/${id}`, {
       method: 'DELETE',
     });
   }
@@ -53,7 +55,8 @@ export class ToolService {
    * @returns Tool details
    */
   static async getTool(id: number): Promise<IToolResponse> {
-    return request<IToolResponse>(`/console/v1/tools/${id}`);
+    const response = await request<IToolResponse>(`/console/v1/tools/${id}`);
+    return response.data;
   }
 
   /**
@@ -61,7 +64,8 @@ export class ToolService {
    * @returns List of tools
    */
   static async getTools(): Promise<ITool[]> {
-    return request<ITool[]>('/console/v1/tools');
+    const response = await request<ITool[]>('/console/v1/tools');
+    return response.data;
   }
 
   /**
@@ -70,10 +74,11 @@ export class ToolService {
    * @returns Paginated list of tools
    */
   static async getToolsByPage(params: IToolListParams): Promise<IToolListResponse> {
-    return request<IToolListResponse>('/console/v1/tools/page', {
+    const response = await request<IToolListResponse>('/console/v1/tools/page', {
       method: 'GET',
       params,
     });
+    return response.data;
   }
 
   /**
@@ -82,10 +87,11 @@ export class ToolService {
    * @returns List of matching tools
    */
   static async searchTools(name: string): Promise<ITool[]> {
-    return request<ITool[]>('/console/v1/tools/search', {
+    const response = await request<ITool[]>('/console/v1/tools/search', {
       method: 'GET',
       params: { name },
     });
+    return response.data;
   }
 
   /**
@@ -94,7 +100,8 @@ export class ToolService {
    * @returns List of tools for the plugin
    */
   static async getToolsByPlugin(pluginId: string): Promise<ITool[]> {
-    return request<ITool[]>(`/console/v1/tools/plugin/${pluginId}`);
+    const response = await request<ITool[]>(`/console/v1/tools/plugin/${pluginId}`);
+    return response.data;
   }
 
   /**
@@ -103,7 +110,7 @@ export class ToolService {
    * @param enabled Enable status
    */
   static async setToolEnabled(id: number, enabled: boolean): Promise<void> {
-    return request<void>(`/console/v1/tools/${id}/enabled`, {
+    await request<void>(`/console/v1/tools/${id}/enabled`, {
       method: 'PATCH',
       params: { enabled },
     });

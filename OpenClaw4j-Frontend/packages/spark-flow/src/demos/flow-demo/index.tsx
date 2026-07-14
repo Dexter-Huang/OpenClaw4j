@@ -141,8 +141,13 @@ const SparkFlow = () => {
                   model_config: {
                     model_id: 'qwen-max',
                     model_name: '',
+                    mode: 'chat',
                     provider: '87a5a76e',
                     params: [],
+                    vision_config: {
+                      enable: false,
+                      params: [],
+                    },
                   },
                   retry_config: {
                     retry_enabled: true,

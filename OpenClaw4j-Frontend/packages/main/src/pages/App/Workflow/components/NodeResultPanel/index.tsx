@@ -90,7 +90,7 @@ export function NodeResultPanel(props: INodeResultPanelProps) {
       case 'Judge':
         return (
           <JudgeResult
-            multiBranchResults={renderData.multi_branch_results}
+            multiBranchResults={renderData.multi_branch_results || undefined}
             input={renderData.input}
           />
         );

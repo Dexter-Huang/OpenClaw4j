@@ -67,7 +67,10 @@ export interface ITryCatchConfig {
   /* Exception handling strategy, defaultValue: default value, failBranch: failure branch, noop: do nothing */
   strategy: 'defaultValue' | 'failBranch' | 'noop';
   /* If strategy is defaultValue, default_value needs to be defined */
-  default_values?: Omit<INodeDataInputParamItem, 'value_from'>[];
+  default_values?: Array<
+    Omit<INodeDataOutputParamItem, 'value_from'> &
+      Pick<INodeDataInputParamItem, 'value'>
+  >;
 }
 
 export interface ILLMNodeParam {
@@ -221,9 +224,9 @@ export interface IVariableHandleNodeParam {
   template_content: string;
 }
 
-export type IStartNodeParam = Record<string, never>;
+export type IStartNodeParam = Record<never, never>;
 
-export type IInputNodeParam = Record<string, never>;
+export type IInputNodeParam = Record<never, never>;
 
 export type IRetrievalNodeParam = {
   /* KnowledgeBase id list  */
@@ -264,6 +267,42 @@ export type INodeDataNodeParam =
   | IVariableHandleNodeParam
   | IRetrievalNodeParam
   | IMCPNodeParam;
+
+export interface IBizEdge {
+  id: string;
+  source: string;
+  target: string;
+  source_handle?: string;
+  target_handle?: string;
+}
+
+export type IBizNodeParam = INodeDataNodeParam & { block?: IBizFlowData };
+
+export interface IBizNodeConfig<T = IBizNodeParam> {
+  input_params: INodeDataInputParamItem[];
+  output_params: INodeDataOutputParamItem[];
+  node_param: T;
+}
+
+export interface IBizNode<T = IBizNodeParam> {
+  id: string;
+  name: string;
+  type: string;
+  parent_id?: string;
+  desc?: string;
+  position: {
+    x: number;
+    y: number;
+  };
+  width?: number;
+  height?: number;
+  config: IBizNodeConfig<T>;
+}
+
+export interface IBizFlowData {
+  nodes: IBizNode[];
+  edges: IBizEdge[];
+}
 
 export type IWorkFlowNodeData<T = INodeDataNodeParam> = {
   /* Node name */

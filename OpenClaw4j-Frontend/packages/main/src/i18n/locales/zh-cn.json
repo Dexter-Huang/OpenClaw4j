@@ -72,6 +72,7 @@
   "main.components.SparkChat.components.Steps.index.error": "错误",
   "main.components.SparkChat.components.Steps.index.knowledgeRetrieval": "知识库检索",
   "main.components.SparkChat.components.Steps.index.plugin": "插件：{var1}",
+  "main.components.SparkChat.components.Steps.index.skill": "Skill：{var1}",
   "main.pages.App.AssistantAppEdit.components.SparkChat.components.Steps.index.mcp": "MCP：{var1}",
   "main.pages.App.AssistantAppEdit.components.SparkChat.components.Steps.index.deepThinking": "深度思考",
   "main.pages.App.AssistantAppEdit.components.SparkChat.components.Welcome.index.inputQuestion": "输入问题进行测试体验",

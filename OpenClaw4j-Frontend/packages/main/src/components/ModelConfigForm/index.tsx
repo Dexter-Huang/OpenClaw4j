@@ -5,6 +5,7 @@ import {
 } from '@/services/modelService';
 import {
   IModel,
+  IModelConfigInfo,
   IModelConfigParamItem,
   IModelParameterRule,
   IModelSelectorItem,
@@ -40,6 +41,11 @@ const getStepFromPrecision = (precision?: number): number => {
 };
 
 type ISelectModel = IModelSelectorItem['models'][0];
+
+const normalizeModel = (model: IModelConfigInfo): IModel => ({
+  ...model,
+  name: model.name || '',
+});
 
 interface IModelSelectorProps {
   value: ISelectedModelParams;
@@ -252,12 +258,15 @@ const ModelSelector = memo(
             const [provider, modelId] = value.split('@@@');
             initModelParams(modelId, provider);
             if (Array.isArray(option)) {
-              onSelect(
-                option[0]?.extra as ISelectModel,
-                option[0]?.extra as IModel,
-              );
+              const selectedOption = option[0]?.extra as ISelectModel | undefined;
+              if (selectedOption) {
+                onSelect(selectedOption, normalizeModel(selectedOption));
+              }
             } else {
-              onSelect(option?.extra as ISelectModel, option?.extra as IModel);
+              const selectedOption = option?.extra as ISelectModel | undefined;
+              if (selectedOption) {
+                onSelect(selectedOption, normalizeModel(selectedOption));
+              }
             }
           }}
         />
@@ -313,7 +322,7 @@ const ModelConfigForm = ({
       modelOptions.forEach((item) => {
         item.options.forEach((option) => {
           if (option.value.split('@@@')[1] === value.model_id) {
-            setSelectedModel(option.extra);
+            setSelectedModel(normalizeModel(option.extra));
           }
         });
       });

@@ -266,7 +266,7 @@ export default defineConfig({
     '/api': withNoStoreProxy(backendTarget),
     '/console': withNoStoreProxy(backendTarget),
     '/oauth2': withNoStoreProxy(backendTarget),
-  },
+  } as any,
   lessLoader: {
     javascriptEnabled: true,
     modifyVars: {

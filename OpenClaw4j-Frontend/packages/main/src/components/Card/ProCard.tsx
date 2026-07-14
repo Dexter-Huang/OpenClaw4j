@@ -3,13 +3,15 @@ import React from 'react';
 import styles from './index.module.less';
 
 export interface ProCardInfo {
-  content: string;
+  label?: React.ReactNode;
+  content: React.ReactNode;
 }
 
 export interface ProCardProps {
-  title: string;
+  title: React.ReactNode;
   logo?: React.ReactNode;
   info?: ProCardInfo[];
+  labelWidth?: number;
   onClick?: () => void;
   className?: string;
   statusNode?: React.ReactNode;
@@ -21,6 +23,7 @@ const ProCard: React.FC<ProCardProps> = ({
   title,
   logo,
   info = [],
+  labelWidth,
   onClick,
   className,
   statusNode,
@@ -47,6 +50,14 @@ const ProCard: React.FC<ProCardProps> = ({
         <div className={styles.cardBody}>
           {info.map((item, index) => (
             <div key={index} className={styles.infoItem}>
+              {item.label && (
+                <span
+                  className={styles.label}
+                  style={labelWidth ? { width: labelWidth } : undefined}
+                >
+                  {item.label}
+                </span>
+              )}
               <span className={styles.content}>{item.content}</span>
             </div>
           ))}

@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
+import type { TooltipProps as AntdTooltipProps } from 'antd';
 
 export * from '@spark-ai/design/dist/index';
 export { copy, isElement } from '@spark-ai/design/dist/libs/utils';
@@ -13,7 +14,7 @@ export type { SparkModalProps as ModalProps } from './Modal';
 export { default as Tooltip } from './Tooltip';
 export type { SparkTooltipProps as TooltipProps } from './Tooltip';
 
-type TooltipExtraProps = {
+type TooltipExtraProps = Partial<AntdTooltipProps> & {
   maxHeight?: CSSProperties['maxHeight'];
   maxWidth?: CSSProperties['maxWidth'];
   overlayInnerStyle?: CSSProperties;
@@ -25,7 +26,7 @@ type TooltipExtraProps = {
 export const renderTooltip = (
   title: ReactNode,
   extraProps: TooltipExtraProps = {},
-) => {
+): AntdTooltipProps => {
   const { maxHeight, maxWidth, overlayInnerStyle, styles, ...restProps } =
     extraProps;
 

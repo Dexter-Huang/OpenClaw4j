@@ -4,6 +4,8 @@ const doNotTranslateFiles = [
     /\.spec\./,
     // Ignore type definition files
     /\.d\.ts$/,
+    // Ignore Umi generated files
+    /[\\/]src[\\/]\.umi(?:-.+)?[\\/]/,
     // Ignore specific directories
     'src/pages/App/Workflow/components/ScriptCodeMirror',
 ]

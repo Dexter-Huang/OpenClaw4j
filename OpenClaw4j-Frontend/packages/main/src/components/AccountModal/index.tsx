@@ -10,7 +10,7 @@ interface AccountModalProps {
   open: boolean;
   onCancel: () => void;
   onOk: (values: any) => void;
-  userInfo: IAccount | null;
+  userInfo: Pick<IAccount, 'username' | 'type'> | null;
 }
 
 const AccountModal: React.FC<AccountModalProps> = ({

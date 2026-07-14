@@ -805,7 +805,7 @@ const GatherDetail: React.FC = () => {
     try {
       setExperimentsLoading(true);
       
-      const response = await API.getDatasetExperiments({
+      const response = await API.getExperiments({
         datasetId: Number(id),
         pageNumber: pageNumber,
         pageSize: pageSize

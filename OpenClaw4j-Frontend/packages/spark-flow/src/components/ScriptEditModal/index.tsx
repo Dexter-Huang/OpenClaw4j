@@ -10,8 +10,6 @@ import React from 'react';
 import ScriptCodeMirror from '../ScriptCodeMirror';
 import './index.less';
 
-export const SCRIPT_TYPE_OPTIONS = [{ label: 'Java', value: 'java' }];
-
 export const CODE_DEMO_MAP = {
   python: `def main():
   ret = {
@@ -35,8 +33,19 @@ public class Main {
 }`,
 };
 
+export type ScriptLanguage = keyof typeof CODE_DEMO_MAP;
+
+export const SCRIPT_TYPE_OPTIONS: Array<{
+  label: string;
+  value: ScriptLanguage;
+}> = [
+  { label: 'Python', value: 'python' },
+  { label: 'JavaScript', value: 'javascript' },
+  { label: 'Java', value: 'java' },
+];
+
 export interface IScriptEditModalProps {
-  language: 'java';
+  language: ScriptLanguage;
   value: string;
   inputParams: INodeDataInputParamItem[];
   outputParams: INodeDataOutputParamItem[];
@@ -46,8 +55,8 @@ export interface IScriptEditModalProps {
     value: IScriptEditModalProps['value'];
   }) => void;
   disabled?: boolean;
-  codeDemoMap?: Record<string, string>;
-  scriptTypeOptions?: { label: string; value: string }[];
+  codeDemoMap?: Record<ScriptLanguage, string>;
+  scriptTypeOptions?: { label: string; value: ScriptLanguage }[];
 }
 
 export default function ScriptEditModal(props: IScriptEditModalProps) {
@@ -60,7 +69,7 @@ export default function ScriptEditModal(props: IScriptEditModalProps) {
     value: props.value,
   });
 
-  const handleChangeLanguage = (val: 'java') => {
+  const handleChangeLanguage = (val: ScriptLanguage) => {
     setState({ language: val, value: codeDemoMap[val] });
   };
 

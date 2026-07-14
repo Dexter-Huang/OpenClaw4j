@@ -65,7 +65,6 @@ const Sidebar: React.FC = () => {
             step={0.1}
             value={config.modelConfig.temperature}
             onChange={(value) => updateModelConfig({ temperature: value })}
-            size="small"
           />
         </div>
 
@@ -79,7 +78,6 @@ const Sidebar: React.FC = () => {
             step={256}
             value={config.modelConfig.maxTokens}
             onChange={(value) => updateModelConfig({ maxTokens: value })}
-            size="small"
           />
         </div>
 

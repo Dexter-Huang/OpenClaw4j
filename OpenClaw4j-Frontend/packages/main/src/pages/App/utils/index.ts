@@ -2,7 +2,7 @@ import $i18n from '@/i18n';
 import { IAppType } from '@/services/appComponent';
 import { IWorkFlowConfig } from '@/types/appManage';
 import uniqueId from '@/utils/uniqueId';
-import { IEndNodeParam } from '@spark-ai/flow';
+import { IEndNodeParam } from '../Workflow/types';
 
 const generateWorkflowConfig = () => {
   return {

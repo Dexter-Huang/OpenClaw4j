@@ -14,11 +14,18 @@ const UserAccountModal: React.FC<UserAccountModalProps> = ({
   avatarProps,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const userInfo = window.g_config.user;
+  const user = window.g_config.user;
+  const username = user?.username || '';
+  const userInfo = username
+    ? {
+        username,
+        type: user.type || 'user',
+      }
+    : null;
 
   const defaultTrigger = (
     <Avatar size={32} onClick={() => setIsModalOpen(true)} {...avatarProps}>
-      {window.g_config.user?.username.charAt(0).toUpperCase()}
+      {username.charAt(0).toUpperCase()}
     </Avatar>
   );
 

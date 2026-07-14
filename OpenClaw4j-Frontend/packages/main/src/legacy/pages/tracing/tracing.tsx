@@ -1597,7 +1597,7 @@ function TracingPage() {
         width="85%"
         onClose={closeDrawer}
         open={drawerVisible}
-        destroyOnHidden
+        destroyOnClose
       >
         {renderDrawerContent()}
       </Drawer>

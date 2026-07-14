@@ -26,7 +26,10 @@ import {
 import { getDefaultValueSchemaFromOutputParams } from '../APINode/panel';
 import styles from './index.module.less';
 
-export const SCRIPT_TYPE_OPTIONS = [
+export const SCRIPT_TYPE_OPTIONS: Array<{
+  label: string;
+  value: IScriptNodeParam['script_type'];
+}> = [
   { label: 'Python', value: 'python' },
   { label: 'JavaScript', value: 'javascript' },
   { label: 'Java', value: 'java' },
@@ -257,6 +260,7 @@ export default memo((props: { id: string; data: IScriptNodeData }) => {
           value={props.data.node_param.script_content}
           inputParams={props.data.input_params}
           outputParams={props.data.output_params}
+          scriptTypeOptions={SCRIPT_TYPE_OPTIONS}
           onClose={() => setFullScreen(false)}
           onOk={({ language, value }) => {
             changeNodeParam({ script_type: language, script_content: value });

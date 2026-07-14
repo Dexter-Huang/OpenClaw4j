@@ -103,7 +103,8 @@ const DifyConverter: React.FC = () => {
 
     } catch (error) {
       console.error('转换失败:', error);
-      message.error(`转换失败：${error.message || '请重试'}`);
+      const errorMessage = error instanceof Error ? error.message : '请重试';
+      message.error(`转换失败：${errorMessage}`);
     }
   };
 

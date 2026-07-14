@@ -5,17 +5,16 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "jsx": "react",
-    "baseUrl": "./",
     "resolveJsonModule": true,
-    "moduleResolution": "node",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "paths": {
-      "@@/*": [".dumi/tmp/*"],
-      "@/*": ["src/*"],
-      "@spark-flow/*": ["src/*"],
-      "@spark-ai/flow": ["src"],
-      "@spark-ai/flow/*": ["src/*", "*"]
+      "@@/*": ["./.dumi/tmp/*"],
+      "@/*": ["./src/*"],
+      "@spark-flow/*": ["./src/*"],
+      "@spark-ai/flow": ["./src"],
+      "@spark-ai/flow/*": ["./src/*", "./*"]
     }
   },
-  "module": "ESNext",
   "include": [".dumirc.ts", "src/**/*"]
 }

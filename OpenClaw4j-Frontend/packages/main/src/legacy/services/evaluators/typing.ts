@@ -510,6 +510,7 @@ declare namespace EvaluatorsAPI {
     pageSize?: number;
     name?: string;
     status?: string;
+    datasetId?: number;
   }
 
   interface GetExperimentsResult {

@@ -234,7 +234,12 @@ const AgentSchemaCreator: React.FC = () => {
       if (modelSelectorData.data) {
         modelSelectorData.data.forEach(providerGroup => {
           if (providerGroup.models) {
-            allModels.push(...providerGroup.models);
+            allModels.push(
+              ...providerGroup.models.map((model) => ({
+                ...model,
+                name: model.name || '',
+              })),
+            );
           }
         });
       }

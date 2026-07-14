@@ -72,7 +72,7 @@ function AddFunctionModal(props: AddFunctionModalProps) {
 
   return (
     <Modal
-      destroyOnHidden
+      destroyOnClose
       open={open}
       onCancel={handleCancel}
       title="新增函数"

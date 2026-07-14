@@ -569,7 +569,7 @@ export default forwardRef<ISparkChatRef, IProps>((props, ref) => {
               />
             ),
 
-            mobile: true,
+            narrowScreen: true,
             background: 'transparent',
           }}
           onStop={onStop}

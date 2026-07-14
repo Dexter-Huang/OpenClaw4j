@@ -10,6 +10,7 @@ import { IconFont, parseJsonSafely } from '@spark-ai/design';
 import Knowledge from './Knowledge';
 import Plugin from './Plugin';
 import Reasoning from './Reasoning';
+import { getToolCallDisplayType } from './toolCallDisplay';
 
 const StepsMsgStatus = {
   finished: $i18n.get({
@@ -71,7 +72,9 @@ export default (props: IProps) => {
         });
       }
       if (msg.type === 'tool_call') {
-        // plugin
+        // tool call
+        const toolName = (msg.function as IToolCallFunction)?.name;
+        const displayType = getToolCallDisplayType(toolName);
         const matchedMsg = content.find(
           (otherMsg, idx) =>
             idx > msgIndex &&
@@ -79,13 +82,27 @@ export default (props: IProps) => {
             otherMsg.id === msg.id,
         );
         res.push({
-          icon: <IconFont type="spark-plugin-line" size="small"></IconFont>,
+          icon: (
+            <IconFont
+              type={
+                displayType === 'skill'
+                  ? 'spark-fileCode-line'
+                  : 'spark-plugin-line'
+              }
+              size="small"
+            ></IconFont>
+          ),
           title: $i18n.get(
-            {
-              id: 'main.components.SparkChat.components.Steps.index.plugin',
-              dm: '插件：{var1}',
-            },
-            { var1: (msg.function as IToolCallFunction)?.name },
+            displayType === 'skill'
+              ? {
+                  id: 'main.components.SparkChat.components.Steps.index.skill',
+                  dm: 'Skill：{var1}',
+                }
+              : {
+                  id: 'main.components.SparkChat.components.Steps.index.plugin',
+                  dm: '插件：{var1}',
+                },
+            { var1: toolName },
           ),
           children: (
             <Plugin

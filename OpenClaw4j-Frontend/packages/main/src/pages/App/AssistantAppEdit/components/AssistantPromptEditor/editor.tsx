@@ -298,7 +298,7 @@ export const AssistantPromptEditor = forwardRef((props: IProps, ref: any) => {
             return `$\{${code}\}`;
           }}
           placeholder={$i18n.get({
-            id: 'work-station-app.pages.App.AssistantAppEdit.components.AssistantPromptEditor.editor.writeSystemPromptIncludingRoleSettingTaskObjectiveAbilityAndReplyRequirements',
+            id: 'main.pages.App.AssistantAppEdit.components.AssistantPromptEditor.editor.writeSystemPromptIncludingRoleSettingTaskObjectiveAbilityAndReplyRequirements',
             dm: '在这里编写系统提示词，包括角色设定、任务目标、具备的能力及回复的要求与限制等，好的提示词会直接影响智能体效果',
           })}
         ></SlateEditor>

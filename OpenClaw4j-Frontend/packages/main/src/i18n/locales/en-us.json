@@ -68,6 +68,7 @@
   "main.components.SparkChat.components.Steps.index.error": "Error",
   "main.components.SparkChat.components.Steps.index.knowledgeRetrieval": "Knowledge Retrieval",
   "main.components.SparkChat.components.Steps.index.plugin": "Plugin: {var1}",
+  "main.components.SparkChat.components.Steps.index.skill": "Skill: {var1}",
   "main.pages.App.AssistantAppEdit.components.SparkChat.components.Steps.index.mcp": "MCP: {var1}",
   "main.pages.App.AssistantAppEdit.components.SparkChat.components.Steps.index.deepThinking": "Deep Thinking",
   "main.pages.App.AssistantAppEdit.components.SparkChat.components.Welcome.index.inputQuestion": "Enter a question",
