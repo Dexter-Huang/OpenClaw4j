@@ -30,6 +30,7 @@ import {
 } from '@xyflow/react';
 import { message } from 'antd';
 import { useCallback } from 'react';
+import { applyDimensionChanges } from './nodeDimensions';
 import { useFlowInteraction } from './useFlowInteraction';
 import { useFlowSave } from './useFlowSave';
 
@@ -654,24 +655,12 @@ export const useNodesInteraction = () => {
       if (!['remove', 'select', 'dimensions'].includes(changes[0].type)) return;
       const { nodes, setNodes } = store.getState();
       if (changes[0].type === 'dimensions') {
-        /* Override the dimensions update method; */
-        return setNodes(
-          nodes.map((item) => {
-            /* @ts-ignore */
-            const targetChange = changes.find((vItem) => vItem.id === item.id);
-            /* @ts-ignore */
-            if (!targetChange || !targetChange?.dimensions) return item;
-            return {
-              ...item,
-              measured: {
-                /* @ts-ignore */
-                width: targetChange.dimensions.width,
-                /* @ts-ignore */
-                height: targetChange.dimensions.height,
-              },
-            };
-          }),
-        );
+        /* React Flow 会在受控节点回写后继续触发尺寸测量；尺寸未变化时必须复用原引用，避免重复 setNodes 造成更新循环。 */
+        const newNodes = applyDimensionChanges(nodes, changes);
+        if (newNodes !== nodes) {
+          setNodes(newNodes);
+        }
+        return;
       }
       const newNodes = applyNodeChanges(changes, nodes);
       setNodes(newNodes);

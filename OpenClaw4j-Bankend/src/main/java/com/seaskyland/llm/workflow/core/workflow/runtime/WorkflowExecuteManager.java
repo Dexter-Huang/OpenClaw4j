@@ -236,7 +236,7 @@ public class WorkflowExecuteManager {
     // Initialize historical context. If user provides sys.history_list, preset
     // context is invalidated; otherwise use cached context
     boolean historySwitch = false;
-    Integer historyMaxRound = 5;
+    int historyMaxRound = 5;
     WorkflowConfig.GlobalConfig globalConfig = context.getWorkflowConfig().getGlobalConfig();
     if (globalConfig != null
         && globalConfig.getHistoryConfig() != null
@@ -642,7 +642,7 @@ public class WorkflowExecuteManager {
                                   .filter(
                                       branchResult -> branchResult.getTargetIds().contains(nodeId))
                                   .findFirst();
-                          if (!referenceOptional.isPresent()) {
+                          if (referenceOptional.isEmpty()) {
                             return true;
                           }
                         }
@@ -696,7 +696,7 @@ public class WorkflowExecuteManager {
    * @return The string with first letter capitalized
    */
   private String capitalizeFirstLetter(String str) {
-    if (str == null || str.length() == 0) {
+    if (str == null || str.isEmpty()) {
       return str;
     }
     return str.substring(0, 1).toUpperCase() + str.substring(1);
@@ -775,7 +775,7 @@ public class WorkflowExecuteManager {
             JsonUtils.fromMap(
                 node.getConfig().getNodeParam(), ClassifierExecuteProcessor.NodeParam.class);
         if (CollectionUtils.isNotEmpty(nodeParam.getConditions())) {
-          nodeParam.getConditions().stream()
+          nodeParam.getConditions()
               .forEach(
                   condition -> {
                     Edge edge = new Edge();
@@ -793,8 +793,7 @@ public class WorkflowExecuteManager {
                 node.getConfig().getNodeParam(), JudgeExecuteProcessor.NodeParam.class);
         List<JudgeExecuteProcessor.Branch> branches = nodeParam.getBranches();
         if (CollectionUtils.isNotEmpty(branches)) {
-          branches.stream()
-              .forEach(
+          branches.forEach(
                   branch -> {
                     Edge edge = new Edge();
                     edge.setSource(sinkNode);
@@ -869,8 +868,7 @@ public class WorkflowExecuteManager {
     result.setSuccess(true);
     DirectedAcyclicGraph<String, Edge> graph = constructGraph(appOrchestraConfig);
     List<Node> nodes = appOrchestraConfig.getNodes();
-    nodes.stream()
-        .forEach(
+    nodes.forEach(
             node -> {
               String type = node.getType();
               ExecuteProcessor.CheckNodeParamResult checkNodeParamResult =

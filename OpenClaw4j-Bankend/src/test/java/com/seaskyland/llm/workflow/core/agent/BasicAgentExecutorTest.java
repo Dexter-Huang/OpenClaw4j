@@ -51,6 +51,7 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
 import org.springframework.ai.chat.model.ChatModel;
@@ -321,6 +322,45 @@ class BasicAgentExecutorTest {
         .contains("SKILL.md")
         .contains("黄明朗本地信息")
         .doesNotContain("籍贯：阳江");
+  }
+
+  @Test
+  void buildMessagesAcceptsMultimodalContentDeserializedAsMapList() {
+    BasicAgentExecutor executor =
+        new BasicAgentExecutor(
+            mock(ToolExecutionService.class),
+            mock(PluginService.class),
+            mock(McpServerService.class),
+            mock(AppComponentManager.class),
+            mock(DocumentRetrieverManager.class),
+            mock(ChatMemory.class),
+            mock(CommonConfig.class),
+            mock(ModelFactory.class),
+            mock(FileManager.class),
+            mock(SkillService.class));
+
+    Map<String, Object> textContent = new HashMap<>();
+    textContent.put("type", "text");
+    textContent.put("text", "图片是什么？");
+
+    AgentRequest request = new AgentRequest();
+    request.setMessages(
+        List.of(
+            ChatMessage.builder()
+                .role(MessageRole.USER)
+                .contentType(ContentType.MULTIMODAL)
+                .content(List.of(textContent))
+                .build()));
+
+    AgentContext context = new AgentContext();
+    context.setConfig(new AgentConfig());
+    context.setRequest(request);
+
+    List<Message> messages = executor.buildMessages(context);
+
+    assertThat(messages).hasSize(1);
+    assertThat(messages.getFirst()).isInstanceOf(UserMessage.class);
+    assertThat(messages.getFirst().getText()).isEqualTo("图片是什么？");
   }
 
   private static AgentContext agentContext() {

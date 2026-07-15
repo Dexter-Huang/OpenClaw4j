@@ -24,15 +24,14 @@ import com.seaskyland.llm.workflow.core.base.manager.FileManager;
 import com.seaskyland.llm.workflow.core.base.manager.ModelExecuteManager;
 import com.seaskyland.llm.workflow.core.config.CommonConfig;
 import com.seaskyland.llm.workflow.core.config.StudioProperties;
-import com.seaskyland.llm.workflow.core.utils.common.VariableUtils;
 import com.seaskyland.llm.workflow.core.workflow.WorkflowContext;
 import com.seaskyland.llm.workflow.core.workflow.WorkflowInnerService;
 import com.seaskyland.llm.workflow.core.workflow.processor.AbstractExecuteProcessor;
+import com.seaskyland.llm.workflow.core.workflow.processor.support.VisionUserMessageFactory;
 import com.seaskyland.llm.workflow.runtime.domain.BizError;
 import com.seaskyland.llm.workflow.runtime.domain.agent.AgentResponse;
 import com.seaskyland.llm.workflow.runtime.domain.chat.ChatMessage;
 import com.seaskyland.llm.workflow.runtime.domain.chat.MessageRole;
-import com.seaskyland.llm.workflow.runtime.domain.file.File;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.Edge;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.Node;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.NodeResult;
@@ -43,13 +42,9 @@ import com.seaskyland.llm.workflow.runtime.domain.workflow.inner.RetryConfig;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.inner.ShortTermMemory;
 import com.seaskyland.llm.workflow.runtime.domain.workflow.inner.TryCatchConfig;
 import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
-import com.seaskyland.llm.workflow.runtime.exception.BizException;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -60,11 +55,7 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.content.Media;
-import org.springframework.core.io.FileUrlResource;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MimeType;
 import reactor.core.publisher.Flux;
 
 /**
@@ -306,81 +297,8 @@ public class LLMExecuteProcessor extends AbstractExecuteProcessor {
   private UserMessage constructUserMessage(
       Node node, ModelConfig modelConfig, String userPrompt, WorkflowContext context) {
     userPrompt = replaceTemplateContent(userPrompt, context);
-    // 构造视觉理解
-    ModelConfig.SkillConfig visionConfig = modelConfig.getVisionConfig();
-    if (visionConfig != null && BooleanUtils.isTrue(visionConfig.getEnable())) {
-      List<Node.InputParam> visionParams = visionConfig.getParams();
-      if (CollectionUtils.isNotEmpty(visionParams)) {
-        Object value = VariableUtils.getValueFromContext(visionParams.get(0), context);
-        if (value == null) {
-          return new UserMessage(userPrompt);
-        } else if (value instanceof File) {
-          Media media = constructMedia(value);
-          if (media == null) {
-            return new UserMessage(userPrompt);
-          }
-          return UserMessage.builder().text(userPrompt).media(media).build();
-        } else if (value instanceof List) {
-          List<Media> mediaList =
-              ((List<?>) value)
-                  .stream()
-                      .map(this::constructMedia)
-                      .filter(Objects::nonNull)
-                      .collect(Collectors.toList());
-          if (CollectionUtils.isEmpty(mediaList)) {
-            return new UserMessage(userPrompt);
-          }
-          return UserMessage.builder().text(userPrompt).media(mediaList).build();
-        } else {
-          throw new BizException(
-              ErrorCode.WORKFLOW_CONFIG_INVALID.toError(
-                  node.getName() + " vision param is not File or List<File>"));
-        }
-      }
-    }
-    return new UserMessage(userPrompt);
-  }
-
-  /**
-   * Constructs a media object from the provided value
-   *
-   * @param value The value to convert into media
-   * @return A Media object if conversion is successful, null otherwise
-   */
-  private Media constructMedia(Object value) {
-    if (value == null) {
-      return null;
-    }
-    if (!(value instanceof File)) {
-      throw new BizException(ErrorCode.WORKFLOW_CONFIG_INVALID.toError("object is not File"));
-    }
-    File file = (File) value;
-    String url = file.getUrl();
-    String mimeType = file.getMimeType();
-    if (StringUtils.isNotBlank(url)) {
-      String source =
-          file.getSource() == null ? File.SourceEnum.localFile.name() : file.getSource();
-      try {
-        if (File.SourceEnum.localFile.name().equals(source)) {
-          String storagePath = studioProperties.getStoragePath();
-          return new Media(
-              MimeType.valueOf(mimeType),
-              new FileUrlResource(storagePath + java.io.File.separator + url));
-        } else {
-          MediaType mediaType = fileManager.getMediaTypeFromUrl(url);
-          return Media.builder()
-              .mimeType(MimeType.valueOf(mediaType.toString()))
-              .data(new URL(url))
-              .build();
-        }
-      } catch (Exception e) {
-        log.error("Error processing local image: {}", url, e);
-        throw new BizException(
-            ErrorCode.WORKFLOW_EXECUTE_ERROR.toError(
-                "Failed to process local image: " + e.getMessage()));
-      }
-    }
-    return null;
+    return VisionUserMessageFactory.constructUserMessage(
+        node, modelConfig, userPrompt, context, studioProperties, fileManager);
   }
 
   /**

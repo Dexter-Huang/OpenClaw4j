@@ -20,12 +20,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.seaskyland.llm.workflow.core.base.manager.CacheManager;
+import com.seaskyland.llm.workflow.core.base.manager.FileManager;
 import com.seaskyland.llm.workflow.core.base.manager.ModelExecuteManager;
 import com.seaskyland.llm.workflow.core.config.CommonConfig;
+import com.seaskyland.llm.workflow.core.config.StudioProperties;
 import com.seaskyland.llm.workflow.core.utils.common.VariableUtils;
 import com.seaskyland.llm.workflow.core.workflow.WorkflowContext;
 import com.seaskyland.llm.workflow.core.workflow.WorkflowInnerService;
 import com.seaskyland.llm.workflow.core.workflow.processor.AbstractExecuteProcessor;
+import com.seaskyland.llm.workflow.core.workflow.processor.support.VisionUserMessageFactory;
 import com.seaskyland.llm.workflow.runtime.domain.agent.AgentResponse;
 import com.seaskyland.llm.workflow.runtime.domain.chat.ChatMessage;
 import com.seaskyland.llm.workflow.runtime.domain.chat.MessageRole;
@@ -89,16 +92,24 @@ public class ClassifierExecuteProcessor extends AbstractExecuteProcessor {
 
   private static final Logger log = LoggerFactory.getLogger(ClassifierExecuteProcessor.class);
 
+  private final StudioProperties studioProperties;
+
   private final ModelExecuteManager modelExecuteManager;
+
+  private final FileManager fileManager;
 
   public ClassifierExecuteProcessor(
       CacheManager cacheManager,
       WorkflowInnerService workflowInnerService,
       ChatMemory conversationChatMemory,
       CommonConfig commonConfig,
-      ModelExecuteManager modelExecuteManager) {
+      StudioProperties studioProperties,
+      ModelExecuteManager modelExecuteManager,
+      FileManager fileManager) {
     super(cacheManager, workflowInnerService, conversationChatMemory, commonConfig);
+    this.studioProperties = studioProperties;
     this.modelExecuteManager = modelExecuteManager;
+    this.fileManager = fileManager;
   }
 
   @Override
@@ -323,7 +334,7 @@ public class ClassifierExecuteProcessor extends AbstractExecuteProcessor {
 
     // 调用模型获取结果
     List<Message> messages = Lists.newArrayList();
-    messages.add(new SystemMessage(prompt));
+    messages.add(constructPromptMessage(node, config, prompt, context));
 
     // 添加短期记忆
     List<Message> shortTermMemories =
@@ -346,7 +357,7 @@ public class ClassifierExecuteProcessor extends AbstractExecuteProcessor {
 
     // 设置输入变量
     Map<String, Object> inputObj = Maps.newHashMap();
-    inputObj.put("messages", messages);
+    inputObj.put("messages", convertToChatMessage(messages));
     nodeResult.setInput(JsonUtils.toJson(decorateInput(inputObj)));
 
     // 调用模型
@@ -426,6 +437,16 @@ public class ClassifierExecuteProcessor extends AbstractExecuteProcessor {
       throw new RuntimeException(e);
     }
     return dtu;
+  }
+
+  private Message constructPromptMessage(
+      Node node, NodeParam config, String prompt, WorkflowContext context) {
+    ModelConfig modelConfig = config.getModelConfig();
+    if (!VisionUserMessageFactory.hasEnabledVisionParams(modelConfig)) {
+      return new SystemMessage(prompt);
+    }
+    return VisionUserMessageFactory.constructUserMessage(
+        node, modelConfig, prompt, context, studioProperties, fileManager);
   }
 
   /**

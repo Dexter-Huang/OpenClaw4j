@@ -14,15 +14,7 @@ import org.springframework.context.annotation.FilterType;
  * @description: 主程序
  * @date 2024/4/1 10:16
  */
-// @SpringBootApplication(scanBasePackages = "com.seaskyland", exclude=
-// {DataSourceAutoConfiguration.class})
-@SpringBootApplication
-@ComponentScan(
-    basePackages = "com.seaskyland",
-    excludeFilters =
-        @ComponentScan.Filter(
-            type = FilterType.REGEX,
-            pattern = "com\\.seaskyland\\.llm\\.workflow\\.admin\\.generator\\..*"))
+@SpringBootApplication(scanBasePackages = {"com.seaskyland.llm.workflow"})
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableConfigurationProperties(value = {StudioProperties.class})
 public class LLMApplication {

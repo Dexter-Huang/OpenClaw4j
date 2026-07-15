@@ -4,6 +4,7 @@ import json5 from 'json5';
 import defaultSettings from '@/defaultSettings';
 import $i18n from '@/i18n';
 import { BizVars } from '../../VarConfigDrawer';
+import { prepareMessagesForRegenerate } from './chatHistory';
 import { Rpc } from './rpc';
 
 type IReceiveMessage = any;
@@ -20,6 +21,7 @@ interface IMessage {
   content: string | Record<string, any>;
   content_type: string;
 }
+
 export class Chat extends EventEmitter {
   private conversation_id: string;
   private configParams: { bizVars: BizVars };
@@ -63,14 +65,15 @@ export class Chat extends EventEmitter {
 
   normalGenerate(
     value: string,
-    options: { imageList?: string[]; app_id?: string } = {},
+    options: { imageList?: string[]; app_id?: string; regenerate?: boolean } = {},
   ) {
+    let nextUserMessage: IMessage;
     if (!options.imageList?.length) {
-      this.messages.push({
+      nextUserMessage = {
         role: 'user',
         content: value,
         content_type: 'text',
-      });
+      };
     } else {
       const newMessage = [
         {
@@ -83,12 +86,22 @@ export class Chat extends EventEmitter {
         })),
       ];
 
-      this.messages.push({
+      nextUserMessage = {
         role: 'user',
         content: newMessage,
         content_type: 'multimodal',
-      });
+      };
     }
+
+    if (options.regenerate) {
+      this.messages = prepareMessagesForRegenerate(
+        this.messages,
+        nextUserMessage,
+      );
+    } else {
+      this.messages.push(nextUserMessage);
+    }
+
     return this.sendMessage({
       app_id: options.app_id,
       messages: this.messages,

@@ -196,6 +196,7 @@ export default forwardRef<ISparkChatRef, IProps>((props, ref) => {
           ? imageList.map((item) => item.response?.downloadUrl)
           : void 0,
         app_id: appCode,
+        regenerate: isRegenerate,
       });
 
       setAppState({

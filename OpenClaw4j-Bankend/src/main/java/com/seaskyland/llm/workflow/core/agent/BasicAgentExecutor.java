@@ -20,6 +20,7 @@ import static com.seaskyland.llm.workflow.core.rag.RagConstants.FILE_SEARCH_CALL
 import static com.seaskyland.llm.workflow.core.rag.RagConstants.FILE_SEARCH_RESULT;
 import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.seaskyland.llm.workflow.core.agent.tool.AgentToolCallRecorder;
 import com.seaskyland.llm.workflow.core.agent.tool.AgentToolCallback;
 import com.seaskyland.llm.workflow.core.agent.tool.CompositeToolCallbackProvider;
@@ -108,6 +109,9 @@ import reactor.core.scheduler.Schedulers;
 @RequiredArgsConstructor
 @Slf4j
 public class BasicAgentExecutor extends AbstractAgentExecutor {
+
+  private static final TypeReference<List<MultimodalContent>> MULTIMODAL_CONTENT_LIST_TYPE =
+      new TypeReference<>() {};
 
   /** Service for executing tools */
   private final ToolExecutionService toolExecutionService;
@@ -556,43 +560,15 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
    * @return Message instance
    */
   private Message buildMultimodelMessage(Object obj) {
-    if (!(obj instanceof List)) {
-      throw new BizException(ErrorCode.INVALID_PARAMS.toError("content", "content must be list"));
-    }
-
-    List<MultimodalContent> content = (List<MultimodalContent>) obj;
+    List<MultimodalContent> content = normalizeMultimodalContent(obj);
     String text = null;
     List<Media> media = new ArrayList<>();
     try {
       for (MultimodalContent item : content) {
+        validateMultimodalContent(item);
         switch (item.getType()) {
           case TEXT -> text = item.getText();
-          case IMAGE -> {
-            if (StringUtils.isNotBlank(item.getUrl())) {
-              String contentType = FileUtils.getContentType(item.getUrl());
-              MediaType mediaType = MediaType.parseMediaType(contentType);
-              media.add(Media.builder().mimeType(mediaType).data(new URL(item.getUrl())).build());
-            } else if (StringUtils.isNotBlank(item.getPath())) {
-              String contentType = FileUtils.getContentType(item.getPath());
-              MediaType mediaType = MediaType.parseMediaType(contentType);
-              Resource resource = fileManager.loadFile(item.getPath());
-              media.add(new Media(mediaType, resource));
-            } else if (StringUtils.isNotBlank(item.getData())) {
-              // format should be data:image/png;base64,iVBORw0KGgoSUhEUgAAA
-              int semicolonIndex = item.getData().indexOf(';');
-              if (semicolonIndex == -1) {
-                throw new IllegalArgumentException("Invalid data format");
-              }
-
-              String mimeType = item.getData().substring(0, semicolonIndex);
-              MediaType mediaType = MediaType.parseMediaType(mimeType);
-              media.add(new Media(mediaType, new ByteArrayResource(item.getData().getBytes())));
-            } else {
-              throw new BizException(
-                  ErrorCode.INVALID_PARAMS.toError(
-                      "content", "image content must be url or path or data"));
-            }
-          }
+          case IMAGE -> media.add(buildImageMedia(item));
           default ->
               throw new BizException(
                   ErrorCode.INVALID_PARAMS.toError(
@@ -604,6 +580,56 @@ public class BasicAgentExecutor extends AbstractAgentExecutor {
     }
 
     return UserMessage.builder().text(text).media(media).build();
+  }
+
+  private List<MultimodalContent> normalizeMultimodalContent(Object obj) {
+    if (!(obj instanceof List<?>)) {
+      throw new BizException(ErrorCode.INVALID_PARAMS.toError("content", "content must be list"));
+    }
+
+    try {
+      return JsonUtils.getObjectMapper().convertValue(obj, MULTIMODAL_CONTENT_LIST_TYPE);
+    } catch (IllegalArgumentException e) {
+      throw new BizException(
+          ErrorCode.INVALID_PARAMS.toError("content", "content item is invalid"));
+    }
+  }
+
+  private void validateMultimodalContent(MultimodalContent item) {
+    if (item == null || item.getType() == null) {
+      throw new BizException(
+          ErrorCode.INVALID_PARAMS.toError("content", "content item type is required"));
+    }
+  }
+
+  private Media buildImageMedia(MultimodalContent item) throws MalformedURLException {
+    if (StringUtils.isNotBlank(item.getUrl())) {
+      String contentType = FileUtils.getContentType(item.getUrl());
+      MediaType mediaType = MediaType.parseMediaType(contentType);
+      return Media.builder().mimeType(mediaType).data(new URL(item.getUrl())).build();
+    }
+
+    if (StringUtils.isNotBlank(item.getPath())) {
+      String contentType = FileUtils.getContentType(item.getPath());
+      MediaType mediaType = MediaType.parseMediaType(contentType);
+      Resource resource = fileManager.loadFile(item.getPath());
+      return new Media(mediaType, resource);
+    }
+
+    if (StringUtils.isNotBlank(item.getData())) {
+      // format should be data:image/png;base64,iVBORw0KGgoSUhEUgAAA
+      int semicolonIndex = item.getData().indexOf(';');
+      if (semicolonIndex == -1) {
+        throw new IllegalArgumentException("Invalid data format");
+      }
+
+      String mimeType = item.getData().substring(0, semicolonIndex);
+      MediaType mediaType = MediaType.parseMediaType(mimeType);
+      return new Media(mediaType, new ByteArrayResource(item.getData().getBytes()));
+    }
+
+    throw new BizException(
+        ErrorCode.INVALID_PARAMS.toError("content", "image content must be url or path or data"));
   }
 
   /**
