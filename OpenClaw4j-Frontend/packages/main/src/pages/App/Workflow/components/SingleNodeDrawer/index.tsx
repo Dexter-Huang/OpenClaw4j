@@ -1,10 +1,7 @@
 import { VariableBaseInput } from '@/components/VariableBaseInput';
 import $i18n from '@/i18n';
 import Welcome from '@/pages/App/AssistantAppEdit/components/SparkChat/components/Welcome';
-import {
-  getWorkFlowTaskProcess,
-  startPartGraphTask,
-} from '@/services/workflow';
+import { startPartGraphTask } from '@/services/workflow';
 import { IBizEdge } from '@/types/workflow';
 import { Button, Drawer, Empty, IconFont } from '@spark-ai/design';
 import {
@@ -16,18 +13,17 @@ import {
   IVarTreeItem,
   IWorkFlowNode,
   IWorkFlowNodeData,
-  IWorkFlowStatus,
-  IWorkFlowTaskProcess,
   useFlowDebugInteraction,
   useNodesOutputParams,
   useReactFlowStore,
   useStore,
 } from '@spark-ai/flow';
-import { useMount, useSetState, useUnmount } from 'ahooks';
+import { useMount, useSetState } from 'ahooks';
 import { Flex, Typography } from 'antd';
 import classNames from 'classnames';
 import { memo, useMemo, useRef } from 'react';
 import { useWorkflowAppStore } from '../../context/WorkflowAppProvider';
+import { useWorkflowDebugTask } from '../../hooks/useWorkflowDebugTask';
 import { INodeDataNodeParam } from '../../types';
 import { NodeResultPanelList } from '../NodeResultPanel';
 import ResultStatus from '../ResultStatus';
@@ -179,11 +175,7 @@ const SingleNodeDrawer = (props: ISingleNodeDrawer) => {
   const { getSystemVariableList } = useNodesOutputParams();
   const [state, setState] = useSetState({
     inputs: [] as IInputParamItem[],
-    taskInfo: null as IWorkFlowTaskProcess | null,
-    loading: false,
   });
-  const timer = useRef(null as NodeJS.Timeout | null);
-  const taskId = useRef<string | null>(null);
   const setShowResults = useStore((state) => state.setShowResults);
   const { updateTaskStore } = useFlowDebugInteraction();
 
@@ -206,45 +198,26 @@ const SingleNodeDrawer = (props: ISingleNodeDrawer) => {
     });
   });
 
-  const clearTimer = () => {
-    if (timer.current) {
-      clearTimeout(timer.current);
-      timer.current = null;
-    }
-  };
-
-  useUnmount(() => {
-    clearTimer();
+  const workflowTask = useWorkflowDebugTask({
+    createTask: startPartGraphTask,
+    normalizeTaskProcess: (taskProcess) => {
+      return {
+        ...taskProcess,
+        node_results: taskProcess.node_results.filter(
+          (item) => !['Start', 'End'].includes(item.node_type),
+        ),
+        task_results: taskProcess.task_results.filter(
+          (item) => !['Start', 'End'].includes(item.node_type),
+        ),
+      };
+    },
+    onTaskCreated: () => {
+      setShowResults(true);
+    },
+    onTaskProcess: (taskProcess) => {
+      updateTaskStore(taskProcess);
+    },
   });
-
-  const queryTaskStatus = () => {
-    clearTimer();
-    if (!taskId.current) return;
-    getWorkFlowTaskProcess({
-      task_id: taskId.current,
-    }).then((res) => {
-      res.node_results = res.node_results.filter(
-        (item) => !['Start', 'End'].includes(item.node_type),
-      );
-      res.task_results = res.task_results.filter(
-        (item) => !['Start', 'End'].includes(item.node_type),
-      );
-      updateTaskStore(res);
-      setState({
-        taskInfo: res,
-      });
-      if (res.task_status === 'executing') {
-        timer.current = setTimeout(() => {
-          queryTaskStatus();
-        }, 500);
-      } else {
-        setState({
-          loading: false,
-        });
-        clearTimer();
-      }
-    });
-  };
 
   const handleTest = () => {
     const extraConfig = nodeSchemaMap[selectedNodeData.type].isGroup
@@ -288,7 +261,7 @@ const SingleNodeDrawer = (props: ISingleNodeDrawer) => {
         });
       }
     }
-    startPartGraphTask({
+    workflowTask.start({
       app_id: appId,
       nodes: [
         {
@@ -311,13 +284,6 @@ const SingleNodeDrawer = (props: ISingleNodeDrawer) => {
         type: item.type,
         value: item.value,
       })),
-    }).then((res) => {
-      setState({
-        loading: true,
-      });
-      setShowResults(true);
-      taskId.current = res.task_id;
-      queryTaskStatus();
     });
   };
 
@@ -350,24 +316,7 @@ const SingleNodeDrawer = (props: ISingleNodeDrawer) => {
     });
   };
 
-  const handleStop = () => {
-    clearTimer();
-    setState({
-      loading: false,
-      taskInfo: {
-        ...(state.taskInfo as IWorkFlowTaskProcess),
-        task_status: 'interrupted' as IWorkFlowStatus,
-        node_results: (state.taskInfo?.node_results || []).map((item) => {
-          return {
-            ...item,
-            node_status: (['executing', 'pause'].includes(item.node_status)
-              ? 'interrupted'
-              : item.node_status) as IWorkFlowStatus,
-          };
-        }),
-      },
-    });
-  };
+  const handleStop = () => workflowTask.stop();
 
   const handleReset = () => {
     setState({
@@ -379,8 +328,8 @@ const SingleNodeDrawer = (props: ISingleNodeDrawer) => {
   };
 
   const usageList = useMemo(() => {
-    return getSparkFlowUsageList(state.taskInfo);
-  }, [state.taskInfo]);
+    return getSparkFlowUsageList(workflowTask.taskInfo);
+  }, [workflowTask.taskInfo]);
 
   return (
     <Drawer
@@ -459,12 +408,12 @@ const SingleNodeDrawer = (props: ISingleNodeDrawer) => {
           )}
           <div className="flex gap-[8px]">
             <Button
-              loading={state.loading}
+              loading={workflowTask.loading}
               onClick={handleTest}
               color="default"
               variant="solid"
             >
-              {state.loading
+              {workflowTask.loading
                 ? $i18n.get({
                     id: 'main.pages.App.Workflow.components.SingleNodeDrawer.index.running',
                     dm: '运行中...',
@@ -474,7 +423,7 @@ const SingleNodeDrawer = (props: ISingleNodeDrawer) => {
                     dm: '运行',
                   })}
             </Button>
-            {state.loading && (
+            {workflowTask.loading && (
               <Button onClick={handleStop}>
                 {$i18n.get({
                   id: 'main.pages.App.Workflow.components.SingleNodeDrawer.index.stop',
@@ -482,7 +431,7 @@ const SingleNodeDrawer = (props: ISingleNodeDrawer) => {
                 })}
               </Button>
             )}
-            <Button disabled={state.loading} onClick={handleReset}>
+            <Button disabled={workflowTask.loading} onClick={handleReset}>
               {$i18n.get({
                 id: 'main.pages.App.Workflow.components.SingleNodeDrawer.index.reset',
                 dm: '重置',
@@ -498,16 +447,16 @@ const SingleNodeDrawer = (props: ISingleNodeDrawer) => {
                 dm: '运行结果',
               })}
             </span>
-            {state.taskInfo && (
+            {workflowTask.taskInfo && (
               <ResultStatus
                 usages={usageList}
-                status={state.taskInfo.task_status}
-                execTime={state.taskInfo.task_exec_time}
+                status={workflowTask.taskInfo.task_status}
+                execTime={workflowTask.taskInfo.task_exec_time}
               />
             )}
           </div>
           <div className={styles['test-result-content']}>
-            {!state.taskInfo ? (
+            {!workflowTask.taskInfo ? (
               <Welcome
                 data={{}}
                 title={$i18n.get({
@@ -516,7 +465,7 @@ const SingleNodeDrawer = (props: ISingleNodeDrawer) => {
                 })}
               />
             ) : (
-              <NodeResultPanelList data={state.taskInfo.node_results} />
+              <NodeResultPanelList data={workflowTask.taskInfo.node_results} />
             )}
           </div>
         </div>

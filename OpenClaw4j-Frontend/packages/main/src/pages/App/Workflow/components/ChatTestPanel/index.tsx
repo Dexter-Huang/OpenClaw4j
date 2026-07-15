@@ -1,10 +1,6 @@
 import $i18n from '@/i18n';
 import Welcome from '@/pages/App/AssistantAppEdit/components/SparkChat/components/Welcome';
-import {
-  createWorkFlowTask,
-  getWorkFlowTaskProcess,
-  resumeWorkFlowTask,
-} from '@/services/workflow';
+import { createWorkFlowTask } from '@/services/workflow';
 import {
   ChatAnywhere,
   ChatAnywhereRef,
@@ -20,13 +16,14 @@ import {
   useFlowInteraction,
   useStore,
 } from '@spark-ai/flow';
-import { useMount, useUnmount } from 'ahooks';
+import { useMount } from 'ahooks';
 import { Flex, message, Tooltip } from 'antd';
 import classNames from 'classnames';
 import { compact } from 'lodash-es';
-import { memo, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { IWorkflowDebugInputParamItem } from '../../context';
 import { useWorkflowAppStore } from '../../context/WorkflowAppProvider';
+import { useWorkflowDebugTask } from '../../hooks/useWorkflowDebugTask';
 import { NodeResultPanelList } from '../NodeResultPanel';
 import { getSparkFlowUsageList, TextCard } from '../TaskTestPanel';
 import { InputParamsFormDrawer } from '../TaskTestPanel/InputParamsForm';
@@ -58,13 +55,11 @@ export default memo(function ChatTestPanel() {
   const inputParams = useWorkflowAppStore((state) => state.debugInputParams);
   const appId = useWorkflowAppStore((state) => state.appId);
   const setShowResults = useStore((state) => state.setShowResults);
-  const taskStore = useStore((state) => state.taskStore);
   const { updateTaskStore } = useFlowDebugInteraction();
   const { focusElement } = useFlowInteraction();
   const [conversationId, setConversationId] = useState(
     void 0 as string | undefined,
   );
-  const [loading, setLoading] = useState(false);
   const setSelectedNode = useStore((state) => state.setSelectedNode);
   const [showInputParamsForm, setShowInputParamsForm] = useState(false);
   const cacheAnimateNodeId = useRef('');
@@ -80,20 +75,11 @@ export default memo(function ChatTestPanel() {
     },
   });
 
-  const timer = useRef(null as NodeJS.Timeout | null);
-  const isDestroy = useRef(false);
   const chatRef = useRef<ChatAnywhereRef>(null);
 
   const updateMessage = function (msg: TMessage) {
     const messages = chatRef.current?.updateMessage(msg);
     return messages;
-  };
-
-  const clearTimer = () => {
-    if (timer.current) {
-      clearTimeout(timer.current);
-      timer.current = null;
-    }
   };
 
   const generateWelcomeCard = () => {
@@ -111,11 +97,6 @@ export default memo(function ChatTestPanel() {
 
   useMount(() => {
     generateWelcomeCard();
-  });
-
-  useUnmount(() => {
-    isDestroy.current = true;
-    clearTimer();
   });
 
   const onRegenerate = (msg: IAnswer) => {
@@ -237,17 +218,26 @@ export default memo(function ChatTestPanel() {
     }
   };
 
-  const queryTaskStatus = () => {
-    clearTimer();
-    if (!currentQA.current.answer) return;
-    if (!currentQA.current.answer.task_id) return;
-    getWorkFlowTaskProcess({
-      task_id: currentQA.current.answer?.task_id,
-    }).then((res) => {
+  const workflowTask = useWorkflowDebugTask({
+    createTask: createWorkFlowTask,
+    keepLoadingOnPause: true,
+    onTaskCreated: (res) => {
+      if (conversationId !== res.conversation_id)
+        setConversationId(res.conversation_id);
+      currentQA.current.answer = {
+        id: uuid(),
+        cards: [],
+        task_id: res.task_id,
+        content: '',
+        msgStatus: 'generating',
+        role: 'assistant',
+      };
+      updateMessage(currentQA.current.answer as TMessage);
+    },
+    onTaskProcess: (res) => {
       if (
         !currentQA.current.answer ||
-        currentQA.current.answer.msgStatus === 'interrupted' ||
-        isDestroy.current
+        currentQA.current.answer.msgStatus === 'interrupted'
       )
         return;
       const endNode = res.node_results[res.node_results.length - 1];
@@ -256,45 +246,21 @@ export default memo(function ChatTestPanel() {
         cacheAnimateNodeId.current = endNode.node_id;
       }
       updateDebugMessages(res);
-      if (res.task_status === 'executing') {
-        timer.current = setTimeout(() => {
-          queryTaskStatus();
-        }, 500);
-      } else {
-        if (res.task_status !== 'pause') {
-          setLoading(false);
-          chatRef.current?.setLoading(false);
-        }
-        clearTimer();
-      }
-    });
-  };
+    },
+  });
 
-  const chat = (task_id: string) => {
-    currentQA.current.answer = {
-      id: uuid(),
-      cards: [],
-      task_id,
-      content: '',
-      msgStatus: 'generating',
-      role: 'assistant',
-    };
-    updateMessage(currentQA.current.answer as TMessage);
-
-    queryTaskStatus();
-  };
+  useEffect(() => {
+    chatRef.current?.setLoading(workflowTask.loading);
+  }, [workflowTask.loading]);
 
   const onInput = ({ query, params, type }: any) => {
     setShowResults(true);
     setSelectedNode(null);
     if (type === 'resume') {
       if (!currentQA.current.answer) return;
-      resumeWorkFlowTask({
+      workflowTask.resume({
         app_id: appId,
-        task_id: currentQA.current.answer.task_id,
         ...params,
-      }).then(() => {
-        queryTaskStatus();
       });
       return;
     }
@@ -315,7 +281,6 @@ export default memo(function ChatTestPanel() {
     }
 
     // clear answer when regenerate
-    setLoading(true);
     chatRef.current?.setLoading(true);
     currentQA.current.answer = undefined;
     if (type !== 'regenerate')
@@ -336,44 +301,16 @@ export default memo(function ChatTestPanel() {
       };
 
     updateMessage(currentQA.current.query as TMessage);
-    createWorkFlowTask({
+    workflowTask.start({
       conversation_id: conversationId,
       app_id: appId,
       inputs: currentQA.current.query.inputs,
-    }).then((res) => {
-      if (conversationId !== res.conversation_id)
-        setConversationId(res.conversation_id);
-      chat(res.task_id);
     });
   };
 
   const onStop = () => {
-    clearTimer();
-    setLoading(false);
     chatRef.current?.setLoading(false);
-    if (currentQA.current.answer) {
-      const newTaskStore = {
-        ...taskStore,
-        task_status: 'stop',
-        node_results: taskStore?.node_results?.map((item) => {
-          return {
-            ...item,
-            node_status: ['executing', 'pause'].includes(item.node_status)
-              ? 'stop'
-              : item.node_status,
-          };
-        }),
-        task_results: taskStore?.task_results?.map((item) => {
-          return {
-            ...item,
-            node_status: ['executing', 'pause'].includes(item.node_status)
-              ? 'stop'
-              : item.node_status,
-          };
-        }),
-      } as IWorkFlowTaskProcess;
-      updateDebugMessages(newTaskStore);
-    }
+    workflowTask.stop();
   };
 
   return (
@@ -395,7 +332,7 @@ export default memo(function ChatTestPanel() {
           </Tooltip>
           <Tooltip
             title={
-              loading
+              workflowTask.loading
                 ? $i18n.get({
                     id: 'main.pages.App.Workflow.components.ChatTestPanel.index.dialogGenerating',
                     dm: '正在进行对话中，请暂停',
@@ -409,7 +346,7 @@ export default memo(function ChatTestPanel() {
             <IconButton
               icon={<IconFont type="spark-clear-line" size="small" />}
               bordered={false}
-              disabled={loading}
+              disabled={workflowTask.loading}
               onClick={() => {
                 setConversationId(void 0);
                 chatRef.current?.removeAllMessages();

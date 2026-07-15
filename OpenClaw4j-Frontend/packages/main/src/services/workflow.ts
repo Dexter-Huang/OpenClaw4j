@@ -66,6 +66,21 @@ export const resumeWorkFlowTask = (data: IResumeTaskParams) => {
   });
 };
 
+/** 停止工作流任务请求参数 */
+export interface IStopTaskParams {
+  /** 需要停止的任务 ID */
+  task_id: string;
+}
+
+/** 停止正在运行的工作流调试任务 */
+export const stopWorkFlowTask = (data: IStopTaskParams) => {
+  return request({
+    url: '/console/v1/apps/workflow/debug/part-graph/stop-task',
+    method: 'POST',
+    data,
+  }).then((res) => res.data.data as boolean);
+};
+
 /**
  * Parameters for starting partial graph task
  */

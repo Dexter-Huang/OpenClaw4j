@@ -1,10 +1,6 @@
 import $i18n from '@/i18n';
 import Welcome from '@/pages/App/AssistantAppEdit/components/SparkChat/components/Welcome';
-import {
-  createWorkFlowTask,
-  getWorkFlowTaskProcess,
-  resumeWorkFlowTask,
-} from '@/services/workflow';
+import { createWorkFlowTask } from '@/services/workflow';
 import { Markdown } from '@spark-ai/chat';
 import { Button } from '@spark-ai/design';
 import {
@@ -13,11 +9,12 @@ import {
   useFlowInteraction,
   useStore,
 } from '@spark-ai/flow';
-import { useSetState, useUnmount } from 'ahooks';
+import { useSetState } from 'ahooks';
 import { Flex, Segmented, Tabs } from 'antd';
 import classNames from 'classnames';
 import { memo, useMemo, useRef } from 'react';
 import { useWorkflowAppStore } from '../../context/WorkflowAppProvider';
+import { useWorkflowDebugTask } from '../../hooks/useWorkflowDebugTask';
 import { NodeResultPanelList } from '../NodeResultPanel';
 import ResultStatus from '../ResultStatus';
 import UserInputForm, { IUserInputSubmitParams } from '../UserInputForm';
@@ -55,12 +52,7 @@ export default memo(function TaskTestPanel() {
   const setShowResults = useStore((state) => state.setShowResults);
   const appId = useWorkflowAppStore((state) => state.appId);
   const { focusElement } = useFlowInteraction();
-  const taskId = useRef(null as string | null);
-  const timer = useRef(null as NodeJS.Timeout | null);
-  const isDestroy = useRef(false);
   const [state, setState] = useSetState({
-    loading: false,
-    taskInfo: null as IWorkFlowTaskProcess | null,
     activeTab: 'input',
   });
   const resultContainerRef = useRef<HTMLDivElement>(null);
@@ -86,42 +78,12 @@ export default memo(function TaskTestPanel() {
     }
   };
 
-  const clearTimer = () => {
-    if (timer.current) {
-      clearTimeout(timer.current);
-      timer.current = null;
-    }
-  };
-
-  useUnmount(() => {
-    isDestroy.current = true;
-    clearTimer();
-  });
-
-  const handleTest = () => {
-    setSelectedNode(null);
-    setState({
-      loading: true,
-      activeTab: 'result',
-    });
-    createWorkFlowTask({
-      app_id: appId,
-      inputs: inputParams,
-    }).then((res) => {
-      taskId.current = res.task_id;
+  const workflowTask = useWorkflowDebugTask({
+    createTask: createWorkFlowTask,
+    onTaskCreated: () => {
       setShowResults(true);
-      queryTaskStatus();
-    });
-  };
-
-  const queryTaskStatus = () => {
-    clearTimer();
-    if (!taskId.current) return;
-    getWorkFlowTaskProcess({
-      task_id: taskId.current,
-    }).then((res) => {
-      if (isDestroy.current) return;
-
+    },
+    onTaskProcess: (res) => {
       const endNode = res.node_results[res.node_results.length - 1];
       if (endNode && endNode.node_id !== cacheAnimateNodeId.current) {
         focusElement({ nodeId: endNode.node_id });
@@ -133,36 +95,30 @@ export default memo(function TaskTestPanel() {
           (item) => item.node_type === 'Input' && item.node_status === 'pause',
         ),
       );
-      setState({
-        taskInfo: res,
-      });
-      if (res.task_status === 'executing') {
-        timer.current = setTimeout(() => {
-          queryTaskStatus();
-        }, 500);
-      } else {
-        setState({
-          loading: false,
-        });
-        clearTimer();
-      }
+    },
+  });
+
+  const handleTest = () => {
+    setSelectedNode(null);
+    setState({
+      activeTab: 'result',
+    });
+    workflowTask.start({
+      app_id: appId,
+      inputs: inputParams,
     });
   };
 
   const usageList = useMemo(() => {
-    return getSparkFlowUsageList(state.taskInfo);
-  }, [state.taskInfo]);
+    return getSparkFlowUsageList(workflowTask.taskInfo);
+  }, [workflowTask.taskInfo]);
 
   const handleSubmitUserInput = (params: IUserInputSubmitParams) => {
-    if (!taskId.current) return;
+    if (!workflowTask.taskId) return;
     setSelectedNode(null);
-    resumeWorkFlowTask({
+    workflowTask.resume({
       app_id: appId,
-      task_id: taskId.current,
       ...params,
-    }).then(() => {
-      setShowResults(true);
-      queryTaskStatus();
     });
   };
 
@@ -208,11 +164,11 @@ export default memo(function TaskTestPanel() {
                     'mx-[20px] gap-[8px]',
                     styles['test-button'],
                   )}
-                  loading={state.loading}
+                  loading={workflowTask.loading}
                   type="primaryLess"
                   onClick={handleTest}
                 >
-                  {state.loading
+                  {workflowTask.loading
                     ? $i18n.get({
                         id: 'main.pages.App.Workflow.components.TaskTestPanel.index.testing',
                         dm: '测试中...',
@@ -236,7 +192,7 @@ export default memo(function TaskTestPanel() {
                 ref={resultContainerRef}
                 className="h-full overflow-y-auto relative px-[20px] pb-[16px] flex flex-col gap-[12px]"
               >
-                {!state.taskInfo ? (
+                {!workflowTask.taskInfo ? (
                   <Welcome
                     data={{}}
                     title={$i18n.get({
@@ -253,17 +209,29 @@ export default memo(function TaskTestPanel() {
                           dm: '运行结果',
                         })}
                       </div>
-                      {state.taskInfo && (
-                        <ResultStatus
-                          usages={usageList}
-                          status={state.taskInfo.task_status}
-                          execTime={state.taskInfo.task_exec_time}
-                        />
-                      )}
+                      <Flex align="center" gap={8}>
+                        {workflowTask.loading && (
+                          <Button onClick={workflowTask.stop}>
+                            {$i18n.get({
+                              id: 'main.pages.App.Workflow.components.TaskTestPanel.index.stop',
+                              dm: '停止',
+                            })}
+                          </Button>
+                        )}
+                        {workflowTask.taskInfo && (
+                          <ResultStatus
+                            usages={usageList}
+                            status={workflowTask.taskInfo.task_status}
+                            execTime={workflowTask.taskInfo.task_exec_time}
+                          />
+                        )}
+                      </Flex>
                     </div>
                     <Flex vertical gap={12}>
-                      <NodeResultPanelList data={state.taskInfo.node_results} />
-                      {state.taskInfo.task_results.map((item) => {
+                      <NodeResultPanelList
+                        data={workflowTask.taskInfo.node_results}
+                      />
+                      {workflowTask.taskInfo.task_results.map((item) => {
                         if (item.node_type === 'Input')
                           return (
                             <UserInputForm
