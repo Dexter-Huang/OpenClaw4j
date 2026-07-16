@@ -50,6 +50,8 @@ import com.seaskyland.llm.workflow.runtime.domain.workflow.debug.TaskRunResponse
 import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
 import com.seaskyland.llm.workflow.runtime.exception.BizException;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -284,7 +286,7 @@ public class WorkflowExecuteManager {
       throws InterruptedException {
     context.setStartTime(System.currentTimeMillis());
     context.setWorkflowConfig(appOrchestraConfig);
-    DirectedAcyclicGraph<String, Edge> graph = constructGraph(appOrchestraConfig);
+    DirectedAcyclicGraph<String, Edge> graph = constructExecutableGraph(appOrchestraConfig);
     final BlockingQueue<String> taskQueue = new LinkedBlockingQueue<>();
     BlockingQueue<String> nodeMonitorQueue = new LinkedBlockingQueue<>();
     final HashSet<String> taskSet = new HashSet<>();
@@ -440,6 +442,36 @@ public class WorkflowExecuteManager {
     return graph;
   }
 
+  DirectedAcyclicGraph<String, Edge> constructExecutableGraph(WorkflowConfig appOrchestraConfig) {
+    DirectedAcyclicGraph<String, Edge> graph = constructGraph(appOrchestraConfig);
+    Set<String> entryNodes =
+        appOrchestraConfig.getNodes().stream()
+            .filter(this::isEntryNode)
+            .map(Node::getId)
+            .collect(Collectors.toSet());
+    if (entryNodes.isEmpty()) {
+      return graph;
+    }
+
+    Set<String> reachableNodes = findReachableNodes(graph, entryNodes);
+    DirectedAcyclicGraph<String, Edge> executableGraph =
+        new DirectedAcyclicGraph<>(null, SupplierUtil.createSupplier(Edge.class), false, true);
+    reachableNodes.forEach(executableGraph::addVertex);
+    graph.edgeSet().stream()
+        .filter(
+            edge ->
+                reachableNodes.contains(edge.getSource())
+                    && reachableNodes.contains(edge.getTarget()))
+        .forEach(edge -> executableGraph.addEdge(edge.getSource(), edge.getTarget(), edge));
+    return executableGraph;
+  }
+
+  private boolean isEntryNode(Node node) {
+    return NodeTypeEnum.START.getCode().equals(node.getType())
+        || NodeTypeEnum.ITERATOR_START.getCode().equals(node.getType())
+        || NodeTypeEnum.PARALLEL_START.getCode().equals(node.getType());
+  }
+
   /**
    * Constructs and validates a workflow graph from nodes and edges Ensures the graph is a valid DAG
    * with proper connectivity
@@ -528,6 +560,22 @@ public class WorkflowExecuteManager {
           toVisit.add(next);
         }
       }
+    }
+
+    return visited;
+  }
+
+  private static Set<String> findReachableNodes(
+      DirectedAcyclicGraph<String, Edge> graph, Set<String> startNodes) {
+    Set<String> visited = new HashSet<>();
+    Deque<String> toVisit = new ArrayDeque<>(startNodes);
+
+    while (!toVisit.isEmpty()) {
+      String current = toVisit.removeFirst();
+      if (!visited.add(current)) {
+        continue;
+      }
+      graph.outgoingEdgesOf(current).stream().map(Edge::getTarget).forEach(toVisit::addLast);
     }
 
     return visited;
@@ -871,10 +919,13 @@ public class WorkflowExecuteManager {
       WorkflowConfig appOrchestraConfig) {
     ExecuteProcessor.CheckFlowParamResult result = new ExecuteProcessor.CheckFlowParamResult();
     result.setSuccess(true);
-    DirectedAcyclicGraph<String, Edge> graph = constructGraph(appOrchestraConfig);
+    DirectedAcyclicGraph<String, Edge> graph = constructExecutableGraph(appOrchestraConfig);
     List<Node> nodes = appOrchestraConfig.getNodes();
     nodes.forEach(
             node -> {
+              if (!graph.containsVertex(node.getId())) {
+                return;
+              }
               String type = node.getType();
               ExecuteProcessor.CheckNodeParamResult checkNodeParamResult =
                   processorMap.get(type + "ExecuteProcessor").checkNodeParam(graph, node);
