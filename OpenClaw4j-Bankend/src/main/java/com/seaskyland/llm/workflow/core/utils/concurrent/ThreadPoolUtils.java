@@ -18,6 +18,7 @@ package com.seaskyland.llm.workflow.core.utils.concurrent;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -53,6 +54,8 @@ public class ThreadPoolUtils {
 
   private static final String NODE_EXECUTOR_NAME = "WorkflowNodeExecutor";
 
+  private static final int NODE_EXECUTOR_MAX_CONCURRENCY = 200;
+
   /** Thread pool for workflow task execution with queue size 100 and caller-runs policy */
   public static final ExecutorService taskExecutorService =
       new RequestContextThreadPoolWrapper(
@@ -68,20 +71,18 @@ public class ThreadPoolUtils {
                   .build(),
               new ThreadPoolExecutor.CallerRunsPolicy()));
 
-  /** Thread pool for workflow node execution with queue size 100 and caller-runs policy */
+  /**
+   * Workflow 节点执行池。
+   *
+   * <p>节点执行经常包含 LLM、HTTP、DB、sleep 等阻塞等待，使用虚拟线程减少平台线程占用；同时保留显式并发上限，避免
+   * 无限制提交把外部依赖打满。
+   */
   public static final ExecutorService nodeExecutorService =
       new RequestContextThreadPoolWrapper(
-          new ThreadPoolExecutor(
-              100,
-              200,
-              120,
-              TimeUnit.SECONDS,
-              new LinkedBlockingQueue<>(100),
-              new ThreadFactoryBuilder()
-                  .setNameFormat(NODE_EXECUTOR_NAME + "-%d")
-                  .setDaemon(true)
-                  .build(),
-              new ThreadPoolExecutor.CallerRunsPolicy()));
+          new BoundedExecutorService(
+              Executors.newThreadPerTaskExecutor(
+                  Thread.ofVirtual().name(NODE_EXECUTOR_NAME + "-", 0).factory()),
+              NODE_EXECUTOR_MAX_CONCURRENCY));
 
   /** Thread pool for plugin execution with queue size 50 and thread count 40-50 */
   public static final String TOOL_TASK_EXECUTOR_NAME = "tool-task-executor";

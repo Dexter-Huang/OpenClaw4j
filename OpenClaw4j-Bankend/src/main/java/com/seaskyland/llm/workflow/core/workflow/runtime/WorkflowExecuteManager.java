@@ -315,6 +315,11 @@ public class WorkflowExecuteManager {
               currentThreads,
               taskCount,
               completedTaskCount);
+        } else {
+          log.debug(
+              "ThreadId:{} taskId:{} node executor does not expose ThreadPoolExecutor metrics",
+              Thread.currentThread().getId(),
+              context.getTaskId());
         }
         ThreadPoolUtils.nodeExecutorService.submit(
             () -> {

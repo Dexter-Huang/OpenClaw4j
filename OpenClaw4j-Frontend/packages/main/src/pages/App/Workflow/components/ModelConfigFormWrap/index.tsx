@@ -24,8 +24,10 @@ export default memo(function ModelConfigFormWrap(
   const [model, setModel] = useState<IModel>();
 
   const enableVision = useMemo(() => {
-    return model?.tags?.includes('vision');
-  }, [model]);
+    return (
+      model?.tags?.includes('vision') || props.value.vision_config?.enable
+    );
+  }, [model, props.value.vision_config?.enable]);
 
   return (
     <>

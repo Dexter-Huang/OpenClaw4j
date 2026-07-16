@@ -24,6 +24,7 @@ import {
 } from 'antd';
 import { memo, useEffect, useMemo, useState } from 'react';
 import styles from './index.module.less';
+import { findModelOptionByValue } from './modelSelection';
 import {
   MODEL_SELECTOR_DROPDOWN_WIDTH,
   MODEL_SELECTOR_WIDTH,
@@ -306,7 +307,7 @@ const ModelConfigForm = ({
       onSelectedModelChange?.(selectedModel);
     }
   }, [selectedModel]);
-  useMount(() => {
+  useEffect(() => {
     getModelSelector('llm').then((res) => {
       const modelOptions = res.data.map((item) => ({
         label: item.provider.name,
@@ -319,15 +320,23 @@ const ModelConfigForm = ({
       setState({
         modelOptions,
       });
-      modelOptions.forEach((item) => {
-        item.options.forEach((option) => {
-          if (option.value.split('@@@')[1] === value.model_id) {
-            setSelectedModel(normalizeModel(option.extra));
-          }
-        });
-      });
     });
-  });
+  }, []);
+
+  useEffect(() => {
+    const selectedOption = findModelOptionByValue(state.modelOptions, value);
+    if (!selectedOption) return;
+
+    setSelectedModel((prev) => {
+      if (
+        prev?.provider === selectedOption.extra.provider &&
+        prev?.model_id === selectedOption.extra.model_id
+      ) {
+        return prev;
+      }
+      return normalizeModel(selectedOption.extra);
+    });
+  }, [state.modelOptions, value.provider, value.model_id]);
   return (
     <>
       <ModelSelector
