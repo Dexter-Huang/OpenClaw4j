@@ -31,3 +31,29 @@ func TestFromEnvUsesDefaults(t *testing.T) {
 		t.Fatalf("PythonRuntime = %q", c.PythonRuntime)
 	}
 }
+
+func TestFromEnvUsesAgentCompatibilityDefaults(t *testing.T) {
+	t.Setenv("OPENCLAW_SANDBOX_WORKSPACE_DIR", "")
+	t.Setenv("OPENCLAW_SANDBOX_BASH_DEFAULT_TIMEOUT_MS", "")
+	t.Setenv("OPENCLAW_SANDBOX_BASH_HARD_TIMEOUT_MS", "")
+	t.Setenv("OPENCLAW_SANDBOX_BASH_OUTPUT_LIMIT_BYTES", "")
+	t.Setenv("OPENCLAW_SANDBOX_FILE_READ_LIMIT_BYTES", "")
+
+	c := FromEnv()
+
+	if filepath.ToSlash(c.WorkspaceDir) != "/tmp/openclaw4j-workspace" {
+		t.Fatalf("WorkspaceDir = %q", c.WorkspaceDir)
+	}
+	if c.BashDefaultTimeoutMs != 30000 {
+		t.Fatalf("BashDefaultTimeoutMs = %d", c.BashDefaultTimeoutMs)
+	}
+	if c.BashHardTimeoutMs != 120000 {
+		t.Fatalf("BashHardTimeoutMs = %d", c.BashHardTimeoutMs)
+	}
+	if c.BashOutputLimitBytes != 65536 {
+		t.Fatalf("BashOutputLimitBytes = %d", c.BashOutputLimitBytes)
+	}
+	if c.FileReadLimitBytes != 1048576 {
+		t.Fatalf("FileReadLimitBytes = %d", c.FileReadLimitBytes)
+	}
+}
