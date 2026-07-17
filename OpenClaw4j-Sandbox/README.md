@@ -38,6 +38,63 @@ $body = @{
 Invoke-RestMethod -Uri 'http://127.0.0.1:9010/v1/execute' -Method Post -ContentType 'application/json' -Body $body
 ```
 
+## Agent 兼容接口
+
+服务额外提供一组轻量 AIO 风格接口，供 Agent 读写 workspace 文件、运行命令和通过 MCP 调用工具。
+
+默认 workspace：
+
+```text
+OPENCLAW_SANDBOX_WORKSPACE_DIR=/tmp/openclaw4j-workspace
+```
+
+可调整的 Agent 兼容参数：
+
+```text
+OPENCLAW_SANDBOX_BASH_DEFAULT_TIMEOUT_MS=30000
+OPENCLAW_SANDBOX_BASH_HARD_TIMEOUT_MS=120000
+OPENCLAW_SANDBOX_BASH_OUTPUT_LIMIT_BYTES=65536
+OPENCLAW_SANDBOX_FILE_READ_LIMIT_BYTES=1048576
+```
+
+写入和读取文件：
+
+```powershell
+$write = @{
+  file = 'notes/todo.txt'
+  content = 'hello sandbox'
+} | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://127.0.0.1:9010/v1/file/write' -Method Post -ContentType 'application/json' -Body $write
+
+$read = @{ file = 'notes/todo.txt' } | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://127.0.0.1:9010/v1/file/read' -Method Post -ContentType 'application/json' -Body $read
+```
+
+执行 Bash：
+
+```powershell
+$body = @{
+  command = 'pwd && ls -la'
+  timeout = 30
+} | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://127.0.0.1:9010/v1/bash/exec' -Method Post -ContentType 'application/json' -Body $body
+```
+
+查询 MCP 工具列表：
+
+```powershell
+$body = @{
+  jsonrpc = '2.0'
+  id = 1
+  method = 'tools/list'
+} | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://127.0.0.1:9010/mcp' -Method Post -ContentType 'application/json' -Body $body
+```
+
+当前内置 MCP server 名称为 `sandbox`，工具包括 `file_read`、`file_write`、`file_list`、`file_replace`、`file_search` 和 `sandbox_execute_bash`。
+
+首轮兼容重点是 Agent 可用，不包含 upload/download、file watch、浏览器、Jupyter、Code Server、外部 MCP Hub 聚合、SSE/streamable HTTP MCP 以及 `sudo` 提权语义。所有 file/bash 路径都会限制在 workspace 内。
+
 ## 内置依赖
 
 沙箱镜像默认内置一组白名单依赖：
