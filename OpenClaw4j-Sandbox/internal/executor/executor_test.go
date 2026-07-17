@@ -16,7 +16,7 @@ import (
 type fakeRuntime struct {
 	result RuntimeResult
 	err    error
-	seen  string
+	seen   string
 }
 
 func (f *fakeRuntime) Run(ctx context.Context, cfg config.Config, language wrapper.Language, workDir string, timeoutMs uint64) (RuntimeResult, error) {

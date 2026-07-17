@@ -1,0 +1,11 @@
+{
+  "name": "openclaw4j-sandbox-node-deps",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "dayjs": "1.11.21",
+    "decimal.js": "10.6.0",
+    "lodash": "4.18.1",
+    "uuid": "11.1.1"
+  }
+}

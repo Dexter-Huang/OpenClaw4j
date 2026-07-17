@@ -1,0 +1,7 @@
+target/
+.env
+tmp/
+output/
+vendor/
+deps/node/node_modules/
+*.exe
