@@ -9,6 +9,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/seaskyland/openclaw4j-sandbox/internal/bashapi"
 	"github.com/seaskyland/openclaw4j-sandbox/internal/config"
 	"github.com/seaskyland/openclaw4j-sandbox/internal/executor"
 	"github.com/seaskyland/openclaw4j-sandbox/internal/fileapi"
@@ -27,6 +28,12 @@ func main() {
 		os.Exit(1)
 	}
 	fileService := fileapi.NewService(guard, cfg.FileReadLimitBytes)
+	bashService := bashapi.NewService(
+		guard,
+		cfg.BashDefaultTimeoutMs,
+		cfg.BashHardTimeoutMs,
+		cfg.BashOutputLimitBytes,
+	)
 	h := server.Default(server.WithHostPorts(cfg.Bind))
 
 	h.GET("/health", func(ctx context.Context, c *app.RequestContext) {
@@ -44,6 +51,7 @@ func main() {
 	})
 
 	fileapi.RegisterRoutes(h, fileService)
+	bashapi.RegisterRoutes(h, bashService)
 
 	slog.Info("OpenClaw4j sandbox listening", "bind", cfg.Bind, "workspace", cfg.WorkspaceDir)
 	h.Spin()
