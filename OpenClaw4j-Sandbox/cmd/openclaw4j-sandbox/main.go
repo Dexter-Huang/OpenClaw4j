@@ -13,6 +13,7 @@ import (
 	"github.com/seaskyland/openclaw4j-sandbox/internal/config"
 	"github.com/seaskyland/openclaw4j-sandbox/internal/executor"
 	"github.com/seaskyland/openclaw4j-sandbox/internal/fileapi"
+	"github.com/seaskyland/openclaw4j-sandbox/internal/mcpapi"
 	"github.com/seaskyland/openclaw4j-sandbox/internal/model"
 	"github.com/seaskyland/openclaw4j-sandbox/internal/pathguard"
 )
@@ -34,6 +35,7 @@ func main() {
 		cfg.BashHardTimeoutMs,
 		cfg.BashOutputLimitBytes,
 	)
+	mcpService := mcpapi.NewService(fileService, bashService)
 	h := server.Default(server.WithHostPorts(cfg.Bind))
 
 	h.GET("/health", func(ctx context.Context, c *app.RequestContext) {
@@ -52,6 +54,7 @@ func main() {
 
 	fileapi.RegisterRoutes(h, fileService)
 	bashapi.RegisterRoutes(h, bashService)
+	mcpapi.RegisterRoutes(h, mcpService)
 
 	slog.Info("OpenClaw4j sandbox listening", "bind", cfg.Bind, "workspace", cfg.WorkspaceDir)
 	h.Spin()
