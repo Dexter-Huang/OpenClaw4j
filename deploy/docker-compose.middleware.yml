@@ -57,6 +57,34 @@ services:
     volumes:
       - ./data/aio-sandbox:${AIO_SANDBOX_WORKSPACE:-/home/gem}
 
+  openclaw4j-sandbox:
+    build:
+      context: ../OpenClaw4j-Sandbox
+      dockerfile: Dockerfile
+    image: ${OPENCLAW_SANDBOX_IMAGE:-openclaw4j-sandbox:local}
+    container_name: openclaw4j-sandbox
+    profiles: ["sandbox"]
+    restart: unless-stopped
+    security_opt:
+      - seccomp:unconfined
+    ports:
+      - "127.0.0.1:${OPENCLAW_SANDBOX_PORT:-9010}:9010"
+    environment:
+      OPENCLAW_SANDBOX_BIND: 0.0.0.0:9010
+      OPENCLAW_SANDBOX_DEFAULT_TIMEOUT_MS: ${OPENCLAW_SANDBOX_DEFAULT_TIMEOUT_MS:-30000}
+      OPENCLAW_SANDBOX_MAX_TIMEOUT_MS: ${OPENCLAW_SANDBOX_MAX_TIMEOUT_MS:-120000}
+      OPENCLAW_SANDBOX_MEMORY_LIMIT: ${OPENCLAW_SANDBOX_MEMORY_LIMIT:-512M}
+      OPENCLAW_SANDBOX_PROCESS_LIMIT: ${OPENCLAW_SANDBOX_PROCESS_LIMIT:-16}
+      OPENCLAW_SANDBOX_DEPS_DIR: ${OPENCLAW_SANDBOX_DEPS_DIR:-/opt/openclaw4j-sandbox/deps}
+      OPENCLAW_SANDBOX_PYTHON_RUNTIME: ${OPENCLAW_SANDBOX_PYTHON_RUNTIME:-/opt/openclaw4j-sandbox/deps/python/bin/python}
+      OPENCLAW_SANDBOX_NODE_PATH: ${OPENCLAW_SANDBOX_NODE_PATH:-/opt/openclaw4j-sandbox/deps/node/node_modules}
+      RUST_LOG: ${OPENCLAW_SANDBOX_RUST_LOG:-openclaw4j_sandbox=info,tower_http=info}
+      TZ: ${OPENCLAW_SANDBOX_TZ:-Asia/Shanghai}
+    # 依赖和 sandlock 二进制默认烘焙进镜像，避免空 volume 遮蔽内置内容。
+    # 本地调试自编译 sandlock 时，可以临时挂只读单文件：
+    # volumes:
+    #   - ./data/sandbox-bin/sandlock:/usr/local/bin/sandlock:ro
+
   # Redis Sentinel 拓扑已默认关闭；如需恢复哨兵机制，先将上面的 redis 服务名和
   # container_name 改回 redis-master/openclaw4j-redis-master，再取消下面服务块的注释。
   # redis-replica-1:

@@ -62,6 +62,14 @@ OpenClaw4j-Bankend/**/*.db-wal
 OpenClaw4j-Bankend/**/*.sqlite
 OpenClaw4j-Bankend/**/*.sqlite3
 
+# Rust sandbox build output and runtime scratch data
+OpenClaw4j-Sandbox/target/
+OpenClaw4j-Sandbox/.env
+OpenClaw4j-Sandbox/.env.*
+!OpenClaw4j-Sandbox/.env.example
+OpenClaw4j-Sandbox/tmp/
+OpenClaw4j-Sandbox/output/
+
 # Java IDE and tool metadata
 .apt_generated/
 .classpath
@@ -78,6 +86,7 @@ nbdist/
 # Logs and temp files
 *.log
 logs/
+output/
 tmp/
 temp/
 

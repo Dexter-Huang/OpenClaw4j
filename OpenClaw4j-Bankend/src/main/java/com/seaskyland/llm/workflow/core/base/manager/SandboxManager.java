@@ -16,46 +16,53 @@
 package com.seaskyland.llm.workflow.core.base.manager;
 
 import com.google.common.collect.Maps;
+import com.seaskyland.llm.workflow.core.config.SandboxProperties;
 import com.seaskyland.llm.workflow.runtime.domain.Result;
 import com.seaskyland.llm.workflow.runtime.enums.ErrorCode;
 import com.seaskyland.llm.workflow.runtime.utils.JsonUtils;
-import jakarta.annotation.Resource;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.script.Bindings;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import javax.script.SimpleScriptContext;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-// import org.graalvm.polyglot.Context;
-// import org.graalvm.polyglot.Value;
-import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Sandbox manager for secure script execution. Supports Python and JavaScript script types.
- * Implements isolated execution environment to prevent runtime crashes.
+ * Script sandbox manager.
+ *
+ * <p>Python and JavaScript are delegated to the Rust/Axum sandbox service so untrusted workflow
+ * code runs in a Linux sandlock process boundary. Java script execution keeps the existing JVM path
+ * for compatibility until it has a separate isolation design.
  */
 @Slf4j
 @Component
 public class SandboxManager {
 
-  /** Nashorn engine name constant */
-  private static final String ENGINE_NAME_NASHORN = "nashorn";
+  private static final String LANGUAGE_PYTHON = "python";
+  private static final String LANGUAGE_JAVASCRIPT = "javascript";
 
-  /** Script engine manager */
-  @Resource private ScriptEngineManager engineManager;
+  private final SandboxProperties sandboxProperties;
 
-  /** Cache for ScriptEngine instances to avoid repeated creation */
-  private final Map<String, ScriptEngine> engineCache = new ConcurrentHashMap<>();
+  private final HttpClient httpClient;
+
+  public SandboxManager(SandboxProperties sandboxProperties) {
+    this.sandboxProperties = sandboxProperties;
+    this.httpClient =
+        HttpClient.newBuilder()
+            .connectTimeout(Duration.ofMillis(sandboxProperties.getTimeoutMs()))
+            .build();
+  }
 
   /**
-   * Executes a script
+   * Executes JavaScript through the Rust sandbox service.
    *
    * @param scriptContent Script content
    * @param localVariableMap Map of variable values
@@ -64,59 +71,11 @@ public class SandboxManager {
    */
   public Result<String> executeJavaScript(
       String scriptContent, Map<String, Object> localVariableMap, String requestId) {
-    // Validate parameters
-    if (StringUtils.isBlank(scriptContent)) {
-      log.error("Script content cannot be empty");
-      return Result.error(requestId, ErrorCode.INVALID_PARAMS);
-    }
-
-    try {
-      // Get or create script engine
-      ScriptEngine engine = getScriptEngine(ENGINE_NAME_NASHORN);
-      if (engine == null) {
-        return Result.error(requestId, ErrorCode.SYSTEM_ERROR);
-      }
-
-      // Create context
-      ScriptContext context = new SimpleScriptContext();
-
-      // Inject variables
-      Bindings bindings = engine.createBindings();
-      if (localVariableMap != null) {
-        bindings.putAll(localVariableMap);
-      }
-      context.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
-
-      // Execute script
-      Object result;
-      try {
-        result = engine.eval(scriptContent, context);
-      } catch (ScriptException e) {
-        log.error("Script execution error: {}", e.getMessage());
-        Map<String, Object> errorResult = Maps.newHashMap();
-        errorResult.put("success", false);
-        errorResult.put("message", e.getMessage());
-        errorResult.put("code", "SCRIPT_ERROR");
-        return Result.success(requestId, JsonUtils.toJson(errorResult));
-      }
-
-      // Build result map
-      Map<String, Object> resultMap = Maps.newHashMap();
-      resultMap.put("success", true);
-      resultMap.put("data", result);
-
-      // Convert to JSON and return
-      return Result.success(requestId, JsonUtils.toJson(resultMap));
-    } catch (Exception e) {
-      log.error("Script execution exception", e);
-      StringWriter sw = new StringWriter();
-      e.printStackTrace(new PrintWriter(sw));
-      return Result.error(requestId, ErrorCode.SYSTEM_ERROR);
-    }
+    return executeRemoteScript(LANGUAGE_JAVASCRIPT, scriptContent, localVariableMap, requestId);
   }
 
   /**
-   * Executes a script
+   * Executes Java code through the legacy JVM implementation.
    *
    * @param scriptContent Script content
    * @param localVariableMap Map of variable values
@@ -125,32 +84,23 @@ public class SandboxManager {
    */
   public Result<String> executeJava(
       String scriptContent, Map<String, Object> localVariableMap, String requestId) {
-    // Validate parameters
     if (StringUtils.isBlank(scriptContent)) {
       log.error("Script content cannot be empty");
       return Result.error(requestId, ErrorCode.INVALID_PARAMS);
     }
 
     try {
-      // Execute script
       Object result;
       try {
         result = ASMCodeExecutor.execute(scriptContent, localVariableMap);
       } catch (ScriptException e) {
         log.error("Script execution error: {}", e.getMessage());
-        Map<String, Object> errorResult = Maps.newHashMap();
-        errorResult.put("success", false);
-        errorResult.put("message", e.getMessage());
-        errorResult.put("code", "SCRIPT_ERROR");
-        return Result.success(requestId, JsonUtils.toJson(errorResult));
+        return Result.success(requestId, buildScriptFailure("SCRIPT_ERROR", e.getMessage()));
       }
 
-      // Build result map
       Map<String, Object> resultMap = Maps.newHashMap();
       resultMap.put("success", true);
       resultMap.put("data", result);
-
-      // Convert to JSON and return
       return Result.success(requestId, JsonUtils.toJson(resultMap));
     } catch (Exception e) {
       log.error("Script execution exception", e);
@@ -161,7 +111,7 @@ public class SandboxManager {
   }
 
   /**
-   * Executes Python3 script.
+   * Executes Python3 script through the Rust sandbox service.
    *
    * @param scriptContent Python script content
    * @param variables Script variable mapping
@@ -170,101 +120,134 @@ public class SandboxManager {
    */
   public Result<String> executePython3Script(
       String scriptContent, Map<String, Object> variables, String requestId) {
-    return null;
-    //		try {
-    //			// Use an embedded Python engine to execute Python script directly
-    //			Context.Builder contextBuilder = Context.newBuilder("python")
-    //				.allowAllAccess(true)
-    //				.option("python.ForceImportSite", "true");
-    //
-    //			// Create isolated execution environment
-    //			try (Context context = contextBuilder.build()) {
-    //
-    //				// Inject variables into Python environment
-    //				if (variables != null && !variables.isEmpty()) {
-    //					for (Map.Entry<String, Object> entry : variables.entrySet()) {
-    //						context.getBindings("python").putMember(entry.getKey(), entry.getValue());
-    //					}
-    //				}
-    //
-    //				// Execute script and capture result
-    //				Value result = context.eval("python", scriptContent);
-    //
-    //				// Build result map
-    //				Map<String, Object> resultMap = Maps.newHashMap();
-    //				resultMap.put("success", true);
-    //				Map<String, Object> innerMap = Maps.newHashMap();
-    //				// Handle different result types
-    //				if (result.isNull()) {
-    //					innerMap.put(OUTPUT_DECORATE_PARAM_KEY, null);
-    //				}
-    //				else if (result.isString()) {
-    //					innerMap.put(OUTPUT_DECORATE_PARAM_KEY, result.asString());
-    //				}
-    //				else if (result.isNumber()) {
-    //					innerMap.put(OUTPUT_DECORATE_PARAM_KEY, result.asDouble());
-    //				}
-    //				else if (result.isBoolean()) {
-    //					innerMap.put(OUTPUT_DECORATE_PARAM_KEY, result.asBoolean());
-    //				}
-    //				else if (result.hasArrayElements()) {
-    //					List<Object> list = Lists.newArrayList();
-    //					for (long i = 0; i < result.getArraySize(); i++) {
-    //						list.add(result.getArrayElement(i).as(Object.class));
-    //					}
-    //					innerMap.put(OUTPUT_DECORATE_PARAM_KEY, list);
-    //				}
-    //				else if (result.hasMembers()) {
-    //					innerMap.putAll(result.as(Map.class));
-    //				}
-    //				resultMap.put("data", innerMap);
-    //
-    //				// Convert to JSON and return
-    //				return Result.success(requestId, JsonUtils.toJson(resultMap));
-    //			}
-    //		}
-    //		catch (Exception e) {
-    //			log.error("Python script execution exception", e);
-    //			StringWriter sw = new StringWriter();
-    //			e.printStackTrace(new PrintWriter(sw));
-    //			return Result.error(requestId, ErrorCode.SYSTEM_ERROR);
-    //		}
+    return executeRemoteScript(LANGUAGE_PYTHON, scriptContent, variables, requestId);
   }
 
-  /**
-   * Gets or creates a script engine instance
-   *
-   * @param engineName Name of the script engine
-   * @return ScriptEngine instance
-   */
-  private synchronized ScriptEngine getScriptEngine(String engineName) {
-    ScriptEngine engine = engineCache.get(engineName);
-    if (engine == null) {
-      // For Nashorn engine, use ES6 configuration
-      if (ENGINE_NAME_NASHORN.equals(engineName)) {
-        try {
-          engine = new NashornScriptEngineFactory().getScriptEngine("--language=es6");
-          log.info(
-              "Successfully created Nashorn script engine (ES6 mode): {}",
-              engine.getClass().getName());
-        } catch (Exception e) {
-          log.error("Failed to create Nashorn engine, trying standard engine", e);
-          engine = engineManager.getEngineByName(engineName);
-        }
-      } else {
-        engine = engineManager.getEngineByName(engineName);
+  private Result<String> executeRemoteScript(
+      String language, String scriptContent, Map<String, Object> variables, String requestId) {
+    if (StringUtils.isBlank(scriptContent)) {
+      log.error("Script content cannot be empty");
+      return Result.error(requestId, ErrorCode.INVALID_PARAMS);
+    }
+    if (!sandboxProperties.isEnabled()) {
+      return Result.success(
+          requestId,
+          buildScriptFailure("SANDBOX_DISABLED", "Rust script sandbox service is disabled"));
+    }
+
+    RemoteScriptRequest request =
+        new RemoteScriptRequest()
+            .setRequestId(requestId)
+            .setLanguage(language)
+            .setCode(scriptContent)
+            .setParams(variables == null ? Maps.newHashMap() : variables)
+            .setTimeoutMs(sandboxProperties.getTimeoutMs());
+
+    try {
+      HttpRequest httpRequest =
+          HttpRequest.newBuilder()
+              .uri(URI.create(normalizeBaseUrl(sandboxProperties.getBaseUrl()) + "/v1/execute"))
+              .timeout(Duration.ofMillis(sandboxProperties.getTimeoutMs()))
+              .header("Content-Type", "application/json")
+              .header("Accept", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(JsonUtils.toJson(request)))
+              .build();
+      long start = System.currentTimeMillis();
+      HttpResponse<String> response =
+          httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+      long duration = System.currentTimeMillis() - start;
+      if (response.statusCode() < 200 || response.statusCode() >= 300) {
+        log.warn(
+            "Rust sandbox HTTP call failed, requestId={}, language={}, status={}, durationMs={}",
+            requestId,
+            language,
+            response.statusCode(),
+            duration);
+        return Result.success(
+            requestId,
+            buildScriptFailure(
+                "SANDBOX_UNAVAILABLE", "Rust sandbox returned HTTP " + response.statusCode()));
       }
 
-      if (engine != null) {
-        engineCache.put(engineName, engine);
-        log.info(
-            "Successfully created script engine: {}, implementation class: {}",
-            engineName,
-            engine.getClass().getName());
-      } else {
-        log.error("Unsupported script engine: {}", engineName);
-      }
+      RemoteScriptResponse remoteResponse =
+          JsonUtils.fromJson(response.body(), RemoteScriptResponse.class);
+      log.info(
+          "Rust sandbox execution finished, requestId={}, language={}, success={}, code={}, durationMs={}",
+          requestId,
+          language,
+          remoteResponse.getSuccess(),
+          remoteResponse.getCode(),
+          duration);
+      return Result.success(requestId, convertRemoteResponse(remoteResponse));
+    } catch (IOException e) {
+      log.warn(
+          "Rust sandbox is unavailable, requestId={}, language={}, message={}",
+          requestId,
+          language,
+          e.getMessage());
+      return Result.success(requestId, buildScriptFailure("SANDBOX_UNAVAILABLE", e.getMessage()));
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      return Result.success(
+          requestId, buildScriptFailure("SANDBOX_INTERRUPTED", "Sandbox request interrupted"));
+    } catch (Exception e) {
+      log.warn(
+          "Rust sandbox response parse failed, requestId={}, language={}, message={}",
+          requestId,
+          language,
+          e.getMessage());
+      return Result.success(requestId, buildScriptFailure("SANDBOX_ERROR", e.getMessage()));
     }
-    return engine;
+  }
+
+  private String convertRemoteResponse(RemoteScriptResponse remoteResponse) {
+    Map<String, Object> resultMap = Maps.newHashMap();
+    resultMap.put("success", Boolean.TRUE.equals(remoteResponse.getSuccess()));
+    if (Boolean.TRUE.equals(remoteResponse.getSuccess())) {
+      resultMap.put("data", remoteResponse.getData());
+    } else {
+      resultMap.put("message", remoteResponse.getMessage());
+      resultMap.put("code", remoteResponse.getCode());
+    }
+    return JsonUtils.toJson(resultMap);
+  }
+
+  private String buildScriptFailure(String code, String message) {
+    Map<String, Object> errorResult = Maps.newHashMap();
+    errorResult.put("success", false);
+    errorResult.put("message", message);
+    errorResult.put("code", code);
+    return JsonUtils.toJson(errorResult);
+  }
+
+  private String normalizeBaseUrl(String baseUrl) {
+    return StringUtils.removeEnd(baseUrl, "/");
+  }
+
+  @Data
+  @lombok.experimental.Accessors(chain = true)
+  static class RemoteScriptRequest {
+    @com.fasterxml.jackson.annotation.JsonProperty("request_id")
+    private String requestId;
+
+    private String language;
+
+    private String code;
+
+    private Map<String, Object> params;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("timeout_ms")
+    private Integer timeoutMs;
+  }
+
+  @Data
+  static class RemoteScriptResponse {
+    private Boolean success;
+
+    private Object data;
+
+    private String message;
+
+    private String code;
   }
 }

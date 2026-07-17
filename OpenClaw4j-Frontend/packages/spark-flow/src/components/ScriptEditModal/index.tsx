@@ -11,12 +11,12 @@ import ScriptCodeMirror from '../ScriptCodeMirror';
 import './index.less';
 
 export const CODE_DEMO_MAP = {
-  python: `def main():
+  python: `def main(params):
   ret = {
       "output": params['input1'] + params['input2']
   }
   return ret`,
-  javascript: `function main() {
+  javascript: `function main(params) {
   const ret = {
       "output": params.input1 + params.input2
   };

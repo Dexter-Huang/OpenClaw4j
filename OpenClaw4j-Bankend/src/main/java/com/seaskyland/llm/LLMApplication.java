@@ -1,5 +1,6 @@
 package com.seaskyland.llm;
 
+import com.seaskyland.llm.workflow.core.config.SandboxProperties;
 import com.seaskyland.llm.workflow.core.config.StudioProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,7 +17,7 @@ import org.springframework.context.annotation.FilterType;
  */
 @SpringBootApplication(scanBasePackages = {"com.seaskyland.llm.workflow"})
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@EnableConfigurationProperties(value = {StudioProperties.class})
+@EnableConfigurationProperties(value = {StudioProperties.class, SandboxProperties.class})
 public class LLMApplication {
   public static void main(String[] args) {
     SpringApplication.run(LLMApplication.class, args).registerShutdownHook();

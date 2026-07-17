@@ -95,6 +95,12 @@ mq:
   document-index-topic: topic_saa_studio_document_index
   document-index-group: group_saa_studio_document_index
 
+# Rust/Axum script sandbox used by workflow Script nodes for Python and JavaScript.
+sandbox:
+  enabled: ${OPENCLAW_SANDBOX_ENABLED:true}
+  base-url: ${OPENCLAW_SANDBOX_BASE_URL:http://127.0.0.1:9010}
+  timeout-ms: ${OPENCLAW_SANDBOX_TIMEOUT_MS:30000}
+
 #oauth2:
 #  github:
 #    client-id: ${GITHUB_CLIENT_ID}

@@ -122,22 +122,19 @@ public class ScriptExecuteProcessor extends AbstractExecuteProcessor {
 
     // Build script variable mapping
     Map<String, Object> localVariableMap = constructScriptVariableMap(node, context);
-    Map<String, Object> variableMap = Maps.newHashMap();
-    variableMap.put("params", localVariableMap);
 
     // Execute script in sandbox for container isolation
     Result<String> executeResult;
     if (ScriptType.python.name().equals(scriptType)) {
-      // Python execution is delegated to the sandbox manager.
-      scriptContent += "\nmain()";
       executeResult =
-          sandboxManager.executePython3Script(scriptContent, variableMap, context.getRequestId());
+          sandboxManager.executePython3Script(
+              scriptContent, localVariableMap, context.getRequestId());
     } else if (ScriptType.javascript.name().equals(scriptType)) {
-      scriptContent += "\nmain()";
-      // Execute JavaScript script using traditional method
       executeResult =
-          sandboxManager.executeJavaScript(scriptContent, variableMap, context.getRequestId());
+          sandboxManager.executeJavaScript(scriptContent, localVariableMap, context.getRequestId());
     } else if (ScriptType.java.name().equals(scriptType)) {
+      Map<String, Object> variableMap = Maps.newHashMap();
+      variableMap.put("params", localVariableMap);
       executeResult =
           sandboxManager.executeJava(scriptContent, variableMap, context.getRequestId());
     } else {
