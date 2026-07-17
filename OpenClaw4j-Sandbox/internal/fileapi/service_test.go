@@ -3,6 +3,7 @@ package fileapi
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/seaskyland/openclaw4j-sandbox/internal/pathguard"
@@ -122,6 +123,143 @@ func TestServiceListsDirectory(t *testing.T) {
 	}
 }
 
+func TestServiceSearchesFileWithRegex(t *testing.T) {
+	root, service := newTestService(t)
+	if err := os.WriteFile(filepath.Join(root, "app.log"), []byte("alpha\nbeta\nalphabet\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	result := service.Search(SearchRequest{
+		File:  "app.log",
+		Regex: "alpha",
+	})
+	if !result.Success {
+		t.Fatalf("search failed: %#v", result)
+	}
+
+	matches := result.Data["matches"].([]Match)
+	if len(matches) != 2 {
+		t.Fatalf("matches = %#v", matches)
+	}
+	if matches[0].Line != 0 || matches[0].Column != 0 || matches[0].Text != "alpha" {
+		t.Fatalf("first match = %#v", matches[0])
+	}
+}
+
+func TestServiceGrepsDirectory(t *testing.T) {
+	root, service := newTestService(t)
+	if err := os.MkdirAll(filepath.Join(root, "logs"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "logs", "a.txt"), []byte("Needle\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "logs", "b.txt"), []byte("needle again\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	result := service.Grep(GrepRequest{
+		Path:            "logs",
+		Pattern:         "needle",
+		CaseInsensitive: boolPtr(true),
+		MaxResults:      intPtr(1),
+	})
+	if !result.Success {
+		t.Fatalf("grep failed: %#v", result)
+	}
+
+	matches := result.Data["matches"].([]Match)
+	if len(matches) != 1 {
+		t.Fatalf("matches = %#v", matches)
+	}
+	if !strings.HasSuffix(filepath.ToSlash(matches[0].File), "logs/a.txt") {
+		t.Fatalf("file = %s", matches[0].File)
+	}
+}
+
+func TestServiceGlobsWorkspace(t *testing.T) {
+	root, service := newTestService(t)
+	if err := os.MkdirAll(filepath.Join(root, "src", "pkg"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for _, path := range []string{"src/main.go", "src/pkg/lib.go", "src/pkg/readme.md"} {
+		if err := os.WriteFile(filepath.Join(root, path), []byte(path), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	result := service.Glob(GlobRequest{
+		Path:    ".",
+		Pattern: "**/*.go",
+	})
+	if !result.Success {
+		t.Fatalf("glob failed: %#v", result)
+	}
+
+	paths := result.Data["paths"].([]string)
+	if len(paths) != 2 {
+		t.Fatalf("paths = %#v", paths)
+	}
+	if paths[0] != filepath.ToSlash(filepath.Join(root, "src/main.go")) {
+		t.Fatalf("first path = %s", paths[0])
+	}
+}
+
+func TestServiceStrReplaceEditorCreateViewReplaceInsertAndUndo(t *testing.T) {
+	root, service := newTestService(t)
+
+	create := service.StrReplaceEditor(StrReplaceEditorRequest{
+		Command:  "create",
+		Path:     "story.txt",
+		FileText: "one\nthree\n",
+	})
+	if !create.Success {
+		t.Fatalf("create failed: %#v", create)
+	}
+
+	view := service.StrReplaceEditor(StrReplaceEditorRequest{Command: "view", Path: "story.txt"})
+	if !view.Success || view.Data["content"] != "one\nthree\n" {
+		t.Fatalf("view = %#v", view)
+	}
+
+	replace := service.StrReplaceEditor(StrReplaceEditorRequest{
+		Command: "str_replace",
+		Path:    "story.txt",
+		OldStr:  "three",
+		NewStr:  "four",
+	})
+	if !replace.Success {
+		t.Fatalf("replace failed: %#v", replace)
+	}
+
+	insert := service.StrReplaceEditor(StrReplaceEditorRequest{
+		Command:    "insert",
+		Path:       "story.txt",
+		InsertLine: intPtr(1),
+		NewStr:     "two\n",
+	})
+	if !insert.Success {
+		t.Fatalf("insert failed: %#v", insert)
+	}
+
+	content, err := os.ReadFile(filepath.Join(root, "story.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(content) != "one\ntwo\nfour\n" {
+		t.Fatalf("content = %q", content)
+	}
+
+	undo := service.StrReplaceEditor(StrReplaceEditorRequest{Command: "undo_edit", Path: "story.txt"})
+	if undo.Success || undo.Data["error_type"] != "unsupported_operation" {
+		t.Fatalf("undo = %#v", undo)
+	}
+}
+
 func boolPtr(value bool) *bool {
+	return &value
+}
+
+func intPtr(value int) *int {
 	return &value
 }

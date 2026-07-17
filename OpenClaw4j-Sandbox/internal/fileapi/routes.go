@@ -20,6 +20,11 @@ func Routes(service Service) []Route {
 		{Method: "POST", Path: "/v1/file/write", Handler: bindHandler(service.Write)},
 		{Method: "POST", Path: "/v1/file/replace", Handler: bindHandler(service.Replace)},
 		{Method: "POST", Path: "/v1/file/list", Handler: bindHandler(service.List)},
+		{Method: "POST", Path: "/v1/file/search", Handler: bindHandler(service.Search)},
+		{Method: "POST", Path: "/v1/file/find", Handler: bindHandler(service.Find)},
+		{Method: "POST", Path: "/v1/file/grep", Handler: bindHandler(service.Grep)},
+		{Method: "POST", Path: "/v1/file/glob", Handler: bindHandler(service.Glob)},
+		{Method: "POST", Path: "/v1/file/str_replace_editor", Handler: bindHandler(service.StrReplaceEditor)},
 	}
 }
 
