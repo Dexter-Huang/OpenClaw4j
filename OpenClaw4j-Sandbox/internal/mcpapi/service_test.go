@@ -2,8 +2,10 @@ package mcpapi
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/seaskyland/openclaw4j-sandbox/internal/bashapi"
 	"github.com/seaskyland/openclaw4j-sandbox/internal/fileapi"
@@ -62,7 +64,8 @@ func TestJSONRPCRequestParses(t *testing.T) {
 
 func TestRoutesExposeMcpEndpoints(t *testing.T) {
 	service := newTestService(t)
-	routes := Routes(service)
+	broker := NewSSEBroker(service)
+	routes := Routes(service, broker)
 
 	seen := make(map[string]string, len(routes))
 	for _, route := range routes {
@@ -71,6 +74,8 @@ func TestRoutesExposeMcpEndpoints(t *testing.T) {
 
 	want := map[string]string{
 		"/mcp":                                  "POST",
+		"/mcp/sse":                              "GET",
+		"/mcp/message":                          "POST",
 		"/v1/mcp/servers":                       "GET",
 		"/v1/mcp/:server_name/tools":            "GET",
 		"/v1/mcp/:server_name/tools/:tool_name": "POST",
@@ -79,5 +84,83 @@ func TestRoutesExposeMcpEndpoints(t *testing.T) {
 		if seen[path] != method {
 			t.Fatalf("route %s = %q, want %s", path, seen[path], method)
 		}
+	}
+}
+
+func TestSSEBrokerOpensSessionWithMessageEndpoint(t *testing.T) {
+	service := newTestService(t)
+	broker := NewSSEBroker(service)
+
+	session := broker.OpenSession()
+	defer broker.CloseSession(session.ID)
+
+	if session.ID == "" {
+		t.Fatal("session id is empty")
+	}
+	if !strings.HasPrefix(session.Endpoint, "/mcp/message?session_id=") {
+		t.Fatalf("endpoint = %s", session.Endpoint)
+	}
+	if !strings.Contains(session.Endpoint, session.ID) {
+		t.Fatalf("endpoint %q does not contain session id %q", session.Endpoint, session.ID)
+	}
+}
+
+func TestSSEBrokerDispatchSendsJSONRPCResponseEvent(t *testing.T) {
+	service := newTestService(t)
+	broker := NewSSEBroker(service)
+	session := broker.OpenSession()
+	defer broker.CloseSession(session.ID)
+
+	err := broker.Dispatch(session.ID, JSONRPCRequest{
+		JSONRPC: "2.0",
+		ID:      float64(1),
+		Method:  "tools/list",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	select {
+	case event := <-session.Events:
+		if event.Type != "message" {
+			t.Fatalf("event type = %s", event.Type)
+		}
+		text := string(event.Data)
+		if !strings.Contains(text, `"jsonrpc":"2.0"`) || !strings.Contains(text, `"tools"`) {
+			t.Fatalf("event data = %s", text)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("timeout waiting for SSE response event")
+	}
+}
+
+func TestSSEBrokerDispatchIgnoresInitializedNotification(t *testing.T) {
+	service := newTestService(t)
+	broker := NewSSEBroker(service)
+	session := broker.OpenSession()
+	defer broker.CloseSession(session.ID)
+
+	err := broker.Dispatch(session.ID, JSONRPCRequest{
+		JSONRPC: "2.0",
+		Method:  "notifications/initialized",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	select {
+	case event := <-session.Events:
+		t.Fatalf("unexpected event: %#v", event)
+	case <-time.After(50 * time.Millisecond):
+	}
+}
+
+func TestSSEBrokerDispatchRejectsUnknownSession(t *testing.T) {
+	service := newTestService(t)
+	broker := NewSSEBroker(service)
+
+	err := broker.Dispatch("missing", JSONRPCRequest{JSONRPC: "2.0", ID: float64(1), Method: "tools/list"})
+	if !errors.Is(err, ErrSSESessionNotFound) {
+		t.Fatalf("err = %v", err)
 	}
 }

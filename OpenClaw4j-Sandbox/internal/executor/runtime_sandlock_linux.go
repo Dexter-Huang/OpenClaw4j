@@ -38,12 +38,10 @@ func (SandlockRuntime) Run(parent context.Context, cfg config.Config, language w
 		return RuntimeResult{}, err
 	}
 	exitCode := res.ExitCode
-	timeout := res.Reason == sandlock.ReasonTimeout
 	return RuntimeResult{
 		Stdout:   res.Stdout,
 		Stderr:   res.Stderr,
 		ExitCode: &exitCode,
 		Success:  res.Success,
-		Timeout:  timeout,
 	}, nil
 }

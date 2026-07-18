@@ -1,19 +1,9 @@
-FROM rust:1.96 AS sandlock-ffi-build
+FROM scratch AS sandlock-prebuilt
 
-WORKDIR /sandlock
-RUN git clone --depth 1 https://github.com/multikernel/sandlock.git .
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/usr/local/cargo/git \
-    --mount=type=cache,target=/sandlock/target \
-    set -eux; \
-    cargo build --release -p sandlock-ffi; \
-    mkdir -p /sandlock-install/lib /sandlock-install/include /sandlock-install/lib/pkgconfig; \
-    cp /sandlock/target/release/libsandlock_ffi.so /sandlock-install/lib/libsandlock_ffi.so; \
-    cp /sandlock/crates/sandlock-ffi/include/sandlock.h /sandlock-install/include/sandlock.h; \
-    sed "s|@PREFIX@|/usr/local|g; s|@LIBDIR@|/usr/local/lib|g; s|@INCLUDEDIR@|/usr/local/include|g" \
-        /sandlock/go/sandlock.pc.in > /sandlock-install/lib/pkgconfig/sandlock.pc
+COPY third_party/sandlock/usr/local /usr/local
+COPY third_party/sandlock/go /sandlock/go
 
-FROM golang:1.24 AS go-build
+FROM golang:1.26 AS go-build
 
 RUN set -eux; \
     apt-get update; \
@@ -22,8 +12,8 @@ RUN set -eux; \
 
 WORKDIR /workspace
 COPY go.mod go.sum ./
-COPY --from=sandlock-ffi-build /sandlock-install /usr/local
-COPY --from=sandlock-ffi-build /sandlock/go /sandlock/go
+COPY --from=sandlock-prebuilt /usr/local /usr/local
+COPY --from=sandlock-prebuilt /sandlock/go /sandlock/go
 ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
     GOPROXY=https://goproxy.cn,https://proxy.golang.org,direct
 RUN --mount=type=cache,target=/go/pkg/mod \
@@ -33,7 +23,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     CGO_ENABLED=1 go build -o /usr/local/bin/openclaw4j-sandbox ./cmd/openclaw4j-sandbox
 
-FROM python:3.12-slim AS python-deps
+FROM python:3.12-slim-bookworm AS python-deps
 
 COPY deps/python/requirements.txt /deps/python/requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
@@ -54,15 +44,11 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
     cp -a /deps/node/node_modules /opt/openclaw4j-sandbox/deps/node/node_modules; \
     cp /deps/node/package.json /deps/node/pnpm-lock.yaml /opt/openclaw4j-sandbox/deps/node/
 
-FROM debian:bookworm-slim AS runtime
-
-RUN set -eux; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends ca-certificates nodejs python3 python3-venv; \
-    rm -rf /var/lib/apt/lists/*
+FROM python:3.12-slim-bookworm AS runtime
 
 COPY --from=go-build /usr/local/bin/openclaw4j-sandbox /usr/local/bin/openclaw4j-sandbox
-COPY --from=sandlock-ffi-build /sandlock-install/lib/libsandlock_ffi.so /usr/local/lib/libsandlock_ffi.so
+COPY --from=sandlock-prebuilt /usr/local/lib/libsandlock_ffi.so /usr/local/lib/libsandlock_ffi.so
+COPY --from=node-deps /usr/local/bin/node /usr/local/bin/node
 COPY --from=python-deps /opt/openclaw4j-sandbox/deps/python /opt/openclaw4j-sandbox/deps/python
 COPY --from=node-deps /opt/openclaw4j-sandbox/deps/node /opt/openclaw4j-sandbox/deps/node
 RUN ldconfig

@@ -93,7 +93,22 @@ Invoke-RestMethod -Uri 'http://127.0.0.1:9010/mcp' -Method Post -ContentType 'ap
 
 当前内置 MCP server 名称为 `sandbox`，工具包括 `file_read`、`file_write`、`file_list`、`file_replace`、`file_search` 和 `sandbox_execute_bash`。
 
-首轮兼容重点是 Agent 可用，不包含 upload/download、file watch、浏览器、Jupyter、Code Server、外部 MCP Hub 聚合、SSE/streamable HTTP MCP 以及 `sudo` 提权语义。所有 file/bash 路径都会限制在 workspace 内。
+MCP SSE 入口：
+
+```json
+{
+  "mcpServers": {
+    "openclaw4j-sandbox": {
+      "type": "sse",
+      "url": "http://127.0.0.1:9010/mcp/sse"
+    }
+  }
+}
+```
+
+`GET /mcp/sse` 会建立 SSE 连接，并通过 `endpoint` 事件返回本次会话的消息投递地址。客户端随后向该 endpoint 发送 JSON-RPC 请求，服务端会把响应通过 SSE `message` 事件返回。当前先实现传统 MCP SSE 传输，暂不实现 Streamable HTTP。
+
+首轮兼容重点是 Agent 可用，不包含 upload/download、file watch、浏览器、Jupyter、Code Server、外部 MCP Hub 聚合、Streamable HTTP MCP 以及 `sudo` 提权语义。所有 file/bash 路径都会限制在 workspace 内。
 
 ## 内置依赖
 

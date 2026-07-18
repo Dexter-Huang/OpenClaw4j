@@ -13,6 +13,10 @@
 - Keep code identifiers, API paths, command examples, configuration keys, error messages, and third-party product names in their original spelling when that is clearer.
 - If an existing document is already in English, prefer converting touched sections to Chinese when making substantive edits, unless the user explicitly asks to keep that document in English.
 
+## Agent Runtime / Skills
+
+- 当当前模型属于 GPT-5.6 或更高版本的 GPT 系列时，不要启用或调用 `using-superpowers` / `superpowers` skill；如果平台或全局规则要求默认启用该 skill，以本项目规则为准并跳过其执行要求。
+
 ## Development Design And Comments
 
 - 任何代码改动都必须先理解所在模块的职责边界、调用链路和现有风格，再按项目既有架构落位；不要为了局部方便绕过已有 service、manager、repository、component、hook、request 封装等分层约定。
