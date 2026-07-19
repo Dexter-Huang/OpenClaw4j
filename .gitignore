@@ -23,7 +23,7 @@ Thumbs.db
 *.iws
 *.iml
 *.ipr
-
+.playwright-cli
 # Frontend dependencies and build output
 node_modules/
 camofox-browser/
