@@ -11,6 +11,64 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countActiveUserAccounts = `-- name: CountActiveUserAccounts :one
+SELECT COUNT(*)::bigint
+FROM account
+WHERE type = 'user' AND status <> 0 AND ($1::text = '' OR username ILIKE '%' || $1::text || '%')
+`
+
+func (q *Queries) CountActiveUserAccounts(ctx context.Context, dollar_1 string) (int64, error) {
+	row := q.db.QueryRow(ctx, countActiveUserAccounts, dollar_1)
+	var column_1 int64
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
+const createAccount = `-- name: CreateAccount :exec
+INSERT INTO account (
+    account_id, username, email, mobile, password, nickname, icon,
+    type, status, gmt_create, gmt_modified, creator, modifier, tenant_id
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+`
+
+type CreateAccountParams struct {
+	AccountID   string           `json:"account_id"`
+	Username    string           `json:"username"`
+	Email       pgtype.Text      `json:"email"`
+	Mobile      pgtype.Text      `json:"mobile"`
+	Password    string           `json:"password"`
+	Nickname    pgtype.Text      `json:"nickname"`
+	Icon        pgtype.Text      `json:"icon"`
+	Type        string           `json:"type"`
+	Status      int16            `json:"status"`
+	GmtCreate   pgtype.Timestamp `json:"gmt_create"`
+	GmtModified pgtype.Timestamp `json:"gmt_modified"`
+	Creator     string           `json:"creator"`
+	Modifier    string           `json:"modifier"`
+	TenantID    pgtype.Int8      `json:"tenant_id"`
+}
+
+func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) error {
+	_, err := q.db.Exec(ctx, createAccount,
+		arg.AccountID,
+		arg.Username,
+		arg.Email,
+		arg.Mobile,
+		arg.Password,
+		arg.Nickname,
+		arg.Icon,
+		arg.Type,
+		arg.Status,
+		arg.GmtCreate,
+		arg.GmtModified,
+		arg.Creator,
+		arg.Modifier,
+		arg.TenantID,
+	)
+	return err
+}
+
 const findActiveAccountByID = `-- name: FindActiveAccountByID :one
 SELECT id, account_id, username, email, mobile, password, nickname, icon,
        type, status, gmt_create, gmt_modified, gmt_last_login, creator, modifier, tenant_id
@@ -73,6 +131,107 @@ func (q *Queries) FindActiveAccountByUsername(ctx context.Context, username stri
 		&i.TenantID,
 	)
 	return i, err
+}
+
+const listActiveUserAccounts = `-- name: ListActiveUserAccounts :many
+SELECT id, account_id, username, email, mobile, password, nickname, icon,
+       type, status, gmt_create, gmt_modified, gmt_last_login, creator, modifier, tenant_id
+FROM account
+WHERE type = 'user' AND status <> 0 AND ($1::text = '' OR username ILIKE '%' || $1::text || '%')
+ORDER BY id DESC
+LIMIT $2 OFFSET $3
+`
+
+type ListActiveUserAccountsParams struct {
+	Column1 string `json:"column_1"`
+	Limit   int32  `json:"limit"`
+	Offset  int32  `json:"offset"`
+}
+
+func (q *Queries) ListActiveUserAccounts(ctx context.Context, arg ListActiveUserAccountsParams) ([]Account, error) {
+	rows, err := q.db.Query(ctx, listActiveUserAccounts, arg.Column1, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Account
+	for rows.Next() {
+		var i Account
+		if err := rows.Scan(
+			&i.ID,
+			&i.AccountID,
+			&i.Username,
+			&i.Email,
+			&i.Mobile,
+			&i.Password,
+			&i.Nickname,
+			&i.Icon,
+			&i.Type,
+			&i.Status,
+			&i.GmtCreate,
+			&i.GmtModified,
+			&i.GmtLastLogin,
+			&i.Creator,
+			&i.Modifier,
+			&i.TenantID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const softDeleteAccount = `-- name: SoftDeleteAccount :exec
+UPDATE account
+SET status = 0, gmt_modified = $2, modifier = $3
+WHERE account_id = $1 AND status <> 0
+`
+
+type SoftDeleteAccountParams struct {
+	AccountID   string           `json:"account_id"`
+	GmtModified pgtype.Timestamp `json:"gmt_modified"`
+	Modifier    string           `json:"modifier"`
+}
+
+func (q *Queries) SoftDeleteAccount(ctx context.Context, arg SoftDeleteAccountParams) error {
+	_, err := q.db.Exec(ctx, softDeleteAccount, arg.AccountID, arg.GmtModified, arg.Modifier)
+	return err
+}
+
+const updateAccount = `-- name: UpdateAccount :exec
+UPDATE account
+SET email = $2, mobile = $3, password = $4, nickname = $5, icon = $6,
+    gmt_modified = $7, modifier = $8
+WHERE account_id = $1 AND status <> 0
+`
+
+type UpdateAccountParams struct {
+	AccountID   string           `json:"account_id"`
+	Email       pgtype.Text      `json:"email"`
+	Mobile      pgtype.Text      `json:"mobile"`
+	Password    string           `json:"password"`
+	Nickname    pgtype.Text      `json:"nickname"`
+	Icon        pgtype.Text      `json:"icon"`
+	GmtModified pgtype.Timestamp `json:"gmt_modified"`
+	Modifier    string           `json:"modifier"`
+}
+
+func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) error {
+	_, err := q.db.Exec(ctx, updateAccount,
+		arg.AccountID,
+		arg.Email,
+		arg.Mobile,
+		arg.Password,
+		arg.Nickname,
+		arg.Icon,
+		arg.GmtModified,
+		arg.Modifier,
+	)
+	return err
 }
 
 const updateAccountLastLogin = `-- name: UpdateAccountLastLogin :exec

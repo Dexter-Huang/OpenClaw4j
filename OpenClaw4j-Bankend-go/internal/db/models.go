@@ -191,6 +191,26 @@ type Document struct {
 	TenantID      pgtype.Int8      `json:"tenant_id"`
 }
 
+type DocumentChunk struct {
+	ID          int64            `json:"id"`
+	WorkspaceID string           `json:"workspace_id"`
+	KbID        string           `json:"kb_id"`
+	DocID       string           `json:"doc_id"`
+	ChunkID     string           `json:"chunk_id"`
+	DocName     string           `json:"doc_name"`
+	Title       string           `json:"title"`
+	Text        string           `json:"text"`
+	Score       pgtype.Float8    `json:"score"`
+	PageNumber  pgtype.Int4      `json:"page_number"`
+	Enabled     int16            `json:"enabled"`
+	Status      int16            `json:"status"`
+	GmtCreate   pgtype.Timestamp `json:"gmt_create"`
+	GmtModified pgtype.Timestamp `json:"gmt_modified"`
+	Creator     string           `json:"creator"`
+	Modifier    string           `json:"modifier"`
+	TenantID    pgtype.Int8      `json:"tenant_id"`
+}
+
 type Evaluator struct {
 	ID            int64            `json:"id"`
 	Name          string           `json:"name"`

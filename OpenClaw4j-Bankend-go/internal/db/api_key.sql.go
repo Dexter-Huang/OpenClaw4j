@@ -24,6 +24,44 @@ func (q *Queries) CountActiveAPIKeysByAccountID(ctx context.Context, accountID s
 	return column_1, err
 }
 
+const createAPIKey = `-- name: CreateAPIKey :one
+INSERT INTO api_key (
+    account_id, api_key, status, description,
+    gmt_create, gmt_modified, creator, modifier, tenant_id
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING id
+`
+
+type CreateAPIKeyParams struct {
+	AccountID   string           `json:"account_id"`
+	ApiKey      string           `json:"api_key"`
+	Status      int16            `json:"status"`
+	Description pgtype.Text      `json:"description"`
+	GmtCreate   pgtype.Timestamp `json:"gmt_create"`
+	GmtModified pgtype.Timestamp `json:"gmt_modified"`
+	Creator     string           `json:"creator"`
+	Modifier    string           `json:"modifier"`
+	TenantID    pgtype.Int8      `json:"tenant_id"`
+}
+
+func (q *Queries) CreateAPIKey(ctx context.Context, arg CreateAPIKeyParams) (int64, error) {
+	row := q.db.QueryRow(ctx, createAPIKey,
+		arg.AccountID,
+		arg.ApiKey,
+		arg.Status,
+		arg.Description,
+		arg.GmtCreate,
+		arg.GmtModified,
+		arg.Creator,
+		arg.Modifier,
+		arg.TenantID,
+	)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
 const findActiveAPIKeyByEncryptedKey = `-- name: FindActiveAPIKeyByEncryptedKey :one
 SELECT id, account_id, api_key, status, description,
        gmt_create, gmt_modified, creator, modifier, tenant_id
@@ -102,6 +140,50 @@ func (q *Queries) FindActiveAPIKeyByHash(ctx context.Context, apiKeyHash pgtype.
 	return i, err
 }
 
+const findActiveAPIKeyByIDAndAccountID = `-- name: FindActiveAPIKeyByIDAndAccountID :one
+SELECT id, account_id, api_key, status, description,
+       gmt_create, gmt_modified, creator, modifier, tenant_id
+FROM api_key
+WHERE id = $1 AND account_id = $2 AND status <> 0
+LIMIT 1
+`
+
+type FindActiveAPIKeyByIDAndAccountIDParams struct {
+	ID        int64  `json:"id"`
+	AccountID string `json:"account_id"`
+}
+
+type FindActiveAPIKeyByIDAndAccountIDRow struct {
+	ID          int64            `json:"id"`
+	AccountID   string           `json:"account_id"`
+	ApiKey      string           `json:"api_key"`
+	Status      int16            `json:"status"`
+	Description pgtype.Text      `json:"description"`
+	GmtCreate   pgtype.Timestamp `json:"gmt_create"`
+	GmtModified pgtype.Timestamp `json:"gmt_modified"`
+	Creator     string           `json:"creator"`
+	Modifier    string           `json:"modifier"`
+	TenantID    pgtype.Int8      `json:"tenant_id"`
+}
+
+func (q *Queries) FindActiveAPIKeyByIDAndAccountID(ctx context.Context, arg FindActiveAPIKeyByIDAndAccountIDParams) (FindActiveAPIKeyByIDAndAccountIDRow, error) {
+	row := q.db.QueryRow(ctx, findActiveAPIKeyByIDAndAccountID, arg.ID, arg.AccountID)
+	var i FindActiveAPIKeyByIDAndAccountIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.AccountID,
+		&i.ApiKey,
+		&i.Status,
+		&i.Description,
+		&i.GmtCreate,
+		&i.GmtModified,
+		&i.Creator,
+		&i.Modifier,
+		&i.TenantID,
+	)
+	return i, err
+}
+
 const listActiveAPIKeysByAccountID = `-- name: ListActiveAPIKeysByAccountID :many
 SELECT id, account_id, api_key, status, description,
        gmt_create, gmt_modified, creator, modifier, tenant_id
@@ -159,4 +241,56 @@ func (q *Queries) ListActiveAPIKeysByAccountID(ctx context.Context, arg ListActi
 		return nil, err
 	}
 	return items, nil
+}
+
+const softDeleteAPIKey = `-- name: SoftDeleteAPIKey :exec
+UPDATE api_key
+SET status = 0,
+    modifier = $3,
+    gmt_modified = $4
+WHERE id = $1 AND account_id = $2 AND status <> 0
+`
+
+type SoftDeleteAPIKeyParams struct {
+	ID          int64            `json:"id"`
+	AccountID   string           `json:"account_id"`
+	Modifier    string           `json:"modifier"`
+	GmtModified pgtype.Timestamp `json:"gmt_modified"`
+}
+
+func (q *Queries) SoftDeleteAPIKey(ctx context.Context, arg SoftDeleteAPIKeyParams) error {
+	_, err := q.db.Exec(ctx, softDeleteAPIKey,
+		arg.ID,
+		arg.AccountID,
+		arg.Modifier,
+		arg.GmtModified,
+	)
+	return err
+}
+
+const updateAPIKeyDescription = `-- name: UpdateAPIKeyDescription :exec
+UPDATE api_key
+SET description = $3,
+    modifier = $4,
+    gmt_modified = $5
+WHERE id = $1 AND account_id = $2 AND status <> 0
+`
+
+type UpdateAPIKeyDescriptionParams struct {
+	ID          int64            `json:"id"`
+	AccountID   string           `json:"account_id"`
+	Description pgtype.Text      `json:"description"`
+	Modifier    string           `json:"modifier"`
+	GmtModified pgtype.Timestamp `json:"gmt_modified"`
+}
+
+func (q *Queries) UpdateAPIKeyDescription(ctx context.Context, arg UpdateAPIKeyDescriptionParams) error {
+	_, err := q.db.Exec(ctx, updateAPIKeyDescription,
+		arg.ID,
+		arg.AccountID,
+		arg.Description,
+		arg.Modifier,
+		arg.GmtModified,
+	)
+	return err
 }

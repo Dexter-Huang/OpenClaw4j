@@ -36,6 +36,13 @@ func TestNewServesPublicCompatRoutes(t *testing.T) {
 			},
 		},
 		SessionIssuer: issuer,
+		AccountProfileProvider: &fakeAccountProfileProvider{profile: &auth.AccountProfile{
+			AccountID:          "acct_saa",
+			DefaultWorkspaceID: "ws_saa",
+			Username:           "saa",
+			Email:              stringPointer("saa@example.com"),
+			Type:               "admin",
+		}},
 		RegisterConsoleRoutes: func(group *route.RouterGroup) {
 			group.GET("/whoami", func(ctx context.Context, c *app.RequestContext) {
 				rc := contextx.MustFrom(ctx)
@@ -98,6 +105,12 @@ func TestNewServesPublicCompatRoutes(t *testing.T) {
 		t.Fatalf("global config did not include login method: %s", globalCtx.Response.Body())
 	}
 
+	healthCtx := request(consts.MethodGet, "/console/v1/system/health")
+	h.ServeHTTP(context.Background(), healthCtx)
+	if healthCtx.Response.StatusCode() != consts.StatusOK || string(healthCtx.Response.Body()) != "ok" {
+		t.Fatalf("system health expected plain ok, got status=%d body=%s", healthCtx.Response.StatusCode(), healthCtx.Response.Body())
+	}
+
 	apiCtx := request(consts.MethodGet, "/api/models")
 	h.ServeHTTP(context.Background(), apiCtx)
 	if apiCtx.Response.StatusCode() != consts.StatusOK {
@@ -110,7 +123,7 @@ func TestNewServesPublicCompatRoutes(t *testing.T) {
 	if profileCtx.Response.StatusCode() != consts.StatusOK {
 		t.Fatalf("profile expected 200, got %d body=%s", profileCtx.Response.StatusCode(), profileCtx.Response.Body())
 	}
-	if !strings.Contains(string(profileCtx.Response.Body()), `"username":"saa"`) {
+	if !strings.Contains(string(profileCtx.Response.Body()), `"username":"saa"`) || !strings.Contains(string(profileCtx.Response.Body()), `"default_workspace_id":"ws_saa"`) || !strings.Contains(string(profileCtx.Response.Body()), `"email":"saa@example.com"`) {
 		t.Fatalf("profile response did not include account info: %s", profileCtx.Response.Body())
 	}
 
@@ -137,6 +150,19 @@ type fakeSessionIssuer struct {
 	logoutToken      string
 	loginResponse    *auth.TokenResponse
 	refreshResponse  *auth.TokenResponse
+}
+
+type fakeAccountProfileProvider struct {
+	profile *auth.AccountProfile
+	err     error
+}
+
+func (f *fakeAccountProfileProvider) GetAccountProfile(context.Context, string) (*auth.AccountProfile, error) {
+	return f.profile, f.err
+}
+
+func stringPointer(value string) *string {
+	return &value
 }
 
 func (f *fakeSessionIssuer) Login(_ context.Context, username, password, callerIP, userAgent string) (*auth.TokenResponse, error) {

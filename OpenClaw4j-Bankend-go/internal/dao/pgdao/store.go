@@ -8,26 +8,43 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/seaskyland/openclaw4j-backend-go/internal/dao"
 	"github.com/seaskyland/openclaw4j-backend-go/internal/db"
 )
 
 type AccountQueries interface {
+	CreateAccount(ctx context.Context, arg db.CreateAccountParams) error
 	FindActiveAccountByID(ctx context.Context, accountID string) (db.Account, error)
 	FindActiveAccountByUsername(ctx context.Context, username string) (db.Account, error)
 	UpdateAccountLastLogin(ctx context.Context, arg db.UpdateAccountLastLoginParams) error
+	UpdateAccount(ctx context.Context, arg db.UpdateAccountParams) error
+	SoftDeleteAccount(ctx context.Context, arg db.SoftDeleteAccountParams) error
+	ListActiveUserAccounts(ctx context.Context, arg db.ListActiveUserAccountsParams) ([]db.Account, error)
+	CountActiveUserAccounts(ctx context.Context, name string) (int64, error)
 }
 
 type WorkspaceQueries interface {
+	CreateWorkspace(ctx context.Context, arg db.CreateWorkspaceParams) error
 	FindDefaultWorkspaceByAccountID(ctx context.Context, accountID string) (db.Workspace, error)
+	FindActiveWorkspaceByIDAndAccountID(ctx context.Context, arg db.FindActiveWorkspaceByIDAndAccountIDParams) (db.Workspace, error)
+	FindActiveWorkspaceByNameAndAccountID(ctx context.Context, arg db.FindActiveWorkspaceByNameAndAccountIDParams) (db.Workspace, error)
+	CountActiveWorkspacesByAccountID(ctx context.Context, accountID string) (int64, error)
+	ListActiveWorkspacesByAccountID(ctx context.Context, arg db.ListActiveWorkspacesByAccountIDParams) ([]db.Workspace, error)
+	UpdateWorkspace(ctx context.Context, arg db.UpdateWorkspaceParams) error
+	SoftDeleteWorkspace(ctx context.Context, arg db.SoftDeleteWorkspaceParams) error
 }
 
 type APIKeyQueries interface {
+	CreateAPIKey(ctx context.Context, arg db.CreateAPIKeyParams) (int64, error)
 	FindActiveAPIKeyByEncryptedKey(ctx context.Context, apiKey string) (db.FindActiveAPIKeyByEncryptedKeyRow, error)
 	FindActiveAPIKeyByHash(ctx context.Context, apiKeyHash pgtype.Text) (db.FindActiveAPIKeyByHashRow, error)
 	CountActiveAPIKeysByAccountID(ctx context.Context, accountID string) (int64, error)
 	ListActiveAPIKeysByAccountID(ctx context.Context, arg db.ListActiveAPIKeysByAccountIDParams) ([]db.ListActiveAPIKeysByAccountIDRow, error)
+	FindActiveAPIKeyByIDAndAccountID(ctx context.Context, arg db.FindActiveAPIKeyByIDAndAccountIDParams) (db.FindActiveAPIKeyByIDAndAccountIDRow, error)
+	UpdateAPIKeyDescription(ctx context.Context, arg db.UpdateAPIKeyDescriptionParams) error
+	SoftDeleteAPIKey(ctx context.Context, arg db.SoftDeleteAPIKeyParams) error
 }
 
 type TokenSessionQueries interface {
@@ -104,9 +121,20 @@ func (d *APIKeyDAO) FindActiveByEncryptedKey(ctx context.Context, encryptedKey s
 func (d *APIKeyDAO) FindActiveByHash(ctx context.Context, keyHash string) (*dao.APIKey, error) {
 	apiKey, err := d.q.FindActiveAPIKeyByHash(ctx, pgText(keyHash))
 	if err != nil {
-		return nil, convertNotFound(err)
+		return nil, convertAPIKeyHashNotFound(err)
 	}
 	return mapAPIKey(apiKey.ID, apiKey.AccountID, apiKey.ApiKey, apiKey.Status, apiKey.Description, apiKey.GmtCreate, apiKey.GmtModified, apiKey.Creator, apiKey.Modifier, apiKey.TenantID), nil
+}
+
+func convertAPIKeyHashNotFound(err error) error {
+	if errors.Is(err, pgx.ErrNoRows) {
+		return dao.ErrNotFound
+	}
+	var postgresError *pgconn.PgError
+	if errors.As(err, &postgresError) && postgresError.Code == "42703" {
+		return dao.ErrNotFound
+	}
+	return err
 }
 
 func (d *APIKeyDAO) CountActiveByAccountID(ctx context.Context, accountID string) (int64, error) {
@@ -307,6 +335,48 @@ func pgTimestamp(value time.Time) pgtype.Timestamp {
 
 func pgOptionalInt8(value int64) pgtype.Int8 {
 	return pgtype.Int8{Int64: value, Valid: true}
+}
+
+func pgOptionalInt8Pointer(value *int64) pgtype.Int8 {
+	if value == nil {
+		return pgtype.Int8{}
+	}
+	return pgtype.Int8{Int64: *value, Valid: true}
+}
+
+func optionalInt4(value pgtype.Int4) *int32 {
+	if !value.Valid {
+		return nil
+	}
+	return &value.Int32
+}
+
+func pgOptionalInt4(value *int32) pgtype.Int4 {
+	if value == nil {
+		return pgtype.Int4{}
+	}
+	return pgtype.Int4{Int32: *value, Valid: true}
+}
+
+func optionalFloat8(value pgtype.Float8) *float64 {
+	if !value.Valid {
+		return nil
+	}
+	return &value.Float64
+}
+
+func pgOptionalFloat8(value *float64) pgtype.Float8 {
+	if value == nil {
+		return pgtype.Float8{}
+	}
+	return pgtype.Float8{Float64: *value, Valid: true}
+}
+
+func optionalInt8Pointer(value pgtype.Int8) *int64 {
+	if !value.Valid {
+		return nil
+	}
+	return &value.Int64
 }
 
 var (

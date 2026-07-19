@@ -88,6 +88,12 @@ go test ./...
 - `OPENCLAW_REDIS_PORT=6379`
 - `OPENCLAW_REDIS_DATABASE=0`
 
+### 本地开发配置
+
+服务启动时会尝试读取当前工作目录的 `.env`。可从 `.env.example` 复制一份并填写本机 PostgreSQL 连接信息；`.env` 已被 Git 忽略，不能提交密码或 token。
+
+`.env` 仅作为开发默认值，进程环境变量优先级更高。因此 Docker、CI 和生产环境仍可只使用 `OPENCLAW_*` 环境变量，不受本地文件影响。支持 `KEY=VALUE`、空行、`#` 注释与 `export KEY=VALUE` 格式。
+
 建议继续确认的接口：
 
 - `GET /healthz`
@@ -101,6 +107,22 @@ go test ./...
 2. 给 console auth、refresh、profile 补更完整的契约测试。
 3. 如果继续扩 Go 后端，优先保持“同库 + Redis session”这个边界，不要重新引入 token 表。
 4. 新增功能前先确认是否要兼容现有 Java 前端的请求头、响应体和错误码。
+
+## Go Runtime（RAG、Agent、Workflow 与 MCP）
+
+- `internal/rag` 提供确定性的 BM25 检索与上下文长度上限；`document.Service.Search` 已通过该层执行。后续接入 pgvector 或 embedding 时只需实现 `rag.Source`，不要让工作流节点直接访问向量库。
+- `internal/agent` 在 chat 调用前恢复同一 `conversation_id` 的历史，并在 Redis 中以 `agent:memory:<workspace>:<conversation>` 保存用户和最终 assistant 消息。默认 TTL 为 30 天。
+- `stream=true` 的 chat 请求会透传上游 OpenAI-compatible SSE delta，Hertz 使用 chunked `text/event-stream` 输出，不再等待全部模型响应聚合完成。
+- 工作流任务在 Redis 中以 `workflow:task:<workspace>:<task>` 保存快照，默认 TTL 为 24 小时。新实例可以处理已有任务的查询、停止和暂停恢复；Redis 写入失败会使正在执行的任务以 `WORKFLOW_STATE_STORE_FAILURE` 结束，避免返回不可恢复的成功状态。
+- MCP 的 `deploy_config` 支持 `transport`：`streamable-http`、`sse`、`stdio`。`stdio` 需要 `command`、可选 `args` 与 `working_dir`，后端直接通过 `exec.CommandContext` 启动进程，不经过 shell；仅应允许可信工作区管理员配置该 transport。
+
+## Go RAG 向量索引
+
+- 知识库 `index_config` 必须包含 `name`、`embedding_provider`、`embedding_model`。`name` 只能使用以字母开头的字母、数字和下划线，Go 后端据此创建 `kb_<name>` pgvector 表和 HNSW cosine index。
+- `PUT /console/v1/knowledge-bases/:kbId/documents/:docId/re-index` 会优先使用已有 document chunks；没有 chunk 时仅自动读取 TXT、Markdown 文件，并按照 `process_config.chunk_size`、`process_config.chunk_overlap` 切分。PDF、Office 解析仍需后续迁移。
+- embedding 通过该 provider credential 的 OpenAI-compatible `embeddings_path`（默认 `/v1/embeddings`）请求，凭据仍使用与 chat 一致的 RSA 私钥解密机制。
+- Retrieval 节点在知识库配置了向量索引时使用 pgvector；没有 `index_config` 的已有知识库继续使用 BM25 回退，避免旧数据被强制迁移后才可查询。
+- 可用 `OPENCLAW_TEST_PGVECTOR_DSN` 启用真实 pgvector 集成测试，例如：`postgres://postgres:password@127.0.0.1:5432/openclaw_test?sslmode=disable`。
 
 ## 已知注意事项
 

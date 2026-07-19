@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
 	"errors"
@@ -11,11 +12,37 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
+const (
+	argon2Iterations  = 2
+	argon2MemoryKiB   = 66536
+	argon2Parallelism = 1
+	argon2HashLength  = 32
+	argon2SaltLength  = 16
+)
+
 var ErrInvalidEncodedPassword = errors.New("invalid encoded password")
 
 func VerifyPassword(password string, encodedPassword string) bool {
 	ok, err := VerifyArgon2ID(password, encodedPassword)
 	return err == nil && ok
+}
+
+// HashPassword 产生与 Java PasswordCryptUtils.encode 相同的 Argon2id 编码格式。
+func HashPassword(password string) (string, error) {
+	salt := make([]byte, argon2SaltLength)
+	if _, err := rand.Read(salt); err != nil {
+		return "", fmt.Errorf("generate password salt: %w", err)
+	}
+	hash := argon2.IDKey([]byte(password), salt, argon2Iterations, argon2MemoryKiB, argon2Parallelism, argon2HashLength)
+	return fmt.Sprintf(
+		"$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s",
+		argon2.Version,
+		argon2MemoryKiB,
+		argon2Iterations,
+		argon2Parallelism,
+		base64.RawStdEncoding.EncodeToString(salt),
+		base64.RawStdEncoding.EncodeToString(hash),
+	), nil
 }
 
 func VerifyArgon2ID(password string, encodedPassword string) (bool, error) {

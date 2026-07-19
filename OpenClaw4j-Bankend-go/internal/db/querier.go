@@ -12,18 +12,123 @@ import (
 
 type Querier interface {
 	CountActiveAPIKeysByAccountID(ctx context.Context, accountID string) (int64, error)
+	CountActiveApplicationVersions(ctx context.Context, arg CountActiveApplicationVersionsParams) (int64, error)
+	CountActiveApplicationsByWorkspace(ctx context.Context, arg CountActiveApplicationsByWorkspaceParams) (int64, error)
+	CountActiveUserAccounts(ctx context.Context, dollar_1 string) (int64, error)
+	CountActiveWorkspacesByAccountID(ctx context.Context, accountID string) (int64, error)
+	CountModelsByProviderAndWorkspace(ctx context.Context, arg CountModelsByProviderAndWorkspaceParams) (int64, error)
+	CreateAPIKey(ctx context.Context, arg CreateAPIKeyParams) (int64, error)
+	CreateAccount(ctx context.Context, arg CreateAccountParams) error
+	CreateAgentSchema(ctx context.Context, arg CreateAgentSchemaParams) (int64, error)
+	CreateApplication(ctx context.Context, arg CreateApplicationParams) error
+	CreateApplicationComponent(ctx context.Context, arg CreateApplicationComponentParams) error
+	CreateApplicationVersion(ctx context.Context, arg CreateApplicationVersionParams) error
+	CreateDocument(ctx context.Context, arg CreateDocumentParams) error
+	CreateDocumentChunk(ctx context.Context, arg CreateDocumentChunkParams) error
+	CreateKnowledgeBase(ctx context.Context, arg CreateKnowledgeBaseParams) error
+	CreateMcpServer(ctx context.Context, arg CreateMcpServerParams) error
+	CreateModel(ctx context.Context, arg CreateModelParams) error
+	CreatePlugin(ctx context.Context, arg CreatePluginParams) error
+	CreatePluginTool(ctx context.Context, arg CreatePluginToolParams) error
+	CreateProvider(ctx context.Context, arg CreateProviderParams) error
+	CreateSkill(ctx context.Context, arg CreateSkillParams) error
+	CreateSkillVersion(ctx context.Context, arg CreateSkillVersionParams) error
 	CreateTokenSession(ctx context.Context, arg CreateTokenSessionParams) error
+	CreateTool(ctx context.Context, arg CreateToolParams) (int64, error)
+	CreateWorkspace(ctx context.Context, arg CreateWorkspaceParams) error
+	DeleteAgentSchema(ctx context.Context, arg DeleteAgentSchemaParams) error
+	DeleteApplicationComponent(ctx context.Context, arg DeleteApplicationComponentParams) error
+	DeleteDocument(ctx context.Context, arg DeleteDocumentParams) error
+	DeleteDocumentChunks(ctx context.Context, arg DeleteDocumentChunksParams) error
 	DeleteExpiredTokenSessions(ctx context.Context, expiresAt pgtype.Timestamp) error
+	DeleteKnowledgeBase(ctx context.Context, arg DeleteKnowledgeBaseParams) error
+	DeleteMcpServer(ctx context.Context, arg DeleteMcpServerParams) error
+	DeleteModel(ctx context.Context, arg DeleteModelParams) error
+	DeletePlugin(ctx context.Context, arg DeletePluginParams) error
+	DeletePluginTool(ctx context.Context, arg DeletePluginToolParams) error
+	DeletePluginTools(ctx context.Context, arg DeletePluginToolsParams) error
+	DeleteProvider(ctx context.Context, arg DeleteProviderParams) error
+	DeleteTool(ctx context.Context, arg DeleteToolParams) error
 	FindActiveAPIKeyByEncryptedKey(ctx context.Context, apiKey string) (FindActiveAPIKeyByEncryptedKeyRow, error)
 	FindActiveAPIKeyByHash(ctx context.Context, apiKeyHash pgtype.Text) (FindActiveAPIKeyByHashRow, error)
+	FindActiveAPIKeyByIDAndAccountID(ctx context.Context, arg FindActiveAPIKeyByIDAndAccountIDParams) (FindActiveAPIKeyByIDAndAccountIDRow, error)
 	FindActiveAccountByID(ctx context.Context, accountID string) (Account, error)
 	FindActiveAccountByUsername(ctx context.Context, username string) (Account, error)
+	FindActiveApplicationByIDAndWorkspace(ctx context.Context, arg FindActiveApplicationByIDAndWorkspaceParams) (Application, error)
+	FindActiveApplicationByNameAndWorkspace(ctx context.Context, arg FindActiveApplicationByNameAndWorkspaceParams) (Application, error)
+	FindActiveApplicationComponent(ctx context.Context, arg FindActiveApplicationComponentParams) (ApplicationComponent, error)
+	FindActiveApplicationComponentByAppID(ctx context.Context, arg FindActiveApplicationComponentByAppIDParams) (ApplicationComponent, error)
+	FindActiveDocument(ctx context.Context, arg FindActiveDocumentParams) (Document, error)
+	FindActiveDocumentByDocID(ctx context.Context, arg FindActiveDocumentByDocIDParams) (Document, error)
+	FindActiveDocumentChunk(ctx context.Context, arg FindActiveDocumentChunkParams) (DocumentChunk, error)
+	FindActiveKnowledgeBase(ctx context.Context, arg FindActiveKnowledgeBaseParams) (KnowledgeBase, error)
+	FindActiveMcpServer(ctx context.Context, arg FindActiveMcpServerParams) (McpServer, error)
+	FindActivePlugin(ctx context.Context, arg FindActivePluginParams) (Plugin, error)
+	FindActiveSkill(ctx context.Context, arg FindActiveSkillParams) (Skill, error)
+	FindActiveSkillVersion(ctx context.Context, arg FindActiveSkillVersionParams) (SkillVersion, error)
 	FindActiveTokenSessionByHash(ctx context.Context, arg FindActiveTokenSessionByHashParams) (AuthTokenSession, error)
+	FindActiveWorkspaceByIDAndAccountID(ctx context.Context, arg FindActiveWorkspaceByIDAndAccountIDParams) (Workspace, error)
+	FindActiveWorkspaceByNameAndAccountID(ctx context.Context, arg FindActiveWorkspaceByNameAndAccountIDParams) (Workspace, error)
+	FindAgentSchemaByIDAndWorkspace(ctx context.Context, arg FindAgentSchemaByIDAndWorkspaceParams) (AgentSchema, error)
+	FindAgentSchemaByNameAndWorkspace(ctx context.Context, arg FindAgentSchemaByNameAndWorkspaceParams) (AgentSchema, error)
+	FindApplicationVersionByVersion(ctx context.Context, arg FindApplicationVersionByVersionParams) (ApplicationVersion, error)
 	FindDefaultWorkspaceByAccountID(ctx context.Context, accountID string) (Workspace, error)
+	FindLastPublishedApplicationVersion(ctx context.Context, arg FindLastPublishedApplicationVersionParams) (ApplicationVersion, error)
+	FindLatestActiveApplicationVersion(ctx context.Context, arg FindLatestActiveApplicationVersionParams) (ApplicationVersion, error)
+	FindLatestActiveSkillVersion(ctx context.Context, arg FindLatestActiveSkillVersionParams) (SkillVersion, error)
+	FindModelByProviderAndIDAndWorkspace(ctx context.Context, arg FindModelByProviderAndIDAndWorkspaceParams) (Model, error)
+	FindPluginTool(ctx context.Context, arg FindPluginToolParams) (Tool, error)
+	FindPluginToolByID(ctx context.Context, arg FindPluginToolByIDParams) (Tool, error)
+	FindProviderByCodeAndWorkspace(ctx context.Context, arg FindProviderByCodeAndWorkspaceParams) (Provider, error)
+	FindToolByIDAndWorkspace(ctx context.Context, arg FindToolByIDAndWorkspaceParams) (Tool, error)
 	ListActiveAPIKeysByAccountID(ctx context.Context, arg ListActiveAPIKeysByAccountIDParams) ([]ListActiveAPIKeysByAccountIDRow, error)
+	ListActiveApplicationComponents(ctx context.Context, arg ListActiveApplicationComponentsParams) ([]ApplicationComponent, error)
+	ListActiveApplicationVersions(ctx context.Context, arg ListActiveApplicationVersionsParams) ([]ApplicationVersion, error)
+	ListActiveApplicationsByWorkspace(ctx context.Context, arg ListActiveApplicationsByWorkspaceParams) ([]Application, error)
+	ListActiveDocumentChunks(ctx context.Context, arg ListActiveDocumentChunksParams) ([]DocumentChunk, error)
+	ListActiveDocuments(ctx context.Context, arg ListActiveDocumentsParams) ([]Document, error)
+	ListActiveKnowledgeBases(ctx context.Context, arg ListActiveKnowledgeBasesParams) ([]KnowledgeBase, error)
+	ListActiveMcpServers(ctx context.Context, arg ListActiveMcpServersParams) ([]McpServer, error)
+	ListActivePlugins(ctx context.Context, arg ListActivePluginsParams) ([]Plugin, error)
+	ListActiveSkills(ctx context.Context, arg ListActiveSkillsParams) ([]Skill, error)
+	ListActiveUserAccounts(ctx context.Context, arg ListActiveUserAccountsParams) ([]Account, error)
+	ListActiveWorkspacesByAccountID(ctx context.Context, arg ListActiveWorkspacesByAccountIDParams) ([]Workspace, error)
+	ListAgentSchemasByWorkspace(ctx context.Context, arg ListAgentSchemasByWorkspaceParams) ([]AgentSchema, error)
+	ListModelsByProviderAndWorkspace(ctx context.Context, arg ListModelsByProviderAndWorkspaceParams) ([]Model, error)
+	ListModelsByWorkspace(ctx context.Context, workspaceID pgtype.Text) ([]Model, error)
+	ListPluginTools(ctx context.Context, arg ListPluginToolsParams) ([]Tool, error)
+	ListPluginToolsByIDs(ctx context.Context, arg ListPluginToolsByIDsParams) ([]Tool, error)
+	ListProvidersByWorkspace(ctx context.Context, arg ListProvidersByWorkspaceParams) ([]Provider, error)
+	ListToolsByWorkspace(ctx context.Context, arg ListToolsByWorkspaceParams) ([]Tool, error)
+	MarkApplicationDeleted(ctx context.Context, arg MarkApplicationDeletedParams) error
+	MarkApplicationVersionsDeleted(ctx context.Context, arg MarkApplicationVersionsDeletedParams) error
+	MarkSkillDeleted(ctx context.Context, arg MarkSkillDeletedParams) error
+	MarkSkillVersionsDeleted(ctx context.Context, arg MarkSkillVersionsDeletedParams) error
 	RevokeAccountTokens(ctx context.Context, arg RevokeAccountTokensParams) error
 	RevokeTokenSessionByHash(ctx context.Context, tokenHash string) error
+	SoftDeleteAPIKey(ctx context.Context, arg SoftDeleteAPIKeyParams) error
+	SoftDeleteAccount(ctx context.Context, arg SoftDeleteAccountParams) error
+	SoftDeleteWorkspace(ctx context.Context, arg SoftDeleteWorkspaceParams) error
+	UpdateAPIKeyDescription(ctx context.Context, arg UpdateAPIKeyDescriptionParams) error
+	UpdateAccount(ctx context.Context, arg UpdateAccountParams) error
 	UpdateAccountLastLogin(ctx context.Context, arg UpdateAccountLastLoginParams) error
+	UpdateAgentSchema(ctx context.Context, arg UpdateAgentSchemaParams) error
+	UpdateApplication(ctx context.Context, arg UpdateApplicationParams) error
+	UpdateApplicationComponent(ctx context.Context, arg UpdateApplicationComponentParams) error
+	UpdateApplicationVersion(ctx context.Context, arg UpdateApplicationVersionParams) error
+	UpdateDocument(ctx context.Context, arg UpdateDocumentParams) error
+	UpdateDocumentChunk(ctx context.Context, arg UpdateDocumentChunkParams) error
+	UpdateDocumentChunksEnabled(ctx context.Context, arg UpdateDocumentChunksEnabledParams) error
+	UpdateKnowledgeBase(ctx context.Context, arg UpdateKnowledgeBaseParams) error
+	UpdateMcpServer(ctx context.Context, arg UpdateMcpServerParams) error
+	UpdateModel(ctx context.Context, arg UpdateModelParams) error
+	UpdatePlugin(ctx context.Context, arg UpdatePluginParams) error
+	UpdatePluginTool(ctx context.Context, arg UpdatePluginToolParams) error
+	UpdateProvider(ctx context.Context, arg UpdateProviderParams) error
+	UpdateSkill(ctx context.Context, arg UpdateSkillParams) error
+	UpdateSkillVersion(ctx context.Context, arg UpdateSkillVersionParams) error
+	UpdateTool(ctx context.Context, arg UpdateToolParams) error
+	UpdateWorkspace(ctx context.Context, arg UpdateWorkspaceParams) error
 }
 
 var _ Querier = (*Queries)(nil)

@@ -4,14 +4,20 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	hertz "github.com/cloudwego/hertz/pkg/app/server"
 	hertzconfig "github.com/cloudwego/hertz/pkg/common/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
+	"github.com/seaskyland/openclaw4j-backend-go/internal/agent"
 	"github.com/seaskyland/openclaw4j-backend-go/internal/bootstrap"
 	appconfig "github.com/seaskyland/openclaw4j-backend-go/internal/config"
 	"github.com/seaskyland/openclaw4j-backend-go/internal/dao/redisdao"
+	"github.com/seaskyland/openclaw4j-backend-go/internal/legacycrypto"
+	"github.com/seaskyland/openclaw4j-backend-go/internal/oauth2"
+	"github.com/seaskyland/openclaw4j-backend-go/internal/scriptsandbox"
+	"github.com/seaskyland/openclaw4j-backend-go/internal/workflow"
 )
 
 func main() {
@@ -36,10 +42,29 @@ func main() {
 	}
 	defer redisClient.Close()
 
+	legacyAPIKeyEncryptor, err := legacycrypto.NewJavaAPIKeyEncryptor()
+	if err != nil {
+		log.Fatalf("initialize legacy API key encryptor: %v", err)
+	}
+
 	app, err := bootstrap.New(bootstrap.Options{
-		DB:            pool,
-		TokenSessions: redisdao.NewTokenSessionDAO(redisClient),
-		HertzOptions:  []hertzconfig.Option{hertz.WithHostPorts(cfg.HTTPAddr)},
+		DB:                     pool,
+		TokenSessions:          redisdao.NewTokenSessionDAO(redisClient),
+		AgentMemory:            agent.NewRedisStore(redisClient, 0),
+		WorkflowState:          workflow.NewRedisStateStore(redisClient, 0),
+		LegacyAPIKeyEncryptor:  legacyAPIKeyEncryptor,
+		HertzOptions:           []hertzconfig.Option{hertz.WithHostPorts(cfg.HTTPAddr)},
+		FileStorageDir:         cfg.FileStorageDir,
+		ProviderPrivateKeyFile: cfg.ProviderPrivateKeyFile,
+		ScriptExecutor:         scriptsandbox.NewClient(cfg.SandboxBaseURL, time.Duration(cfg.SandboxTimeoutMs)*time.Millisecond),
+		GitHubOAuth2Provider: oauth2.NewGitHubService(oauth2.GitHubConfig{
+			ClientID:     cfg.GitHubClientID,
+			ClientSecret: cfg.GitHubClientSecret,
+			RedirectURI:  cfg.GitHubRedirectURI,
+			AuthorizeURL: cfg.GitHubAuthorizeURL,
+			TokenURL:     cfg.GitHubTokenURL,
+			UserInfoURL:  cfg.GitHubUserInfoURL,
+		}, nil),
 	})
 	if err != nil {
 		log.Fatalf("bootstrap app: %v", err)

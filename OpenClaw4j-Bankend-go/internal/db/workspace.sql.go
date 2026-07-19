@@ -7,7 +7,127 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const countActiveWorkspacesByAccountID = `-- name: CountActiveWorkspacesByAccountID :one
+SELECT COUNT(*)::bigint
+FROM workspace
+WHERE account_id = $1 AND status <> 0
+`
+
+func (q *Queries) CountActiveWorkspacesByAccountID(ctx context.Context, accountID string) (int64, error) {
+	row := q.db.QueryRow(ctx, countActiveWorkspacesByAccountID, accountID)
+	var column_1 int64
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
+const createWorkspace = `-- name: CreateWorkspace :exec
+INSERT INTO workspace (
+    workspace_id, account_id, status, name, description, config,
+    gmt_create, gmt_modified, creator, modifier, tenant_id
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+`
+
+type CreateWorkspaceParams struct {
+	WorkspaceID string           `json:"workspace_id"`
+	AccountID   string           `json:"account_id"`
+	Status      int16            `json:"status"`
+	Name        string           `json:"name"`
+	Description pgtype.Text      `json:"description"`
+	Config      pgtype.Text      `json:"config"`
+	GmtCreate   pgtype.Timestamp `json:"gmt_create"`
+	GmtModified pgtype.Timestamp `json:"gmt_modified"`
+	Creator     string           `json:"creator"`
+	Modifier    string           `json:"modifier"`
+	TenantID    pgtype.Int8      `json:"tenant_id"`
+}
+
+func (q *Queries) CreateWorkspace(ctx context.Context, arg CreateWorkspaceParams) error {
+	_, err := q.db.Exec(ctx, createWorkspace,
+		arg.WorkspaceID,
+		arg.AccountID,
+		arg.Status,
+		arg.Name,
+		arg.Description,
+		arg.Config,
+		arg.GmtCreate,
+		arg.GmtModified,
+		arg.Creator,
+		arg.Modifier,
+		arg.TenantID,
+	)
+	return err
+}
+
+const findActiveWorkspaceByIDAndAccountID = `-- name: FindActiveWorkspaceByIDAndAccountID :one
+SELECT id, workspace_id, account_id, status, name, description, config,
+       gmt_create, gmt_modified, creator, modifier, tenant_id
+FROM workspace
+WHERE workspace_id = $1 AND account_id = $2 AND status <> 0
+LIMIT 1
+`
+
+type FindActiveWorkspaceByIDAndAccountIDParams struct {
+	WorkspaceID string `json:"workspace_id"`
+	AccountID   string `json:"account_id"`
+}
+
+func (q *Queries) FindActiveWorkspaceByIDAndAccountID(ctx context.Context, arg FindActiveWorkspaceByIDAndAccountIDParams) (Workspace, error) {
+	row := q.db.QueryRow(ctx, findActiveWorkspaceByIDAndAccountID, arg.WorkspaceID, arg.AccountID)
+	var i Workspace
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.AccountID,
+		&i.Status,
+		&i.Name,
+		&i.Description,
+		&i.Config,
+		&i.GmtCreate,
+		&i.GmtModified,
+		&i.Creator,
+		&i.Modifier,
+		&i.TenantID,
+	)
+	return i, err
+}
+
+const findActiveWorkspaceByNameAndAccountID = `-- name: FindActiveWorkspaceByNameAndAccountID :one
+SELECT id, workspace_id, account_id, status, name, description, config,
+       gmt_create, gmt_modified, creator, modifier, tenant_id
+FROM workspace
+WHERE name = $1 AND account_id = $2 AND status <> 0
+LIMIT 1
+`
+
+type FindActiveWorkspaceByNameAndAccountIDParams struct {
+	Name      string `json:"name"`
+	AccountID string `json:"account_id"`
+}
+
+func (q *Queries) FindActiveWorkspaceByNameAndAccountID(ctx context.Context, arg FindActiveWorkspaceByNameAndAccountIDParams) (Workspace, error) {
+	row := q.db.QueryRow(ctx, findActiveWorkspaceByNameAndAccountID, arg.Name, arg.AccountID)
+	var i Workspace
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.AccountID,
+		&i.Status,
+		&i.Name,
+		&i.Description,
+		&i.Config,
+		&i.GmtCreate,
+		&i.GmtModified,
+		&i.Creator,
+		&i.Modifier,
+		&i.TenantID,
+	)
+	return i, err
+}
 
 const findDefaultWorkspaceByAccountID = `-- name: FindDefaultWorkspaceByAccountID :one
 SELECT id, workspace_id, account_id, status, name, description, config,
@@ -36,4 +156,104 @@ func (q *Queries) FindDefaultWorkspaceByAccountID(ctx context.Context, accountID
 		&i.TenantID,
 	)
 	return i, err
+}
+
+const listActiveWorkspacesByAccountID = `-- name: ListActiveWorkspacesByAccountID :many
+SELECT id, workspace_id, account_id, status, name, description, config,
+       gmt_create, gmt_modified, creator, modifier, tenant_id
+FROM workspace
+WHERE account_id = $1 AND status <> 0
+ORDER BY id DESC
+LIMIT $2 OFFSET $3
+`
+
+type ListActiveWorkspacesByAccountIDParams struct {
+	AccountID string `json:"account_id"`
+	Limit     int32  `json:"limit"`
+	Offset    int32  `json:"offset"`
+}
+
+func (q *Queries) ListActiveWorkspacesByAccountID(ctx context.Context, arg ListActiveWorkspacesByAccountIDParams) ([]Workspace, error) {
+	rows, err := q.db.Query(ctx, listActiveWorkspacesByAccountID, arg.AccountID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Workspace
+	for rows.Next() {
+		var i Workspace
+		if err := rows.Scan(
+			&i.ID,
+			&i.WorkspaceID,
+			&i.AccountID,
+			&i.Status,
+			&i.Name,
+			&i.Description,
+			&i.Config,
+			&i.GmtCreate,
+			&i.GmtModified,
+			&i.Creator,
+			&i.Modifier,
+			&i.TenantID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const softDeleteWorkspace = `-- name: SoftDeleteWorkspace :exec
+UPDATE workspace
+SET status = 0, modifier = $3, gmt_modified = $4
+WHERE workspace_id = $1 AND account_id = $2 AND status <> 0
+`
+
+type SoftDeleteWorkspaceParams struct {
+	WorkspaceID string           `json:"workspace_id"`
+	AccountID   string           `json:"account_id"`
+	Modifier    string           `json:"modifier"`
+	GmtModified pgtype.Timestamp `json:"gmt_modified"`
+}
+
+func (q *Queries) SoftDeleteWorkspace(ctx context.Context, arg SoftDeleteWorkspaceParams) error {
+	_, err := q.db.Exec(ctx, softDeleteWorkspace,
+		arg.WorkspaceID,
+		arg.AccountID,
+		arg.Modifier,
+		arg.GmtModified,
+	)
+	return err
+}
+
+const updateWorkspace = `-- name: UpdateWorkspace :exec
+UPDATE workspace
+SET name = $3, description = $4, config = $5, modifier = $6, gmt_modified = $7
+WHERE workspace_id = $1 AND account_id = $2 AND status <> 0
+`
+
+type UpdateWorkspaceParams struct {
+	WorkspaceID string           `json:"workspace_id"`
+	AccountID   string           `json:"account_id"`
+	Name        string           `json:"name"`
+	Description pgtype.Text      `json:"description"`
+	Config      pgtype.Text      `json:"config"`
+	Modifier    string           `json:"modifier"`
+	GmtModified pgtype.Timestamp `json:"gmt_modified"`
+}
+
+func (q *Queries) UpdateWorkspace(ctx context.Context, arg UpdateWorkspaceParams) error {
+	_, err := q.db.Exec(ctx, updateWorkspace,
+		arg.WorkspaceID,
+		arg.AccountID,
+		arg.Name,
+		arg.Description,
+		arg.Config,
+		arg.Modifier,
+		arg.GmtModified,
+	)
+	return err
 }

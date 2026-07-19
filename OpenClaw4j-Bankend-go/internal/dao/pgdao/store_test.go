@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/seaskyland/openclaw4j-backend-go/internal/dao"
 	"github.com/seaskyland/openclaw4j-backend-go/internal/db"
@@ -184,6 +185,15 @@ func TestAPIKeyDAOMapsHashEncryptedAndListRows(t *testing.T) {
 	}
 }
 
+func TestAPIKeyDAOAllowsLegacyFallbackBeforeHashColumnsAreMigrated(t *testing.T) {
+	query := &fakeAPIKeyQueries{err: &pgconn.PgError{Code: "42703"}}
+
+	_, err := NewAPIKeyDAO(query).FindActiveByHash(context.Background(), "hash")
+	if !errors.Is(err, dao.ErrNotFound) {
+		t.Fatalf("expected missing api_key_hash column to allow legacy fallback, got %v", err)
+	}
+}
+
 func TestTokenSessionDAOMapsCreateFindAndMutations(t *testing.T) {
 	now := time.Date(2026, 7, 18, 10, 30, 0, 0, time.UTC)
 	source := "console"
@@ -266,12 +276,32 @@ type fakeAccountQueries struct {
 	lastUpdate db.UpdateAccountLastLoginParams
 }
 
+func (f *fakeAccountQueries) CreateAccount(context.Context, db.CreateAccountParams) error {
+	return f.err
+}
+
 func (f *fakeAccountQueries) FindActiveAccountByID(context.Context, string) (db.Account, error) {
 	return f.account, f.err
 }
 
 func (f *fakeAccountQueries) FindActiveAccountByUsername(context.Context, string) (db.Account, error) {
 	return f.account, f.err
+}
+
+func (f *fakeAccountQueries) UpdateAccount(context.Context, db.UpdateAccountParams) error {
+	return f.err
+}
+
+func (f *fakeAccountQueries) SoftDeleteAccount(context.Context, db.SoftDeleteAccountParams) error {
+	return f.err
+}
+
+func (f *fakeAccountQueries) ListActiveUserAccounts(context.Context, db.ListActiveUserAccountsParams) ([]db.Account, error) {
+	return nil, f.err
+}
+
+func (f *fakeAccountQueries) CountActiveUserAccounts(context.Context, string) (int64, error) {
+	return 0, f.err
 }
 
 func (f *fakeAccountQueries) UpdateAccountLastLogin(_ context.Context, arg db.UpdateAccountLastLoginParams) error {
@@ -284,11 +314,40 @@ type fakeWorkspaceQueries struct {
 	err       error
 }
 
+func (f *fakeWorkspaceQueries) CreateWorkspace(context.Context, db.CreateWorkspaceParams) error {
+	return f.err
+}
+
 func (f *fakeWorkspaceQueries) FindDefaultWorkspaceByAccountID(context.Context, string) (db.Workspace, error) {
 	return f.workspace, f.err
 }
 
+func (f *fakeWorkspaceQueries) FindActiveWorkspaceByIDAndAccountID(context.Context, db.FindActiveWorkspaceByIDAndAccountIDParams) (db.Workspace, error) {
+	return f.workspace, f.err
+}
+
+func (f *fakeWorkspaceQueries) FindActiveWorkspaceByNameAndAccountID(context.Context, db.FindActiveWorkspaceByNameAndAccountIDParams) (db.Workspace, error) {
+	return f.workspace, f.err
+}
+
+func (f *fakeWorkspaceQueries) CountActiveWorkspacesByAccountID(context.Context, string) (int64, error) {
+	return 0, f.err
+}
+
+func (f *fakeWorkspaceQueries) ListActiveWorkspacesByAccountID(context.Context, db.ListActiveWorkspacesByAccountIDParams) ([]db.Workspace, error) {
+	return nil, f.err
+}
+
+func (f *fakeWorkspaceQueries) UpdateWorkspace(context.Context, db.UpdateWorkspaceParams) error {
+	return f.err
+}
+
+func (f *fakeWorkspaceQueries) SoftDeleteWorkspace(context.Context, db.SoftDeleteWorkspaceParams) error {
+	return f.err
+}
+
 type fakeAPIKeyQueries struct {
+	createdID     int64
 	hashRow       db.FindActiveAPIKeyByHashRow
 	encryptedRow  db.FindActiveAPIKeyByEncryptedKeyRow
 	listRows      []db.ListActiveAPIKeysByAccountIDRow
@@ -299,9 +358,25 @@ type fakeAPIKeyQueries struct {
 	lastList      db.ListActiveAPIKeysByAccountIDParams
 }
 
+func (f *fakeAPIKeyQueries) CreateAPIKey(context.Context, db.CreateAPIKeyParams) (int64, error) {
+	return f.createdID, f.err
+}
+
 func (f *fakeAPIKeyQueries) FindActiveAPIKeyByHash(_ context.Context, apiKeyHash pgtype.Text) (db.FindActiveAPIKeyByHashRow, error) {
 	f.lastHash = apiKeyHash
 	return f.hashRow, f.err
+}
+
+func (f *fakeAPIKeyQueries) FindActiveAPIKeyByIDAndAccountID(context.Context, db.FindActiveAPIKeyByIDAndAccountIDParams) (db.FindActiveAPIKeyByIDAndAccountIDRow, error) {
+	return db.FindActiveAPIKeyByIDAndAccountIDRow{}, f.err
+}
+
+func (f *fakeAPIKeyQueries) UpdateAPIKeyDescription(context.Context, db.UpdateAPIKeyDescriptionParams) error {
+	return f.err
+}
+
+func (f *fakeAPIKeyQueries) SoftDeleteAPIKey(context.Context, db.SoftDeleteAPIKeyParams) error {
+	return f.err
 }
 
 func (f *fakeAPIKeyQueries) FindActiveAPIKeyByEncryptedKey(_ context.Context, apiKey string) (db.FindActiveAPIKeyByEncryptedKeyRow, error) {
