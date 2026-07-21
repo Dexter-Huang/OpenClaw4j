@@ -61,6 +61,8 @@ OpenClaw4j-Bankend/**/*.db-shm
 OpenClaw4j-Bankend/**/*.db-wal
 OpenClaw4j-Bankend/**/*.sqlite
 OpenClaw4j-Bankend/**/*.sqlite3
+OpenClaw4j-Bankend-go/bin/
+OpenClaw4j-Bankend-go/dist/
 
 # Rust sandbox build output and runtime scratch data
 OpenClaw4j-Sandbox/target/

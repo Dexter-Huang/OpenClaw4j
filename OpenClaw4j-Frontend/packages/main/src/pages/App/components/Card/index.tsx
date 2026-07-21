@@ -25,7 +25,6 @@ const typeLabelMap: Record<IAppType, string> = {
 };
 
 const AppCard: React.FC<AppCardProps> = ({
-  app_id,
   name,
   gmt_modified,
   type,
@@ -43,6 +42,7 @@ const AppCard: React.FC<AppCardProps> = ({
       title={name}
       logo={<img className={styles['logo']} src={APP_ICON_IMAGE[type]} />}
       statusNode={<Status status={status} />}
+      stackStatus
       labelWidth={language === 'en' ? 70 : 60}
       info={[
         {
@@ -52,13 +52,6 @@ const AppCard: React.FC<AppCardProps> = ({
           }),
           content: updateTime,
         },
-        {
-          label: $i18n.get({
-            id: 'main.pages.App.components.Card.index.appId',
-            dm: 'ID',
-          }),
-          content: app_id,
-        },
       ]}
       onClick={() => onClickAction('click')}
       footerDescNode={<Tag color="mauve">{typeLabelMap[type]}</Tag>}
@@ -67,7 +60,10 @@ const AppCard: React.FC<AppCardProps> = ({
           <Button
             type="primary"
             className="flex-1"
-            onClick={() => onClickAction('edit')}
+            onClick={(event) => {
+              event.stopPropagation();
+              onClickAction('edit');
+            }}
           >
             {$i18n.get({
               id: 'main.pages.App.components.Card.index.edit',
@@ -75,9 +71,10 @@ const AppCard: React.FC<AppCardProps> = ({
             })}
           </Button>
           <Dropdown
-            getPopupContainer={(ele) => ele}
+            trigger={['click']}
             menu={{
               onClick: (e) => {
+                e.domEvent.stopPropagation();
                 onClickAction(e.key);
               },
               items: [
@@ -106,7 +103,9 @@ const AppCard: React.FC<AppCardProps> = ({
               ],
             }}
           >
-            <IconButton shape="default" icon="spark-more-line" />
+            <div onClick={(event) => event.stopPropagation()}>
+              <IconButton shape="default" icon="spark-more-line" />
+            </div>
           </Dropdown>
         </>
       }

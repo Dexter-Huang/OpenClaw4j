@@ -116,6 +116,10 @@
   }
 }
 
+.stretch {
+  align-items: stretch;
+}
+
 .pagination {
   padding: 20px;
   justify-items: flex-end;
@@ -139,9 +143,23 @@
   margin-bottom: 16px;
 }
 
+.cardHeaderStacked {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
 .headerLeft {
   display: flex;
   align-items: center;
+  gap: 12px;
+}
+
+.headerLeftStacked {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: flex-start;
   gap: 12px;
 }
 
@@ -156,6 +174,15 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.titleWrapperStacked {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 2px;
 }
 
 .title {

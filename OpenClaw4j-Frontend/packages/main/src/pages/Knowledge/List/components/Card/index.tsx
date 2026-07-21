@@ -53,6 +53,58 @@ const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
   total_docs,
   handleClickAction,
 }) => {
+  const renderActions = () => (
+    <>
+      <Button
+        type="primary"
+        className={styles['operate-button']}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          history.push(`/knowledge/edit/${kb_id}`);
+        }}
+      >
+        {$i18n.get({
+          id: 'main.pages.Knowledge.List.components.Card.index.edit',
+          dm: '编辑',
+        })}
+      </Button>
+      <Button
+        type="default"
+        className={styles['operate-button']}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          history.push(`/knowledge/test/${kb_id}`);
+        }}
+      >
+        {$i18n.get({
+          id: 'main.pages.Knowledge.List.components.Card.index.hitTest',
+          dm: '命中测试',
+        })}
+      </Button>
+      <Dropdown
+        getPopupContainer={(ele) => ele}
+        menu={{
+          items: [
+            {
+              danger: true,
+              label: $i18n.get({
+                id: 'main.pages.Knowledge.List.components.Card.index.delete',
+                dm: '删除',
+              }),
+              key: 'delete',
+              onClick: () =>
+                handleClickAction && handleClickAction('delete', kb_id),
+            },
+          ],
+        }}
+      >
+        <IconButton shape="default" icon="spark-more-line" />
+      </Dropdown>
+    </>
+  );
+
   return (
     <ProCard
       title={name}
@@ -86,76 +138,28 @@ const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
         },
       ]}
       footerDescNode={
-        <div className={styles['card-footer']}>
-          <div className={styles['update-time']}>
-            {$i18n.get({
-              id: 'main.pages.Knowledge.List.components.Card.index.updatedAt',
-              dm: '更新于',
-            })}
-            {dayjs(gmt_modified).format('YYYY-MM-DD HH:mm:ss')}
-          </div>
-          <div className={styles['document-count']}>
-            <div className={styles['count-wrapper']}>
-              <IconFont
-                type="spark-document-line"
-                className={styles['doc-icon']}
-              />
+        <div className={styles['footer-content']}>
+          <div className={styles['card-footer']}>
+            <div className={styles['update-time']}>
+              {$i18n.get({
+                id: 'main.pages.Knowledge.List.components.Card.index.updatedAt',
+                dm: '更新于',
+              })}
+              {dayjs(gmt_modified).format('YYYY-MM-DD HH:mm:ss')}
+            </div>
+            <div className={styles['document-count']}>
+              <div className={styles['count-wrapper']}>
+                <IconFont
+                  type="spark-document-line"
+                  className={styles['doc-icon']}
+                />
 
-              <div className={styles['count']}>{total_docs}</div>
+                <div className={styles['count']}>{total_docs}</div>
+              </div>
             </div>
           </div>
+          <div className={styles['footer-actions']}>{renderActions()}</div>
         </div>
-      }
-      footerOperateNode={
-        <>
-          <Button
-            type="primary"
-            className={styles['operate-button']}
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              history.push(`/knowledge/edit/${kb_id}`);
-            }}
-          >
-            {$i18n.get({
-              id: 'main.pages.Knowledge.List.components.Card.index.edit',
-              dm: '编辑',
-            })}
-          </Button>
-          <Button
-            type="default"
-            className={styles['operate-button']}
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              history.push(`/knowledge/test/${kb_id}`);
-            }}
-          >
-            {$i18n.get({
-              id: 'main.pages.Knowledge.List.components.Card.index.hitTest',
-              dm: '命中测试',
-            })}
-          </Button>
-          <Dropdown
-            getPopupContainer={(ele) => ele}
-            menu={{
-              items: [
-                {
-                  danger: true,
-                  label: $i18n.get({
-                    id: 'main.pages.Knowledge.List.components.Card.index.delete',
-                    dm: '删除',
-                  }),
-                  key: 'delete',
-                  onClick: () =>
-                    handleClickAction && handleClickAction('delete', kb_id),
-                },
-              ],
-            }}
-          >
-            <IconButton shape="default" icon="spark-more-line" />
-          </Dropdown>
-        </>
       }
       onClick={() => history.push(`/knowledge/${kb_id}`)}
       className={styles['knowledge-card']}

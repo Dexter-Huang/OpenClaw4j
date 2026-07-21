@@ -2,7 +2,7 @@ import $i18n from '@/i18n';
 import { IAppType } from '@/services/appComponent';
 import { createApp } from '@/services/appManage';
 import uniqueId from '@/utils/uniqueId';
-import { Button, getCommonConfig, message, Modal } from '@spark-ai/design';
+import { Button, getCommonConfig, Modal } from '@spark-ai/design';
 import { useSetState } from 'ahooks';
 import { Flex } from 'antd';
 import classNames from 'classnames';
@@ -56,12 +56,6 @@ export default function CreateModal(props: ICreateModalProps) {
       config: initAppConfig(activeRecord.value as IAppType),
     })
       .then((res) => {
-        message.success(
-          $i18n.get({
-            id: 'main.pages.App.components.CreateModal.index.createSuccess',
-            dm: '创建成功',
-          }),
-        );
         props.onOk({
           type: activeRecord.value as IAppType,
           app_id: res,

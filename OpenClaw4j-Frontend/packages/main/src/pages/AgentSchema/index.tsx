@@ -495,6 +495,12 @@ const AgentSchemaCreator: React.FC = () => {
 
   // 监听表单变化，实时更新 YAML
   useEffect(() => {
+    // 新建态没有已选智能体且名称为空，无需在 Form 完成挂载前读取字段。
+    // 选中已有智能体时仍会在此同步 YAML，新增表单值则由 onValuesChange 处理。
+    if (selectedAgentId === null) {
+      return;
+    }
+
     const updateYaml = async () => {
       const subscription = form.getFieldsValue() as AgentSchemaForm;
       if (subscription.name) {

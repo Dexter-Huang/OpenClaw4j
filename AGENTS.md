@@ -136,6 +136,21 @@ mvn '-Dmaven.repo.local=D:\apache-maven-3.9.1\m2\repository' spotbugs:check
 - 对同一问题优先复用已有脚本并只调整输入或断言；如果必须新增诊断脚本，保持单一目的，输出尽量是结构化 JSON，字段只包含定位问题所需信息。
 - 完成页面验证后，在回复里说明实际打开的 URL、关键接口状态、是否有 `pageerror/requestfailed/console:error`，以及测试结束时是否已关闭浏览器资源。
 
+## Playwright 与 Camofox MCP 联调
+
+- 默认使用 Playwright 验证本项目的前端、后端接口联动和 CI 回归。它是本项目的浏览器测试基线；Camofox 不是 Playwright Test、Chromium/WebKit 覆盖或 Playwright trace/report 的替代品。
+- Camofox 仅用于确有必要的外部站点、Firefox/Camoufox 行为差异、反自动化拦截排查，或需要隔离且可持久化的浏览器会话的场景。不要为了同一条本地页面路径同时启动两套浏览器；只有需要比对浏览器差异时才并行执行。
+- Camofox 通过已配置的 Streamable HTTP MCP 服务接入。服务地址、Bearer token、真实账号和业务接口地址都属于运行时机密：从本机受控配置或密钥管理读取，严禁写入 `AGENTS.md`、脚本、测试夹具、提交记录或日志。
+- MCP 可使用 `camofox_create_tab`、`camofox_snapshot`、`camofox_click`、`camofox_type`、`camofox_navigate`、`camofox_scroll`、`camofox_screenshot`、`camofox_close_tab`、`camofox_evaluate` 和 `camofox_list_tabs`。先获取快照，再使用当前快照中的 ref 操作；导航、打开弹窗、切换标签或显著更新页面后必须重新获取快照。
+- Camofox 会话以 `userId` 和 `sessionKey` 隔离。联调使用任务专属且不含真实身份信息的值；完成后关闭所有测试标签。需要保留登录态时，由调用方显式管理持久化数据，不能把它当作无条件复用的共享测试前置条件。
+- 常规前后端联调按以下顺序执行，以降低浏览器启动次数、重复上下文和模型 token：
+  1. 先用后端最小测试或 HTTP 调用确认接口契约、状态码和关键 JSON 字段；未通过时不启动浏览器。
+  2. 只启动本次变更涉及的前端和后端服务，使用 Playwright 走一条最短的本地用户路径。等待必要接口或关键元素出现，采集状态、URL、资源类型和必要字段；优先 accessibility snapshot 或定向 locator 文本，禁止输出完整 DOM、整页响应或重复截图。
+  3. 本地路径通过但外部登录、第三方页面、站点拦截或 Firefox 特性仍需确认时，再通过 Camofox MCP 复现。每一步只执行一次动作并读取最小快照；仅在失败定位或视觉验收需要时截图。
+  4. 修复后先重跑失败的最小接口和单一路径；涉及跨浏览器兼容、稳定回归或 CI 契约时，补充或运行 Playwright 测试，不把 Camofox 结果作为唯一回归依据。
+- 排查本项目资源加载、路由、控制台异常或前端性能问题时优先 Playwright，因为它的网络、CDP、trace 和错误采集更适合本地应用诊断。Camofox 侧的失败优先记录 MCP 工具名、页面 URL、最小快照片段和服务日志摘要，不记录认证信息或完整页面内容。
+- 两类浏览器资源均须清理：Playwright 关闭 `page/context/browser`；Camofox 关闭每个测试标签并确认没有遗留测试会话。验证产物继续分别放在 `output/playwright/` 和 Camofox 服务自身的受控运行目录，不新增顶层调试目录，也不提交生成物。
+
 ## Leyden / AOT
 
 - Keep the default startup optimization on HotSpot JVM with the JDK Project Leyden style AOT cache.

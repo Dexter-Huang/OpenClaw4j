@@ -206,12 +206,14 @@ export default function Account() {
         />
       </div>
 
-      <UserEditModal
-        open={isUserModalOpen}
-        onCancel={handleModalCancel}
-        onOk={handleModalOk}
-        initialValues={editingUser}
-      />
+      {isUserModalOpen ? (
+        <UserEditModal
+          open={isUserModalOpen}
+          onCancel={handleModalCancel}
+          onOk={handleModalOk}
+          initialValues={editingUser}
+        />
+      ) : null}
     </InnerLayout>
   );
 }

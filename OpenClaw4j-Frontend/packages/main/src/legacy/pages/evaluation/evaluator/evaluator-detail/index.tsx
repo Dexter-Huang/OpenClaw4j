@@ -161,6 +161,12 @@ function EvaluatorDetail() {
       }
 
       const evaluatorData = evaluatorResponse.data;
+      if (!evaluatorData) {
+        setEvaluator(null);
+        setError('评估器不存在或已删除');
+        return;
+      }
+
       setEvaluator(evaluatorData);
       try {
         const isFromEvaluationDebug = stateFromDebug?.prePathname === '/evaluation-debug';
@@ -732,6 +738,10 @@ function EvaluatorDetail() {
   if (loading) {
     return (
       <div className="p-6">
+        {/* 加载态尚未渲染详情表单，保留无 DOM 表单连接以避免 useForm 实例脱离。 */}
+        <Form component={false} form={form} />
+        <Form component={false} form={configForm} />
+        <Form component={false} form={publishForm} />
         <div className="flex items-center justify-center h-64">
           <Spin size="large">
             <div className="text-center pt-4">
@@ -746,6 +756,10 @@ function EvaluatorDetail() {
   if (error || !evaluator) {
     return (
       <div className="p-6">
+        {/* 错误态不展示编辑控件，但需要保持三个已创建表单实例的连接。 */}
+        <Form component={false} form={form} />
+        <Form component={false} form={configForm} />
+        <Form component={false} form={publishForm} />
         <Alert
           message="加载失败"
           description={error || '评估器不存在'}

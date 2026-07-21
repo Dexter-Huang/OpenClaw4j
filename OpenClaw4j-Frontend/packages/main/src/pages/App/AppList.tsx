@@ -5,6 +5,7 @@ import $i18n from '@/i18n';
 import { IAppType } from '@/services/appComponent';
 import {
   copyApp,
+  createApp,
   deleteApp,
   getAppList,
   IGetAppListParams,
@@ -14,9 +15,11 @@ import { AlertDialog, Button, IconFont, message } from '@spark-ai/design';
 import { useMount, useSetState } from 'ahooks';
 import { useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import uniqueId from '@/utils/uniqueId';
 import AppCard from './components/Card';
 import CreateModal from './components/CreateModal';
 import { EditNameModal } from './components/EditNameModal';
+import { initAppConfig } from './utils';
 
 const tabs = [
   {
@@ -60,6 +63,7 @@ export default function () {
     status: '',
     list: [] as IAppCard[],
     showCreateModal: false,
+    createLoading: false,
     activeRecord: null as IAppCard | null,
     showEditNameModal: false,
   });
@@ -181,6 +185,31 @@ export default function () {
     );
   };
 
+  // 在类型筛选页中，当前标签已确定新应用类型，无需再弹出类型选择窗口。
+  const createAppForActiveTab = () => {
+    const appType = typeMap[state.activeTab];
+    if (!appType) {
+      setState({ showCreateModal: true });
+      return;
+    }
+    if (state.createLoading) return;
+
+    const name =
+      appType === IAppType.AGENT
+        ? `智能体_${uniqueId(4)}`
+        : `流程编排_${uniqueId(4)}`;
+    setState({ createLoading: true });
+    createApp({
+      name,
+      type: appType,
+      config: initAppConfig(appType),
+    })
+      .then((appID) => {
+        gotoAppDetail({ type: appType, app_id: appID });
+      })
+      .finally(() => setState({ createLoading: false }));
+  };
+
   const handleClickAction = (key: string, item: IAppCard) => {
     switch (key) {
       case 'click':
@@ -233,7 +262,8 @@ export default function () {
       tabs={tabs}
       right={
         <Button
-          onClick={() => setState({ showCreateModal: true })}
+          loading={state.createLoading}
+          onClick={createAppForActiveTab}
           icon={<IconFont type="spark-plus-line" />}
           type="primary"
         >
@@ -258,6 +288,7 @@ export default function () {
         />
       )}
       <CardList
+        stretch
         pagination={{
           current: state.current,
           total: state.total,
@@ -277,7 +308,8 @@ export default function () {
         emptyAction={
           <Button
             icon={<IconFont type="spark-plus-line" />}
-            onClick={() => setState({ showCreateModal: true })}
+            loading={state.createLoading}
+            onClick={createAppForActiveTab}
             type="primary"
           >
             {$i18n.get({

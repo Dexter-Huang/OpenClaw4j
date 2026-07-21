@@ -181,7 +181,9 @@ const PromptDetailPage = () => {
       // 4. 聚合 Prompt 数据和最新版本详情
       let aggregatedPrompt = { ...promptData };
 
-      if (versionDetailResponse && versionDetailResponse.code === 200) {
+      // 历史数据可能只有 Prompt 主记录而没有实际版本。兼容接口会以成功状态返回 null，
+      // 此时保留主记录并让页面进入“未发布版本”状态，不能把 null 当作版本对象解引用。
+      if (versionDetailResponse && versionDetailResponse.code === 200 && versionDetailResponse.data) {
         const versionDetail = versionDetailResponse.data;
 
         // 聚合最新版本的详细信息到 Prompt 对象中

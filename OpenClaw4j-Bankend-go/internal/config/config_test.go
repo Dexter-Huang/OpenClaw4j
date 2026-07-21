@@ -24,7 +24,7 @@ func TestLoadUsesDefaultHTTPAddr(t *testing.T) {
 	if cfg.DatabaseDSN == "" {
 		t.Fatalf("database DSN was not loaded")
 	}
-	if cfg.RedisHost != DefaultRedisHost || cfg.RedisPort != DefaultRedisPort || cfg.RedisDatabase != DefaultRedisDatabase || cfg.SandboxBaseURL != DefaultSandboxBaseURL || cfg.SandboxTimeoutMs != DefaultSandboxTimeout {
+	if cfg.RedisHost != DefaultRedisHost || cfg.RedisPort != DefaultRedisPort || cfg.RedisDatabase != DefaultRedisDatabase || cfg.FrontendDistDir != DefaultFrontendDistDir || cfg.SandboxBaseURL != DefaultSandboxBaseURL || cfg.SandboxTimeoutMs != DefaultSandboxTimeout {
 		t.Fatalf("unexpected redis defaults: %#v", cfg)
 	}
 }
@@ -44,6 +44,8 @@ func TestLoadUsesCustomHTTPAddr(t *testing.T) {
 			return "secret"
 		case EnvRedisDatabase:
 			return "2"
+		case EnvFrontendDistDir:
+			return "web/dist"
 		case EnvSandboxBaseURL:
 			return "http://sandbox.local:9010/"
 		case EnvSandboxTimeoutMs:
@@ -64,6 +66,9 @@ func TestLoadUsesCustomHTTPAddr(t *testing.T) {
 	}
 	if cfg.SandboxBaseURL != "http://sandbox.local:9010" || cfg.SandboxTimeoutMs != 1234 {
 		t.Fatalf("unexpected sandbox config: %#v", cfg)
+	}
+	if cfg.FrontendDistDir != "web/dist" {
+		t.Fatalf("unexpected frontend dist directory: %#v", cfg)
 	}
 }
 

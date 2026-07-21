@@ -145,14 +145,16 @@ const ModelService = () => {
           ))}
         </CardList>
       </div>
-      <ModelServiceProviderModal
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        onSuccess={() => {
-          setIsModalOpen(false);
-          fetchProviders();
-        }}
-      />
+      {isModalOpen ? (
+        <ModelServiceProviderModal
+          open={isModalOpen}
+          onCancel={() => setIsModalOpen(false)}
+          onSuccess={() => {
+            setIsModalOpen(false);
+            fetchProviders();
+          }}
+        />
+      ) : null}
     </InnerLayout>
   );
 };

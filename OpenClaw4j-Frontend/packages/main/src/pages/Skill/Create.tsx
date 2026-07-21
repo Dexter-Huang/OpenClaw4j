@@ -42,10 +42,6 @@ export default function SkillCreate() {
 
   useMount(() => {
     if (!skillCode) {
-      form.setFieldsValue({
-        mainFilePath: DEFAULT_MAIN_FILE,
-        manifest: '{}',
-      });
       return;
     }
 
@@ -88,7 +84,14 @@ export default function SkillCreate() {
   const isFormChanged = () => {
     const currentValues = form.getFieldsValue();
     if (!skillCode) {
-      return Object.values(currentValues).some(Boolean);
+      return (
+        !!currentValues.name ||
+        !!currentValues.description ||
+        !!currentValues.tags ||
+        currentValues.mainFilePath !== DEFAULT_MAIN_FILE ||
+        currentValues.manifest !== '{}' ||
+        !!currentValues.packageObjectKey
+      );
     }
     if (!initialData) return false;
 
@@ -321,7 +324,12 @@ export default function SkillCreate() {
       <div className={styles.page}>
         <Flex className={styles.container} vertical>
           <div className={styles['content-wrap']}>
-            <Form className={styles.content} form={form} layout="vertical">
+            <Form
+              className={styles.content}
+              form={form}
+              layout="vertical"
+              initialValues={{ mainFilePath: DEFAULT_MAIN_FILE, manifest: '{}' }}
+            >
               <Form.Item
                 required
                 label={$i18n.get({

@@ -26,6 +26,32 @@ interface ToolPanelProps {
   }) => Promise<any>;
 }
 
+type ToolInputSchema = IMCPTool['input_schema'];
+
+const emptyToolInputSchema: ToolInputSchema = {
+  type: 'object',
+  properties: {},
+  required: [],
+  additionalProperties: false,
+};
+
+// MCP 协议标准字段为 inputSchema，历史管理端表单则使用 input_schema。第三方
+// Server 可能省略参数 schema，渲染时将其按空对象处理，避免单个工具导致整个详情页崩溃。
+const resolveToolInputSchema = (tool: IMCPTool): ToolInputSchema => {
+  const standardSchema = (tool as IMCPTool & { inputSchema?: ToolInputSchema })
+    .inputSchema;
+  const schema = tool.input_schema || standardSchema;
+  if (!schema) {
+    return emptyToolInputSchema;
+  }
+  return {
+    ...emptyToolInputSchema,
+    ...schema,
+    properties: schema.properties || {},
+    required: schema.required || [],
+  };
+};
+
 const ToolPanel: React.FC<ToolPanelProps> = ({
   server_Code,
   tool,
@@ -39,6 +65,7 @@ const ToolPanel: React.FC<ToolPanelProps> = ({
     result: any;
   } | null>(null);
   const [loading, setLoading] = useState(false);
+  const inputSchema = resolveToolInputSchema(tool);
   const handleToolClick = () => {
     setExpanded(!expanded);
   };
@@ -47,7 +74,7 @@ const ToolPanel: React.FC<ToolPanelProps> = ({
     try {
       Object.keys(values).forEach((key) => {
         const formValue = values[key];
-        const targetItem = tool.input_schema.properties?.[key];
+        const targetItem = inputSchema.properties[key];
         if (targetItem && !!formValue) {
           if (['array', 'object'].includes(targetItem.type)) {
             values[key] = JSON.parse(formValue);
@@ -130,7 +157,7 @@ const ToolPanel: React.FC<ToolPanelProps> = ({
   };
 
   const renderToolInputs = () => {
-    const { properties, required = [] } = tool.input_schema;
+    const { properties, required } = inputSchema;
     const propertiesKeys = Object.keys(properties).sort((key) =>
       required.includes(key) ? -1 : 1,
     );

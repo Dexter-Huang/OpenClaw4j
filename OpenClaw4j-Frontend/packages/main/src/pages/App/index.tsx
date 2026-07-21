@@ -1,6 +1,16 @@
 import ProCard from '@/components/Card/ProCard';
 import InnerLayout from '@/components/InnerLayout';
 import $i18n from '@/i18n';
+import {
+  AppstoreOutlined,
+  BulbOutlined,
+  CodeOutlined,
+  DeploymentUnitOutlined,
+  ExperimentOutlined,
+  GithubOutlined,
+  NodeIndexOutlined,
+  RadarChartOutlined,
+} from '@ant-design/icons';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.less';
@@ -134,11 +144,7 @@ const HomePage: React.FC = () => {
                 title="使用 Copilot 创建智能体"
                 logo={
                   <div className={styles.cardIcon}>
-                    <img
-                      src="/images/copilot.svg"
-                      alt="Copilot Agent Creation"
-                      className={styles.iconImage}
-                    />
+                    <CodeOutlined aria-label="Copilot Agent Creation" className={styles.iconImage} />
                   </div>
                 }
                 info={[
@@ -156,11 +162,7 @@ const HomePage: React.FC = () => {
                 title="Agent Schema 方式创建智能体"
                 logo={
                   <div className={styles.cardIcon}>
-                    <img
-                      src="/images/agentSchema.svg"
-                      alt="Agent Schema Agent Creation"
-                      className={styles.iconImage}
-                    />
+                    <NodeIndexOutlined aria-label="Agent Schema Agent Creation" className={styles.iconImage} />
                   </div>
                 }
                 info={[
@@ -178,11 +180,7 @@ const HomePage: React.FC = () => {
                 title="从 GitHub 导入智能体"
                 logo={
                   <div className={styles.cardIconDisabled}>
-                    <img
-                      src="/images/github.svg"
-                      alt="GitHub Import"
-                      className={styles.iconImage}
-                    />
+                    <GithubOutlined aria-label="GitHub Import" className={styles.iconImage} />
                   </div>
                 }
                 info={[
@@ -234,11 +232,7 @@ const HomePage: React.FC = () => {
                 title="Graph 可视化调试"
                 logo={
                   <div className={styles.cardIcon}>
-                    <img
-                      src="/images/graph.svg"
-                      alt="Graph Workflow Debug"
-                      className={styles.iconImage}
-                    />
+                    <DeploymentUnitOutlined aria-label="Graph Workflow Debug" className={styles.iconImage} />
                   </div>
                 }
                 info={[
@@ -256,11 +250,7 @@ const HomePage: React.FC = () => {
                 title="Tracing"
                 logo={
                   <div className={styles.cardIconDisabled}>
-                    <img
-                      src="/images/tracing.svg"
-                      alt="Tracing"
-                      className={styles.iconImage}
-                    />
+                    <RadarChartOutlined aria-label="Tracing" className={styles.iconImage} />
                   </div>
                 }
                 info={[
@@ -278,11 +268,7 @@ const HomePage: React.FC = () => {
                 title="Evaluation"
                 logo={
                   <div className={styles.cardIconDisabled}>
-                    <img
-                      src="/images/evaluation.svg"
-                      alt="Evaluation"
-                      className={styles.iconImage}
-                    />
+                    <ExperimentOutlined aria-label="Evaluation" className={styles.iconImage} />
                   </div>
                 }
                 info={[
@@ -300,11 +286,7 @@ const HomePage: React.FC = () => {
                 title="Prompt Engineering"
                 logo={
                   <div className={styles.cardIconDisabled}>
-                    <img
-                      src="/images/prompt.svg"
-                      alt="Prompt Engineering"
-                      className={styles.iconImage}
-                    />
+                    <BulbOutlined aria-label="Prompt Engineering" className={styles.iconImage} />
                   </div>
                 }
                 info={[
@@ -328,11 +310,7 @@ const HomePage: React.FC = () => {
                 title="智能体管理"
                 logo={
                   <div className={styles.cardIconDisabled}>
-                    <img
-                      src="/images/management.svg"
-                      alt="Agent Management"
-                      className={styles.iconImage}
-                    />
+                    <AppstoreOutlined aria-label="Agent Management" className={styles.iconImage} />
                   </div>
                 }
                 info={[

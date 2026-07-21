@@ -32,6 +32,8 @@ interface IProps {
    * Whether in search state
    */
   isSearch?: boolean;
+  /** 同一行的卡片是否拉伸为等高 */
+  stretch?: boolean;
   /**
    * Props for Empty component
    */
@@ -42,7 +44,7 @@ interface IProps {
 }
 
 const CardList: React.FC<IProps> = (props) => {
-  const { className, children } = props;
+  const { className, children, stretch } = props;
   const { bottomPortal } = useInnerLayout();
 
   if (!props.children?.length && !props.loading)
@@ -82,7 +84,11 @@ const CardList: React.FC<IProps> = (props) => {
 
   return (
     <>
-      <div className={classNames(styles['container'], className)}>
+      <div
+        className={classNames(styles['container'], className, {
+          [styles.stretch]: stretch,
+        })}
+      >
         {props.loading ? (
           <Spin spinning className={styles['loading']} />
         ) : (

@@ -15,6 +15,7 @@ export interface ProCardProps {
   onClick?: () => void;
   className?: string;
   statusNode?: React.ReactNode;
+  stackStatus?: boolean;
   footerDescNode?: React.ReactNode;
   footerOperateNode?: React.ReactNode;
 }
@@ -27,6 +28,7 @@ const ProCard: React.FC<ProCardProps> = ({
   onClick,
   className,
   statusNode,
+  stackStatus = false,
   footerDescNode,
   footerOperateNode,
 }) => {
@@ -36,10 +38,22 @@ const ProCard: React.FC<ProCardProps> = ({
       onClick={onClick}
       hoverable={!!onClick}
     >
-      <div className={styles.cardHeader}>
-        <div className={styles.headerLeft}>
+      <div
+        className={
+          stackStatus ? styles.cardHeaderStacked : styles.cardHeader
+        }
+      >
+        <div
+          className={
+            stackStatus ? styles.headerLeftStacked : styles.headerLeft
+          }
+        >
           {logo && <div className={styles.logo}>{logo}</div>}
-          <div className={styles.titleWrapper}>
+          <div
+            className={
+              stackStatus ? styles.titleWrapperStacked : styles.titleWrapper
+            }
+          >
             <h3 className={styles.title}>{title}</h3>
             {statusNode && <div className={styles.status}>{statusNode}</div>}
           </div>

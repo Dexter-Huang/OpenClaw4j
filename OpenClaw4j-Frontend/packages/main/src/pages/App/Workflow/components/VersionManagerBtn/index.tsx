@@ -29,18 +29,21 @@ export default memo(function VersionManagerBtn(props: IVersionManageBtnProps) {
             })
       }
     >
-      <Button
-        iconType="spark-auditLog-line"
-        onClick={() => {
-          props.setShowHistoryPanel(true);
-        }}
-        disabled={isFlushing}
-      >
-        {$i18n.get({
-          id: 'main.pages.App.AssistantAppEdit.components.AppActions.index.versionManagement',
-          dm: '版本管理',
-        })}
-      </Button>
+      {/* Tooltip 需要稳定的原生 DOM trigger，避免 rc-trigger 回退到 findDOMNode。 */}
+      <span style={{ display: 'inline-flex' }}>
+        <Button
+          iconType="spark-auditLog-line"
+          onClick={() => {
+            props.setShowHistoryPanel(true);
+          }}
+          disabled={isFlushing}
+        >
+          {$i18n.get({
+            id: 'main.pages.App.AssistantAppEdit.components.AppActions.index.versionManagement',
+            dm: '版本管理',
+          })}
+        </Button>
+      </span>
     </Tooltip>
   );
 });

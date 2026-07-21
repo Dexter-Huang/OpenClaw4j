@@ -115,17 +115,15 @@ function EvaluatorDebug() {
       // 首先进行表单校验
       await form.validateFields();
       
-      const modelConfig = getModelConfig();
-
       // 构建统一的variables参数，包含所有变量和测试数据
 
 
-      const { systemPrompt, ...otherConfig } = (debugConfig?.modelConfig) || {};
+      const { modelId, ...otherConfig } = getModelConfig();
       console.log(form.getFieldsValue(), 'asd...')
       // 构建请求参数
       const params: EvaluatorsAPI.DebugEvaluatorParams = {
         modelConfig: JSON.stringify({
-          modelId: modelConfig.modelId,
+          modelId,
           ...otherConfig
         }),
         prompt: debugConfig.systemPrompt,
@@ -205,7 +203,9 @@ function EvaluatorDebug() {
     }
   };
 
-  const { modelId, ...otherConfig } = debugConfig.modelConfig;
+  // 该页允许从菜单直接进入，此时浏览器不会保留评估器详情页传入的路由 state。
+  // 使用空配置继续渲染默认调试界面，避免对 undefined 解构导致整个页面崩溃。
+  const { modelId, ...otherConfig } = getModelConfig();
 
   return (
     <div className="p-8 fade-in evaluator-debug-page">
@@ -248,7 +248,7 @@ function EvaluatorDebug() {
             <Divider orientation="left">模型配置</Divider>
 
             <Descriptions column={3} size="small">
-              <Descriptions.Item span={24} label="模型">
+              <Descriptions.Item span={3} label="模型">
                 <Tag color="geekblue">{getModelName(modelId)}</Tag>
               </Descriptions.Item>
               {

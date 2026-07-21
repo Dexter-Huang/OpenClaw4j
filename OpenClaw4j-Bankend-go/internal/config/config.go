@@ -17,6 +17,7 @@ const (
 	EnvRedisPassword          = "OPENCLAW_REDIS_PASSWORD"
 	EnvRedisDatabase          = "OPENCLAW_REDIS_DATABASE"
 	EnvFileStorageDir         = "OPENCLAW_FILE_STORAGE_DIR"
+	EnvFrontendDistDir        = "OPENCLAW_FRONTEND_DIST_DIR"
 	EnvProviderPrivateKeyFile = "OPENCLAW_PROVIDER_PRIVATE_KEY_FILE"
 	EnvGitHubClientID         = "OPENCLAW_GITHUB_CLIENT_ID"
 	EnvGitHubClientSecret     = "OPENCLAW_GITHUB_CLIENT_SECRET"
@@ -27,14 +28,15 @@ const (
 	EnvSandboxBaseURL         = "OPENCLAW_SANDBOX_BASE_URL"
 	EnvSandboxTimeoutMs       = "OPENCLAW_SANDBOX_TIMEOUT_MS"
 
-	DefaultHTTPAddr       = ":9004"
-	DefaultRedisHost      = "127.0.0.1"
-	DefaultRedisPort      = 6379
-	DefaultRedisDatabase  = 0
-	DefaultFileStorageDir = "data/files"
-	DefaultSandboxBaseURL = "http://127.0.0.1:9010"
-	DefaultSandboxTimeout = 30000
-	DefaultEnvFile        = ".env"
+	DefaultHTTPAddr        = ":9004"
+	DefaultRedisHost       = "127.0.0.1"
+	DefaultRedisPort       = 6379
+	DefaultRedisDatabase   = 0
+	DefaultFileStorageDir  = "data/files"
+	DefaultFrontendDistDir = "dist"
+	DefaultSandboxBaseURL  = "http://127.0.0.1:9010"
+	DefaultSandboxTimeout  = 30000
+	DefaultEnvFile         = ".env"
 )
 
 var (
@@ -52,6 +54,7 @@ type Config struct {
 	RedisPassword          string
 	RedisDatabase          int
 	FileStorageDir         string
+	FrontendDistDir        string
 	ProviderPrivateKeyFile string
 	GitHubClientID         string
 	GitHubClientSecret     string
@@ -97,6 +100,10 @@ func LoadFromEnv(getenv func(string) string) (Config, error) {
 	if fileStorageDir == "" {
 		fileStorageDir = DefaultFileStorageDir
 	}
+	frontendDistDir := strings.TrimSpace(getenv(EnvFrontendDistDir))
+	if frontendDistDir == "" {
+		frontendDistDir = DefaultFrontendDistDir
+	}
 	providerPrivateKeyFile := strings.TrimSpace(getenv(EnvProviderPrivateKeyFile))
 
 	redisDatabase := DefaultRedisDatabase
@@ -129,6 +136,7 @@ func LoadFromEnv(getenv func(string) string) (Config, error) {
 		RedisPassword:          redisPassword,
 		RedisDatabase:          redisDatabase,
 		FileStorageDir:         fileStorageDir,
+		FrontendDistDir:        frontendDistDir,
 		ProviderPrivateKeyFile: providerPrivateKeyFile,
 		GitHubClientID:         strings.TrimSpace(getenv(EnvGitHubClientID)),
 		GitHubClientSecret:     strings.TrimSpace(getenv(EnvGitHubClientSecret)),

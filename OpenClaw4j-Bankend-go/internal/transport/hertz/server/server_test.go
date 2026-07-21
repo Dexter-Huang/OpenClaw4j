@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -49,12 +51,53 @@ func TestNewRegistersPublicHealthRoute(t *testing.T) {
 	}
 }
 
+func TestNewServesFrontendDistWithSPAFallback(t *testing.T) {
+	distDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(distDir, "index.html"), []byte("<html>frontend</html>"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(distDir, "umi.js"), []byte("console.log('frontend')"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	h := New(Options{FrontendDistDir: distDir})
+
+	for _, testCase := range []struct {
+		path string
+		body string
+	}{
+		{path: "/", body: "<html>frontend</html>"},
+		{path: "/umi.js", body: "console.log('frontend')"},
+		{path: "/app/workflow/example", body: "<html>frontend</html>"},
+	} {
+		ctx := request(consts.MethodGet, testCase.path)
+		h.ServeHTTP(context.Background(), ctx)
+		if ctx.Response.StatusCode() != consts.StatusOK {
+			t.Fatalf("GET %s expected 200, got %d body=%s", testCase.path, ctx.Response.StatusCode(), ctx.Response.Body())
+		}
+		if string(ctx.Response.Body()) != testCase.body {
+			t.Fatalf("GET %s returned unexpected body: %s", testCase.path, ctx.Response.Body())
+		}
+	}
+
+	missingAsset := request(consts.MethodGet, "/missing.js")
+	h.ServeHTTP(context.Background(), missingAsset)
+	if missingAsset.Response.StatusCode() != consts.StatusNotFound {
+		t.Fatalf("missing static asset expected 404, got %d", missingAsset.Response.StatusCode())
+	}
+
+	missingAPI := request(consts.MethodGet, "/console/v1/missing")
+	h.ServeHTTP(context.Background(), missingAPI)
+	if missingAPI.Response.StatusCode() != consts.StatusNotFound {
+		t.Fatalf("missing API route expected 404, got %d", missingAPI.Response.StatusCode())
+	}
+}
+
 func TestNewHandlesCORSPreflightForUnknownConsoleRoute(t *testing.T) {
 	h := New(Options{})
 
 	ctx := request(consts.MethodOptions, "/console/v1/auth/login")
 	ctx.Request.Header.Set("Origin", "http://127.0.0.1:8000")
-	ctx.Request.Header.Set("Access-Control-Request-Headers", "content-type, x-saa-token")
+	ctx.Request.Header.Set("Access-Control-Request-Headers", "content-type, x-saa-token, x-client-version, x-request-id")
 	h.ServeHTTP(context.Background(), ctx)
 
 	if ctx.Response.StatusCode() != consts.StatusNoContent {
@@ -64,7 +107,7 @@ func TestNewHandlesCORSPreflightForUnknownConsoleRoute(t *testing.T) {
 	if !strings.Contains(headers, "Access-Control-Allow-Origin: http://127.0.0.1:8000") {
 		t.Fatalf("cors origin header was not set: %s", headers)
 	}
-	if !strings.Contains(strings.ToLower(headers), "x-saa-token") || !strings.Contains(strings.ToLower(headers), "authorization") {
+	if !strings.Contains(strings.ToLower(headers), "x-saa-token") || !strings.Contains(strings.ToLower(headers), "x-client-version") || !strings.Contains(strings.ToLower(headers), "x-request-id") || !strings.Contains(strings.ToLower(headers), "authorization") {
 		t.Fatalf("cors allowed headers were not set: %s", headers)
 	}
 }
@@ -78,8 +121,20 @@ func TestChatCompletionHandlerStreamsEveryModelDelta(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(ctx.Response.Header.Peek("Content-Type")), "text/event-stream") || strings.Count(string(body), "data: ") != 3 || !strings.Contains(string(body), `"done":true`) {
+	if !strings.Contains(string(ctx.Response.Header.Peek("Content-Type")), "text/event-stream") || strings.Count(string(body), "data: ") != 3 || !strings.Contains(string(body), `"request_id":"r"`) || strings.Contains(string(body), `"response":`) || strings.Contains(string(body), `"done":`) {
 		t.Fatalf("unexpected SSE response: headers=%s body=%s", ctx.Response.Header.Header(), body)
+	}
+}
+
+func TestChatSSEPayloadUsesFrontendErrorShape(t *testing.T) {
+	payload := newChatSSEPayload(chat.StreamEvent{
+		Response: chat.Response{RequestID: "r", ConversationID: "c"},
+		Done:     true,
+		Error:    "model stream request failed with status 429",
+	})
+
+	if payload.RequestID != "r" || payload.Error == nil || payload.Error.Message != "model stream request failed with status 429" {
+		t.Fatalf("unexpected frontend SSE payload: %#v", payload)
 	}
 }
 

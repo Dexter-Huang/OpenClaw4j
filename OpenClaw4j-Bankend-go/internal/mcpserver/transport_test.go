@@ -9,30 +9,62 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/seaskyland/openclaw4j-backend-go/internal/dao"
 )
 
 func TestCallSSECompletesEndpointHandshake(t *testing.T) {
+	messagePosted := make(chan struct{}, 1)
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		switch request.URL.Path {
-		case "/sse":
+		case "/mcp/sse":
 			writer.Header().Set("Content-Type", "text/event-stream")
-			_, _ = writer.Write([]byte("event: endpoint\ndata: /message\n\n"))
-		case "/message":
-			writer.Header().Set("Content-Type", "application/json")
-			_, _ = writer.Write([]byte(`{"jsonrpc":"2.0","id":"go","result":{"tools":[{"name":"weather"}]}}`))
+			_, _ = writer.Write([]byte("event: endpoint\ndata: /mcp/message\n\n"))
+			writer.(http.Flusher).Flush()
+			<-messagePosted
+			_, _ = writer.Write([]byte("event: message\ndata: {\"jsonrpc\":\"2.0\",\"id\":\"go\",\"result\":{\"tools\":[{\"name\":\"weather\"}]}}\n\n"))
+		case "/mcp/message":
+			messagePosted <- struct{}{}
+			writer.WriteHeader(http.StatusAccepted)
 		default:
 			http.NotFound(writer, request)
 		}
 	}))
 	defer server.Close()
 	service := NewService(nil, nil)
-	body, err := service.callSSE(context.Background(), deployConfig{RemoteAddress: server.URL}, "tools/list", map[string]any{})
+	body, err := service.callSSE(context.Background(), deployConfig{RemoteAddress: server.URL, RemoteEndpoint: "/mcp/sse"}, "tools/list", map[string]any{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	tools, err := parseToolListResponse(body)
 	if err != nil || len(tools) != 1 {
 		t.Fatalf("tools=%#v err=%v", tools, err)
+	}
+}
+
+func TestParseToolListResponseAddsLegacyInputSchemaAlias(t *testing.T) {
+	tools, err := parseToolListResponse([]byte(`{"jsonrpc":"2.0","id":1,"result":{"tools":[{"name":"weather","inputSchema":{"type":"object","properties":{"city":{"type":"string"}},"required":["city"]}}]}}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(tools) != 1 {
+		t.Fatalf("tools=%#v", tools)
+	}
+	tool, ok := tools[0].(map[string]any)
+	if !ok {
+		t.Fatalf("tool=%#v", tools[0])
+	}
+	schema, ok := tool["input_schema"].(map[string]any)
+	if !ok || schema["type"] != "object" {
+		t.Fatalf("legacy input_schema was not populated: %#v", tool)
+	}
+}
+
+func TestResolveTransportUsesInstallTypeForLegacyBusinessType(t *testing.T) {
+	installType := "SSE"
+	server := dao.McpServer{Type: "CUSTOMER", InstallType: &installType}
+	if transport := resolveTransport(deployConfig{}, server); transport != "sse" {
+		t.Fatalf("transport=%q, want sse", transport)
 	}
 }
 

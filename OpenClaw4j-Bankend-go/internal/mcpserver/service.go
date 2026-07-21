@@ -334,10 +334,7 @@ func (s *Service) call(ctx context.Context, server dao.McpServer, method string,
 	if err != nil {
 		return nil, err
 	}
-	transport := strings.ToLower(strings.TrimSpace(config.Transport))
-	if transport == "" {
-		transport = strings.ToLower(strings.TrimSpace(server.Type))
-	}
+	transport := resolveTransport(config, server)
 	switch transport {
 	case "stdio", "standard_io":
 		return s.callStdio(ctx, config, method, params)
@@ -348,6 +345,24 @@ func (s *Service) call(ctx context.Context, server dao.McpServer, method string,
 	default:
 		return nil, fmt.Errorf("unsupported MCP transport: %s", transport)
 	}
+}
+
+// resolveTransport 需要兼容 Java 侧已持久化的 MCP 记录：其 type 字段可能是
+// CUSTOMER 等业务分类，并不表示传输协议。显式 transport 始终优先；只有 type
+// 本身是已知协议时才采用，最后才回退到 install_type，避免旧记录在读取详情时
+// 被误判为不支持的传输类型。
+func resolveTransport(config deployConfig, server dao.McpServer) string {
+	for _, value := range []string{config.Transport, server.Type, pointerValue(server.InstallType, "")} {
+		switch strings.ToLower(strings.TrimSpace(value)) {
+		case "stdio", "standard_io":
+			return "stdio"
+		case "sse":
+			return "sse"
+		case "streamable-http", "streamable_http", "http":
+			return "streamable-http"
+		}
+	}
+	return ""
 }
 
 func (s *Service) callHTTP(ctx context.Context, config deployConfig, method string, params map[string]any, endpointOverride string) ([]byte, error) {
@@ -393,21 +408,22 @@ func (s *Service) callHTTP(ctx context.Context, config deployConfig, method stri
 }
 
 // callSSE supports the legacy MCP SSE handshake: GET an event stream, read its
-// endpoint event, then POST JSON-RPC to that session endpoint. A configured endpoint
-// is also accepted for deployments that already expose the POST URL directly.
+// endpoint event, POST JSON-RPC to that session endpoint, then read the resulting
+// message event from the same stream. A configured endpoint that is not an SSE URL
+// is still accepted as a direct POST endpoint for existing deployments.
 func (s *Service) callSSE(ctx context.Context, config deployConfig, method string, params map[string]any) ([]byte, error) {
 	if strings.TrimSpace(config.RemoteAddress) == "" {
 		return nil, ErrRemoteAddressRequired
 	}
-	if strings.TrimSpace(config.RemoteEndpoint) != "" {
+	configuredEndpoint := strings.TrimSpace(config.RemoteEndpoint)
+	if configuredEndpoint != "" && !strings.HasSuffix(strings.TrimRight(strings.ToLower(configuredEndpoint), "/"), "/sse") {
 		return s.callHTTP(ctx, config, method, params, "")
 	}
-	base, err := url.Parse(config.RemoteAddress)
-	if err != nil || (base.Scheme != "http" && base.Scheme != "https") || base.Host == "" {
-		return nil, errors.New("deploy_config.remote_address must be an http(s) URL")
+	handshakeEndpoint, err := sseHandshakeEndpoint(config.RemoteAddress, configuredEndpoint)
+	if err != nil {
+		return nil, err
 	}
-	base.Path = strings.TrimRight(base.Path, "/") + "/sse"
-	request, err := http.NewRequestWithContext(ctx, http.MethodGet, base.String(), nil)
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, handshakeEndpoint, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -425,7 +441,7 @@ func (s *Service) callSSE(ctx context.Context, config deployConfig, method strin
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		return nil, fmt.Errorf("MCP SSE handshake failed with status %d", response.StatusCode)
 	}
-	endpoint, err := readSSEEndpoint(response.Body)
+	endpoint, scanner, err := readSSEEndpoint(response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -433,10 +449,29 @@ func (s *Service) callSSE(ctx context.Context, config deployConfig, method strin
 	if err != nil || relative.IsAbs() {
 		return nil, errors.New("MCP SSE endpoint must be a relative path")
 	}
-	return s.callHTTP(ctx, config, method, params, base.ResolveReference(relative).String())
+	if _, err := s.callHTTP(ctx, config, method, params, response.Request.URL.ResolveReference(relative).String()); err != nil {
+		return nil, err
+	}
+	return readSSEMessage(scanner)
 }
 
-func readSSEEndpoint(reader io.Reader) (string, error) {
+func sseHandshakeEndpoint(address, endpoint string) (string, error) {
+	base, err := url.Parse(strings.TrimSpace(address))
+	if err != nil || (base.Scheme != "http" && base.Scheme != "https") || base.Host == "" {
+		return "", errors.New("deploy_config.remote_address must be an http(s) URL")
+	}
+	if endpoint == "" {
+		base.Path = strings.TrimRight(base.Path, "/") + "/sse"
+		return base.String(), nil
+	}
+	relative, err := url.Parse(endpoint)
+	if err != nil || relative.IsAbs() {
+		return "", errors.New("deploy_config.remote_endpoint must be a relative path")
+	}
+	return base.ResolveReference(relative).String(), nil
+}
+
+func readSSEEndpoint(reader io.Reader) (string, *bufio.Scanner, error) {
 	scanner := bufio.NewScanner(io.LimitReader(reader, 64<<10))
 	scanner.Buffer(make([]byte, 1024), 64<<10)
 	event := ""
@@ -449,14 +484,41 @@ func readSSEEndpoint(reader io.Reader) (string, error) {
 		if strings.HasPrefix(line, "data:") && (event == "" || event == "endpoint") {
 			value := strings.TrimSpace(strings.TrimPrefix(line, "data:"))
 			if value != "" {
-				return value, nil
+				return value, scanner, nil
 			}
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		return "", err
+		return "", nil, err
 	}
-	return "", errors.New("MCP SSE handshake did not provide an endpoint")
+	return "", nil, errors.New("MCP SSE handshake did not provide an endpoint")
+}
+
+func readSSEMessage(scanner *bufio.Scanner) ([]byte, error) {
+	event := ""
+	data := make([]string, 0, 1)
+	for scanner.Scan() {
+		line := strings.TrimSuffix(scanner.Text(), "\r")
+		if line == "" {
+			if event == "message" && len(data) > 0 {
+				return []byte(strings.Join(data, "\n")), nil
+			}
+			event = ""
+			data = data[:0]
+			continue
+		}
+		if strings.HasPrefix(line, "event:") {
+			event = strings.TrimSpace(strings.TrimPrefix(line, "event:"))
+			continue
+		}
+		if strings.HasPrefix(line, "data:") {
+			data = append(data, strings.TrimSpace(strings.TrimPrefix(line, "data:")))
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	return nil, errors.New("MCP SSE stream closed before responding")
 }
 
 func (s *Service) callStdio(ctx context.Context, config deployConfig, method string, params map[string]any) ([]byte, error) {
@@ -580,7 +642,24 @@ func parseToolListResponse(body []byte) ([]any, error) {
 	if response.Result.Tools == nil {
 		return []any{}, nil
 	}
-	return response.Result.Tools, nil
+	return normalizeToolSchemas(response.Result.Tools), nil
+}
+
+// normalizeToolSchemas 保留 MCP 标准的 inputSchema，同时补充旧管理端表单使用的
+// input_schema。工具来源由第三方 MCP Server 决定，不能要求其为某个管理端前端调整
+// 字段命名；双字段输出可兼容标准客户端和既有管理端，而不会丢失原始 schema。
+func normalizeToolSchemas(tools []any) []any {
+	for index, rawTool := range tools {
+		tool, ok := rawTool.(map[string]any)
+		if !ok || tool["input_schema"] != nil {
+			continue
+		}
+		if inputSchema, exists := tool["inputSchema"]; exists {
+			tool["input_schema"] = inputSchema
+			tools[index] = tool
+		}
+	}
+	return tools
 }
 
 func firstSSEData(body string) string {

@@ -36,6 +36,42 @@ const SkillCard: React.FC<SkillCardProps> = ({ data, onClick, className }) => {
     onClick?.(action, data);
   };
 
+  const renderActions = () => (
+    <>
+      <Button
+        type="default"
+        className="flex-1"
+        onClick={(e) => handleButtonClick('edit', e)}
+      >
+        {$i18n.get({
+          id: 'main.pages.Skill.components.SkillCard.edit',
+          dm: '编辑',
+        })}
+      </Button>
+      <Dropdown
+        getPopupContainer={(ele) => ele}
+        trigger={['click']}
+        menu={{
+          items: [
+            {
+              key: 'delete',
+              label: $i18n.get({
+                id: 'main.pages.Skill.components.SkillCard.delete',
+                dm: '删除',
+              }),
+              danger: true,
+            },
+          ],
+          onClick: handleDropdownClick,
+        }}
+      >
+        <div onClick={(e) => e.stopPropagation()}>
+          <Button icon={<IconFont type="spark-more-line" />} />
+        </div>
+      </Dropdown>
+    </>
+  );
+
   return (
     <ProCard
       title={data.name}
@@ -65,57 +101,18 @@ const SkillCard: React.FC<SkillCardProps> = ({ data, onClick, className }) => {
           }),
           content: data.current_version || data.version || '-',
         },
-        {
-          label: $i18n.get({
-            id: 'main.pages.Skill.components.SkillCard.id',
-            dm: 'ID',
-          }),
-          content: data.skill_code,
-        },
       ]}
       footerDescNode={
-        <div className={styles['update-time']}>
-          {$i18n.get({
-            id: 'main.pages.Skill.components.SkillCard.updatedAt',
-            dm: '更新于',
-          })}
-          {updateTime}
-        </div>
-      }
-      footerOperateNode={
-        <>
-          <Button
-            type="default"
-            className="flex-1"
-            onClick={(e) => handleButtonClick('edit', e)}
-          >
+        <div className={styles['footer-content']}>
+          <div className={styles['update-time']}>
             {$i18n.get({
-              id: 'main.pages.Skill.components.SkillCard.edit',
-              dm: '编辑',
+              id: 'main.pages.Skill.components.SkillCard.updatedAt',
+              dm: '更新于',
             })}
-          </Button>
-          <Dropdown
-            getPopupContainer={(ele) => ele}
-            trigger={['click']}
-            menu={{
-              items: [
-                {
-                  key: 'delete',
-                  label: $i18n.get({
-                    id: 'main.pages.Skill.components.SkillCard.delete',
-                    dm: '删除',
-                  }),
-                  danger: true,
-                },
-              ],
-              onClick: handleDropdownClick,
-            }}
-          >
-            <div onClick={(e) => e.stopPropagation()}>
-              <Button icon={<IconFont type="spark-more-line" />} />
-            </div>
-          </Dropdown>
-        </>
+            {updateTime}
+          </div>
+          <div className={styles['footer-actions']}>{renderActions()}</div>
+        </div>
       }
       className={classNames(className)}
       onClick={() => onClick?.('detail', data)}

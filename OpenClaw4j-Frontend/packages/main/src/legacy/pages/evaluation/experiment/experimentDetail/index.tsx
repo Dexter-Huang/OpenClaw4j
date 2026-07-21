@@ -250,7 +250,13 @@ const ExperimentDetail: React.FC = () => {
       // 调用详情接口
       const response = await API.getExperiment({ experimentId: Number(id) });
       
-      if (response.code === 200 && response.data) {
+      if (response.code === 200) {
+        // 兼容接口会以成功状态返回空数据，表示目标实验已不存在；这不是请求失败。
+        if (!response.data) {
+          setDetail(null);
+          return;
+        }
+
         const apiData = response.data as any;
         
         // 解析 evaluationObjectConfig

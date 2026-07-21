@@ -534,6 +534,12 @@ const GatherDetail: React.FC = () => {
       
       const response = await API.getDataset({ datasetId: Number(id) });
       if (response.code === 200) {
+        // 兼容接口以成功状态返回空数据时，表示评测集已被删除。
+        if (!response.data) {
+          setDetail(null);
+          return;
+        }
+
         const apiData = response.data as any; // 使用any类型绕过类型检查
         // 转换API数据为组件所需的类型
         const detailData: DatasetDetail = {

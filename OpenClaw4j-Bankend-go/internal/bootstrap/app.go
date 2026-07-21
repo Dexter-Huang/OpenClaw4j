@@ -52,6 +52,7 @@ type Options struct {
 	RegisterConsoleRoutes  func(group *route.RouterGroup)
 	RegisterAPIRoutes      func(group *route.RouterGroup)
 	FileStorageDir         string
+	FrontendDistDir        string
 	ProviderPrivateKeyFile string
 	GitHubOAuth2Provider   *oauth2.GitHubService
 	ScriptExecutor         scriptsandbox.Executor
@@ -159,6 +160,7 @@ func New(options Options) (*App, error) {
 		LegacyAdminManager:     legacyAdminService,
 		ObservabilityManager:   observabilityService,
 		FileStorageDir:         options.FileStorageDir,
+		FrontendDistDir:        options.FrontendDistDir,
 		RegisterConsoleRoutes:  options.RegisterConsoleRoutes,
 		RegisterAPIRoutes:      options.RegisterAPIRoutes,
 	})

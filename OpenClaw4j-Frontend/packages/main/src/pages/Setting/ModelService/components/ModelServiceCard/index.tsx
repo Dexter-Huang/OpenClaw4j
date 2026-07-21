@@ -151,15 +151,17 @@ const ModelServiceCard = ({ service, onClick }: ModelServiceCardProps) => {
         },
       ]}
       footerDescNode={
-        <div className={styles['footer-desc-node']}>
-          {$i18n.get({
-            id: 'main.pages.Setting.ModelService.components.ModelServiceCard.index.updatedAt',
-            dm: '更新于',
-          })}
-          {updatedAt}
+        <div className={styles['footer-content']}>
+          <div className={styles['footer-desc-node']}>
+            {$i18n.get({
+              id: 'main.pages.Setting.ModelService.components.ModelServiceCard.index.updatedAt',
+              dm: '更新于',
+            })}
+            {updatedAt}
+          </div>
+          <div className={styles['footer-actions']}>{renderActions()}</div>
         </div>
       }
-      footerOperateNode={renderActions()}
       className={styles['service-card']}
       onClick={() => onClick?.('detail', service)}
     ></ProCard>

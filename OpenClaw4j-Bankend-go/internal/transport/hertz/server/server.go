@@ -12,6 +12,7 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -57,6 +58,7 @@ type Options struct {
 	AgentSchemaManager     AgentSchemaManager
 	ToolManager            ToolManager
 	FileStorageDir         string
+	FrontendDistDir        string
 	KnowledgeBaseManager   KnowledgeBaseManager
 	DocumentManager        DocumentManager
 	McpServerManager       McpServerManager
@@ -276,7 +278,76 @@ func New(options Options) *server.Hertz {
 	registerConsoleGroup(h, options)
 	registerPublicAPIRoutes(h, options)
 	registerAPIGroup(h, options)
+	registerFrontendDistRoute(h, options.FrontendDistDir)
 	return h
+}
+
+// registerFrontendDistRoute 将 Go 发布目录中的前端构建产物托管到根路径。API 路由已在此之前
+// 注册，因此精确匹配的后端接口不会被覆盖；仅未匹配的 GET/HEAD 请求才会进入 SPA 回退逻辑。
+func registerFrontendDistRoute(h *server.Hertz, frontendDistDir string) {
+	frontendDistDir = strings.TrimSpace(frontendDistDir)
+	if frontendDistDir == "" {
+		return
+	}
+
+	indexFile := filepath.Join(frontendDistDir, "index.html")
+	h.NoRoute(func(_ context.Context, c *app.RequestContext) {
+		if method := string(c.Request.Header.Method()); method != consts.MethodGet && method != consts.MethodHead {
+			c.AbortWithStatus(consts.StatusNotFound)
+			return
+		}
+
+		requestPath := string(c.Path())
+		if isBackendRoute(requestPath) {
+			c.AbortWithStatus(consts.StatusNotFound)
+			return
+		}
+
+		relativePath := strings.TrimPrefix(path.Clean("/"+requestPath), "/")
+		if relativePath != "" {
+			filePath, ok := frontendStaticFilePath(frontendDistDir, relativePath)
+			if !ok {
+				c.AbortWithStatus(consts.StatusNotFound)
+				return
+			}
+			if info, err := os.Stat(filePath); err == nil && info.Mode().IsRegular() {
+				c.File(filePath)
+				return
+			}
+			if path.Ext(relativePath) != "" {
+				c.AbortWithStatus(consts.StatusNotFound)
+				return
+			}
+		}
+
+		if info, err := os.Stat(indexFile); err == nil && info.Mode().IsRegular() {
+			c.File(indexFile)
+			return
+		}
+		c.AbortWithStatus(consts.StatusNotFound)
+	})
+}
+
+func isBackendRoute(requestPath string) bool {
+	return requestPath == "/console" || strings.HasPrefix(requestPath, "/console/") ||
+		requestPath == "/api" || strings.HasPrefix(requestPath, "/api/") ||
+		requestPath == "/oauth2" || strings.HasPrefix(requestPath, "/oauth2/")
+}
+
+func frontendStaticFilePath(frontendDistDir, relativePath string) (string, bool) {
+	distRoot, err := filepath.Abs(frontendDistDir)
+	if err != nil {
+		return "", false
+	}
+	filePath, err := filepath.Abs(filepath.Join(distRoot, filepath.FromSlash(relativePath)))
+	if err != nil {
+		return "", false
+	}
+	relativeToRoot, err := filepath.Rel(distRoot, filePath)
+	if err != nil || relativeToRoot == ".." || strings.HasPrefix(relativeToRoot, ".."+string(filepath.Separator)) {
+		return "", false
+	}
+	return filePath, true
 }
 
 func registerHealthRoute(h *server.Hertz) {
@@ -2499,7 +2570,7 @@ func chatCompletionHandler(manager ChatManager) app.HandlerFunc {
 func writeChatSSE(ctx context.Context, writer *io.PipeWriter, events <-chan chat.StreamEvent) {
 	defer writer.Close()
 	for event := range events {
-		payload, err := json.Marshal(event)
+		payload, err := json.Marshal(newChatSSEPayload(event))
 		if err != nil {
 			continue
 		}
@@ -2515,6 +2586,26 @@ func writeChatSSE(ctx context.Context, writer *io.PipeWriter, events <-chan chat
 		default:
 		}
 	}
+}
+
+// chatSSEPayload 对齐管理端 SparkChat 的既有 SSE 协议。chat.StreamEvent 是 Go
+// 服务内部的控制对象，若直接序列化会多包一层 response，导致前端无法读取根节点的
+// request_id 和 message，进而将正常模型响应误判成“未知错误”。
+type chatSSEPayload struct {
+	chat.Response
+	Error *chatSSEError `json:"error,omitempty"`
+}
+
+type chatSSEError struct {
+	Message string `json:"message"`
+}
+
+func newChatSSEPayload(event chat.StreamEvent) chatSSEPayload {
+	payload := chatSSEPayload{Response: event.Response}
+	if event.Error != "" {
+		payload.Error = &chatSSEError{Message: event.Error}
+	}
+	return payload
 }
 
 func workflowInitHandler(manager WorkflowManager) app.HandlerFunc {
@@ -4212,7 +4303,9 @@ func setCORSHeaders(c *app.RequestContext) {
 	c.Response.Header.Set("Vary", "Origin")
 	c.Response.Header.Set("Access-Control-Allow-Credentials", "true")
 	c.Response.Header.Set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
-	c.Response.Header.Set("Access-Control-Allow-Headers", "Authorization,X-SAA-TOKEN,X-API-Key,Content-Type,Accept")
+	// legacy admin 请求拦截器固定添加 X-Client-Version 和 X-Request-ID。直连模式在本地开发时跨域
+	// 请求 Go 服务，因此预检响应必须显式允许这两个兼容请求头。
+	c.Response.Header.Set("Access-Control-Allow-Headers", "Authorization,X-SAA-TOKEN,X-API-Key,X-Client-Version,X-Request-ID,Content-Type,Accept")
 }
 
 func successEnvelope(requestID string, data any) apiEnvelope {

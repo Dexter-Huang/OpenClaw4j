@@ -333,22 +333,23 @@ export default function McpCreate() {
                 />
               </Form.Item>
               <Form.Item
-                name="installType"
                 label={$i18n.get({
                   id: 'main.pages.MCP.Create.installType',
                   dm: '安装类型',
                 })}
               >
-                {installTypeOptions.map((item) => (
-                  <RadioItem
-                    className={styles['mcp-install-type-item']}
-                    onSelect={() => setInstallType(item.value)}
-                    isActive={installType === item.value}
-                    disabled={!!server_code && deployStatus === McpStatus.ENABLED}
-                    {...item}
-                    key={item.value}
-                  />
-                ))}
+                <div>
+                  {installTypeOptions.map((item) => (
+                    <RadioItem
+                      className={styles['mcp-install-type-item']}
+                      onSelect={() => setInstallType(item.value)}
+                      isActive={installType === item.value}
+                      disabled={!!server_code && deployStatus === McpStatus.ENABLED}
+                      {...item}
+                      key={item.value}
+                    />
+                  ))}
+                </div>
               </Form.Item>
 
               <Form.Item

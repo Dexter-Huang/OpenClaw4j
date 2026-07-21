@@ -55,6 +55,7 @@ func main() {
 		LegacyAPIKeyEncryptor:  legacyAPIKeyEncryptor,
 		HertzOptions:           []hertzconfig.Option{hertz.WithHostPorts(cfg.HTTPAddr)},
 		FileStorageDir:         cfg.FileStorageDir,
+		FrontendDistDir:        cfg.FrontendDistDir,
 		ProviderPrivateKeyFile: cfg.ProviderPrivateKeyFile,
 		ScriptExecutor:         scriptsandbox.NewClient(cfg.SandboxBaseURL, time.Duration(cfg.SandboxTimeoutMs)*time.Millisecond),
 		GitHubOAuth2Provider: oauth2.NewGitHubService(oauth2.GitHubConfig{
