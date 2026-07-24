@@ -10,6 +10,9 @@
 **/*.jks
 **/*.keystore
 
+
+openclaw4j-backend-go.exe
+
 # OS and editor noise
 .DS_Store
 Thumbs.db
