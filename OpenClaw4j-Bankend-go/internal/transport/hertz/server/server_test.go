@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -52,22 +51,18 @@ func TestNewRegistersPublicHealthRoute(t *testing.T) {
 }
 
 func TestNewServesFrontendDistWithSPAFallback(t *testing.T) {
-	distDir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(distDir, "index.html"), []byte("<html>frontend</html>"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(distDir, "umi.js"), []byte("console.log('frontend')"), 0o600); err != nil {
-		t.Fatal(err)
-	}
+	// Hertz 的静态文件处理器会缓存文件句柄。使用受版本控制的 testdata fixture，避免
+	// Windows 在 t.TempDir 清理阶段因仍被缓存的 index.html 句柄而产生不稳定失败。
+	distDir := filepath.Join("testdata", "frontend-dist")
 	h := New(Options{FrontendDistDir: distDir})
 
 	for _, testCase := range []struct {
 		path string
 		body string
 	}{
-		{path: "/", body: "<html>frontend</html>"},
-		{path: "/umi.js", body: "console.log('frontend')"},
-		{path: "/app/workflow/example", body: "<html>frontend</html>"},
+		{path: "/", body: "<html>frontend</html>\n"},
+		{path: "/umi.js", body: "console.log('frontend')\n"},
+		{path: "/app/workflow/example", body: "<html>frontend</html>\n"},
 	} {
 		ctx := request(consts.MethodGet, testCase.path)
 		h.ServeHTTP(context.Background(), ctx)
